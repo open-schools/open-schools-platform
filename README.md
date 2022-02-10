@@ -1,1 +1,1 @@
-# SchoolsAiServer
+# schools-ai-server
