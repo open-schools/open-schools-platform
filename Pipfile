@@ -10,6 +10,10 @@ djoser = "*"
 djangorestframework-simplejwt = "*"
 django-rest-swagger = "*"
 drf-yasg = "*"
+django-otp = "*"
+google-api-python-client = "*"
+google-auth-httplib2 = "*"
+google-auth-oauthlib = "*"
 
 [dev-packages]
 
