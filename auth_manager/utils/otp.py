@@ -3,6 +3,7 @@ from django_otp.oath import TOTP
 import time
 import datetime
 
+LIVE_TIME = datetime.timedelta(minutes=7)
 
 class OTPFromPhoneNumber:
     LIVE_TIME = datetime.timedelta(minutes=7)

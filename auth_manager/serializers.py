@@ -1,7 +1,7 @@
 from re import match
 from rest_framework import serializers
-from auth_manager.utils.sender_sms import prepare_phone_number
 from models.models import UserProfile
+from services.auth_services import prepare_phone_number
 
 
 class CreateUserProfileSerializer(serializers.Serializer):
@@ -16,7 +16,7 @@ class CreateUserProfileSerializer(serializers.Serializer):
         ):
             raise serializers.ValidationError(detail="Invalid phone number")
         attrs["phone_number"] = prepare_phone_number(attrs["phone_number"])
-        if "otp" in attrs and match(r"[0-9]{6}", attrs["otp"]):
+        if "otp" in attrs and not match(r"[0-9]{6}", attrs["otp"]):
             raise serializers.ValidationError(detail="Invalid otp")
         return True
 
@@ -25,10 +25,3 @@ class CreateUserProfileSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
-
-
-class VerificationCodeSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model=UserProfile
-        fields=('verification_code',)

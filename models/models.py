@@ -16,8 +16,8 @@ class UserProfile(models.Model):
 
 class VerificationSession(models.Model):
     user_profile = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name="profile")
-    verification_session = models.CharField(max_length=6, null=True)
-    verification_session_creation_date = models.DateTimeField(editable=True, null=True, blank=True)
+    session = models.CharField(max_length=6, null=True)
+    creation_date = models.DateTimeField(editable=True, null=True, blank=True)
 
     def __str__(self):
         return "VerificationCode: " + self.user_profile.phone_number
