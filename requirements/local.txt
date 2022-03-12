@@ -1,0 +1,16 @@
+-r base.txt
+
+pytest==7.0.1
+pytest-django==4.5.2
+
+factory-boy==3.2.1
+Faker==13.3.1
+
+flake8==4.0.1
+
+ipdb==0.13.9
+ipython==8.1.1
+
+mypy==0.931
+django-stubs==1.9.0
+djangorestframework-stubs==1.4.0
