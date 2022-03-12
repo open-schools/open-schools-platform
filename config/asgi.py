@@ -1,5 +1,5 @@
 """
-ASGI config for styleguide_example project.
+ASGI config for open_schools_platform project.
 
 It exposes the ASGI callable as a module-level variable named ``application``.
 
