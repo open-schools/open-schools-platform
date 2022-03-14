@@ -1,13 +1,40 @@
-# Styleguide-Example
+# Open schools platform
 
 ---
 
-## 📢 **The Django Styleguide Survey has ended. Expect results soon.** 📢
+It's an Open Source educational organizations management platform.
 
-1. More about it here - <https://www.hacksoft.io/blog/django-styleguide-survey>.
-1. Issue where we track the feedback - <https://github.com/HackSoftware/Django-Styleguide/issues/90>.
+## How to run
 
----
+1. Run db
+```
+docker-compose up db
+```
+2. Create virtualenv
+```
+python -m venv [path to venv folder]
+```
+3. Activate virtualenv
+```
+source [path to venv folder]/Scripts/activate
+```
+4. Install requirements
+```
+pip install -r requirements/local.txt
+```
+5. Create .env file with 
+```
+DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
+```
+6. Migrate
+```
+python manage.py migrate
+```
+7. Run django server
+```
+python manage.py runserver [port]
+```
+
 
 This project serves as an [example of our styleguide](https://github.com/HackSoftware/Django-Styleguide)
 
