@@ -51,6 +51,7 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'django_extensions',
     'rest_framework_jwt',
+    'drf_yasg',
 ]
 
 INSTALLED_APPS = [

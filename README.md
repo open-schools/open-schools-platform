@@ -18,7 +18,7 @@ python -m venv [path to venv folder]
 ```
 source [path to venv folder]/Scripts/activate
 ```
-4. Install requirements
+4. Install requirements. Don't forget to change production.txt to local.txt in requirements.txt if it's necessary!
 ```
 pip install -r requirements/local.txt
 ```
