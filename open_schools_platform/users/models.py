@@ -2,10 +2,11 @@ import uuid
 
 from django.db import models
 from django.contrib.auth.models import (
-    BaseUserManager as BUM,
+    UserManager as BUM,
     PermissionsMixin,
     AbstractBaseUser
 )
+from phonenumber_field.modelfields import PhoneNumberField
 
 from open_schools_platform.common.models import BaseModel
 
@@ -14,14 +15,23 @@ from open_schools_platform.common.models import BaseModel
 # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
 # With some modifications
 
+class CommonFields:
+    phone = PhoneNumberField(
+        verbose_name='telephone number',
+        max_length=17,
+        unique=True,
+        blank=False,
+        null=True,
+    )
 
-class BaseUserManager(BUM):
-    def create_user(self, email, is_active=True, is_admin=False, password=None):
-        if not email:
+
+class UserManager(BUM):
+    def create_user(self, phone, is_active=True, is_admin=False, password=None):
+        if not phone:
             raise ValueError('Users must have an email address')
 
         user = self.model(
-            email=self.normalize_email(email.lower()),
+            phone=phone,
             is_active=is_active,
             is_admin=is_admin
         )
@@ -36,9 +46,9 @@ class BaseUserManager(BUM):
 
         return user
 
-    def create_superuser(self, email, password=None):
+    def create_superuser(self, phone, password=None):
         user = self.create_user(
-            email=email,
+            phone=phone,
             is_active=True,
             is_admin=True,
             password=password,
@@ -50,12 +60,24 @@ class BaseUserManager(BUM):
         return user
 
 
-class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(
-        verbose_name='email address',
-        max_length=255,
-        unique=True,
-    )
+class CreationTokenManager(BUM):
+    def create_token(self, phone, session):
+        if not phone:
+            raise ValueError('Users must have an phone')
+
+        token = self.model(
+            phone=phone,
+            session=session,
+        )
+
+        token.full_clean()
+        token.save(using=self._db)
+
+        return token
+
+
+class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+    phone = CommonFields.phone
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -63,12 +85,31 @@ class BaseUser(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = BaseUserManager()
+    objects = UserManager()
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'phone'
 
     def __str__(self):
-        return self.email
+        return str(self.phone)
 
     def is_staff(self):
         return self.is_admin
+
+
+class CreationToken(BaseModel):
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+    )
+
+    phone = PhoneNumberField(
+        verbose_name='telephone number',
+        max_length=17,
+        blank=False,
+        null=True,
+    )
+    session = models.CharField(max_length=200, null=True)
+
+    objects = CreationTokenManager()
+
+    USERNAME_FIELD = 'token'

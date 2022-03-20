@@ -9,7 +9,7 @@ from rest_framework import serializers
 from open_schools_platform.api.pagination import get_paginated_response, LimitOffsetPagination
 
 from open_schools_platform.users.services import user_create
-from open_schools_platform.users.models import BaseUser
+from open_schools_platform.users.models import User
 
 
 class ExampleListApi(APIView):
@@ -18,11 +18,11 @@ class ExampleListApi(APIView):
 
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
-            model = BaseUser
+            model = User
             fields = ('id', 'email')
 
     def get(self, request):
-        queryset = BaseUser.objects.order_by('id')
+        queryset = User.objects.order_by('id')
 
         response = get_paginated_response(
             pagination_class=self.Pagination,
@@ -49,7 +49,7 @@ class GetPaginatedResponseTests(TestCase):
         expected_first_page_response = OrderedDict({
             'limit': 1,
             'offset': 0,
-            'count': BaseUser.objects.count(),
+            'count': User.objects.count(),
             'next': 'http://testserver/some/path?limit=1&offset=1',
             'previous': None,
             'results': [
@@ -68,7 +68,7 @@ class GetPaginatedResponseTests(TestCase):
         expected_next_page_response = OrderedDict({
             'limit': 1,
             'offset': 1,
-            'count': BaseUser.objects.count(),
+            'count': User.objects.count(),
             'next': None,
             'previous': 'http://testserver/some/path?limit=1',
             'results': [

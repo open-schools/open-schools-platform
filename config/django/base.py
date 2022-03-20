@@ -52,6 +52,7 @@ THIRD_PARTY_APPS = [
     'django_extensions',
     'rest_framework_jwt',
     'drf_yasg',
+    'phonenumber_field',
 ]
 
 INSTALLED_APPS = [
@@ -139,7 +140,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-AUTH_USER_MODEL = 'users.BaseUser'
+AUTH_USER_MODEL = 'users.User'
 
 
 # Internationalization

@@ -1,8 +1,9 @@
 from django.urls import path
 
-from .apis import UserListApi
-
+from .views import UserApi, CreationTokenApi
 
 urlpatterns = [
-    path('', UserListApi.as_view(), name='list')
+    path('user/token', CreationTokenApi.as_view(), name='user'),
+    path('user', UserApi.as_view(), name='user')
 ]
+

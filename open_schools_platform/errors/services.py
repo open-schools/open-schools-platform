@@ -11,7 +11,7 @@ from django.http import Http404
 from rest_framework import serializers, exceptions
 from rest_framework.exceptions import ValidationError as RestValidationError
 
-from open_schools_platform.users.models import BaseUser
+from open_schools_platform.users.models import User
 from open_schools_platform.core.exceptions import ApplicationError
 
 
@@ -43,7 +43,7 @@ def trigger_django_404():
 
 
 def trigger_model_clean():
-    user = BaseUser()
+    user = User()
     user.full_clean()
 
 

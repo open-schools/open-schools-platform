@@ -4,7 +4,7 @@ from django.conf import settings
 
 from rest_framework.test import APIClient
 
-from open_schools_platform.users.models import BaseUser
+from open_schools_platform.users.models import User
 from open_schools_platform.users.services import user_create
 
 
@@ -17,7 +17,7 @@ class UserSessionLoginTests(TestCase):
         self.me_url = reverse('api:authentication:me')
 
     def test_non_existing_user_cannot_login(self):
-        self.assertEqual(0, BaseUser.objects.count())
+        self.assertEqual(0, User.objects.count())
 
         data = {
             'email': 'test@hacksoft.io',
@@ -106,7 +106,7 @@ class UserJwtLoginTests(TestCase):
         self.me_url = reverse('api:authentication:me')
 
     def test_non_existing_user_cannot_login(self):
-        self.assertEqual(0, BaseUser.objects.count())
+        self.assertEqual(0, User.objects.count())
 
         data = {
             'email': 'test@hacksoft.io',

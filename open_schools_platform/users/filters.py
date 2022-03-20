@@ -1,9 +1,9 @@
 import django_filters
 
-from open_schools_platform.users.models import BaseUser
+from open_schools_platform.users.models import User
 
 
-class BaseUserFilter(django_filters.FilterSet):
+class UserFilter(django_filters.FilterSet):
     class Meta:
-        model = BaseUser
-        fields = ('id', 'email', 'is_admin')
+        model = User
+        fields = ('id', 'phone')

@@ -1,27 +1,27 @@
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 
-from open_schools_platform.users.models import BaseUser
+from open_schools_platform.users.models import User, CreationToken
 from open_schools_platform.users.services import user_create
 
 
-@admin.register(BaseUser)
-class BaseUserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'is_admin', 'is_superuser', 'is_active', 'created_at', 'updated_at')
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = ('phone', 'is_admin', 'is_superuser', 'is_active', 'created_at', 'updated_at')
 
-    search_fields = ('email',)
+    search_fields = ('phone',)
 
-    list_filter = ('is_active', 'is_admin', 'is_superuser')
+    list_filter = ('is_active', 'is_admin')
 
     fieldsets = (
         (
             None, {
-                'fields': ('email',)
+                'fields': ('phone',)
             }
         ),
         (
             "Booleans", {
-                "fields": ("is_active", "is_admin", "is_superuser")
+                "fields": ("is_active", "is_admin")
             }
         ),
         (
@@ -41,3 +41,6 @@ class BaseUserAdmin(admin.ModelAdmin):
             user_create(**form.cleaned_data)
         except ValidationError as exc:
             self.message_user(request, str(exc), messages.ERROR)
+
+
+admin.site.register(CreationToken)
