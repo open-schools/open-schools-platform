@@ -56,6 +56,8 @@ class UserApi(APIView):
             return Response({"detail": "no such token"}, status=400)
         if not is_token_alive(token):
             return Response({"detail": "token is overdue"}, status=400)
+        if not token.is_verified:
+            return Response({"detail": "your phone number is not verified"}, status=400)
 
         user = create_user(
             phone=token.phone,
