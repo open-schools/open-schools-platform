@@ -1,6 +1,5 @@
 from re import match
 
-from django.core.validators import RegexValidator
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
@@ -38,8 +37,30 @@ class OtpSerializer(serializers.Serializer):
         pass
 
 
+class UserRegisterSerializer(serializers.Serializer):
+    token = serializers.UUIDField(required=True)
+    name = serializers.CharField(max_length=120)
+    password = serializers.CharField(max_length=40)
+    password_confirm = serializers.CharField(max_length=40)
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+    def validate(self, attrs):
+        if attrs["password"] != attrs["password_confirm"]:
+            raise serializers.ValidationError(detail="passwords do not match")
+        return attrs
+
+
 class UserSerializer(serializers.Serializer):
-    phone = PhoneNumberField(
-        max_length=17,
-        required=True,
-    )
+    phone = PhoneNumberField()
+    name = serializers.CharField(max_length=120)
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass

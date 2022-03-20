@@ -9,8 +9,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from open_schools_platform.common.services import model_update
 
 from open_schools_platform.users.models import User, CreationToken
-from open_schools_platform.users.selectors import get_token_by_phone
-from open_schools_platform.users.serializers import CreationTokenSerializer
 from datetime import timezone, datetime
 import datetime as datetime_lib
 
@@ -26,31 +24,19 @@ def is_token_alive(token: CreationToken):
     return (datetime.now(timezone.utc) - token.created_at) < RegistrationConstants.LIVE_TIME
 
 
-def create_token(data) -> CreationToken or None:
-    response = send_sms(data["phone"], data["recaptcha"])
+def create_token(phone: str, recaptcha: str) -> CreationToken or None:
+    response = send_sms(phone, recaptcha)
 
     if response.status_code == 200:
         token = CreationToken.objects.create_token(
-            phone=data["phone"],
+            phone=phone,
             session=json.loads(response.content.decode("utf-8"))["sessionInfo"],
         )
         return token
     return None
 
-def update_token(token: CreationToken, token_ser) -> CreationToken:
-    tuple = model_update(
-        instance=token,
-        fields=['recaptcha', 'session'],
-        data={"recaptcha": token_ser.recaptcha,
-              "session": send_sms(token_ser.recaptcha,
-                                  token_ser.phone)}
-    )
-    if not tuple[1]:
-        raise Exception("Can't edit the creation token")
-    return tuple[0]
 
-
-def send_sms(phone, recaptcha):
+def send_sms(phone: str, recaptcha: str):
     base_url = RegistrationConstants.FIREBASE_URL_TO_GET_SESSION + \
                RegistrationConstants.GOOGLE_API_KEY
 
@@ -64,7 +50,7 @@ def send_sms(phone, recaptcha):
     #return json.loads(response.content.decode("utf-8"))["sessionInfo"]
 
 
-def check_otp(session, otp):
+def check_otp(session: str, otp: str):
     base_url = RegistrationConstants.FIREBASE_URL_TO_CHECK_OTP + RegistrationConstants.GOOGLE_API_KEY
 
     dict = {
@@ -91,9 +77,11 @@ def user_create(
 
     return user
 
-def create_user(phone: PhoneNumberField) -> User:
+def create_user(phone: str, password: str, name: str) -> User:
     user = User.objects.create_user(
         phone=phone,
+        password=password,
+        name=name,
     )
     return user
 
@@ -112,3 +100,9 @@ def user_update(*, user: User, data) -> User:
     # ... some additional tasks with the user ...
 
     return user
+
+
+def verify_token(token: CreationToken):
+    token.is_verified = True
+    token.save()
+    return token

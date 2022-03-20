@@ -26,14 +26,15 @@ class CommonFields:
 
 
 class UserManager(BUM):
-    def create_user(self, phone, is_active=True, is_admin=False, password=None):
+    def create_user(self, phone, name=None, is_active=True, is_admin=False, password=None):
         if not phone:
             raise ValueError('Users must have an email address')
 
         user = self.model(
             phone=phone,
             is_active=is_active,
-            is_admin=is_admin
+            is_admin=is_admin,
+            name=name,
         )
 
         if password is not None:
@@ -46,7 +47,7 @@ class UserManager(BUM):
 
         return user
 
-    def create_superuser(self, phone, password=None):
+    def create_superuser(self, phone, is_active=True, is_admin=True, password=None):
         user = self.create_user(
             phone=phone,
             is_active=True,
@@ -78,6 +79,7 @@ class CreationTokenManager(BUM):
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     phone = CommonFields.phone
+    name = models.CharField(max_length=200, null=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)
@@ -109,6 +111,7 @@ class CreationToken(BaseModel):
         null=True,
     )
     session = models.CharField(max_length=200, null=True)
+    is_verified = models.BooleanField(default=False)
 
     objects = CreationTokenManager()
 
