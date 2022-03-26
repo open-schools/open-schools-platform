@@ -15,18 +15,9 @@ from open_schools_platform.common.models import BaseModel
 # https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#a-full-example
 # With some modifications
 
-class CommonFields:
-    phone = PhoneNumberField(
-        verbose_name='telephone number',
-        max_length=17,
-        unique=True,
-        blank=False,
-        null=True,
-    )
-
 
 class UserManager(BUM):
-    def create_user(self, phone, name=None, is_active=True, is_admin=False, password=None):
+    def create_user(self, phone, name="", is_active=True, is_admin=False, password=None):
         if not phone:
             raise ValueError('Users must have an email address')
 
@@ -78,8 +69,14 @@ class CreationTokenManager(BUM):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
-    phone = CommonFields.phone
-    name = models.CharField(max_length=200, null=True)
+    phone = PhoneNumberField(
+        verbose_name='telephone number',
+        max_length=17,
+        unique=True,
+        blank=False,
+        null=True,
+    )
+    name = models.CharField(max_length=200, blank=True)
 
     is_active = models.BooleanField(default=True)
     is_admin = models.BooleanField(default=False)

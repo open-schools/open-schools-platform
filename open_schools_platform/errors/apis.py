@@ -8,7 +8,7 @@ from open_schools_platform.api.exception_handlers import (
 
 from open_schools_platform.errors.services import trigger_errors
 
-from open_schools_platform.users.services import user_create
+from open_schools_platform.users.services import create_user
 
 
 class TriggerErrorApi(APIView):
@@ -24,8 +24,16 @@ class TriggerErrorApi(APIView):
 class TriggerValidateUniqueErrorApi(APIView):
     def get(self, request):
         # Due to the fiddling with transactions, this example a different API
-        user_create(email="unique@hacksoft.io", password="user")
-        user_create(email="unique@hacksoft.io", password="user")
+        create_user(
+            phone="+79112112943",
+            name="Ivan",
+            password="qwe",
+        )
+        create_user(
+            phone="+79112112943",
+            name="Ivan",
+            password="qwe",
+        )
 
         return Response()
 

@@ -61,22 +61,6 @@ def check_otp(session: str, otp: str):
     response = requests.post(base_url, headers={'Content-Type': 'application/json'}, json=dict)
     return response
 
-def user_create(
-    *,
-    phone: PhoneNumberField,
-    is_active: bool = True,
-    is_admin: bool = False,
-    password: Optional[str] = None
-) -> User:
-    user = User.objects.create_user(
-        phone=phone,
-        is_active=is_active,
-        is_admin=is_admin,
-        password=password
-    )
-
-    return user
-
 def create_user(phone: str, password: str, name: str) -> User:
     user = User.objects.create_user(
         phone=phone,

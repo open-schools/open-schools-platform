@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from open_schools_platform.api.pagination import get_paginated_response, LimitOffsetPagination
 
-from open_schools_platform.users.services import user_create
+from open_schools_platform.users.services import create_user
 from open_schools_platform.users.models import User
 
 
@@ -19,7 +19,7 @@ class ExampleListApi(APIView):
     class OutputSerializer(serializers.ModelSerializer):
         class Meta:
             model = User
-            fields = ('id', 'email')
+            fields = ('id', 'phone')
 
     def get(self, request):
         queryset = User.objects.order_by('id')
@@ -39,8 +39,8 @@ class GetPaginatedResponseTests(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
-        self.user1 = user_create(email='user1@hacksoft.io')
-        self.user2 = user_create(email='user2@hacksoft.io')
+        self.user1 = create_user(phone='+79222112944', name="Ivan", password='qwe')
+        self.user2 = create_user(phone='+79222112943', name="Vasya", password="123")
 
     def test_response_is_paginated_correctly(self):
         first_page_request = self.factory.get('/some/path')
@@ -55,7 +55,7 @@ class GetPaginatedResponseTests(TestCase):
             'results': [
                 OrderedDict({
                     'id': self.user1.id,
-                    'email': self.user1.email,
+                    'phone': str(self.user1.phone),
                 })
             ]
         })
@@ -74,7 +74,7 @@ class GetPaginatedResponseTests(TestCase):
             'results': [
                 OrderedDict({
                     'id': self.user2.id,
-                    'email': self.user2.email,
+                    'phone': str(self.user2.phone),
                 })
             ]
         })
