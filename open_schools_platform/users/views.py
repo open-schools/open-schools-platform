@@ -30,13 +30,13 @@ class CreationTokenApi(APIView):
 
         token = get_token_by_phone(token_ser.data["phone"])
         if token and is_token_alive(token):
-            return Response({"token": token.token}, status=201)
+            return Response({"token": token.key}, status=201)
 
         token = create_token(**token_ser.data)
         if not token:
             return Response({"detail": "An error occurred. Probably you sent incorrect recaptcha"}, status=400)
 
-        return Response({"token": token.token}, status=200)
+        return Response({"token": token.key}, status=200)
 
 
 class UserApi(APIView):

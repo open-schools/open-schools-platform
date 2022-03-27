@@ -96,7 +96,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
 
 class CreationToken(BaseModel):
-    token = models.UUIDField(
+    key = models.UUIDField(
         default=uuid.uuid4,
         primary_key=True,
     )

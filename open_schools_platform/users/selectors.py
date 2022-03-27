@@ -32,7 +32,7 @@ def get_user_by_phone(phone) -> User or None:
 
 def get_token_by_id(token) -> CreationToken or None:
     try:
-        creation_token = CreationToken.objects.get(token=token)
+        creation_token = CreationToken.objects.get(key=token)
     except:
         return None
     return creation_token
