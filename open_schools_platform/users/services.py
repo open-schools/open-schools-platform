@@ -1,23 +1,13 @@
 import json
-import os
-from typing import Optional
 
 import requests
 from django.db import transaction
-from phonenumber_field.modelfields import PhoneNumberField
 
 from open_schools_platform.common.services import model_update
+from open_schools_platform.users.constants import RegistrationConstants
 
 from open_schools_platform.users.models import User, CreationToken
 from datetime import timezone, datetime
-import datetime as datetime_lib
-
-
-class RegistrationConstants:
-    LIVE_TIME = datetime_lib.timedelta(minutes=7)
-    FIREBASE_URL_TO_GET_SESSION = r"https://www.googleapis.com/identitytoolkit/v3/relyingparty/sendVerificationCode?key="
-    FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPhoneNumber?key="
-    GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY")
 
 
 def is_token_alive(token: CreationToken):
@@ -47,7 +37,6 @@ def send_sms(phone: str, recaptcha: str):
 
     response = requests.post(base_url, headers={'Content-Type': 'application/json'}, json=dict)
     return response
-    #return json.loads(response.content.decode("utf-8"))["sessionInfo"]
 
 
 def check_otp(session: str, otp: str):
@@ -61,6 +50,7 @@ def check_otp(session: str, otp: str):
     response = requests.post(base_url, headers={'Content-Type': 'application/json'}, json=dict)
     return response
 
+
 def create_user(phone: str, password: str, name: str) -> User:
     user = User.objects.create_user(
         phone=phone,
@@ -68,6 +58,7 @@ def create_user(phone: str, password: str, name: str) -> User:
         name=name,
     )
     return user
+
 
 @transaction.atomic
 def user_update(*, user: User, data) -> User:
