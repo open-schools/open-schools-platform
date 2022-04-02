@@ -1,5 +1,6 @@
-from django.test import TestCase
 import requests
+from django.test import TestCase
+
 
 from open_schools_platform.users.constants import RegistrationConstants
 

@@ -2,7 +2,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from open_schools_platform.users.selectors import get_user_by_phone, get_token_by_phone, get_token_by_id
+from open_schools_platform.users.selectors import get_user, get_token
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.users.serializers import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
@@ -24,11 +24,11 @@ class CreationTokenApi(APIView):
         token_ser = CreationTokenSerializer(data=request.data)
         token_ser.is_valid(raise_exception=True)
 
-        user = get_user_by_phone(token_ser.data["phone"])
+        user = get_user(filters=token_ser.validated_data)
         if user:
             return Response({"detail": "user with this phone number has already been created"}, status=409)
 
-        token = get_token_by_phone(token_ser.data["phone"])
+        token = get_token(filters=token_ser.validated_data)
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=201)
 
@@ -46,12 +46,10 @@ class UserApi(APIView):
         responses={200: "user was successfully created", 400: "different errors, see in detail"}
     )
     def post(self, request):
-        token_str = request.data.get("token")
-
         user_ser = UserRegisterSerializer(data=request.data)
         user_ser.is_valid(raise_exception=True)
 
-        token = get_token_by_id(token_str)
+        token = get_token(filters=request.data)
         if not token:
             return Response({"detail": "no such token"}, status=400)
         if not is_token_alive(token):
@@ -78,7 +76,7 @@ class VerificationApi(APIView):
         otp_ser = OtpSerializer(data=request.data)
         otp_ser.is_valid(raise_exception=True)
 
-        token = get_token_by_id(otp_ser.data["token"])
+        token = get_token(filters=otp_ser.data)
         if not token:
             return Response({"detail": "no such token"}, status=400)
         if not is_token_alive(token):

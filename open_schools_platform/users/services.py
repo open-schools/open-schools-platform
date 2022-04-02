@@ -14,21 +14,22 @@ def is_token_alive(token: CreationToken):
     return (datetime.now(timezone.utc) - token.created_at) < RegistrationConstants.LIVE_TIME
 
 
-def create_token(phone: str, recaptcha: str) -> CreationToken or None:
+def create_token(phone: str, recaptcha: str) -> CreationToken:
     response = send_sms(phone, recaptcha)
 
     if response.status_code == 200:
         token = CreationToken.objects.create_token(
             phone=phone,
             session=json.loads(response.content.decode("utf-8"))["sessionInfo"],
-        )
+        ).qs
         return token
-    return None
+
+    return None  # type: ignore
 
 
 def send_sms(phone: str, recaptcha: str):
     base_url = RegistrationConstants.FIREBASE_URL_TO_GET_SESSION + \
-               RegistrationConstants.GOOGLE_API_KEY
+               str(RegistrationConstants.GOOGLE_API_KEY)
 
     dict = {
         "phoneNumber": phone,
@@ -40,7 +41,7 @@ def send_sms(phone: str, recaptcha: str):
 
 
 def check_otp(session: str, otp: str):
-    base_url = RegistrationConstants.FIREBASE_URL_TO_CHECK_OTP + RegistrationConstants.GOOGLE_API_KEY
+    base_url = RegistrationConstants.FIREBASE_URL_TO_CHECK_OTP + str(RegistrationConstants.GOOGLE_API_KEY)
 
     dict = {
         "sessionInfo": session,

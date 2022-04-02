@@ -6,7 +6,8 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     AbstractBaseUser
 )
-from phonenumber_field.modelfields import PhoneNumberField
+from django.db.models import Manager
+from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
 
 from open_schools_platform.common.models import BaseModel
 
@@ -52,7 +53,7 @@ class UserManager(BUM):
         return user
 
 
-class CreationTokenManager(BUM):
+class CreationTokenManager(Manager):
     def create_token(self, phone, session):
         if not phone:
             raise ValueError('Users must have an phone')
