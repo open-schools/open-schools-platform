@@ -21,7 +21,7 @@ def create_token(phone: str, recaptcha: str) -> CreationToken:
         token = CreationToken.objects.create_token(
             phone=phone,
             session=json.loads(response.content.decode("utf-8"))["sessionInfo"],
-        ).qs
+        )
         return token
 
     return None  # type: ignore
