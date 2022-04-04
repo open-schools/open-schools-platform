@@ -16,7 +16,7 @@ class CreationTokenApi(APIView):
                               "return token for creation of user"
                               "or tell that user with such number already exist",
         request_body=CreationTokenSerializer,
-        responses={201: "Use old sms, it is still alive", 200: "SMS sent", 409: "user already created",
+        responses={201: "Use old sms, it is still alive", 202: "SMS sent", 409: "user already created",
                    400: "probably incorrect recaptcha"}
     )
     def post(self, request):
@@ -36,14 +36,14 @@ class CreationTokenApi(APIView):
         if not token:
             return Response({"detail": "An error occurred. Probably you sent incorrect recaptcha"}, status=400)
 
-        return Response({"token": token.key}, status=200)
+        return Response({"token": token.key}, status=201)
 
 
 class UserApi(APIView):
     @swagger_auto_schema(
         operation_description="Create user due to token",
         request_body=UserRegisterSerializer,
-        responses={200: "user was successfully created", 400: "different errors, see in detail"}
+        responses={201: "user was successfully created", 400: "different errors, see in detail"}
     )
     def post(self, request):
         user_ser = UserRegisterSerializer(data=request.data)
@@ -51,11 +51,11 @@ class UserApi(APIView):
 
         token = get_token(filters=request.data)
         if not token:
-            return Response({"detail": "no such token"}, status=400)
+            return Response({"detail": "no such token"}, status=404)
         if not is_token_alive(token):
-            return Response({"detail": "token is overdue"}, status=400)
+            return Response({"detail": "token is overdue"}, status=408)
         if not token.is_verified:
-            return Response({"detail": "your phone number is not verified"}, status=400)
+            return Response({"detail": "your phone number is not verified"}, status=401)
 
         user = create_user(
             phone=token.phone,
@@ -70,7 +70,7 @@ class VerificationApi(APIView):
     @swagger_auto_schema(
         operation_description="Create user if verification code is true",
         request_body=OtpSerializer,
-        responses={200: "user was successfully created", 400: "different errors, see in detail"}
+        responses={201: "user was successfully created", 400: "different errors, see in detail"}
     )
     def post(self, request):
         otp_ser = OtpSerializer(data=request.data)
@@ -78,9 +78,9 @@ class VerificationApi(APIView):
 
         token = get_token(filters=otp_ser.data)
         if not token:
-            return Response({"detail": "no such token"}, status=400)
+            return Response({"detail": "no such token"}, status=404)
         if not is_token_alive(token):
-            return Response({"detail": "token is overdue"}, status=400)
+            return Response({"detail": "token is overdue"}, status=408)
 
         response = check_otp(token.session, otp_ser.data["otp"])
         if response.status_code != 200:
