@@ -1,8 +1,8 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
-from open_schools_platform.users.services import create_user
-from open_schools_platform.users.models import User
+from open_schools_platform.user_management.users.services import create_user
+from open_schools_platform.user_management.users.models import User
 
 
 class UserCreateTests(TestCase):

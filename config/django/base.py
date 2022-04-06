@@ -38,7 +38,8 @@ LOCAL_APPS = [
     'open_schools_platform.common.apps.CommonConfig',
     'open_schools_platform.tasks.apps.TasksConfig',
     'open_schools_platform.api.apps.ApiConfig',
-    'open_schools_platform.users.apps.UsersConfig',
+    'open_schools_platform.user_management.users.apps.UsersConfig',
+    'open_schools_platform.user_management.authentication.apps.AuthenticationConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
 ]

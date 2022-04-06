@@ -1,13 +1,16 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_jwt.compat import set_cookie_with_token
+from rest_framework_jwt.settings import api_settings
 
-from open_schools_platform.users.selectors import get_user, get_token
+from open_schools_platform.user_management.users.selectors import get_user, get_token
 
 # TODO: When JWT is resolved, add authenticated version
-from open_schools_platform.users.serializers import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    UserSerializer
-from open_schools_platform.users.services import is_token_alive, create_token, check_otp, create_user, verify_token
+from open_schools_platform.user_management.users.serializers import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer
+from open_schools_platform.user_management.users.services import is_token_alive, create_token, check_otp, create_user, verify_token, \
+    get_jwt_token
 
 
 class CreationTokenApi(APIView):
@@ -45,7 +48,7 @@ class UserApi(APIView):
         request_body=UserRegisterSerializer,
         responses={200: "user was successfully created", 400: "different errors, see in detail"}
     )
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         user_ser = UserRegisterSerializer(data=request.data)
         user_ser.is_valid(raise_exception=True)
 
@@ -62,8 +65,17 @@ class UserApi(APIView):
             name=user_ser.data["name"],
             password=user_ser.data["password"]
         )
+        if not user:
+            return Response({"detail": "error when creating user"}, status=400)
 
-        return Response({"user": UserSerializer(user).data}, status=200)
+        token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
+                            user_ser.data["password"], request)
+
+        response = Response({"token": token}, status=status.HTTP_201_CREATED)
+        if api_settings.JWT_AUTH_COOKIE:
+            set_cookie_with_token(response, api_settings.JWT_AUTH_COOKIE, token)
+
+        return response
 
 
 class VerificationApi(APIView):

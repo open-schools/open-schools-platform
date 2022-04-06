@@ -2,7 +2,7 @@ import os
 import datetime as datetime_lib
 import warnings
 
-from open_schools_platform.users.tests.constants.test_valid_api_key import is_google_api_key_valid
+from open_schools_platform.user_management.users.tests.constants.test_valid_api_key import is_google_api_key_valid
 
 
 class RegistrationConstants:

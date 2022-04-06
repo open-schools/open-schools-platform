@@ -1,6 +1,6 @@
 import django_filters
 
-from open_schools_platform.users.models import User, CreationToken
+from open_schools_platform.user_management.users.models import User, CreationToken
 
 
 class UserFilter(django_filters.FilterSet):

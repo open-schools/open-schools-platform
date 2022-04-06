@@ -1,12 +1,16 @@
 import json
 
 import requests
+from django.contrib.auth import authenticate
 from django.db import transaction
+from rest_framework import serializers
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from rest_framework_jwt.utils import unix_epoch
 
 from open_schools_platform.common.services import model_update
-from open_schools_platform.users.constants import RegistrationConstants
+from open_schools_platform.user_management.users.constants import RegistrationConstants
 
-from open_schools_platform.users.models import User, CreationToken
+from open_schools_platform.user_management.users.models import User, CreationToken
 from datetime import timezone, datetime
 
 
@@ -52,11 +56,13 @@ def check_otp(session: str, otp: str):
     return response
 
 
-def create_user(phone: str, password: str, name: str) -> User:
+def create_user(phone: str, password: str, name: str, is_active: bool = True, is_admin: bool = False) -> User:
     user = User.objects.create_user(
         phone=phone,
         password=password,
         name=name,
+        is_active=is_active,
+        is_admin=is_admin,
     )
     return user
 
@@ -82,3 +88,29 @@ def verify_token(token: CreationToken):
     token.is_verified = True
     token.save()
     return token
+
+
+def get_jwt_token(username_field: str, username: str, password: str, request=None) -> str:
+    credentials = {
+        username_field: username,
+        'password': password,
+    }
+
+    user = authenticate(**credentials)
+
+    if not user:
+        msg = 'Unable to log in with provided credentials.'
+        raise serializers.ValidationError(msg)
+
+    payload = JSONWebTokenAuthentication.jwt_create_payload(user)
+    payload["username"] = str(payload["username"])
+
+    token = JSONWebTokenAuthentication.jwt_encode_payload(payload)
+    issued_at = payload.get('iat', unix_epoch())
+
+    response_data = JSONWebTokenAuthentication. \
+        jwt_create_response_payload(token, user, request, issued_at)
+
+    return str(response_data["token"])
+
+

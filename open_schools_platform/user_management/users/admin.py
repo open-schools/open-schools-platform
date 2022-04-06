@@ -1,8 +1,8 @@
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 
-from open_schools_platform.users.models import User, CreationToken
-from open_schools_platform.users.services import create_user
+from open_schools_platform.user_management.users.models import User, CreationToken
+from open_schools_platform.user_management.users.services import create_user
 
 
 @admin.register(User)
@@ -16,12 +16,7 @@ class UserAdmin(admin.ModelAdmin):
     fieldsets = (
         (
             None, {
-                'fields': ("phone", "name")
-            }
-        ),
-        (
-            "Booleans", {
-                "fields": ("is_active", "is_admin")
+                'fields': ("phone", "name", 'password')
             }
         ),
         (

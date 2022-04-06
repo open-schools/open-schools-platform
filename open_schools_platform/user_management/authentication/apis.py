@@ -9,10 +9,11 @@ from rest_framework import status
 from rest_framework_jwt.views import ObtainJSONWebTokenView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.user_management.authentication.serializers import LoginUserSerializer
 
-from open_schools_platform.authentication.services import auth_logout
+from open_schools_platform.user_management.authentication.services import auth_logout
 
-from open_schools_platform.users.selectors import user_get_login_data
+from open_schools_platform.user_management.users.selectors import user_get_login_data
 
 
 class UserSessionLoginApi(APIView):
@@ -56,6 +57,8 @@ class UserSessionLogoutApi(APIView):
 
 
 class UserJwtLoginApi(ObtainJSONWebTokenView):
+    serializer_class = LoginUserSerializer
+
     def post(self, request, *args, **kwargs):
         # We are redefining post so we can change the response status on success
         # Mostly for consistency with the session-based API

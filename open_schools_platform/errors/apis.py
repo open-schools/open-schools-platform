@@ -7,8 +7,7 @@ from open_schools_platform.api.exception_handlers import (
 )
 
 from open_schools_platform.errors.services import trigger_errors
-
-from open_schools_platform.users.services import create_user
+from open_schools_platform.user_management.users.services import create_user
 
 
 class TriggerErrorApi(APIView):

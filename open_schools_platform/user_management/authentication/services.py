@@ -1,6 +1,6 @@
 import uuid
 
-from open_schools_platform.users.models import User
+from open_schools_platform.user_management.users.models import User
 
 
 def auth_user_get_jwt_secret_key(user: User) -> str:

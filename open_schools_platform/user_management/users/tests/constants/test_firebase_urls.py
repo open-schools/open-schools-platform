@@ -1,7 +1,7 @@
 from django.test import TestCase
 import requests
 
-from open_schools_platform.users.constants import RegistrationConstants
+from open_schools_platform.user_management.users.constants import RegistrationConstants
 
 
 class FirebaseUrlsTests(TestCase):

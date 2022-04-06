@@ -13,8 +13,8 @@ JWT_AUTH_HEADER_PREFIX = env("JWT_AUTH_HEADER_PREFIX", default="Bearer")
 
 
 JWT_AUTH = {
-    "JWT_GET_USER_SECRET_KEY": "open_schools_platform.authentication.services.auth_user_get_jwt_secret_key",
-    "JWT_RESPONSE_PAYLOAD_HANDLER": "open_schools_platform.authentication.services.auth_jwt_response_payload_handler",
+    "JWT_GET_USER_SECRET_KEY": "open_schools_platform.user_management.authentication.services.auth_user_get_jwt_secret_key",
+    "JWT_RESPONSE_PAYLOAD_HANDLER": "open_schools_platform.user_management.authentication.services.auth_jwt_response_payload_handler",
     "JWT_EXPIRATION_DELTA": datetime.timedelta(seconds=JWT_EXPIRATION_DELTA_SECONDS),
     "JWT_ALLOW_REFRESH": False,
 
