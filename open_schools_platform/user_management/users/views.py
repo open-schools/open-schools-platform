@@ -8,8 +8,10 @@ from rest_framework_jwt.settings import api_settings
 from open_schools_platform.user_management.users.selectors import get_user, get_token
 
 # TODO: When JWT is resolved, add authenticated version
-from open_schools_platform.user_management.users.serializers import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer
-from open_schools_platform.user_management.users.services import is_token_alive, create_token, check_otp, create_user, verify_token, \
+from open_schools_platform.user_management.users.serializers \
+    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer
+from open_schools_platform.user_management.users.services import is_token_alive, create_token, check_otp, create_user, \
+    verify_token, \
     get_jwt_token
 
 
@@ -69,7 +71,7 @@ class UserApi(APIView):
             return Response({"detail": "error when creating user"}, status=400)
 
         token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
-                            user_ser.data["password"], request)
+                              user_ser.data["password"], request)
 
         response = Response({"token": token}, status=status.HTTP_201_CREATED)
         if api_settings.JWT_AUTH_COOKIE:

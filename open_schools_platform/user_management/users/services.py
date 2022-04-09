@@ -112,5 +112,3 @@ def get_jwt_token(username_field: str, username: str, password: str, request=Non
         jwt_create_response_payload(token, user, request, issued_at)
 
     return str(response_data["token"])
-
-

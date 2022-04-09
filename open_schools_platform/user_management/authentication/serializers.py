@@ -6,7 +6,7 @@ from rest_framework_jwt.utils import unix_epoch
 
 
 class LoginUserSerializer(JSONWebTokenSerializer):
-    
+
     def validate(self, data):
         credentials = {
             self.username_field: data.get(self.username_field),

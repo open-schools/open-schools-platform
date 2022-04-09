@@ -7,4 +7,3 @@ urlpatterns = [
     path('token/verify', VerificationApi.as_view(), name='verification-phone-by-token'),
     path('', UserApi.as_view(), name='user'),
 ]
-
