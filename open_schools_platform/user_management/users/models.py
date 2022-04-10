@@ -20,7 +20,7 @@ from open_schools_platform.common.models import BaseModel
 class UserManager(BUM):
     def create_user(self, phone, name="", is_active=True, is_admin=False, password=None):
         if not phone:
-            raise ValueError('Users must have an email address')
+            raise ValueError('Users must have a phone number')
 
         user = self.model(
             phone=phone,
@@ -113,4 +113,4 @@ class CreationToken(BaseModel):
 
     objects = CreationTokenManager()
 
-    USERNAME_FIELD = 'token'
+    USERNAME_FIELD = 'key'
