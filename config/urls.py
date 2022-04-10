@@ -25,7 +25,7 @@ schema_view = get_schema_view(
         default_version='v1',
         description="open-schools-platform API",
         contact=openapi.Contact(email="inbox@lamart.site"),
-        license=openapi.License(name="BSD License"),
+        license=openapi.License(name="MIT License"),
     ),
     public=True,
     permission_classes=[permissions.AllowAny],
