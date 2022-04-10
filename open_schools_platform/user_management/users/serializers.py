@@ -40,8 +40,8 @@ class OtpSerializer(serializers.Serializer):
 class UserRegisterSerializer(serializers.Serializer):
     token = serializers.UUIDField(required=True)
     name = serializers.CharField(max_length=120)
-    password = serializers.CharField(max_length=40)
-    password_confirm = serializers.CharField(max_length=40)
+    password = serializers.CharField(min_length=6, max_length=40)
+    password_confirm = serializers.CharField(min_length=6, max_length=40)
 
     def update(self, instance, validated_data):
         pass
