@@ -56,7 +56,7 @@ class UserManager(BUM):
 class CreationTokenManager(Manager):
     def create_token(self, phone, session):
         if not phone:
-            raise ValueError('Users must have an phone')
+            raise ValueError('Users must have a phone')
 
         token = self.model(
             phone=phone,
