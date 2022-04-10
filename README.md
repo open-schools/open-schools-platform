@@ -22,6 +22,8 @@ source [path to venv folder]/Scripts/activate
 ```
 pip install -r requirements/local.txt
 ```
+> For MacOS developer: change string "psycopg2" to "psycopg2-binary" in requirements/base.txt
+
 5. Create .env file with 
 ```
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
