@@ -1,2 +1,2 @@
 echo "--> Starting beats process"
-celery -A styleguide_example.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
+celery -A open_schools_platform.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
