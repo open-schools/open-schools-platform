@@ -90,7 +90,10 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'phone'
 
     def __str__(self):
-        return str(self.phone)
+        return self.phone.__str__()
+
+    def get_username(self):
+        return self.__str__()
 
     def is_staff(self):
         return self.is_admin
