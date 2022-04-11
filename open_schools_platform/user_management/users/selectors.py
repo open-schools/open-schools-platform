@@ -5,7 +5,7 @@ from open_schools_platform.user_management.users.filters import UserFilter, Crea
 def user_get_login_data(*, user: User):
     return {
         'id': user.id,
-        'phone': user.phone.__str__,
+        'phone': user.phone.__str__(),
         'name': user.name,
     }
 
