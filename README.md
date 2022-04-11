@@ -36,6 +36,10 @@ python manage.py migrate
 ```
 python manage.py runserver [port]
 ```
+8. Install pre-commit hooks
+```
+pre-commit install
+```
 
 
 This project serves as an [example of our styleguide](https://github.com/HackSoftware/Django-Styleguide)
