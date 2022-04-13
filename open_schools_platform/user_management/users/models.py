@@ -111,7 +111,7 @@ class CreationToken(BaseModel):
         blank=False,
         null=True,
     )
-    session = models.CharField(max_length=200, null=True)
+    session = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
 
     objects = CreationTokenManager()

@@ -1,1 +1,1 @@
-source venv/Scripts/activate && python -m pytest
+source ./venv/Scripts/activate && python -m pytest
