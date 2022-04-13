@@ -1,3 +1,6 @@
+import json
+
+from requests import Response
 from rest_framework import serializers
 
 from django.shortcuts import get_object_or_404
@@ -30,3 +33,7 @@ def inline_serializer(*, fields, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
+
+
+def get_dict_from_response(response: Response):
+    return json.loads(response.content.decode("utf-8"))
