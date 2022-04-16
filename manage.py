@@ -5,8 +5,7 @@ import sys
 
 
 def main():
-    """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'SchoolAiServer.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.django.base')
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
