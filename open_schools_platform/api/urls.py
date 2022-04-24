@@ -7,7 +7,13 @@ user_management_urls = [
     ),
 ]
 
+organization_management_urls = [
+    path('organizations/',
+         include(('open_schools_platform.organization_management.organizations.urls', 'organizations'))),
+]
+
 urlpatterns = [
     path('user-management/', include(user_management_urls)),
+    path('organization-management/', include(organization_management_urls)),
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
 ]

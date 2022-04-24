@@ -40,6 +40,7 @@ LOCAL_APPS = [
     'open_schools_platform.api.apps.ApiConfig',
     'open_schools_platform.user_management.users.apps.UsersConfig',
     'open_schools_platform.user_management.authentication.apps.AuthenticationConfig',
+    'open_schools_platform.organization_management.organizations.apps.OrganizationsConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
 ]
@@ -166,7 +167,7 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',
+    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',  # noqa: E501
     # 'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.hacksoft_proposed_exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
