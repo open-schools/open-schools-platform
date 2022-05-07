@@ -64,3 +64,17 @@ class UserSerializer(serializers.Serializer):
 
     def create(self, validated_data):
         pass
+
+
+class ResendSerializer(serializers.Serializer):
+    token = serializers.UUIDField(required=True)
+    recaptcha = serializers.CharField(
+        allow_null=False,
+        required=True,
+    )
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
