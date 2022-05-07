@@ -5,14 +5,15 @@ from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
+from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.user_management.users.selectors import get_user, get_token
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
-    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer
+    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, ResendSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, check_otp, create_user, \
     verify_token, \
-    get_jwt_token
+    get_jwt_token, send_sms, update_token_session
 
 
 class CreationTokenApi(APIView):
@@ -103,3 +104,36 @@ class VerificationApi(APIView):
         verify_token(token)
 
         return Response({"detail": "token verified"}, status=200)
+
+
+class CodeResendApi(APIView):
+    @swagger_auto_schema(
+        operation_description="Resend sms to entered phone number"
+                              "or tell that user with such number already exist",
+        request_body=ResendSerializer,
+        responses={202: "SMS was resent", 409: "user already created", 404: "no such token", 408: "token is overdue"}
+    )
+    def post(self, request):
+        # Make sure the filters are valid, if passed
+        token_ser = ResendSerializer(data=request.data)
+        token_ser.is_valid(raise_exception=True)
+
+        token = get_token(filters=token_ser.data)
+
+        if not token:
+            return Response({"detail": "no such token"}, status=404)
+        if not is_token_alive(token):
+            return Response({"detail": "token is overdue"}, status=408)
+
+        user = get_user(filters={"phone": token.phone})
+
+        if user:
+            return Response({"detail": "user with this phone number has already been created"}, status=409)
+
+        sms_response = send_sms(str(token.phone), token_ser.data["recaptcha"])
+
+        if sms_response.status_code == 200:
+            update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])
+            return Response({"detail": "SMS was resent"}, status=202)
+        else:
+            return Response({"detail": "An error occurred. SMS was not resent"}, status=400)
