@@ -6,7 +6,9 @@ from rest_framework.response import Response
 from rest_framework import serializers
 from rest_framework import status
 
-from rest_framework_jwt.views import ObtainJSONWebTokenView
+from .serializers import JSONWebTokenWithTwoResponses
+
+from rest_framework_jwt.views import BaseJSONWebTokenAPIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 
@@ -55,7 +57,8 @@ class UserSessionLogoutApi(APIView):
         return Response()
 
 
-class UserJwtLoginApi(ObtainJSONWebTokenView):
+class UserJwtLoginApi(BaseJSONWebTokenAPIView):
+    serializer_class = JSONWebTokenWithTwoResponses
 
     def post(self, request, *args, **kwargs):
         # We are redefining post so we can change the response status on success
