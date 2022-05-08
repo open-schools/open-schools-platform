@@ -21,8 +21,10 @@ repos:
           language: system
           types: [python]
 
-        - id: tests
-          name: Run tests
-          entry: "bash tests.sh"
-          language: system
+        - id: pytest
+          name: pytest
+          entry: pytest
+          language: python
+          always_run: true
+          pass_filenames: false
           verbose: true
