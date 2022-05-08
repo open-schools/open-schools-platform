@@ -1,15 +1,14 @@
-import django_filters
-
+from open_schools_platform.common.filters import BaseFilterSet
 from open_schools_platform.user_management.users.models import User, CreationToken
 
 
-class UserFilter(django_filters.FilterSet):
+class UserFilter(BaseFilterSet):
     class Meta:
         model = User
         fields = ('id', 'phone')
 
 
-class CreationTokenFilter(django_filters.FilterSet):
+class CreationTokenFilter(BaseFilterSet):
     class Meta:
         model = CreationToken
         fields = ('key', 'phone')
