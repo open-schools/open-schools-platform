@@ -3,6 +3,8 @@ from re import match
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
+from open_schools_platform.user_management.users.models import CreationToken
+
 
 class CreationTokenSerializer(serializers.Serializer):
     phone = PhoneNumberField(
@@ -19,6 +21,12 @@ class CreationTokenSerializer(serializers.Serializer):
 
     def update(self, instance, validated_data):
         pass
+
+
+class RetrieveCreationTokenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CreationToken
+        fields = ("key", "phone", "is_verified")
 
 
 class OtpSerializer(serializers.Serializer):

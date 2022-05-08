@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
@@ -10,13 +11,25 @@ from open_schools_platform.user_management.users.selectors import get_user, get_
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
-    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, ResendSerializer
+    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, ResendSerializer, \
+    RetrieveCreationTokenSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, check_otp, create_user, \
     verify_token, \
     get_jwt_token, send_sms, update_token_session
 
 
 class CreationTokenApi(APIView):
+    @swagger_auto_schema(
+        operation_description="Return CreationToken data",
+        responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()}
+    )
+    def get(self, request):
+        key = request.GET.get("token", "")
+        if key == "":
+            raise ValidationError("Enter a valid UUID.")
+
+        return Response(RetrieveCreationTokenSerializer(get_token(filters={"key": key})).data)
+
     @swagger_auto_schema(
         operation_description="Send sms to entered phone number and"
                               "return token for creation of user"
