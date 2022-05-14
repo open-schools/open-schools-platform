@@ -41,6 +41,7 @@ LOCAL_APPS = [
     'open_schools_platform.user_management.users.apps.UsersConfig',
     'open_schools_platform.user_management.authentication.apps.AuthenticationConfig',
     'open_schools_platform.organization_management.organizations.apps.OrganizationsConfig',
+    'open_schools_platform.employee_management.employees.apps.EmployeesConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
 ]
@@ -172,7 +173,10 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': []
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [
+       'rest_framework.permissions.AllowAny',
+    ]
 }
 
 from config.settings.cors import *  # noqa
