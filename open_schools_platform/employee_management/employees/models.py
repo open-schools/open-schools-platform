@@ -1,7 +1,7 @@
 from django.db import models
 
 from open_schools_platform.common.models import BaseModel
-from open_schools_platform.organization_management.organizations.models import Organization  # type:ignore
+from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
 
