@@ -48,7 +48,7 @@ def trigger_model_clean():
 
 
 def trigger_rest_validation_plain():
-    raise RestValidationError("Some error message")
+    raise RestValidationError("An Error occurred")
 
 
 def trigger_rest_validation_detail():
@@ -101,6 +101,11 @@ def trigger_rest_parse_error():
 
 def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
+
+
+def trigger_runtime_error():
+    raise RuntimeError()
+
 
 
 def trigger_errors(exception_handler):
