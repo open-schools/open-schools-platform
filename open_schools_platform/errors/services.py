@@ -103,29 +103,28 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-def trigger_timeout_error(message="An error occurred. SMS was not resent"):
-    raise TimeoutError(message)
-
-
 class TriggerNotFounded(APIException):
-    def __init__(self, status_code=404, default_detail="Not found", default_code="not_found"):
-        self.status_code = status_code
-        self.detail = default_detail
-        self.default_code = default_code
+    def __init__(self, status=404, detail="Not found"):
+        self.status_code = status
+        self.detail = detail
 
 
 class TriggerNotAcceptable(APIException):
-    def __init__(self, status_code=406, default_detail="Not acceptable", default_code="not_acceptable"):
-        self.status_code = status_code
-        self.detail = default_detail
-        self.default_code = default_code
+    def __init__(self, status=406, detail="Not acceptable"):
+        self.status_code = status
+        self.detail = detail
 
 
 class TriggerAuthFailed(APIException):
-    def __init__(self, status_code=401, default_detail="Authentication failed", default_code="futhentication_failed"):
-        self.status_code = status_code
-        self.detail = default_detail
-        self.default_code = default_code
+    def __init__(self, status=401, detail="Authentication failed"):
+        self.status_code = status
+        self.detail = detail
+
+
+class TriggerTimeoutError(APIException):
+    def __init__(self, status=500, detail="Timeout error"):
+        self.status_code = status
+        self.detail = detail
 
 
 def trigger_errors(exception_handler):
