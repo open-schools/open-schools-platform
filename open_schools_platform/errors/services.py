@@ -8,8 +8,8 @@ from django.core.exceptions import (
 )
 from django.http import Http404
 
-from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError as RestValidationError
+from rest_framework import serializers, exceptions, status
+from rest_framework.exceptions import ValidationError as RestValidationError, APIException
 
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.core.exceptions import ApplicationError
@@ -103,9 +103,29 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-def trigger_runtime_error():
-    raise RuntimeError()
+def trigger_timeout_error(message="An error occurred. SMS was not resent"):
+    raise TimeoutError(message)
 
+
+class TriggerNotFound(APIException):
+    def __init__(self, status_code=404, default_detail="Not found", default_code="not_found"):
+        self.status_code = status_code
+        self.detail = default_detail
+        self.default_code = default_code
+
+
+class TriggerNotAcceptable(APIException):
+    def __init__(self, status_code=406, default_detail="Not Acceptable", default_code="not_acceptable"):
+        self.status_code = status_code
+        self.detail = default_detail
+        self.default_code = default_code
+
+
+class TriggerAuthFailed(APIException):
+    def __init__(self, status_code=401, default_detail="Authentication Failed", default_code="auth_failed"):
+        self.status_code = status_code
+        self.detail = default_detail
+        self.default_code = default_code
 
 
 def trigger_errors(exception_handler):
@@ -115,6 +135,17 @@ def trigger_errors(exception_handler):
         if inspect.isfunction(member) and name.startswith("trigger") and name != "trigger_errors":
             try:
                 member()
+            except Exception as exc:
+                response = exception_handler(exc, {})
+
+                if response is None:
+                    result[name] = "500 SERVER ERROR"
+                    continue
+
+                result[name] = response.data
+        if inspect.isclass(member) and name.startswith("Trigger"):
+            try:
+                raise member()
             except Exception as exc:
                 response = exception_handler(exc, {})
 
