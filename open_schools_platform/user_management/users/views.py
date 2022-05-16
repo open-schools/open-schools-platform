@@ -7,6 +7,8 @@ from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.common.utils import get_dict_from_response
+from open_schools_platform.errors.services import TriggerAuthFailed, TriggerNotAcceptable, \
+    TriggerNotFounded, TriggerTimeoutError
 from open_schools_platform.user_management.users.selectors import get_user, get_token
 
 # TODO: When JWT is resolved, add authenticated version
@@ -46,7 +48,7 @@ class CreationTokenApi(APIView):
 
         user = get_user(filters=token_ser.validated_data)
         if user:
-            return Response({"detail": "user with this phone number has already been created"}, status=409)
+            raise TriggerAuthFailed(status=409, detail="user with this phone number has already been created")
 
         token = get_token(filters=token_ser.validated_data)
         if token and is_token_alive(token):
@@ -55,7 +57,7 @@ class CreationTokenApi(APIView):
         response = send_sms(**token_ser.data)
 
         if response.status_code != 200:
-            return Response({"detail": "An error occurred. Probably you sent incorrect recaptcha"}, status=400)
+            raise TriggerNotAcceptable(status=400, detail="An error occurred. Probably you sent incorrect recaptcha")
 
         token = create_token(token_ser.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
@@ -74,20 +76,16 @@ class UserApi(APIView):
 
         token = get_token(filters=request.data)
         if not token:
-            return Response({"detail": "no such token"}, status=404)
+            raise TriggerNotFounded(status=404, detail="no such token")
         if not is_token_alive(token):
-            return Response({"detail": "token is overdue"}, status=408)
+            raise TriggerNotAcceptable(status=408, detail="token is overdue")
         if not token.is_verified:
-            return Response({"detail": "your phone number is not verified"}, status=401)
-
+            raise TriggerAuthFailed(status=401, detail="your phone number is not verified",)
         user = create_user(
             phone=token.phone,
             name=user_ser.data["name"],
             password=user_ser.data["password"]
         )
-        if not user:
-            return Response({"detail": "error when creating user"}, status=500)
-
         token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
                               user_ser.data["password"], request)
 
@@ -110,13 +108,13 @@ class VerificationApi(APIView):
 
         token = get_token(filters=otp_ser.data)
         if not token:
-            return Response({"detail": "no such token"}, status=404)
+            raise TriggerNotFounded(status=404, detail="no such token")
         if not is_token_alive(token):
-            return Response({"detail": "token is overdue"}, status=408)
+            raise TriggerNotAcceptable(status=408, detail="token is overdue")
 
         response = check_otp(token.session, otp_ser.data["otp"])
         if response.status_code != 200:
-            return Response({"detail": "otp is incorrect"}, status=400)
+            raise TriggerNotAcceptable(status=400, detail="otp is incorrect")
 
         verify_token(token)
 
@@ -138,14 +136,14 @@ class CodeResendApi(APIView):
         token = get_token(filters=token_ser.data)
 
         if not token:
-            return Response({"detail": "no such token"}, status=404)
+            raise TriggerNotFounded(status=404, detail="no such token")
         if not is_token_alive(token):
-            return Response({"detail": "token is overdue"}, status=408)
+            raise TriggerNotAcceptable(status=408, detail="token is overdue")
 
         user = get_user(filters={"phone": token.phone})
 
         if user:
-            return Response({"detail": "user with this phone number has already been created"}, status=409)
+            raise TriggerAuthFailed(status=409, detail="user with this phone number has already been created")
 
         sms_response = send_sms(str(token.phone), token_ser.data["recaptcha"])
 
@@ -153,4 +151,4 @@ class CodeResendApi(APIView):
             update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])
             return Response({"detail": "SMS was resent"}, status=202)
         else:
-            return Response({"detail": "An error occurred. SMS was not resent"}, status=400)
+            raise TriggerTimeoutError(status=400, detail="An error occurred. SMS was not resent")
