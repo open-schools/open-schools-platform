@@ -16,7 +16,7 @@ from open_schools_platform.user_management.users.serializers \
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session
-from open_schools_platform.utils.firebase_requests import send_sms, check_otp
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp
 
 
 class CreationTokenApi(APIView):
@@ -52,7 +52,7 @@ class CreationTokenApi(APIView):
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=201)
 
-        response = send_sms(**token_ser.data)
+        response = send_firebase_sms(**token_ser.data)
 
         if response.status_code != 200:
             return Response({"detail": "An error occurred. Probably you sent incorrect recaptcha"}, status=400)
@@ -147,7 +147,7 @@ class CodeResendApi(APIView):
         if user:
             return Response({"detail": "user with this phone number has already been created"}, status=409)
 
-        sms_response = send_sms(str(token.phone), token_ser.data["recaptcha"])
+        sms_response = send_firebase_sms(str(token.phone), token_ser.data["recaptcha"])
 
         if sms_response.status_code == 200:
             update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])

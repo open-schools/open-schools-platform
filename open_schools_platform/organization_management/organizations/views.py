@@ -3,8 +3,8 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.employee_management.employees.serializers import CreateEmployeeSerializer
-from open_schools_platform.employee_management.employees.services import create_employee
+from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
+from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization
 
@@ -15,7 +15,7 @@ class OrganizationApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user",
         request_body=CreateOrganizationSerializer,
-        responses={200: "Created"}
+        responses={201: "Created"}
     )
     def post(self, request, *args, **kwargs):
         org_serializer = self.serializer_class(data=request.data)
@@ -29,5 +29,5 @@ class OrganizationApi(ApiAuthMixin, CreateAPIView):
                                    position="Creator")
 
         return Response({"organization": self.serializer_class(org).data,
-                         "creator_employee": CreateEmployeeSerializer(employee).data},
+                         "creator_employee": EmployeeSerializer(employee).data},
                         status=201)

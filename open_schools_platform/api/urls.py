@@ -10,6 +10,8 @@ user_management_urls = [
 organization_management_urls = [
     path('organizations/',
          include(('open_schools_platform.organization_management.organizations.urls', 'organizations'))),
+    path('employees/',
+         include(('open_schools_platform.organization_management.employees.urls', 'employees'))),
 ]
 
 urlpatterns = [

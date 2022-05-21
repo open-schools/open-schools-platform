@@ -5,7 +5,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
 from open_schools_platform.common.services import model_update
-from open_schools_platform.user_management.users.constants import RegistrationConstants
+from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
 
 from open_schools_platform.user_management.users.models import User, CreationToken
 from datetime import timezone, datetime
@@ -23,7 +23,7 @@ def create_token(phone: str, session: str) -> CreationToken:
     return token
 
 
-def create_user(phone: str, password: str, name: str, is_active: bool = True, is_admin: bool = False) -> User:
+def create_user(phone: str, password: str, name: str = "", is_active: bool = True, is_admin: bool = False) -> User:
     user = User.objects.create_user(
         phone=phone,
         password=password,
@@ -84,3 +84,9 @@ def update_token_session(token: CreationToken, new_session: str) -> CreationToke
     token.session = new_session
     token.save()
     return token
+
+
+def generate_user_password():
+    password = User.objects.make_random_password(length=GenerateConstants.password_length,
+                                                 allowed_chars=GenerateConstants.alphabet)
+    return password

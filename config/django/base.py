@@ -30,7 +30,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 LOCAL_APPS = [
@@ -41,7 +40,7 @@ LOCAL_APPS = [
     'open_schools_platform.user_management.users.apps.UsersConfig',
     'open_schools_platform.user_management.authentication.apps.AuthenticationConfig',
     'open_schools_platform.organization_management.organizations.apps.OrganizationsConfig',
-    'open_schools_platform.employee_management.employees.apps.EmployeesConfig',
+    'open_schools_platform.organization_management.employees.apps.EmployeesConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
 ]
@@ -103,7 +102,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -123,7 +121,6 @@ if os.environ.get('GITHUB_WORKFLOW'):
             'PORT': '5432',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -145,7 +142,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'users.User'
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -158,7 +154,6 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
