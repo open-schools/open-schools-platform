@@ -18,7 +18,7 @@ def send_sms(*, to: List[str], msg: str):
     """
 
     base_url = "{url}/?api_id={api_key}".format(url=CommonConstants.SMS_PROVIDER_URL,
-                                                api_key=CommonConstants.API_KEY)
+                                                api_key=CommonConstants.SMS_API_KEY)
 
     phones = ""
     for phone in to:
