@@ -127,6 +127,12 @@ class TriggerTimeoutError(APIException):
         self.detail = detail
 
 
+class TriggerValidationError(APIException):
+    def __init__(self, status=400, detail="Validation error"):
+        self.status_code = status
+        self.detail = detail
+
+
 def trigger_errors(exception_handler):
     result = {}
 
