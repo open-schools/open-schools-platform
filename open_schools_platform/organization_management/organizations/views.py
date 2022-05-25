@@ -3,9 +3,10 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
+from open_schools_platform.organization_management.employees.serializers import RetrieveEmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
-from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer
+from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
+    RetrieveOrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization
 
 
@@ -28,6 +29,6 @@ class OrganizationApi(ApiAuthMixin, CreateAPIView):
                                    organization=org,
                                    position="Creator")
 
-        return Response({"organization": self.serializer_class(org).data,
-                         "creator_employee": EmployeeSerializer(employee).data},
+        return Response({"organization": RetrieveOrganizationSerializer(org).data,
+                         "creator_employee": RetrieveEmployeeSerializer(employee).data},
                         status=201)
