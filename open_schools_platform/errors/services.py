@@ -103,26 +103,32 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-class TriggerNotFounded(APIException):
+class NotFoundedException(APIException):
     def __init__(self, status=404, detail="Not found"):
         self.status_code = status
         self.detail = detail
 
 
-class TriggerNotAcceptable(APIException):
+class NotAcceptableException(APIException):
     def __init__(self, status=406, detail="Not acceptable"):
         self.status_code = status
         self.detail = detail
 
 
-class TriggerAuthFailed(APIException):
+class AuthFailedException(APIException):
     def __init__(self, status=401, detail="Authentication failed"):
         self.status_code = status
         self.detail = detail
 
 
-class TriggerTimeoutError(APIException):
+class TimeoutErrorException(APIException):
     def __init__(self, status=500, detail="Timeout error"):
+        self.status_code = status
+        self.detail = detail
+
+
+class ValidationErrorException(APIException):
+    def __init__(self, status=400, detail="Validation error"):
         self.status_code = status
         self.detail = detail
 
@@ -142,7 +148,7 @@ def trigger_errors(exception_handler):
                     continue
 
                 result[name] = response.data
-        if inspect.isclass(member) and name.startswith("Trigger"):
+        if inspect.isclass(member) and name.endswith("Exception"):
             try:
                 raise member
             except Exception as exc:

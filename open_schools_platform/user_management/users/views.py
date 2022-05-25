@@ -1,15 +1,15 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.common.utils import get_dict_from_response
-from open_schools_platform.errors.services import TriggerAuthFailed, TriggerNotAcceptable, \
-    TriggerNotFounded, TriggerTimeoutError
+from open_schools_platform.errors.services import AuthFailedException, NotAcceptableException, \
+    NotFoundedException, TimeoutErrorException, ValidationErrorException
 from open_schools_platform.user_management.users.selectors import get_user, get_token
+from open_schools_platform.api.swagger_tags import user_management_users
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
@@ -24,12 +24,13 @@ from open_schools_platform.utils.firebase_requests import send_sms, check_otp
 class CreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data",
-        responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()}
+        responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()},
+        tags=[user_management_users]
     )
     def get(self, request):
         key = request.GET.get("token", "")
         if key == "":
-            raise ValidationError("Enter a valid UUID.")
+            raise ValidationErrorException(status=400, detail="Enter a valid UUID.")
 
         return Response(RetrieveCreationTokenSerializer(get_token(filters={"key": key})).data)
 
@@ -39,7 +40,8 @@ class CreationTokenApi(APIView):
                               "or tell that user with such number already exist",
         request_body=CreationTokenSerializer,
         responses={201: "Use old sms, it is still alive", 202: "SMS sent", 409: "user already created",
-                   400: "probably incorrect recaptcha"}
+                   400: "probably incorrect recaptcha"},
+        tags=[user_management_users]
     )
     def post(self, request):
         # Make sure the filters are valid, if passed
@@ -48,7 +50,7 @@ class CreationTokenApi(APIView):
 
         user = get_user(filters=token_ser.validated_data)
         if user:
-            raise TriggerAuthFailed(status=409, detail="user with this phone number has already been created")
+            raise AuthFailedException(status=409, detail="user with this phone number has already been created")
 
         token = get_token(filters=token_ser.validated_data)
         if token and is_token_alive(token):
@@ -57,7 +59,7 @@ class CreationTokenApi(APIView):
         response = send_sms(**token_ser.data)
 
         if response.status_code != 200:
-            raise TriggerNotAcceptable(status=400, detail="An error occurred. Probably you sent incorrect recaptcha")
+            raise NotAcceptableException(status=400, detail="An error occurred. Probably you sent incorrect recaptcha")
 
         token = create_token(token_ser.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
@@ -68,7 +70,8 @@ class UserApi(APIView):
     @swagger_auto_schema(
         operation_description="Create user due to token",
         request_body=UserRegisterSerializer,
-        responses={201: "user was successfully created", 400: "different errors, see in detail"}
+        responses={201: "user was successfully created", 400: "different errors, see in detail"},
+        tags=[user_management_users]
     )
     def post(self, request, *args, **kwargs):
         user_ser = UserRegisterSerializer(data=request.data)
@@ -76,11 +79,11 @@ class UserApi(APIView):
 
         token = get_token(filters=request.data)
         if not token:
-            raise TriggerNotFounded(status=404, detail="no such token")
+            raise NotFoundedException(status=404, detail="no such token")
         if not is_token_alive(token):
-            raise TriggerNotAcceptable(status=408, detail="token is overdue")
+            raise NotAcceptableException(status=408, detail="token is overdue")
         if not token.is_verified:
-            raise TriggerAuthFailed(status=401, detail="your phone number is not verified",)
+            raise AuthFailedException(status=401, detail="your phone number is not verified", )
         user = create_user(
             phone=token.phone,
             name=user_ser.data["name"],
@@ -100,7 +103,8 @@ class VerificationApi(APIView):
     @swagger_auto_schema(
         operation_description="Create user if verification code is true",
         request_body=OtpSerializer,
-        responses={201: "user was successfully created", 400: "different errors, see in detail"}
+        responses={201: "user was successfully created", 400: "different errors, see in detail"},
+        tags=[user_management_users]
     )
     def post(self, request):
         otp_ser = OtpSerializer(data=request.data)
@@ -108,13 +112,13 @@ class VerificationApi(APIView):
 
         token = get_token(filters=otp_ser.data)
         if not token:
-            raise TriggerNotFounded(status=404, detail="no such token")
+            raise NotFoundedException(status=404, detail="no such token")
         if not is_token_alive(token):
-            raise TriggerNotAcceptable(status=408, detail="token is overdue")
+            raise NotAcceptableException(status=408, detail="token is overdue")
 
         response = check_otp(token.session, otp_ser.data["otp"])
         if response.status_code != 200:
-            raise TriggerNotAcceptable(status=400, detail="otp is incorrect")
+            raise NotAcceptableException(status=400, detail="otp is incorrect")
 
         verify_token(token)
 
@@ -126,7 +130,8 @@ class CodeResendApi(APIView):
         operation_description="Resend sms to entered phone number"
                               "or tell that user with such number already exist",
         request_body=ResendSerializer,
-        responses={202: "SMS was resent", 409: "user already created", 404: "no such token", 408: "token is overdue"}
+        responses={202: "SMS was resent", 409: "user already created", 404: "no such token", 408: "token is overdue"},
+        tags=[user_management_users]
     )
     def post(self, request):
         # Make sure the filters are valid, if passed
@@ -136,14 +141,14 @@ class CodeResendApi(APIView):
         token = get_token(filters=token_ser.data)
 
         if not token:
-            raise TriggerNotFounded(status=404, detail="no such token")
+            raise NotFoundedException(status=404, detail="no such token")
         if not is_token_alive(token):
-            raise TriggerNotAcceptable(status=408, detail="token is overdue")
+            raise NotAcceptableException(status=408, detail="token is overdue")
 
         user = get_user(filters={"phone": token.phone})
 
         if user:
-            raise TriggerAuthFailed(status=409, detail="user with this phone number has already been created")
+            raise AuthFailedException(status=409, detail="user with this phone number has already been created")
 
         sms_response = send_sms(str(token.phone), token_ser.data["recaptcha"])
 
@@ -151,4 +156,4 @@ class CodeResendApi(APIView):
             update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])
             return Response({"detail": "SMS was resent"}, status=202)
         else:
-            raise TriggerTimeoutError(status=400, detail="An error occurred. SMS was not resent")
+            raise TimeoutErrorException(status=400, detail="An error occurred. SMS was not resent")
