@@ -17,6 +17,8 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 from open_schools_platform.user_management.users.selectors import user_get_login_data
 
+from open_schools_platform.api.swagger_tags import user_management_auth
+
 
 class UserSessionLoginApi(APIView):
     """
@@ -27,7 +29,7 @@ class UserSessionLoginApi(APIView):
         password = serializers.CharField()
 
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
@@ -51,7 +53,7 @@ class UserSessionLoginApi(APIView):
 
 class UserSessionLogoutApi(APIView):
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def get(self, request):
         logout(request)
@@ -59,7 +61,7 @@ class UserSessionLogoutApi(APIView):
         return Response()
 
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def post(self, request):
         logout(request)
@@ -71,7 +73,7 @@ class UserJwtLoginApi(BaseJSONWebTokenAPIView):
     serializer_class = JSONWebTokenWithTwoResponses
 
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def post(self, request, *args, **kwargs):
         # We are redefining post so we can change the response status on success
@@ -86,7 +88,7 @@ class UserJwtLoginApi(BaseJSONWebTokenAPIView):
 
 class UserJwtLogoutApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def post(self, request):
         auth_logout(request.user)
@@ -101,7 +103,7 @@ class UserJwtLogoutApi(ApiAuthMixin, APIView):
 
 class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        tags=['User management. Authentication']
+        tags=[user_management_auth]
     )
     def get(self, request):
         data = user_get_login_data(user=request.user)
