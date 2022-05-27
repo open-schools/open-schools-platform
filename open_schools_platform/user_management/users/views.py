@@ -132,6 +132,7 @@ class CodeResendApi(APIView):
     @swagger_auto_schema(
         operation_description="Resend sms to entered phone number"
                               "or tell that user with such number already exist",
+        request_body=ResendSerializer,
         responses={202: "SMS was resent", 409: "user already created", 404: "no such token", 408: "token is overdue"},
         tags=[user_management_users]
     )
