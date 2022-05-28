@@ -40,6 +40,7 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
 
     @swagger_auto_schema(
         tags=[SwaggerTags.Organization_management_organizations],
+        description="Return paginated list of organizations",
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(

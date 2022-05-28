@@ -34,23 +34,23 @@ class CreationTokenApi(CreateAPIView):
     )
     def post(self, request):
         # Make sure the filters are valid, if passed
-        token_ser = CreationTokenSerializer(data=request.data)
-        token_ser.is_valid(raise_exception=True)
+        token_serializer = CreationTokenSerializer(data=request.data)
+        token_serializer.is_valid(raise_exception=True)
 
-        user = get_user(filters=token_ser.validated_data)
+        user = get_user(filters=token_serializer.validated_data)
         if user:
             raise AuthFailedException(status=409, detail="user with this phone number has already been created")
 
-        token = get_token(filters=token_ser.validated_data)
+        token = get_token(filters=token_serializer.validated_data)
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=201)
 
-        response = send_firebase_sms(**token_ser.data)
+        response = send_firebase_sms(**token_serializer.data)
 
         if response.status_code != 200:
             raise NotAcceptableException(status=400, detail="An error occurred. Probably you sent incorrect recaptcha")
 
-        token = create_token(token_ser.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
+        token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
         return Response({"token": token.key}, status=201)
 
@@ -77,8 +77,8 @@ class UserApi(CreateAPIView):
         tags=[SwaggerTags.User_management_users]
     )
     def post(self, request, *args, **kwargs):
-        user_ser = UserRegisterSerializer(data=request.data)
-        user_ser.is_valid(raise_exception=True)
+        user_serializer = UserRegisterSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
 
         token = get_token(filters=request.data)
         if not token:
@@ -89,11 +89,11 @@ class UserApi(CreateAPIView):
             raise AuthFailedException(status=401, detail="your phone number is not verified", )
         user = create_user(
             phone=token.phone,
-            name=user_ser.data["name"],
-            password=user_ser.data["password"]
+            name=user_serializer.data["name"],
+            password=user_serializer.data["password"]
         )
         token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
-                              user_ser.data["password"], request)
+                              user_serializer.data["password"], request)
 
         response = Response({"token": token}, status=status.HTTP_201_CREATED)
         if api_settings.JWT_AUTH_COOKIE:
@@ -110,8 +110,8 @@ class VerificationApi(APIView):
         tags=[SwaggerTags.User_management_users]
     )
     def put(self, request, pk):
-        otp_ser = OtpSerializer(data=request.data)
-        otp_ser.is_valid(raise_exception=True)
+        otp_serializer = OtpSerializer(data=request.data)
+        otp_serializer.is_valid(raise_exception=True)
 
         token = get_token(filters={"key": pk})
         if not token:
@@ -119,7 +119,7 @@ class VerificationApi(APIView):
         if not is_token_alive(token):
             raise NotAcceptableException(status=408, detail="token is overdue")
 
-        response = check_otp(token.session, otp_ser.validated_data["otp"])
+        response = check_otp(token.session, otp_serializer.validated_data["otp"])
         if response.status_code != 200:
             raise NotAcceptableException(status=400, detail="otp is incorrect")
 

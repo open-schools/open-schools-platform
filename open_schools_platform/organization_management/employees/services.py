@@ -1,5 +1,6 @@
 from rest_framework.exceptions import PermissionDenied
 
+from open_schools_platform.errors.services import TimeoutErrorException
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.selectors import get_employee
 from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
@@ -10,7 +11,7 @@ from open_schools_platform.user_management.users.services import create_user, ge
 from open_schools_platform.utils.sms_provider_requests import send_sms
 
 
-def create_employee(user: User, organization: Organization, position: str = "", name: str = "") -> Employee:
+def create_employee(user: User, organization: Organization, name: str, position: str = "") -> Employee:
     employee = Employee.objects.create(
         name=name,
         user=user,
@@ -20,13 +21,12 @@ def create_employee(user: User, organization: Organization, position: str = "", 
     return employee
 
 
-def add_employee_to_organization(user: User, phone: str, organization: Organization, position: str = "",
-                                 name: str = "") -> Employee:
+def add_employee_to_organization(user: User, phone: str, organization: Organization, name: str, position: str = "") -> Employee:
     employee = get_employee(filters={"user": user, "organization": organization})
 
-    # likely we should add permission check in future
+    # TODO:implement permissions here
     if not employee:
-        raise PermissionDenied()  # here is another error
+        raise PermissionDenied()
 
     pwd = generate_user_password()
     add_user = get_user(filters={"phone": phone})
@@ -35,9 +35,11 @@ def add_employee_to_organization(user: User, phone: str, organization: Organizat
         response = send_sms(to=[phone], msg=msg)
 
         if response[str(phone)] != 100:
-            raise PermissionDenied()  # here is another error
+            raise TimeoutErrorException(detail="Something wrong! Please, contact the administrator"
+                                               "and tell him the error number",
+                                        status=response[str(phone)])  # here is another error
 
-        add_user = create_user(phone=phone, password=pwd)
+        add_user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
     new_employee = create_employee(user=add_user,
                                    organization=organization,

@@ -7,5 +7,5 @@ class RegistrationConstants:
 
 
 class GenerateConstants:
-    alphabet = string.ascii_letters + string.digits
-    password_length = 10
+    Alphabet = string.ascii_letters + string.digits
+    Password_length = 10

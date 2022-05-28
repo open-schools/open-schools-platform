@@ -23,7 +23,7 @@ def create_token(phone: str, session: str) -> CreationToken:
     return token
 
 
-def create_user(phone: str, password: str, name: str = "", is_active: bool = True, is_admin: bool = False) -> User:
+def create_user(phone: str, password: str, name: str, is_active: bool = True, is_admin: bool = False) -> User:
     user = User.objects.create_user(
         phone=phone,
         password=password,
@@ -87,6 +87,6 @@ def update_token_session(token: CreationToken, new_session: str) -> CreationToke
 
 
 def generate_user_password():
-    password = User.objects.make_random_password(length=GenerateConstants.password_length,
-                                                 allowed_chars=GenerateConstants.alphabet)
+    password = User.objects.make_random_password(length=GenerateConstants.Password_length,
+                                                 allowed_chars=GenerateConstants.Alphabet)
     return password

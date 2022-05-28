@@ -8,6 +8,7 @@ from open_schools_platform.common.constants import CommonConstants
 def prepare_phone_number(phone: str):
     phone = str(phone)  # PhoneNumber cast
 
+    # TODO: check if it works in different countries
     if phone[0] == '+':
         return phone[1:len(phone)]
 
