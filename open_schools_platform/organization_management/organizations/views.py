@@ -1,12 +1,9 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.decorators import api_view
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
-from drf_yasg.inspectors import PaginatorInspector, DjangoRestResponsePagination, CoreAPICompatInspector
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.api.pagination import get_paginated_response, LimitOffsetPagination
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import organization_management_organizations
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
