@@ -3,7 +3,7 @@ from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.api.swagger_tags import organization_management_employees
+from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     CreateEmployeeSerializer
 from open_schools_platform.organization_management.employees.services import add_employee_to_organization
@@ -16,7 +16,7 @@ class EmployeeApi(ApiAuthMixin, CreateAPIView):
         operation_description="Create employee with attached organization and user",
         request_body=CreateEmployeeSerializer,
         responses={201: EmployeeSerializer},
-        tags=[organization_management_employees],
+        tags=[SwaggerTags.organization_management_employees],
     )
     def post(self, request, *args, **kwargs):
         employee_serializer = self.serializer_class(data=request.data)

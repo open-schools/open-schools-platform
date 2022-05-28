@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
-from open_schools_platform.api.swagger_tags import organization_management_organizations
+from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
@@ -22,7 +22,7 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
         operation_description="Create organization and related to it employee for this user",
         request_body=CreateOrganizationSerializer,
         responses={201: EmployeeSerializer},
-        tags=[organization_management_organizations]
+        tags=[SwaggerTags.organization_management_organizations]
     )
     def post(self, request, *args, **kwargs):
         org_serializer = CreateOrganizationSerializer(data=request.data)
@@ -39,7 +39,7 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
                         status=201)
 
     @swagger_auto_schema(
-        tags=[organization_management_organizations],
+        tags=[SwaggerTags.organization_management_organizations],
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(
