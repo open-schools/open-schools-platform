@@ -11,7 +11,7 @@ class CommonConstants:
     FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3" \
                                 r"/relyingparty/verifyPhoneNumber?key="
     SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
-    SMS_API_KEY = r"1B525A5E-C342-5299-70CD-F5A0094BC988"
+    SMS_API_KEY = os.environ.get("SMS_API_KEY")
     SCHOOLS_AI_URL = os.environ.get("SCHOOLS_AI_URL")
 
     if not GOOGLE_API_KEY or not is_google_api_key_valid(FIREBASE_URL_TO_GET_SESSION, GOOGLE_API_KEY):
