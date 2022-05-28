@@ -19,7 +19,7 @@ from open_schools_platform.user_management.users.serializers \
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session
-from open_schools_platform.utils.firebase_requests import send_sms, check_otp
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp
 
 
 class CreationTokenApi(CreateAPIView):
@@ -45,7 +45,7 @@ class CreationTokenApi(CreateAPIView):
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=201)
 
-        response = send_sms(**token_ser.data)
+        response = send_firebase_sms(**token_ser.data)
 
         if response.status_code != 200:
             raise NotAcceptableException(status=400, detail="An error occurred. Probably you sent incorrect recaptcha")
@@ -55,7 +55,7 @@ class CreationTokenApi(CreateAPIView):
         return Response({"token": token.key}, status=201)
 
 
-class RetrieveCreationTokenApi(RetrieveAPIView):
+class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data",
         responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()},
@@ -151,7 +151,7 @@ class CodeResendApi(APIView):
         if user:
             raise AuthFailedException(status=409, detail="User with this phone number has already been created")
 
-        sms_response = send_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
+        sms_response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
         if sms_response.status_code == 200:
             update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])

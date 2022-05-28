@@ -3,7 +3,7 @@ from re import match
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
-from open_schools_platform.user_management.users.models import CreationToken
+from open_schools_platform.user_management.users.models import CreationToken, User
 
 
 class CreationTokenSerializer(serializers.Serializer):
@@ -62,15 +62,11 @@ class UserRegisterSerializer(serializers.Serializer):
         return attrs
 
 
-class RetrieveUserSerializer(serializers.ModelSerializer):
-    phone = PhoneNumberField()
-    name = serializers.CharField(max_length=120)
+class UserSerializer(serializers.ModelSerializer):
 
-    def update(self, instance, validated_data):
-        pass
-
-    def create(self, validated_data):
-        pass
+    class Meta:
+        model = User
+        fields = ["id", "phone", "name"]
 
 
 class ResendSerializer(serializers.Serializer):

@@ -18,6 +18,7 @@ from open_schools_platform.user_management.authentication.services import auth_l
 from open_schools_platform.user_management.users.selectors import user_get_login_data
 
 from open_schools_platform.api.swagger_tags import user_management_auth
+from ..users.serializers import UserSerializer
 
 
 class UserSessionLoginApi(APIView):
@@ -103,9 +104,9 @@ class UserJwtLogoutApi(ApiAuthMixin, APIView):
 
 class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        tags=[user_management_auth]
+        tags=[user_management_auth],
+        responses={200: UserSerializer},
     )
     def get(self, request):
-        data = user_get_login_data(user=request.user)
-
-        return Response(data)
+        return Response({"user": UserSerializer(request.user).data},
+                        status=200)

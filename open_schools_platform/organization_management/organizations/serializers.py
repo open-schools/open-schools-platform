@@ -9,7 +9,8 @@ class CreateOrganizationSerializer(serializers.ModelSerializer):
         fields = ("name", "inn")
 
 
-class RetrieveOrganizationSerializer(serializers.ModelSerializer):
+class OrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ("pk", "name", "inn")
+        fields = ("id", "name", "inn")
+        read_only_fields = fields
