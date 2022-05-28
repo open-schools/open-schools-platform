@@ -30,7 +30,6 @@ class RetrieveCreationTokenSerializer(serializers.ModelSerializer):
 
 
 class OtpSerializer(serializers.Serializer):
-    token = serializers.UUIDField(required=True)
     otp = serializers.CharField(required=True)
 
     def validate(self, attrs):
@@ -63,7 +62,7 @@ class UserRegisterSerializer(serializers.Serializer):
         return attrs
 
 
-class UserSerializer(serializers.Serializer):
+class RetrieveUserSerializer(serializers.ModelSerializer):
     phone = PhoneNumberField()
     name = serializers.CharField(max_length=120)
 
@@ -75,7 +74,6 @@ class UserSerializer(serializers.Serializer):
 
 
 class ResendSerializer(serializers.Serializer):
-    token = serializers.UUIDField(required=True)
     recaptcha = serializers.CharField(
         allow_null=False,
         required=True,
