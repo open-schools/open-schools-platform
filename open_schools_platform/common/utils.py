@@ -1,5 +1,6 @@
 import json
 
+from typing import List, Dict, Any
 from requests import Response
 from rest_framework import serializers
 
@@ -37,3 +38,11 @@ def inline_serializer(*, fields, data=None, **kwargs):
 
 def get_dict_from_response(response: Response):
     return json.loads(response.content.decode("utf-8"))
+
+
+def get_dict_excluding_fields(dictionary: Dict[str, Any], fields: List[str]):
+    return dict(filter(lambda x: x[0] not in fields, dictionary.items()))
+
+
+def get_dict_including_fields(dictionary: Dict[str, Any], fields: List[str]):
+    return dict(filter(lambda x: x[0] in fields, dictionary.items()))

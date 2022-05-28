@@ -30,7 +30,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
 # Application definition
 
 LOCAL_APPS = [
@@ -40,6 +39,8 @@ LOCAL_APPS = [
     'open_schools_platform.api.apps.ApiConfig',
     'open_schools_platform.user_management.users.apps.UsersConfig',
     'open_schools_platform.user_management.authentication.apps.AuthenticationConfig',
+    'open_schools_platform.organization_management.organizations.apps.OrganizationsConfig',
+    'open_schools_platform.organization_management.employees.apps.EmployeesConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
 ]
@@ -101,7 +102,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
@@ -121,7 +121,6 @@ if os.environ.get('GITHUB_WORKFLOW'):
             'PORT': '5432',
         }
     }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.0/ref/settings/#auth-password-validators
@@ -143,7 +142,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'users.User'
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -157,7 +155,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
@@ -166,12 +163,16 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',
+    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',  # noqa: E501
     # 'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.hacksoft_proposed_exception_handler',
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
     ),
-    'DEFAULT_AUTHENTICATION_CLASSES': []
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
+    'DEFAULT_PERMISSION_CLASSES': [
+       'rest_framework.permissions.AllowAny',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
 
 from config.settings.cors import *  # noqa

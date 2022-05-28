@@ -9,7 +9,7 @@ from django.core.exceptions import (
 from django.http import Http404
 
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError as RestValidationError, APIException
+from rest_framework.exceptions import ValidationError as RestValidationError, APIException, NotFound
 
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.core.exceptions import ApplicationError
@@ -103,8 +103,13 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-class NotFoundedException(APIException):
-    def __init__(self, status=404, detail="Not found"):
+class NotFoundedException(NotFound):
+    def __init__(self, detail="Not found"):
+        self.detail = detail
+
+
+class PermissionDeniedException(APIException):
+    def __init__(self, status=403, detail="Permission denied"):
         self.status_code = status
         self.detail = detail
 
