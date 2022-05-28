@@ -50,4 +50,3 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
             view=self
         )
         return response
-
