@@ -1,6 +1,6 @@
 class SwaggerTags:
-    Errors = "Errors"
-    User_management_users = "User management. Users"
-    User_management_auth = "User management. Authentication"
-    Organization_management_organizations = "Organization management. Organizations"
-    Organization_management_employees = "Organization management. Employees"
+    ERRORS = "Errors"
+    USER_MANAGEMENT_USERS = "User management. Users"
+    USER_MANAGEMENT_AUTH = "User management. Authentication"
+    ORGANIZATION_MANAGEMENT_ORGANIZATIONS = "Organization management. Organizations"
+    ORGANIZATION_MANAGEMENT_EMPLOYEES = "Organization management. Employees"

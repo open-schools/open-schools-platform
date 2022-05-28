@@ -30,5 +30,5 @@ def send_sms(*, to: List[str], msg: str):
     response = requests.get(url)
 
     return dict(map(
-        lambda x: ('+' + x, int(response.json()["sms"][x]["status_code"])),
+        lambda phone: ('+' + phone, int(response.json()["sms"][phone]["status_code"])),
         response.json()["sms"]))

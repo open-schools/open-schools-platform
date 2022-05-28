@@ -87,6 +87,6 @@ def update_token_session(token: CreationToken, new_session: str) -> CreationToke
 
 
 def generate_user_password():
-    password = User.objects.make_random_password(length=GenerateConstants.Password_length,
-                                                 allowed_chars=GenerateConstants.Alphabet)
+    password = User.objects.make_random_password(length=GenerateConstants.PASSWORD_LENGTH,
+                                                 allowed_chars=GenerateConstants.ALPHABET)
     return password
