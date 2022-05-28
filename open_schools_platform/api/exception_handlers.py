@@ -33,7 +33,7 @@ def drf_default_with_modifications_exception_handler(exc, ctx):
     return response
 
 
-def hacksoft_proposed_exception_handler(exc, ctx):
+def proposed_exception_handler(exc, ctx):
     """
     {
         "message": "Error message",
