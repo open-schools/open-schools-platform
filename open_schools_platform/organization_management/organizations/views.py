@@ -22,7 +22,7 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
         operation_description="Create organization and related to it employee for this user",
         request_body=CreateOrganizationSerializer,
         responses={201: EmployeeSerializer},
-        tags=[SwaggerTags.organization_management_organizations]
+        tags=[SwaggerTags.Organization_management_organizations]
     )
     def post(self, request, *args, **kwargs):
         org_serializer = CreateOrganizationSerializer(data=request.data)
@@ -39,7 +39,7 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
                         status=201)
 
     @swagger_auto_schema(
-        tags=[SwaggerTags.organization_management_organizations],
+        tags=[SwaggerTags.Organization_management_organizations],
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(

@@ -30,7 +30,7 @@ class CreationTokenApi(CreateAPIView):
         request_body=CreationTokenSerializer,
         responses={201: "Use old sms, it is still alive", 202: "SMS sent", 409: "user already created",
                    400: "probably incorrect recaptcha"},
-        tags=[SwaggerTags.user_management_users]
+        tags=[SwaggerTags.User_management_users]
     )
     def post(self, request):
         # Make sure the filters are valid, if passed
@@ -59,7 +59,7 @@ class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data",
         responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()},
-        tags=[SwaggerTags.user_management_users]
+        tags=[SwaggerTags.User_management_users]
     )
     def get(self, request, pk):
         token = get_token(filters={"key": pk})
@@ -74,7 +74,7 @@ class UserApi(CreateAPIView):
         operation_description="Create user due to token",
         request_body=UserRegisterSerializer,
         responses={201: "user was successfully created", 400: "different errors, see in detail"},
-        tags=[SwaggerTags.user_management_users]
+        tags=[SwaggerTags.User_management_users]
     )
     def post(self, request, *args, **kwargs):
         user_ser = UserRegisterSerializer(data=request.data)
@@ -107,7 +107,7 @@ class VerificationApi(APIView):
         operation_description="Create user if verification code is true",
         request_body=OtpSerializer,
         responses={201: "user was successfully created", 400: "different errors, see in detail"},
-        tags=[SwaggerTags.user_management_users]
+        tags=[SwaggerTags.User_management_users]
     )
     def put(self, request, pk):
         otp_ser = OtpSerializer(data=request.data)
@@ -134,7 +134,7 @@ class CodeResendApi(APIView):
                               "or tell that user with such number already exist",
         request_body=ResendSerializer,
         responses={202: "SMS was resent", 409: "user already created", 404: "no such token", 408: "token is overdue"},
-        tags=[SwaggerTags.user_management_users]
+        tags=[SwaggerTags.User_management_users]
     )
     def post(self, request, pk):
         recaptcha_serializer = ResendSerializer(data=request.data)

@@ -13,7 +13,7 @@ from open_schools_platform.errors.services import trigger_errors
 
 class TriggerApiException(APIView):
     @swagger_auto_schema(
-        tags=[SwaggerTags.errors]
+        tags=[SwaggerTags.Errors]
     )
     def get(self, request):
         data = {

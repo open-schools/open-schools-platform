@@ -30,7 +30,7 @@ class UserSessionLoginApi(APIView):
         password = serializers.CharField()
 
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth]
+        tags=[SwaggerTags.User_management_auth]
     )
     def post(self, request):
         serializer = self.InputSerializer(data=request.data)
@@ -54,7 +54,7 @@ class UserSessionLoginApi(APIView):
 
 class UserSessionLogoutApi(APIView):
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth]
+        tags=[SwaggerTags.User_management_auth]
     )
     def get(self, request):
         logout(request)
@@ -62,7 +62,7 @@ class UserSessionLogoutApi(APIView):
         return Response()
 
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth]
+        tags=[SwaggerTags.User_management_auth]
     )
     def post(self, request):
         logout(request)
@@ -74,7 +74,7 @@ class UserJwtLoginApi(BaseJSONWebTokenAPIView):
     serializer_class = JSONWebTokenWithTwoResponses
 
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth]
+        tags=[SwaggerTags.User_management_auth]
     )
     def post(self, request, *args, **kwargs):
         # We are redefining post so we can change the response status on success
@@ -89,7 +89,7 @@ class UserJwtLoginApi(BaseJSONWebTokenAPIView):
 
 class UserJwtLogoutApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth]
+        tags=[SwaggerTags.User_management_auth]
     )
     def post(self, request):
         auth_logout(request.user)
@@ -104,7 +104,7 @@ class UserJwtLogoutApi(ApiAuthMixin, APIView):
 
 class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        tags=[SwaggerTags.user_management_auth],
+        tags=[SwaggerTags.User_management_auth],
         responses={200: UserSerializer},
     )
     def get(self, request):

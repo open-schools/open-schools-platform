@@ -16,7 +16,7 @@ class EmployeeApi(ApiAuthMixin, CreateAPIView):
         operation_description="Create employee with attached organization and user",
         request_body=CreateEmployeeSerializer,
         responses={201: EmployeeSerializer},
-        tags=[SwaggerTags.organization_management_employees],
+        tags=[SwaggerTags.Organization_management_employees],
     )
     def post(self, request, *args, **kwargs):
         employee_serializer = self.serializer_class(data=request.data)
