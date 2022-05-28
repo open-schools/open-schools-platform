@@ -21,7 +21,8 @@ def create_employee(user: User, organization: Organization, name: str, position:
     return employee
 
 
-def add_employee_to_organization(user: User, phone: str, organization: Organization, name: str, position: str = "") -> Employee:
+def add_employee_to_organization(user: User, phone: str,
+                                 organization: Organization, name: str, position: str = "") -> Employee:
     employee = get_employee(filters={"user": user, "organization": organization})
 
     # TODO:implement permissions here
