@@ -104,7 +104,8 @@ def trigger_application_error():
 
 
 class NotFoundedException(NotFound):
-    def __init__(self, detail="Not found"):
+    def __init__(self, status=404, detail="Not found"):
+        self.status_code = status
         self.detail = detail
 
 
