@@ -5,6 +5,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        SMS_API_KEY: ${{secrets.SMS_API_KEY}}
     - name: Build docker
       run: docker-compose build
     - name: Type check
@@ -29,6 +32,9 @@ jobs:
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
     - uses: actions/checkout@v2
+      env:
+        GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+        SMS_API_KEY: ${{secrets.SMS_API_KEY}}
     - name: Fetch history, because Heroku deploy fails otherwise.
       uses: actions/setup-python@v2
       with:
