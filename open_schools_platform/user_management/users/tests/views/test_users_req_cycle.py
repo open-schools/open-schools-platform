@@ -2,7 +2,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 
 from open_schools_platform.user_management.users.services import verify_token
-from test_services import valid_token_for_tests_creation
+from open_schools_platform.user_management.users.tests.views.test_services import valid_token_for_tests_creation
 
 
 class UserRequestsCycleTests(TestCase):
