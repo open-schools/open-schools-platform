@@ -1,10 +1,8 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from open_schools_platform.common.utils import get_dict_from_response
-from open_schools_platform.user_management.users.services import create_token, verify_token
-from open_schools_platform.user_management.users.serializers import CreationTokenSerializer
-from open_schools_platform.utils.firebase_requests import send_firebase_sms
+from open_schools_platform.user_management.users.services import verify_token
+from test_services import valid_token_for_tests_creation
 
 
 class UserRequestsCycleTests(TestCase):
@@ -31,11 +29,7 @@ class UserRequestsCycleTests(TestCase):
             "phone": "+79025456481",
             "recaptcha": "123456"
         }
-        token_serializer = CreationTokenSerializer(data=data_for_token_creation)
-        token_serializer.is_valid(raise_exception=True)
-        response_for_token = send_firebase_sms(**token_serializer.data)
-        token = create_token(token_serializer.validated_data["phone"],
-                             get_dict_from_response(response_for_token)["sessionInfo"])
+        token = valid_token_for_tests_creation(data=data_for_token_creation)
         response = self.client.put(self.token_verification_url.format(token.key), data)
         self.assertEqual(200, response.status_code)
 
@@ -45,11 +39,7 @@ class UserRequestsCycleTests(TestCase):
             "recaptcha": "123456"
         }
 
-        token_serializer = CreationTokenSerializer(data=data_for_token_creation)
-        token_serializer.is_valid(raise_exception=True)
-        response_for_token = send_firebase_sms(**token_serializer.data)
-        token = create_token(token_serializer.validated_data["phone"],
-                             get_dict_from_response(response_for_token)["sessionInfo"])
+        token = valid_token_for_tests_creation(data=data_for_token_creation)
         verify_token(token)
         data = {
             "token": token.key,
