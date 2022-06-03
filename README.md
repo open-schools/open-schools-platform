@@ -40,6 +40,10 @@ python manage.py runserver [port]
 ```
 pre-commit install
 ```
+9. Install pre-push hooks
+```
+pre-commit install --hook-type pre-push
+```
 
 
 This project serves as an [example of our styleguide](https://github.com/HackSoftware/Django-Styleguide)
