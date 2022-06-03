@@ -12,9 +12,9 @@ class UserJwtLoginTests(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        self.jwt_login_url = reverse('api:authentication:jwt:login')
-        self.jwt_logout_url = reverse('api:authentication:jwt:logout')
-        self.me_url = reverse('api:authentication:me')
+        self.jwt_login_url = reverse('api:user-management:authentication:jwt:login')
+        self.jwt_logout_url = reverse('api:user-management:authentication:jwt:logout')
+        self.me_url = reverse('api:user-management:authentication:me')
 
     def test_non_existing_user_cannot_login(self):
         self.assertEqual(0, User.objects.count())
