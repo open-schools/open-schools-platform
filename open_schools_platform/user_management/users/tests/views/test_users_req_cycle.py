@@ -1,17 +1,19 @@
 from django.test import TestCase
 from rest_framework.test import APIClient
+from django.urls import reverse
 
 from open_schools_platform.user_management.users.services import verify_token
-from open_schools_platform.user_management.users.tests.views.test_services import valid_token_for_tests_creation
+from open_schools_platform.user_management.users.tests.views.test_utils import valid_token_for_tests_creation
 
 
 class UserRequestsCycleTests(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.token_creation_url = "/api/user-management/users/token"
-        self.token_verification_url = "/api/user-management/users/token/{}/verify"
-        self.user_creation_url = "/api/user-management/users/"
+        self.token_creation_url = reverse('api:user-management:users:create-token')
+        self.user_creation_url = reverse('api:user-management:users:user')
+        self.token_verification_url = lambda pk: reverse(
+            'api:user-management:users:verification-phone-by-token', args=[pk])
 
     def test_user_token_creation(self):
         data = {
@@ -30,7 +32,7 @@ class UserRequestsCycleTests(TestCase):
             "recaptcha": "123456"
         }
         token = valid_token_for_tests_creation(data=data_for_token_creation)
-        response = self.client.put(self.token_verification_url.format(token.key), data)
+        response = self.client.put(self.token_verification_url(token.key), data)
         self.assertEqual(200, response.status_code)
 
     def test_user_creation(self):
