@@ -25,4 +25,5 @@ def get_organizations(*, filters=None) -> QuerySet:
 def get_organizations_by_user(user: User) -> QuerySet:
     qs = get_employees(filters={"user": user})
 
-    return get_organizations(filters={"ids": list(map(lambda x: x.organization.id, list(qs)))}).order_by('id')
+    return qs if len(qs) == 0 else \
+        get_organizations(filters={"ids": list(map(lambda x: x.organization.id, list(qs)))}).order_by('id')
