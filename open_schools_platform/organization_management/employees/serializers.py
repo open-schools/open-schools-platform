@@ -16,6 +16,14 @@ class EmployeeSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class EmployeeListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ("id", "name", "user", "organization", "position")
+        read_only_fields = fields
+
+
 class CreateEmployeeSerializer(serializers.ModelSerializer):
     phone = PhoneNumberField(
         max_length=17,
