@@ -39,7 +39,7 @@ class EmployeeApi(ApiAuthMixin, CreateAPIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         description="Return paginated list of employees",
         manual_parameters=[
-            Parameter('organization', IN_QUERY, required=True, type=FORMAT_UUID),
+            Parameter('organization', IN_QUERY, required=True, type=FORMAT_UUID),  # type:ignore
         ],
     )
     def get(self, request, *args, **kwargs):
