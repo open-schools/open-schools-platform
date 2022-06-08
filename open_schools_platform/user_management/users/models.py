@@ -70,6 +70,7 @@ class CreationTokenManager(Manager):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     phone = PhoneNumberField(
         verbose_name='telephone number',
         max_length=17,
