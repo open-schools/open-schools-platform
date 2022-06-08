@@ -22,7 +22,7 @@ class ExampleListApi(APIView):
             fields = ('id', 'phone')
 
     def get(self, request):
-        queryset = User.objects.order_by('id')
+        queryset = User.objects.order_by('name')
 
         response = get_paginated_response(
             pagination_class=self.Pagination,
@@ -39,8 +39,8 @@ class GetPaginatedResponseTests(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
-        self.user1 = create_user(phone='+79222112944', name="Ivan", password='qwe')
-        self.user2 = create_user(phone='+79222112943', name="Vasya", password="123")
+        self.user1 = create_user(phone='+79222112944', name="Alex Nevsky", password='qwe')
+        self.user2 = create_user(phone='+79222112943', name="Arnold Schwarzenegger", password="123")
 
     def test_response_is_paginated_correctly(self):
         first_page_request = self.factory.get('/some/path')
@@ -54,7 +54,7 @@ class GetPaginatedResponseTests(TestCase):
             'previous': None,
             'results': [
                 OrderedDict({
-                    'id': self.user1.id,
+                    'id': str(self.user1.id),
                     'phone': str(self.user1.phone),
                 })
             ]
@@ -73,7 +73,7 @@ class GetPaginatedResponseTests(TestCase):
             'previous': 'http://testserver/some/path?limit=1',
             'results': [
                 OrderedDict({
-                    'id': self.user2.id,
+                    'id': str(self.user2.id),
                     'phone': str(self.user2.phone),
                 })
             ]
