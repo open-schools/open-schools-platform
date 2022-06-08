@@ -1,5 +1,6 @@
 from typing import Any
 
+import uuid
 from django.db import models
 
 from open_schools_platform.common.models import BaseModel
@@ -21,6 +22,7 @@ class EmployeeManager(models.Manager):
 
 
 class Employee(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.ForeignKey(User, related_name='employees', on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, related_name='employees', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
