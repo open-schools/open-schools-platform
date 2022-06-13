@@ -5,8 +5,10 @@ from rest_framework.response import Response
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
+from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
@@ -14,10 +16,7 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization
 
 
-class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
-    pagination_class = OrganizationApiListPagination
-    serializer_class = OrganizationSerializer
-
+class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user",
         request_body=CreateOrganizationSerializer,
@@ -38,6 +37,12 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
         return Response({"creator_employee": EmployeeSerializer(employee).data},
                         status=201)
 
+
+class OrganizationListApi(ApiAuthMixin, ListAPIView):
+    queryset = Organization.objects.all()
+    pagination_class = OrganizationApiListPagination
+    serializer_class = OrganizationSerializer
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         description="Return paginated list of organizations",
@@ -51,3 +56,4 @@ class OrganizationApi(ApiAuthMixin, ListAPIView, CreateAPIView):
             view=self
         )
         return response
+
