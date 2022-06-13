@@ -1,6 +1,6 @@
 from django_filters import CharFilter
 
-from open_schools_platform.common.filters import BaseFilterSet, OR_SEARCH_FIELD
+from open_schools_platform.common.filters import BaseFilterSet
 from open_schools_platform.organization_management.employees.models import Employee
 
 
@@ -13,4 +13,3 @@ class EmployeeFilter(BaseFilterSet):
     class Meta:
         model = Employee
         fields = ('user', 'organization', 'position', 'name', 'user__phone')
-

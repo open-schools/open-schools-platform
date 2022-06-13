@@ -5,7 +5,6 @@ from rest_framework.response import Response
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -56,4 +55,3 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
             view=self
         )
         return response
-

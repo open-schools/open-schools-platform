@@ -31,8 +31,6 @@ class EmployeeListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-
-
 class CreateEmployeeSerializer(serializers.ModelSerializer):
     phone = PhoneNumberField(
         max_length=17,

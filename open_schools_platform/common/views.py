@@ -10,7 +10,7 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
     if not set(method_names).issubset(set(View.http_method_names)):
         raise Exception('Define correct type of requests: ', str(View.http_method_names))
 
-    class BaseManageView(*list(handlers.values())):
+    class BaseManageView(*list(handlers.values())):  # type: ignore
         views_by_method = handlers
         http_method_names = method_names
         """
