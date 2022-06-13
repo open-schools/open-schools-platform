@@ -17,11 +17,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 
 class EmployeeListSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['phone'] = ret['user']['phone']
+        ret['user'] = ret['user']['id']
+        return ret
 
     class Meta:
         model = Employee
         fields = ("id", "name", "user", "organization", "position")
         read_only_fields = fields
+
+
 
 
 class CreateEmployeeSerializer(serializers.ModelSerializer):
