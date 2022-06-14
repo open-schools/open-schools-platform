@@ -21,9 +21,9 @@ from drf_yasg import openapi
 
 schema_view = get_schema_view(
     openapi.Info(
-        title="open-schools-platform API",
+        title="Open Schools Platform API",
         default_version='v1',
-        description="open-schools-platform API",
+        description="Backend for open source schools management platform",
         contact=openapi.Contact(email="inbox@lamart.site"),
         license=openapi.License(name="MIT License"),
     ),
