@@ -201,4 +201,3 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
             return Response({"detail": "Password was successfully updated"}, status=200)
         else:
             raise PermissionDeniedException
-
