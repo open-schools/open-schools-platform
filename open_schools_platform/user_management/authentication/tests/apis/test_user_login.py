@@ -20,9 +20,9 @@ class UserJwtLoginTests(TestCase):
         self.assertEqual(0, User.objects.count())
 
         data = {
-            "phone": "+79222112943",
-            "password": "qwe",
-            "name": "Vasya",
+            "phone": "+79020000000",
+            "password": "qwerty123456",
+            "name": "Alex Nevsky",
         }
 
         response = self.client.post(self.jwt_login_url, data)
@@ -37,9 +37,9 @@ class UserJwtLoginTests(TestCase):
         4. Assert valid response
         """
         credentials = {
-            "phone": "+79222112943",
-            "password": "qwe",
-            "name": "Vasya",
+            "phone": "+79020000000",
+            "password": "qwerty123456",
+            "name": "Alex Nevsky",
         }
 
         create_user(
@@ -80,9 +80,9 @@ class UserJwtLoginTests(TestCase):
         3. Logout, cannot access APIs
         """
         credentials = {
-            "phone": "+79222112943",
-            "password": "qwe",
-            "name": "Vasya",
+            "phone": "+79020000000",
+            "password": "qwerty123456",
+            "name": "Alex Nevsky",
         }
 
         user = create_user(
