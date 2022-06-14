@@ -17,7 +17,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer
+    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer, UserSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
@@ -165,8 +165,10 @@ class CodeResendApi(APIView):
 class UserUpdateApi(ApiAuthMixin, APIView):
 
     @swagger_auto_schema(
+        operation_description="Update user",
         tags=[SwaggerTags.USER_MANAGEMENT_USERS],
-        request_body=UserUpdateSerializer
+        request_body=UserUpdateSerializer,
+        responses={200: UserSerializer, 403: "User is not logged in"}
     )
     def put(self, request, pk):
         user = get_user(filters={"id": pk})
@@ -174,7 +176,7 @@ class UserUpdateApi(ApiAuthMixin, APIView):
         user_serializer.is_valid(raise_exception=True)
         if request.user == user:
             model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
-            return Response({"detail": "User was successfully updated"}, status=200)
+            return Response(UserSerializer(user).data)
         else:
             raise PermissionDeniedException
 
@@ -183,7 +185,7 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update user password",
         request_body=PasswordUpdateSerializer,
-        responses={200: "Password was successfully updated"},
+        responses={200: "Password was successfully updated", 403: "User is not logged in"},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def put(self, request, pk):

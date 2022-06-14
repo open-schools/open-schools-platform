@@ -85,8 +85,7 @@ class ResendSerializer(serializers.Serializer):
 class UserUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(
         allow_null=False,
-        allow_blank=True,
-        required=False
+        allow_blank=False
     )
 
 
