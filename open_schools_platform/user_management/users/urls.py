@@ -1,11 +1,14 @@
 from django.urls import path
 
-from .views import UserApi, CreationTokenApi, VerificationApi, CodeResendApi, RetrieveCreationTokenApi
+from .views import UserApi, CreationTokenApi, VerificationApi, CodeResendApi, RetrieveCreationTokenApi, UserUpdateApi, \
+    UpdatePasswordApi
 
 urlpatterns = [
     path('token', CreationTokenApi.as_view(), name='create-token'),
     path('token/<uuid:pk>', RetrieveCreationTokenApi.as_view(), name='get-token'),
     path('token/<uuid:pk>/verify', VerificationApi.as_view(), name='verification-phone-by-token'),
     path('', UserApi.as_view(), name='user'),
-    path('token/<uuid:pk>/resend', CodeResendApi.as_view(), name='resend')
+    path('token/<uuid:pk>/resend', CodeResendApi.as_view(), name='resend'),
+    path('<uuid:pk>', UserUpdateApi.as_view(), name='user-update'),
+    path('<uuid:pk>/change_password', UpdatePasswordApi.as_view(), name='change-password'),
 ]

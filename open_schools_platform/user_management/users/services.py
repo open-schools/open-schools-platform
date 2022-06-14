@@ -90,3 +90,9 @@ def generate_user_password():
     password = User.objects.make_random_password(length=GenerateConstants.PASSWORD_LENGTH,
                                                  allowed_chars=GenerateConstants.ALPHABET)
     return password
+
+
+def set_new_password_for_user(user: User, password: str) -> User:
+    user.set_password(password)
+    user.save()
+    return user
