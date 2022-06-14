@@ -6,19 +6,21 @@ from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
+from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.errors.services import AuthFailedException, NotAcceptableException, \
-    NotFoundedException, TimeoutErrorException, ValidationErrorException
+    NotFoundedException, TimeoutErrorException, ValidationErrorException, PermissionDeniedException
 from open_schools_platform.user_management.users.selectors import get_user, get_token
 from open_schools_platform.api.swagger_tags import SwaggerTags
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    RetrieveCreationTokenSerializer, ResendSerializer
+    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer, UserSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
-    get_jwt_token, update_token_session
+    get_jwt_token, update_token_session, set_new_password_for_user
 from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp
 
 
@@ -158,3 +160,46 @@ class CodeResendApi(APIView):
             return Response({"detail": "SMS was resent"}, status=202)
         else:
             raise TimeoutErrorException(status=400, detail="An error occurred. SMS was not resent")
+
+
+class UserUpdateApi(ApiAuthMixin, APIView):
+
+    @swagger_auto_schema(
+        operation_description="Update user",
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
+        request_body=UserUpdateSerializer,
+        responses={200: UserSerializer, 403: "User is not logged in"}
+    )
+    def put(self, request, pk):
+        user = get_user(filters={"id": pk})
+        user_serializer = UserUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        if request.user == user:
+            model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
+            return Response(UserSerializer(user).data)
+        else:
+            raise PermissionDeniedException
+
+
+class UpdatePasswordApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Update user password",
+        request_body=PasswordUpdateSerializer,
+        responses={200: "Password was successfully updated", 403: "User is not logged in"},
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS]
+    )
+    def put(self, request, pk):
+        user = get_user(filters={"id": pk})
+        user_serializer = PasswordUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+
+        old_password = user_serializer.validated_data['old_password']
+        new_password = user_serializer.validated_data['new_password']
+
+        if request.user == user and user.check_password(old_password):
+            if old_password == new_password:
+                raise NotAcceptableException
+            set_new_password_for_user(user=user, password=new_password)
+            return Response({"detail": "Password was successfully updated"}, status=200)
+        else:
+            raise PermissionDeniedException
