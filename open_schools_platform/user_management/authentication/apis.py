@@ -1,5 +1,6 @@
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -15,7 +16,10 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer
+from ..users.selectors import get_user
+from ..users.serializers import UserSerializer, UserUpdateSerializer, PasswordUpdateSerializer
+from ..users.services import set_new_password_for_user
+from ...common.services import model_update
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
@@ -58,3 +62,42 @@ class UserMeApi(ApiAuthMixin, APIView):
     def get(self, request):
         return Response({"user": UserSerializer(request.user).data},
                         status=200)
+
+    @swagger_auto_schema(
+        operation_description="Update user",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=UserUpdateSerializer,
+        responses={200: UserSerializer}
+    )
+    def put(self, request):
+        user_id = UserSerializer(request.user).data["id"]
+        user = get_user(filters={"id": user_id})
+        user_serializer = UserUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
+        return Response(UserSerializer(user).data)
+
+
+class UpdatePasswordApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Update user password",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=PasswordUpdateSerializer,
+        responses={200: "Password was successfully updated"},
+    )
+    def put(self, request):
+        user_serializer = PasswordUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        user_id = UserSerializer(request.user).data["id"]
+        user = get_user(filters={"id": user_id})
+
+        old_password = user_serializer.validated_data['old_password']
+        new_password = user_serializer.validated_data['new_password']
+
+        if request.user != user:
+            raise PermissionDenied(detail="User is not logged in")
+        if not user.check_password(old_password):
+            raise AuthenticationFailed(detail="Old password does not match with actual one")
+
+        set_new_password_for_user(user=user, password=new_password)
+        return Response({"detail": "Password was successfully updated"}, status=200)

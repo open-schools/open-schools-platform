@@ -5,6 +5,7 @@ from .apis import (
     UserJwtLogoutApi,
 
     UserMeApi,
+    UpdatePasswordApi
 )
 
 urlpatterns = [
@@ -25,7 +26,17 @@ urlpatterns = [
     ),
     path(
         'me/',
-        UserMeApi.as_view(),
-        name='me'
+        include(([
+             path(
+                 "change-password/",
+                 UpdatePasswordApi.as_view(),
+                 name="change-password"
+             ),
+             path(
+                 "",
+                 UserMeApi.as_view(),
+                 name="me"
+             )
+         ]))
     )
 ]

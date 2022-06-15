@@ -1,6 +1,7 @@
 import inspect
 import sys
 
+from rest_framework import status
 from django.core.exceptions import (
     ValidationError as DjangoValidationError,
     PermissionDenied,
@@ -10,6 +11,7 @@ from django.http import Http404
 
 from rest_framework import serializers, exceptions
 from rest_framework.exceptions import ValidationError as RestValidationError, APIException, NotFound
+from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.core.exceptions import ApplicationError
@@ -103,39 +105,11 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-class NotFoundedException(NotFound):
-    def __init__(self, status=404, detail="Not found"):
-        self.status_code = status
-        self.detail = detail
+class InvalidArgumentException(APIException):
+    status = status.HTTP_422_UNPROCESSABLE_ENTITY
+    default_detail = _("Some of input data are invalid.")
 
-
-class PermissionDeniedException(APIException):
-    def __init__(self, status=403, detail="Permission denied"):
-        self.status_code = status
-        self.detail = detail
-
-
-class NotAcceptableException(APIException):
-    def __init__(self, status=406, detail="Not acceptable"):
-        self.status_code = status
-        self.detail = detail
-
-
-class AuthFailedException(APIException):
-    def __init__(self, status=401, detail="Authentication failed"):
-        self.status_code = status
-        self.detail = detail
-
-
-class TimeoutErrorException(APIException):
-    def __init__(self, status=500, detail="Timeout error"):
-        self.status_code = status
-        self.detail = detail
-
-
-class ValidationErrorException(APIException):
-    def __init__(self, status=400, detail="Validation error"):
-        self.status_code = status
+    def __init__(self, detail="Some of input data are invalid"):
         self.detail = detail
 
 

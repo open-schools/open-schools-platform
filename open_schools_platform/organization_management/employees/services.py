@@ -1,6 +1,5 @@
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, ValidationError
 
-from open_schools_platform.errors.services import TimeoutErrorException
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.selectors import get_employee
 from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
@@ -36,9 +35,8 @@ def add_employee_to_organization(user: User, phone: str,
         response = send_sms(to=[phone], msg=msg)
 
         if response[str(phone)] != 100:
-            raise TimeoutErrorException(detail="Something wrong! Please, contact the administrator"
-                                               "and tell him the error number.",
-                                        status=response[str(phone)])  # here is another error
+            raise ValidationError(detail="Something wrong! Please, contact the administrator"
+                                         "and tell him the error number.")
 
         add_user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
