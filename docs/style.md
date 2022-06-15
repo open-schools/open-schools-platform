@@ -1,7 +1,5 @@
 # Style
 
----
-
 This project serves as an [example of our styleguide](https://github.com/HackSoftware/Django-Styleguide)
 
 The structure is inspired by [cookiecutter-django](https://github.com/pydanny/cookiecutter-django) and modified based on our experience with Django.

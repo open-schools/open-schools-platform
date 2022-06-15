@@ -1,7 +1,5 @@
 # Deploy
 
----
-
 1. Run db
 ```
 docker-compose up db
