@@ -1,12 +1,11 @@
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import PermissionDenied, AuthenticationFailed
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import JSONWebTokenWithTwoResponses
+from .serializers import JSONWebTokenWithTwoResponses, PasswordUpdateSerializer, UserUpdateSerializer
 
 from rest_framework_jwt.views import BaseJSONWebTokenAPIView
 
@@ -17,9 +16,10 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from ..users.selectors import get_user
-from ..users.serializers import UserSerializer, UserUpdateSerializer, PasswordUpdateSerializer
+from ..users.serializers import UserSerializer
 from ..users.services import set_new_password_for_user
 from ...common.services import model_update
+from ...errors.services import NotAcceptableException
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
@@ -83,7 +83,8 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
         operation_description="Update user password",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
         request_body=PasswordUpdateSerializer,
-        responses={200: "Password was successfully updated"},
+        responses={200: "Password was successfully updated", 403: "User is not logged in",
+                   408: "Old password does not match with actual one"},
     )
     def put(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
@@ -94,10 +95,9 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
         old_password = user_serializer.validated_data['old_password']
         new_password = user_serializer.validated_data['new_password']
 
-        if request.user != user:
-            raise PermissionDenied(detail="User is not logged in")
         if not user.check_password(old_password):
-            raise AuthenticationFailed(detail="Old password does not match with actual one")
-
+            raise NotAcceptableException(status=408, detail="Old password does not match with actual one")
+        if old_password == new_password:
+            raise NotAcceptableException(status=408, detail="New password matches with the old one")
         set_new_password_for_user(user=user, password=new_password)
         return Response({"detail": "Password was successfully updated"}, status=200)
