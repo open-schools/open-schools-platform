@@ -26,8 +26,8 @@ class BaseFilterSet(django_filters.FilterSet):
 
         query = Q()
         filters = self.get_filters()
-        for key in self.get_fields():
-            if type(filters[key]) is CharFilter:
-                query |= Q(**{"{0}__icontains".format(key): self.search_value})
+        for filter in filters.values():
+            if type(filter) is CharFilter and filter.field_name != OR_SEARCH_FIELD:
+                query |= Q(**{"{0}__icontains".format(filter.field_name): self.search_value})
 
         return base_queryset.filter(query)
