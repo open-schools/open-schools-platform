@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.services import create_user
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'is_admin', 'name', 'is_superuser', 'is_active', 'created_at', 'updated_at')
+    list_display = ('phone', 'is_admin', 'name', 'is_superuser', 'is_active', 'created_at', 'updated_at', 'id')
 
     search_fields = ('phone', 'name')
 

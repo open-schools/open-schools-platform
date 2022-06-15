@@ -17,7 +17,8 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer, UserSerializer
+    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer, UserSerializer, \
+    PasswordResetSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
@@ -38,10 +39,6 @@ class CreationTokenApi(CreateAPIView):
         # Make sure the filters are valid, if passed
         token_serializer = CreationTokenSerializer(data=request.data)
         token_serializer.is_valid(raise_exception=True)
-
-        user = get_user(filters=token_serializer.validated_data)
-        if user:
-            raise AuthFailedException(status=409, detail="user with this phone number has already been created")
 
         token = get_token(filters=token_serializer.validated_data)
         if token and is_token_alive(token):
@@ -174,19 +171,19 @@ class UserUpdateApi(ApiAuthMixin, APIView):
         user = get_user(filters={"id": pk})
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        if request.user == user:
-            model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
-            return Response(UserSerializer(user).data)
-        else:
-            raise PermissionDeniedException
+        if request.user != user:
+            raise PermissionDeniedException(status=403, detail="User is not logged in")
+        model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
+        return Response(UserSerializer(user).data)
 
 
 class UpdatePasswordApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update user password",
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
         request_body=PasswordUpdateSerializer,
-        responses={200: "Password was successfully updated", 403: "User is not logged in"},
-        tags=[SwaggerTags.USER_MANAGEMENT_USERS]
+        responses={200: "Password was successfully updated", 403: "User is not logged in",
+                   408: "Old password does not match with actual one"},
     )
     def put(self, request, pk):
         user = get_user(filters={"id": pk})
@@ -196,10 +193,41 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
         old_password = user_serializer.validated_data['old_password']
         new_password = user_serializer.validated_data['new_password']
 
-        if request.user == user and user.check_password(old_password):
-            if old_password == new_password:
-                raise NotAcceptableException
-            set_new_password_for_user(user=user, password=new_password)
-            return Response({"detail": "Password was successfully updated"}, status=200)
-        else:
-            raise PermissionDeniedException
+        if request.user != user:
+            raise PermissionDeniedException(status=403, detail="User is not logged in")
+        if not user.check_password(old_password):
+            raise NotAcceptableException(status=408, detail="Old password does not match with actual one")
+        if old_password == new_password:
+            raise NotAcceptableException(status=408, detail="New password matches with the old one")
+
+        set_new_password_for_user(user=user, password=new_password)
+        return Response({"detail": "Password was successfully updated"}, status=200)
+
+
+class UserResetPasswordApi(APIView):
+    @swagger_auto_schema(
+        operation_description="Reset user's password",
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
+        request_body=PasswordResetSerializer,
+        responses={200: "Password was successfully reset", 404: "No such user", 408: "Token is overdue",
+                   401: "Token is not verified"},
+    )
+    def post(self, request):
+        user_serializer = PasswordResetSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        token = get_token(filters={"key": user_serializer.validated_data['token']})
+        if not token:
+            raise NotFoundedException(status=404, detail="No such token")
+        user = get_user(filters={"phone": token.phone})
+        if not user:
+            raise NotFoundedException(status=404, detail="No such user")
+        if not token.is_verified:
+            raise AuthFailedException(status=401, detail="Token is not verified", )
+        if not is_token_alive(token):
+            raise NotAcceptableException(status=408, detail="Token is overdue")
+        if user_serializer.validated_data['password'] != user_serializer.validated_data['password_confirm']:
+            raise NotAcceptableException(status=408, detail="Passwords don't match")
+
+        set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
+        return Response({"detail": "Password was successfully reset"}, status=200)
+
