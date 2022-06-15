@@ -39,8 +39,8 @@ class GetPaginatedResponseTests(TestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
-        self.user1 = create_user(phone='+79222112944', name="Alex Nevsky", password='qwe')
-        self.user2 = create_user(phone='+79222112943', name="Arnold Schwarzenegger", password="123")
+        self.user1 = create_user(phone='+79020000003', name="Alex Nevsky", password='qwerty123456')
+        self.user2 = create_user(phone='+79020000002', name="Arnold Schwarzenegger", password="qwerty123456")
 
     def test_response_is_paginated_correctly(self):
         first_page_request = self.factory.get('/some/path')

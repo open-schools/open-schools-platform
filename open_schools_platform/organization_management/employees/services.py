@@ -37,7 +37,7 @@ def add_employee_to_organization(user: User, phone: str,
 
         if response[str(phone)] != 100:
             raise TimeoutErrorException(detail="Something wrong! Please, contact the administrator"
-                                               "and tell him the error number",
+                                               "and tell him the error number.",
                                         status=response[str(phone)])  # here is another error
 
         add_user = create_user(phone=phone, password=pwd, name="Alex Nevsky")

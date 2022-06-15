@@ -1,10 +1,8 @@
-from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import serializers
 from rest_framework import status
 
 from .serializers import JSONWebTokenWithTwoResponses
@@ -15,59 +13,9 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 
 from open_schools_platform.user_management.authentication.services import auth_logout
 
-from open_schools_platform.user_management.users.selectors import user_get_login_data
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from ..users.serializers import UserSerializer
-
-
-class UserSessionLoginApi(APIView):
-    """
-    Following https://docs.djangoproject.com/en/3.1/topics/auth/default/#how-to-log-a-user-in
-    """
-    class InputSerializer(serializers.Serializer):
-        email = serializers.EmailField()
-        password = serializers.CharField()
-
-    @swagger_auto_schema(
-        tags=[SwaggerTags.USER_MANAGEMENT_AUTH]
-    )
-    def post(self, request):
-        serializer = self.InputSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        user = authenticate(request, **serializer.validated_data)
-
-        if user is None:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
-        login(request, user)
-
-        data = user_get_login_data(user=user)
-        session_key = request.session.session_key
-
-        return Response({
-            'session': session_key,
-            'data': data
-        })
-
-
-class UserSessionLogoutApi(APIView):
-    @swagger_auto_schema(
-        tags=[SwaggerTags.USER_MANAGEMENT_AUTH]
-    )
-    def get(self, request):
-        logout(request)
-
-        return Response()
-
-    @swagger_auto_schema(
-        tags=[SwaggerTags.USER_MANAGEMENT_AUTH]
-    )
-    def post(self, request):
-        logout(request)
-
-        return Response()
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):

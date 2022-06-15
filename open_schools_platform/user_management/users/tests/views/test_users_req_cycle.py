@@ -16,6 +16,7 @@ class UserRequestsCycleTests(TestCase):
             'api:user-management:users:verification-phone-by-token', args=[pk])
 
     def test_user_token_creation(self):
+        # make sure this number is listed in firebase
         data = {
             "phone": "+79025456481",
             "recaptcha": "123456"
@@ -24,6 +25,7 @@ class UserRequestsCycleTests(TestCase):
         self.assertEqual(201, response.status_code)
 
     def test_user_token_verification(self):
+        # make sure this number is listed in firebase
         data = {
             "otp": "123456"
         }
@@ -36,6 +38,7 @@ class UserRequestsCycleTests(TestCase):
         self.assertEqual(200, response.status_code)
 
     def test_user_creation(self):
+        # make sure this number is listed in firebase
         data_for_token_creation = {
             "phone": "+79025456481",
             "recaptcha": "123456"
