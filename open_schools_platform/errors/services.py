@@ -10,7 +10,7 @@ from django.core.exceptions import (
 from django.http import Http404
 
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError as RestValidationError, APIException, NotFound
+from rest_framework.exceptions import ValidationError as RestValidationError, APIException
 from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.user_management.users.models import User

@@ -49,7 +49,7 @@ class UserExceptionsTests(TestCase):
             "recaptcha": "123456"
         }
         response_for_token_creation_request = self.client.post(self.token_creation_url, data_for_token_creation_request)
-        self.assertEqual(400, response_for_token_creation_request.status_code)
+        self.assertEqual(500, response_for_token_creation_request.status_code)
 
         data_for_token_creation = {
             "phone": "+79020000000",
@@ -62,7 +62,7 @@ class UserExceptionsTests(TestCase):
         }
         response_for_token_verification_request = self.client.put(self.token_verification_url(token.key),
                                                                   data_for_token_verification_request)
-        self.assertEqual(400, response_for_token_verification_request.status_code)
+        self.assertEqual(500, response_for_token_verification_request.status_code)
 
     def test_token_does_not_exist(self):
         data_for_user_creation_request = {
@@ -114,13 +114,13 @@ class UserExceptionsTests(TestCase):
         }
         response_for_token_verification_request = self.client.put(self.token_verification_url(token.key),
                                                                   data_for_token_verification_request)
-        self.assertEqual(408, response_for_token_verification_request.status_code)
+        self.assertEqual(403, response_for_token_verification_request.status_code)
 
         data_for_sms_resend_request = {
             "recaptcha": "123456"
         }
         response_for_sms_resend_request = self.client.post(self.sms_resend_url(token.key), data_for_sms_resend_request)
-        self.assertEqual(408, response_for_sms_resend_request.status_code)
+        self.assertEqual(403, response_for_sms_resend_request.status_code)
 
     def test_token_is_not_verified(self):
         data_for_token_creation = {
