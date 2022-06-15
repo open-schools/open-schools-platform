@@ -230,4 +230,3 @@ class UserResetPasswordApi(APIView):
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
         return Response({"detail": "Password was successfully reset"}, status=200)
-

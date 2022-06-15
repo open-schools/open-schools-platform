@@ -30,14 +30,6 @@ class UserExceptionsTests(TestCase):
 
         create_user(**credentials)
 
-        data_for_token_creation_request = {
-            "phone": "+79020000000",
-            "recaptcha": "123456"
-        }
-
-        response_for_token_creation_request = self.client.post(self.token_creation_url, data_for_token_creation_request)
-        self.assertEqual(409, response_for_token_creation_request.status_code)
-
         data_for_token_creation = {
             "phone": "+79020000000",
             "session": "000000"
