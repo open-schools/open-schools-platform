@@ -42,7 +42,7 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
-        description="Return paginated list of employees",
+        operation_description="Return paginated list of employees",
         manual_parameters=[
             Parameter('organization', IN_QUERY, required=True, type=TYPE_STRING),  # type:ignore
         ],
