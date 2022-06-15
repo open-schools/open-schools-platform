@@ -75,6 +75,7 @@ class PasswordUserSerializer(serializers.ModelSerializer):
         model = User
         fields = ["password"]
 
+
 class ResendSerializer(serializers.Serializer):
     recaptcha = serializers.CharField(
         allow_null=False,

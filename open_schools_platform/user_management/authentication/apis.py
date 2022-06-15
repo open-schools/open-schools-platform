@@ -101,4 +101,3 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
             raise NotAcceptableException(status=408, detail="New password matches with the old one")
         set_new_password_for_user(user=user, password=new_password)
         return Response({"detail": "Password was successfully updated"}, status=200)
-
