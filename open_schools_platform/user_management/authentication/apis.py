@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import JSONWebTokenWithTwoResponses
+from .serializers import JSONWebTokenWithTwoResponses, PasswordUpdateSerializer, UserUpdateSerializer
 
 from rest_framework_jwt.views import BaseJSONWebTokenAPIView
 
@@ -15,7 +15,11 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from ..users.selectors import get_user
 from ..users.serializers import UserSerializer
+from ..users.services import set_new_password_for_user
+from ...common.services import model_update
+from ...errors.services import NotAcceptableException
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
@@ -58,3 +62,42 @@ class UserMeApi(ApiAuthMixin, APIView):
     def get(self, request):
         return Response({"user": UserSerializer(request.user).data},
                         status=200)
+
+    @swagger_auto_schema(
+        operation_description="Update user",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=UserUpdateSerializer,
+        responses={200: UserSerializer}
+    )
+    def put(self, request):
+        user_id = UserSerializer(request.user).data["id"]
+        user = get_user(filters={"id": user_id})
+        user_serializer = UserUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
+        return Response(UserSerializer(user).data)
+
+
+class UpdatePasswordApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Update user password",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=PasswordUpdateSerializer,
+        responses={200: "Password was successfully updated", 403: "User is not logged in",
+                   408: "Old password does not match with actual one"},
+    )
+    def put(self, request):
+        user_serializer = PasswordUpdateSerializer(data=request.data)
+        user_serializer.is_valid(raise_exception=True)
+        user_id = UserSerializer(request.user).data["id"]
+        user = get_user(filters={"id": user_id})
+
+        old_password = user_serializer.validated_data['old_password']
+        new_password = user_serializer.validated_data['new_password']
+
+        if not user.check_password(old_password):
+            raise NotAcceptableException(status=408, detail="Old password does not match with actual one")
+        if old_password == new_password:
+            raise NotAcceptableException(status=408, detail="New password matches with the old one")
+        set_new_password_for_user(user=user, password=new_password)
+        return Response({"detail": "Password was successfully updated"}, status=200)

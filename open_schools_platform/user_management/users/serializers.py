@@ -69,6 +69,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["id", "phone", "name"]
 
 
+class PasswordUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["password"]
+
+
 class ResendSerializer(serializers.Serializer):
     recaptcha = serializers.CharField(
         allow_null=False,
@@ -82,19 +89,6 @@ class ResendSerializer(serializers.Serializer):
         pass
 
 
-class UserUpdateSerializer(serializers.Serializer):
-    name = serializers.CharField(
-        allow_null=False,
-        allow_blank=False
-    )
-
-
-class PasswordUpdateSerializer(serializers.Serializer):
-    old_password = serializers.CharField(min_length=6, max_length=40)
-    new_password = serializers.CharField(min_length=6, max_length=40)
-
-
 class PasswordResetSerializer(serializers.Serializer):
     token = serializers.UUIDField(required=True)
     password = serializers.CharField(min_length=6, max_length=40)
-    password_confirm = serializers.CharField(min_length=6, max_length=40)

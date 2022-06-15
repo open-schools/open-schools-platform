@@ -21,3 +21,15 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
                 msg = _('Incorrect password.')
                 raise serializers.ValidationError(msg)
         return response
+
+
+class UserUpdateSerializer(serializers.Serializer):
+    name = serializers.CharField(
+        allow_null=False,
+        allow_blank=False
+    )
+
+
+class PasswordUpdateSerializer(serializers.Serializer):
+    old_password = serializers.CharField(min_length=6, max_length=40)
+    new_password = serializers.CharField(min_length=6, max_length=40)

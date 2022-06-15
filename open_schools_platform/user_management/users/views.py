@@ -6,19 +6,17 @@ from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
-from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.common.services import model_update
+
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.errors.services import AuthFailedException, NotAcceptableException, \
-    NotFoundedException, TimeoutErrorException, ValidationErrorException, PermissionDeniedException
+    NotFoundedException, TimeoutErrorException, ValidationErrorException
 from open_schools_platform.user_management.users.selectors import get_user, get_token
 from open_schools_platform.api.swagger_tags import SwaggerTags
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    RetrieveCreationTokenSerializer, ResendSerializer, UserUpdateSerializer, PasswordUpdateSerializer, UserSerializer, \
-    PasswordResetSerializer
+    RetrieveCreationTokenSerializer, ResendSerializer, PasswordResetSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
@@ -159,51 +157,6 @@ class CodeResendApi(APIView):
             raise TimeoutErrorException(status=400, detail="An error occurred. SMS was not resent")
 
 
-class UserUpdateApi(ApiAuthMixin, APIView):
-
-    @swagger_auto_schema(
-        operation_description="Update user",
-        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
-        request_body=UserUpdateSerializer,
-        responses={200: UserSerializer, 403: "User is not logged in"}
-    )
-    def put(self, request, pk):
-        user = get_user(filters={"id": pk})
-        user_serializer = UserUpdateSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-        if request.user != user:
-            raise PermissionDeniedException(status=403, detail="User is not logged in")
-        model_update(instance=user, fields=["name"], data=user_serializer.validated_data)
-        return Response(UserSerializer(user).data)
-
-
-class UpdatePasswordApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        operation_description="Update user password",
-        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
-        request_body=PasswordUpdateSerializer,
-        responses={200: "Password was successfully updated", 403: "User is not logged in",
-                   408: "Old password does not match with actual one"},
-    )
-    def put(self, request, pk):
-        user = get_user(filters={"id": pk})
-        user_serializer = PasswordUpdateSerializer(data=request.data)
-        user_serializer.is_valid(raise_exception=True)
-
-        old_password = user_serializer.validated_data['old_password']
-        new_password = user_serializer.validated_data['new_password']
-
-        if request.user != user:
-            raise PermissionDeniedException(status=403, detail="User is not logged in")
-        if not user.check_password(old_password):
-            raise NotAcceptableException(status=408, detail="Old password does not match with actual one")
-        if old_password == new_password:
-            raise NotAcceptableException(status=408, detail="New password matches with the old one")
-
-        set_new_password_for_user(user=user, password=new_password)
-        return Response({"detail": "Password was successfully updated"}, status=200)
-
-
 class UserResetPasswordApi(APIView):
     @swagger_auto_schema(
         operation_description="Reset user's password",
@@ -225,8 +178,6 @@ class UserResetPasswordApi(APIView):
             raise AuthFailedException(status=401, detail="Token is not verified", )
         if not is_token_alive(token):
             raise NotAcceptableException(status=408, detail="Token is overdue")
-        if user_serializer.validated_data['password'] != user_serializer.validated_data['password_confirm']:
-            raise NotAcceptableException(status=408, detail="Passwords don't match")
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
         return Response({"detail": "Password was successfully reset"}, status=200)
