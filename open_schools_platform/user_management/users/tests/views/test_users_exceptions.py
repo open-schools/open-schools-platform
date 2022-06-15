@@ -41,7 +41,7 @@ class UserExceptionsTests(TestCase):
         }
         response_for_sms_resend_request = self.client.post(self.sms_resend_url(token.key),
                                                            data_for_sms_resend_request)
-        self.assertEqual(409, response_for_sms_resend_request.status_code)
+        self.assertEqual(403, response_for_sms_resend_request.status_code)
 
     def test_firebase_response_is_not_200(self):
         data_for_token_creation_request = {
@@ -107,7 +107,7 @@ class UserExceptionsTests(TestCase):
             "password_confirm": "123456"
         }
         response_for_user_creation_request = self.client.post(self.user_creation_url, data_for_user_creation_request)
-        self.assertEqual(408, response_for_user_creation_request.status_code)
+        self.assertEqual(403, response_for_user_creation_request.status_code)
 
         data_for_token_verification_request = {
             "otp": "123456"
@@ -135,7 +135,7 @@ class UserExceptionsTests(TestCase):
             "password_confirm": "123456"
         }
         response = self.client.post(self.user_creation_url, data)
-        self.assertEqual(401, response.status_code)
+        self.assertEqual(403, response.status_code)
 
     def test_sms_cannot_be_resend(self):
         data_for_token_creation = {
@@ -148,4 +148,4 @@ class UserExceptionsTests(TestCase):
             "recaptcha": "123456"
         }
         response = self.client.post(self.sms_resend_url(token.key), data)
-        self.assertEqual(400, response.status_code)
+        self.assertEqual(500, response.status_code)
