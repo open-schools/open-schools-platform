@@ -56,6 +56,7 @@ class UserJwtLogoutApi(ApiAuthMixin, APIView):
 
 class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
+        operation_description="Get user data.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
         responses={200: UserSerializer},
     )
@@ -64,7 +65,7 @@ class UserMeApi(ApiAuthMixin, APIView):
                         status=200)
 
     @swagger_auto_schema(
-        operation_description="Update user",
+        operation_description="Update user.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
         request_body=UserUpdateSerializer,
         responses={200: UserSerializer}
@@ -80,10 +81,10 @@ class UserMeApi(ApiAuthMixin, APIView):
 
 class UpdatePasswordApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        operation_description="Update user password",
+        operation_description="Update user password.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
         request_body=PasswordUpdateSerializer,
-        responses={200: "Password was successfully updated"},
+        responses={200: "Password was successfully updated."},
     )
     def put(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
@@ -98,5 +99,6 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
             raise AuthenticationFailed(detail="Old password does not match with actual one.")
         if old_password == new_password:
             raise AuthenticationFailed(detail="New password matches with the old one.")
+
         set_new_password_for_user(user=user, password=new_password)
         return Response({"detail": "Password was successfully updated"}, status=200)

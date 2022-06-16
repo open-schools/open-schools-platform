@@ -19,7 +19,7 @@ from open_schools_platform.organization_management.employees.services import add
 class EmployeeCreateApi(ApiAuthMixin, CreateAPIView):
 
     @swagger_auto_schema(
-        operation_description="Create employee with attached organization and user",
+        operation_description="Create employee with attached organization and user.",
         request_body=CreateEmployeeSerializer,
         responses={201: EmployeeSerializer},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
@@ -42,7 +42,7 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
-        operation_description="Return paginated list of employees",
+        operation_description="Return paginated list of employees.",
         manual_parameters=[
             Parameter('organization', IN_QUERY, required=True, type=TYPE_STRING),  # type:ignore
         ],

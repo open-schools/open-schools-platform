@@ -17,7 +17,7 @@ from open_schools_platform.organization_management.organizations.services import
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
-        operation_description="Create organization and related to it employee for this user",
+        operation_description="Create organization and related to it employee for this user.",
         request_body=CreateOrganizationSerializer,
         responses={201: EmployeeSerializer},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
@@ -44,7 +44,7 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        operation_description="Return paginated list of organizations",
+        operation_description="Return paginated list of organizations.",
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(

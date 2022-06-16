@@ -29,7 +29,8 @@ class CreationTokenApi(CreateAPIView):
                               "return token for phone verification. Creation token id as a response.",
         request_body=CreationTokenSerializer,
         responses={200: "Use old sms, it is still alive.", 201: "Token created and SMS was sent.",
-                   422: "Probably incorrect recaptcha."},
+                   422: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
+                   404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request):
@@ -53,7 +54,7 @@ class CreationTokenApi(CreateAPIView):
 class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data.",
-        responses={400: "Probably incorrect token", 200: RetrieveCreationTokenSerializer()},
+        responses={404: "Token with that id was not found.", 200: RetrieveCreationTokenSerializer()},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def get(self, request, pk):
@@ -68,7 +69,8 @@ class UserApi(CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create user due to verificated token.",
         request_body=UserRegisterSerializer,
-        responses={201: "User was successfully created. JWT token as a response."},
+        responses={201: "User was successfully created. JWT token as a response.",
+                   401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request, *args, **kwargs):
@@ -96,7 +98,8 @@ class VerificationApi(APIView):
     @swagger_auto_schema(
         operation_description="Verify phone number with CreationToken if otp is correct.",
         request_body=OtpSerializer,
-        responses={200: "Phone number verified.", 422: "Incorrect otp."},
+        responses={200: "Phone number verified.", 422: "Incorrect otp.",
+                   401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def put(self, request, pk):
@@ -119,7 +122,8 @@ class CodeResendApi(APIView):
         operation_description="Resend sms to entered phone number"
                               "or tell that user with such number already exist.",
         request_body=ResendSerializer,
-        responses={200: "SMS was resent."},
+        responses={200: "SMS was resent.", 401: "Token is not verified or it is overdue.",
+                   404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request, pk):
@@ -127,11 +131,6 @@ class CodeResendApi(APIView):
         recaptcha_serializer.is_valid(raise_exception=True)
 
         token = get_token_with_checks(key=pk, verify_check=False)
-
-        user = get_user(filters={"phone": token.phone})
-
-        if user:
-            raise AuthenticationFailed(detail="User with this phone number has already been created.")
 
         sms_response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
@@ -144,10 +143,11 @@ class CodeResendApi(APIView):
 
 class UserResetPasswordApi(APIView):
     @swagger_auto_schema(
-        operation_description="Reset user's password",
+        operation_description="Reset user's password.",
         tags=[SwaggerTags.USER_MANAGEMENT_USERS],
         request_body=PasswordResetSerializer,
-        responses={200: "Password was successfully reset"},
+        responses={200: "Password was successfully reset.", 401: "Token is not verified or it is overdue.",
+                   404: "Such token or user were not found."},
     )
     def post(self, request):
         user_serializer = PasswordResetSerializer(data=request.data)
