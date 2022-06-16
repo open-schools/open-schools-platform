@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 import pytz
 
-from open_schools_platform.user_management.users.services import create_user, create_token
+from open_schools_platform.user_management.users.services import create_token
 
 
 class UserExceptionsTests(TestCase):
