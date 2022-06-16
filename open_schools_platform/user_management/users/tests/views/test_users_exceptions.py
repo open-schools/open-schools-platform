@@ -47,7 +47,6 @@ class UserExceptionsTests(TestCase):
             "token": "99999999-9999-9999-9999-999999999999",
             "name": "test_user",
             "password": "123456",
-            "password_confirm": "123456"
         }
         response_for_user_creation_request = self.client.post(self.user_creation_url, data_for_user_creation_request)
         self.assertEqual(404, response_for_user_creation_request.status_code)
@@ -82,7 +81,6 @@ class UserExceptionsTests(TestCase):
             "token": token.key,
             "name": "test_user",
             "password": "123456",
-            "password_confirm": "123456"
         }
         response_for_user_creation_request = self.client.post(self.user_creation_url, data_for_user_creation_request)
         self.assertEqual(403, response_for_user_creation_request.status_code)
@@ -110,7 +108,6 @@ class UserExceptionsTests(TestCase):
             "token": token.key,
             "name": "test_user",
             "password": "123456",
-            "password_confirm": "123456"
         }
         response = self.client.post(self.user_creation_url, data)
         self.assertEqual(403, response.status_code)
