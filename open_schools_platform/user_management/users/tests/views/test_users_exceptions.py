@@ -89,7 +89,7 @@ class UserExceptionsTests(TestCase):
         self.assertEqual(404, response_for_sms_resend_request.status_code)
 
         response_for_token_data_resend_request = self.client.get(self.token_data_resend_url(token))
-        self.assertEqual(400, response_for_token_data_resend_request.status_code)
+        self.assertEqual(404, response_for_token_data_resend_request.status_code)
 
     def test_token_is_overdue(self):
         data_for_token_creation = {

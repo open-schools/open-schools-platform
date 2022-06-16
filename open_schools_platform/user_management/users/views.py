@@ -1,7 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound, AuthenticationFailed, APIException, \
-    ValidationError
+from rest_framework.exceptions import NotFound, AuthenticationFailed, APIException
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +9,7 @@ from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.errors.services import InvalidArgumentException
-from open_schools_platform.user_management.users.selectors import get_user, get_token
+from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
 
 # TODO: When JWT is resolved, add authenticated version
@@ -30,7 +29,7 @@ class CreationTokenApi(CreateAPIView):
                               "return token for phone verification. Creation token id as a response.",
         request_body=CreationTokenSerializer,
         responses={200: "Use old sms, it is still alive.", 201: "Token created and SMS was sent.",
-                   422: "probably incorrect recaptcha."},
+                   422: "Probably incorrect recaptcha."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request):
@@ -60,7 +59,7 @@ class RetrieveCreationTokenApi(APIView):
     def get(self, request, pk):
         token = get_token(filters={"key": pk})
         if not token:
-            raise ValidationError(detail="Token with such id is not exist.")
+            raise NotFound(detail="No such token.")
 
         return Response(RetrieveCreationTokenSerializer(token).data)
 
@@ -76,24 +75,19 @@ class UserApi(CreateAPIView):
         user_serializer = UserRegisterSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
 
-        token = get_token(filters=request.data)
-        if not token:
-            raise NotFound(detail="No such token.")
-        if not is_token_alive(token):
-            raise AuthenticationFailed(detail="Token is overdue.")
-        if not token.is_verified:
-            raise AuthenticationFailed(detail="Your phone number is not verified.")
+        token = get_token_with_checks(key=user_serializer.validated_data['token'])
+
         user = create_user(
             phone=token.phone,
             name=user_serializer.data["name"],
             password=user_serializer.data["password"]
         )
-        token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
-                              user_serializer.data["password"], request)
+        jwt_token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
+                                  user_serializer.data["password"], request)
 
-        response = Response({"token": token}, status=status.HTTP_201_CREATED)
+        response = Response({"token": jwt_token}, status=status.HTTP_201_CREATED)
         if api_settings.JWT_AUTH_COOKIE:
-            set_cookie_with_token(response, api_settings.JWT_AUTH_COOKIE, token)
+            set_cookie_with_token(response, api_settings.JWT_AUTH_COOKIE, jwt_token)
 
         return response
 
@@ -109,11 +103,7 @@ class VerificationApi(APIView):
         otp_serializer = OtpSerializer(data=request.data)
         otp_serializer.is_valid(raise_exception=True)
 
-        token = get_token(filters={"key": pk})
-        if not token:
-            raise NotFound(detail="No such token.")
-        if not is_token_alive(token):
-            raise AuthenticationFailed(detail="Token is overdue.")
+        token = get_token_with_checks(key=pk, verify_check=False)
 
         response = check_otp(token.session, otp_serializer.validated_data["otp"])
         if response.status_code != 200:
@@ -135,12 +125,8 @@ class CodeResendApi(APIView):
     def post(self, request, pk):
         recaptcha_serializer = ResendSerializer(data=request.data)
         recaptcha_serializer.is_valid(raise_exception=True)
-        token = get_token(filters={"key": pk})
 
-        if not token:
-            raise NotFound(detail="No such token.")
-        if not is_token_alive(token):
-            raise AuthenticationFailed(detail="Token is overdue.")
+        token = get_token_with_checks(key=pk, verify_check=False)
 
         user = get_user(filters={"phone": token.phone})
 
@@ -150,7 +136,7 @@ class CodeResendApi(APIView):
         sms_response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
         if sms_response.status_code != 200:
-            raise APIException(detail="An error occurred. SMS was not resent")
+            raise APIException(detail="An error occurred. SMS was not resent.")
 
         update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])
         return Response({"detail": "SMS was resent."}, status=200)
@@ -166,18 +152,12 @@ class UserResetPasswordApi(APIView):
     def post(self, request):
         user_serializer = PasswordResetSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        token = get_token(filters={"key": user_serializer.validated_data['token']})
-        if not token:
-            raise NotFound(detail="No such token")
+
+        token = get_token_with_checks(key=user_serializer.validated_data['token'])
+
         user = get_user(filters={"phone": token.phone})
         if not user:
-            raise NotFound(detail="No such user")
-        if not token.is_verified:
-            raise AuthenticationFailed(detail="Token is not verified")
-        if not is_token_alive(token):
-            raise AuthenticationFailed(detail="Token is overdue")
-        if user_serializer.validated_data['password'] != user_serializer.validated_data['password_confirm']:
-            raise AuthenticationFailed(detail="Passwords don't match")
+            raise NotFound(detail="No such user.")
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
-        return Response({"detail": "Password was successfully reset"}, status=200)
+        return Response({"detail": "Password was successfully reset."}, status=200)
