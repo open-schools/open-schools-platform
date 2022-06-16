@@ -21,28 +21,6 @@ class UserExceptionsTests(TestCase):
         self.token_data_resend_url = lambda pk: reverse("api:user-management:users:get-token", args=[pk])
         self.sms_resend_url = lambda pk: reverse("api:user-management:users:resend", args=[pk])
 
-    def test_user_already_created(self):
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-
-        data_for_token_creation = {
-            "phone": "+79020000000",
-            "session": "000000"
-        }
-
-        token = create_token(**data_for_token_creation)
-        data_for_sms_resend_request = {
-            "recaptcha": "123456"
-        }
-        response_for_sms_resend_request = self.client.post(self.sms_resend_url(token.key),
-                                                           data_for_sms_resend_request)
-        self.assertEqual(403, response_for_sms_resend_request.status_code)
-
     def test_firebase_response_is_not_200(self):
         data_for_token_creation_request = {
             "phone": "+79020000000",
