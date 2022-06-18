@@ -19,7 +19,6 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from ..users.selectors import get_user
 from ..users.serializers import UserSerializer
 from ..users.services import set_new_password_for_user, user_update
-from ...common.services import model_update
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
