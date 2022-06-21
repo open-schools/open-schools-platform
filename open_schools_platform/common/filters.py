@@ -14,8 +14,8 @@ class BaseFilterSet(django_filters.FilterSet):
     2. Will raise ValidationError when filter get not valid data
     3. Will order result by "-created_at" field
         * To use this class your input model type should inherit BaseModel
-        otherwise you can redefine ORDER_DATE_TIME
-        * To disable this feature write ORDER_DATE_TIME=None
+        otherwise you can redefine ORDER_FIELD
+        * To disable this feature write ORDER_FIELD=None
         * Note: symbol '-' is the reverse trigger
     """
     OR_SEARCH_FIELD = "search"
