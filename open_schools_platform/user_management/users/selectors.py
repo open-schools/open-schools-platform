@@ -5,14 +5,6 @@ from open_schools_platform.user_management.users.filters import UserFilter, Crea
 from open_schools_platform.user_management.users.services import is_token_alive
 
 
-def user_get_login_data(*, user: User):
-    return {
-        'id': user.id,
-        'phone': user.phone.as_e164,
-        'name': user.name,
-    }
-
-
 def get_user(*, filters=None) -> User:
     filters = filters or {}
 

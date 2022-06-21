@@ -16,7 +16,7 @@ def send_firebase_sms(phone: str, recaptcha: str):
     return response
 
 
-def check_otp(session: str, otp: str):
+def check_otp_with_firebase(session: str, otp: str):
     base_url = CommonConstants.FIREBASE_URL_TO_CHECK_OTP + str(CommonConstants.GOOGLE_API_KEY)
 
     request_dict = {

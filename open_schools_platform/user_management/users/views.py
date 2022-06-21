@@ -20,7 +20,7 @@ from open_schools_platform.user_management.users.serializers \
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
-from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase
 
 
 class CreationTokenApi(CreateAPIView):
@@ -108,7 +108,7 @@ class VerificationApi(APIView):
 
         token = get_token_with_checks(key=pk, verify_check=False)
 
-        response = check_otp(token.session, otp_serializer.validated_data["otp"])
+        response = check_otp_with_firebase(token.session, otp_serializer.validated_data["otp"])
         if response.status_code != 200:
             raise InvalidArgumentException(detail="Otp is incorrect.")
 
