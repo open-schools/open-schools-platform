@@ -1,6 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound, APIException
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -123,7 +123,7 @@ class CodeResendApi(APIView):
                               "or tell that user with such number already exist.",
         request_body=ResendSerializer,
         responses={200: "SMS was resent.", 401: "Token is not verified or it is overdue.",
-                   404: "Such token was not found."},
+                   404: "Such token was not found.", 422: "Probably incorrect recaptcha."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request, pk):
@@ -132,12 +132,12 @@ class CodeResendApi(APIView):
 
         token = get_token_with_checks(key=pk, verify_check=False)
 
-        sms_response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
+        response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
-        if sms_response.status_code != 200:
-            raise APIException(detail="An error occurred. SMS was not resent.")
+        if response.status_code != 200:
+            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
 
-        update_token_session(token, get_dict_from_response(sms_response)["sessionInfo"])
+        update_token_session(token, get_dict_from_response(response)["sessionInfo"])
         return Response({"detail": "SMS was resent."}, status=200)
 
 

@@ -19,7 +19,7 @@ class BaseFilterSet(django_filters.FilterSet):
         * Note: symbol '-' is the reverse trigger
     """
     OR_SEARCH_FIELD = "search"
-    ORDER_DATE_TIME = "-created_at"
+    ORDER_FIELD = "-created_at"
 
     def __init__(self, *args, **kwargs):
         self.search_value = None
@@ -37,8 +37,8 @@ class BaseFilterSet(django_filters.FilterSet):
     @property
     def qs(self):
         base_queryset = super().qs
-        if self.ORDER_DATE_TIME:
-            base_queryset = base_queryset.order_by(self.ORDER_DATE_TIME)
+        if self.ORDER_FIELD:
+            base_queryset = base_queryset.order_by(self.ORDER_FIELD)
 
         if not self.search_value:
             return base_queryset

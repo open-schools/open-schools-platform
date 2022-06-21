@@ -106,7 +106,7 @@ def trigger_application_error():
 
 
 class InvalidArgumentException(APIException):
-    status = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     default_detail = _("Some of input data are invalid.")
 
     def __init__(self, detail="Some of input data are invalid"):
