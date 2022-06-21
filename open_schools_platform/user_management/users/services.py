@@ -36,17 +36,13 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True, is
 
 @transaction.atomic
 def user_update(*, user: User, data) -> User:
-    non_side_effect_fields = ['first_name', 'last_name']
+    non_side_effect_fields = ['name']
 
     user, has_updated = model_update(
         instance=user,
         fields=non_side_effect_fields,
         data=data
     )
-
-    # Side-effect fields update here (e.g. username is generated based on first & last name)
-
-    # ... some additional tasks with the user ...
 
     return user
 

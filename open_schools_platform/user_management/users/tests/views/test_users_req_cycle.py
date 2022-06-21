@@ -50,7 +50,6 @@ class UserRequestsCycleTests(TestCase):
             "token": token.key,
             "name": "test_user",
             "password": "123456",
-            "password_confirm": "123456"
         }
         response = self.client.post(self.user_creation_url, data)
         self.assertEqual(201, response.status_code)
