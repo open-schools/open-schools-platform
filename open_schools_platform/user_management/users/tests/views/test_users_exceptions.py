@@ -5,7 +5,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 import pytz
 
-from open_schools_platform.user_management.users.services import create_token, create_user
+from open_schools_platform.user_management.users.services import create_token, create_user, verify_token
 
 
 class UserExceptionsTests(TestCase):
@@ -84,8 +84,7 @@ class UserExceptionsTests(TestCase):
         }
         token = create_token(**data_for_token_creation)
         token.created_at = datetime.datetime(2000, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
-        token.is_verified = True
-        token.save()
+        verify_token(token)
 
         data_for_user_creation_request = {
             "token": token.key,
@@ -174,8 +173,7 @@ class UserExceptionsTests(TestCase):
             "session": "000000"
         }
         token = create_token(**data_for_token_creation)
-        token.is_verified = True
-        token.save()
+        verify_token(token)
 
         data_for_password_reset_request = {
             "token": token.key,

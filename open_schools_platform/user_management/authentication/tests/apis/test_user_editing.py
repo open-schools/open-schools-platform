@@ -2,13 +2,14 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import create_user
 
 
 class UserEditingTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user_change_name_url = reverse("api:user-management:authentication:me:me")
+        self.user_change_name_url = reverse("api:user-management:authentication:me:info")
         self.user_update_password_url = reverse("api:user-management:authentication:me:update-password")
         self.jwt_login_url = reverse('api:user-management:authentication:jwt:login')
 
@@ -28,6 +29,8 @@ class UserEditingTests(TestCase):
 
         response = self.client.put(self.user_change_name_url, data)
         self.assertEqual(200, response.status_code)
+        user = get_user(filters={"phone": "+79025456481"})
+        self.assertEqual("test_user_changed_name", user.name)
 
     def test_user_successfully_changed_password(self):
 
@@ -47,6 +50,8 @@ class UserEditingTests(TestCase):
 
         response = self.client.put(self.user_update_password_url, data)
         self.assertEqual(200, response.status_code)
+        user = get_user(filters={"phone": "+79025456481"})
+        self.assertTrue(user.check_password("123456"))
 
     def test_old_password_does_not_match_with_actual_one(self):
         credentials = {

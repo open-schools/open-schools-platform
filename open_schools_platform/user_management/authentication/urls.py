@@ -35,7 +35,7 @@ urlpatterns = [
              path(
                  "",
                  UserMeApi.as_view(),
-                 name="me"
+                 name="info"
              )
          ], "me"))
     )
