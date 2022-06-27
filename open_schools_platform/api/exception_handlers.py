@@ -9,7 +9,6 @@ from rest_framework.response import Response
 from open_schools_platform.core.exceptions import ApplicationError
 
 
-
 def drf_default_with_modifications_exception_handler(exc, ctx):
     if isinstance(exc, DjangoValidationError):
         exc = exceptions.ValidationError(as_serializer_error(exc))
