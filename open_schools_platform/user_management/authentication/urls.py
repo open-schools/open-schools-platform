@@ -28,15 +28,15 @@ urlpatterns = [
         'me/',
         include(([
              path(
-                 "change-password/",
+                 "update-password/",
                  UpdatePasswordApi.as_view(),
-                 name="change-password"
+                 name="update-password"
              ),
              path(
                  "",
                  UserMeApi.as_view(),
-                 name="me"
+                 name="info"
              )
-         ]))
+         ], "me"))
     )
 ]

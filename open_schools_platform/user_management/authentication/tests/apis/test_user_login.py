@@ -14,7 +14,7 @@ class UserJwtLoginTests(TestCase):
 
         self.jwt_login_url = reverse('api:user-management:authentication:jwt:login')
         self.jwt_logout_url = reverse('api:user-management:authentication:jwt:logout')
-        self.me_url = reverse('api:user-management:authentication:me')
+        self.me_url = reverse('api:user-management:authentication:me:info')
 
     def test_non_existing_user_cannot_login(self):
         self.assertEqual(0, User.objects.count())
@@ -65,7 +65,7 @@ class UserJwtLoginTests(TestCase):
         client = APIClient()
 
         response = client.get(self.me_url)
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(401, response.status_code)
 
         auth_headers = {
             "HTTP_AUTHORIZATION": f"{settings.JWT_AUTH['JWT_AUTH_HEADER_PREFIX']} {token}"
@@ -100,7 +100,7 @@ class UserJwtLoginTests(TestCase):
         self.client.post(self.jwt_logout_url)
 
         response = self.client.get(self.me_url)
-        self.assertEqual(403, response.status_code)
+        self.assertEqual(401, response.status_code)
 
         user.refresh_from_db()
         key_after_logout = user.jwt_key

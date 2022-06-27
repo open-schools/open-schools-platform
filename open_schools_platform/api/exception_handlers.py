@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError as DjangoValidationError, Per
 from django.http import Http404
 
 from rest_framework.views import exception_handler
-from rest_framework import exceptions
+from rest_framework import exceptions, status
 from rest_framework.serializers import as_serializer_error
 from rest_framework.response import Response
 
@@ -20,6 +20,9 @@ def drf_default_with_modifications_exception_handler(exc, ctx):
         exc = exceptions.PermissionDenied()
 
     response = exception_handler(exc, ctx)
+
+    if isinstance(exc, (exceptions.AuthenticationFailed, exceptions.NotAuthenticated)):
+        response.status_code = status.HTTP_401_UNAUTHORIZED
 
     # If unexpected error occurs (server error, etc.)
     if response is None:
