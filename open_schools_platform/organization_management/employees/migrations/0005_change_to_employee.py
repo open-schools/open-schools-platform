@@ -7,7 +7,7 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
-def create_employees(apps, schema_editor):
+def create_profiles_for_employees(apps, schema_editor):
     # forwards_func() creates two Country instances,
     # so reverse_func() should delete them.
     EmployeeProfile = apps.get_model("employees", "employeeprofile")
@@ -21,7 +21,7 @@ def create_employees(apps, schema_editor):
     print(len(qs))
 
 
-def delete_employees(apps, schema_editor):
+def delete_employees_profiles(apps, schema_editor):
     # forwards_func() creates two Country instances,
     # so reverse_func() should delete them.
     EmployeeProfile = apps.get_model("employees", "employeeprofile")
@@ -41,7 +41,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(create_employees, delete_employees),
+        migrations.RunPython(create_profiles_for_employees, delete_employees_profiles),
 
         migrations.AlterField(
             model_name='employee',
