@@ -18,7 +18,6 @@ def create_profiles_for_employees(apps, schema_editor):
         employee_profile = EmployeeProfile()
         employee_profile.user = i
         employee_profile.save(using=db_alias)
-    print(len(qs))
 
 
 def delete_employees_profiles(apps, schema_editor):
