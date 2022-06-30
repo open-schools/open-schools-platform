@@ -8,8 +8,6 @@ import django.db.models.deletion
 
 
 def create_profiles_for_employees(apps, schema_editor):
-    # forwards_func() creates two Country instances,
-    # so reverse_func() should delete them.
     EmployeeProfile = apps.get_model("employees", "employeeprofile")
     User = apps.get_model("users", "User")
     db_alias = schema_editor.connection.alias
@@ -21,16 +19,9 @@ def create_profiles_for_employees(apps, schema_editor):
 
 
 def delete_employees_profiles(apps, schema_editor):
-    # forwards_func() creates two Country instances,
-    # so reverse_func() should delete them.
     EmployeeProfile = apps.get_model("employees", "employeeprofile")
-    Employee = apps.get_model("employees", "employee")
     db_alias = schema_editor.connection.alias
     EmployeeProfile.objects.using(db_alias).all().delete()
-    qs = Employee.objects.using(db_alias).all()
-    for i in qs:
-        i.employee_profile = i.user
-        i.save()
 
 
 class Migration(migrations.Migration):
