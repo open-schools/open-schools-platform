@@ -27,4 +27,3 @@ def generate_name_for_family(parent: ParentProfile, family_name: str) -> str:
         name_for_family = "Family of " + parent.name
         return name_for_family
     return family_name
-

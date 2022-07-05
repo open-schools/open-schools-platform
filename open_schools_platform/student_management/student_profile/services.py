@@ -11,5 +11,5 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
     return student_profile
 
 
-def can_user_create_student_profile_check(family_parent_profiles: Family.parent_profiles, user: User) -> bool:
-    return user.parent_profile in family_parent_profiles
+def can_user_create_student_profile_check(family: Family, user: User) -> bool:
+    return user.parent_profile in family.parent_profiles.all()

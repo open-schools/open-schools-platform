@@ -28,7 +28,7 @@ class StudentProfileApi(CreateAPIView):
         if not family:
             raise NotFound("There is no such family")
         user = get_user(request)
-        if not can_user_create_student_profile_check(family_parent_profiles=family.parent_profiles.all(), user=user):
+        if not can_user_create_student_profile_check(family=family, user=user):
             raise PermissionDenied
         student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
                                                  age=student_profile_serializer.validated_data['age'])

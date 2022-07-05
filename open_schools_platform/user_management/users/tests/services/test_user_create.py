@@ -25,4 +25,3 @@ class UserCreateTests(TestCase):
         self.assertEqual(1, User.objects.count())
         self.assertEqual(1, ParentProfile.objects.count())
         self.assertEqual(1, StudentProfile.objects.count())
-
