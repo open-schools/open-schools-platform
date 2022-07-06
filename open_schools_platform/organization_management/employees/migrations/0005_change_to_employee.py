@@ -15,6 +15,7 @@ def create_profiles_for_employees(apps, schema_editor):
     for i in qs:
         employee_profile = EmployeeProfile()
         employee_profile.user = i
+        employee_profile.name = i.name
         employee_profile.save(using=db_alias)
 
 

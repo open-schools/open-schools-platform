@@ -37,6 +37,7 @@ class EmployeeProfileManager(models.Manager):
 class EmployeeProfile(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
 
     objects = EmployeeProfileManager()
 
