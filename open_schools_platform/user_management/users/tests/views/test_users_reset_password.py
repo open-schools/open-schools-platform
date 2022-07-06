@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import verify_token, create_user
 from open_schools_platform.user_management.users.tests.views.test_utils import valid_token_for_tests_creation
 
@@ -34,3 +35,5 @@ class UserResetPasswordTests(TestCase):
         }
         response = self.client.post(self.user_reset_password_url, data)
         self.assertEqual(200, response.status_code)
+        user = get_user(filters={"phone": "+79025456481"})
+        self.assertTrue(user.check_password("123456"))
