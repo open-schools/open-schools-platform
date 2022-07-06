@@ -5,6 +5,8 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
 from open_schools_platform.common.services import model_update
+from open_schools_platform.parent_management.parents.models import ParentProfile
+from open_schools_platform.student_management.student.models import StudentProfile
 from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
 
 from open_schools_platform.user_management.users.models import User, CreationToken
@@ -30,6 +32,14 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True, is
         name=name,
         is_active=is_active,
         is_admin=is_admin,
+    )
+    ParentProfile.objects.create_parent_profile(
+        name=name,
+        user=user
+    )
+    StudentProfile.objects.create_student_profile(
+        name=name,
+        user=user
     )
     return user
 
