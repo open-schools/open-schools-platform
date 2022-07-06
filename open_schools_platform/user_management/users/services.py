@@ -34,6 +34,7 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True, is
     )
     EmployeeProfile.objects.create(
         user=user,
+        name=name,
     )
     return user
 
