@@ -1,6 +1,7 @@
 from django.test import TestCase
 from django.core.exceptions import ValidationError
 
+from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.student.models import StudentProfile
 from open_schools_platform.user_management.users.services import create_user
@@ -23,5 +24,6 @@ class UserCreateTests(TestCase):
             )
 
         self.assertEqual(1, User.objects.count())
+        self.assertEqual(1, EmployeeProfile.objects.count())
         self.assertEqual(1, ParentProfile.objects.count())
         self.assertEqual(1, StudentProfile.objects.count())
