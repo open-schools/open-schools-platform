@@ -36,4 +36,3 @@ class FamilyApi(CreateAPIView):
         add_parent_to_family(family=family, parent=parent)
         return Response({"family_id": family.id, "family_name": family_name,
                          "family_parent": family_serializer.validated_data['parent_profile']}, status=201)
-
