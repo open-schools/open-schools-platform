@@ -4,10 +4,9 @@ from django.db import models
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.user_management.users.models import User
-from django.contrib.auth.models import UserManager as BUM
 
 
-class ParentProfileManager(BUM):
+class ParentProfileManager(models.Manager):
     def create_parent_profile(self, user: User, name: str):
         parent_profile = self.model(
             name=name,

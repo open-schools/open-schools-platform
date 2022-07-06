@@ -28,7 +28,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('email', models.EmailField(max_length=255)),
                 ('identifier', models.UUIDField(default=uuid.uuid4)),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='students', to='testing_examples.school')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='student', to='testing_examples.school')),
             ],
             options={
                 'unique_together': {('identifier', 'school'), ('email', 'school')},

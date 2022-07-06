@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.core.exceptions import ValidationError
 
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.student_profile.models import StudentProfile
+from open_schools_platform.student_management.student.models import StudentProfile
 from open_schools_platform.user_management.users.services import create_user
 from open_schools_platform.user_management.users.models import User
 

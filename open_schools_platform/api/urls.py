@@ -23,6 +23,6 @@ urlpatterns = [
     path('organization-management/', include(organization_management_urls)),
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
     path('parent-management/', include((parent_management_urls, "parent-management"))),
-    path('student-management/', include(('open_schools_platform.student_management.student_profile.urls',
-                                         'student-profile')))
+    path('student-management/', include(('open_schools_platform.student_management.student.urls',
+                                         'student-management')))
 ]

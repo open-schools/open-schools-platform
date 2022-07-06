@@ -1,13 +1,12 @@
 import uuid
 
 from django.db import models
-from django.contrib.auth.models import UserManager as BUM
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.student_profile.models import StudentProfile
+from open_schools_platform.student_management.student.models import StudentProfile
 
 
-class FamilyManager(BUM):
+class FamilyManager(models.Manager):
     def create_family(self, name: str):
         family = self.model(
             name=name

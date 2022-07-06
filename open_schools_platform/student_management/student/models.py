@@ -1,12 +1,12 @@
 import uuid
 
+from django.core.validators import MinValueValidator
 from django.db import models
 
 from open_schools_platform.user_management.users.models import User
-from django.contrib.auth.models import UserManager as BUM
 
 
-class StudentProfileManager(BUM):
+class StudentProfileManager(models.Manager):
     def create_student_profile(self, name: str, age: int = 0, user: User = None):
         student_profile = self.model(
             name=name,
@@ -20,9 +20,9 @@ class StudentProfileManager(BUM):
 
 class StudentProfile(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True, blank=True)
     name = models.CharField(max_length=200)
-    age = models.IntegerField()
+    age = models.IntegerField(validators=[MinValueValidator(0)])
     objects = StudentProfileManager()
 
     def __str__(self):

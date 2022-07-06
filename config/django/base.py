@@ -45,7 +45,7 @@ LOCAL_APPS = [
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
     'open_schools_platform.parent_management.families.apps.FamiliesConfig',
     'open_schools_platform.parent_management.parents.apps.ParentsConfig',
-    'open_schools_platform.student_management.student_profile.apps.StudentProfileConfig',
+    'open_schools_platform.student_management.student.apps.StudentConfig',
 ]
 
 THIRD_PARTY_APPS = [

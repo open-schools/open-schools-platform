@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family
-from open_schools_platform.student_management.student_profile.serializers import StudentProfileSerializer
-from open_schools_platform.student_management.student_profile.services import can_user_create_student_profile_check, \
+from open_schools_platform.student_management.student.serializers import StudentProfileSerializer
+from open_schools_platform.student_management.student.services import can_user_create_student_profile_check, \
     create_student_profile
 
 
@@ -17,9 +17,9 @@ class StudentProfileApi(CreateAPIView):
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
         request_body=StudentProfileSerializer,
-        responses={201: "Family was successfully created", 404: "There is no such parent",
-                   403: 'User is not logged in'},
-        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENT_PROFILE]
+        responses={201: "Family was successfully created", 404: "There is no such family",
+                   403: "Current user do not have permission to perform this action"},
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
     def post(self, request):
         student_profile_serializer = StudentProfileSerializer(data=request.data)

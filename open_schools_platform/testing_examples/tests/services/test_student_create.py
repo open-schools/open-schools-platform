@@ -9,8 +9,8 @@ from open_schools_platform.testing_examples.tests.factories import SchoolFactory
 
 
 class StudentCreateTests(TestCase):
-    @patch('open_schools_platform.testing_examples.services.students.school_list_school_courses')
-    @patch('open_schools_platform.testing_examples.services.students.roster_create')
+    @patch('open_schools_platform.testing_examples.services.student.school_list_school_courses')
+    @patch('open_schools_platform.testing_examples.services.student.roster_create')
     def test_student_is_rostered_to_all_active_school_courses(
         self,
         roster_create_mock,

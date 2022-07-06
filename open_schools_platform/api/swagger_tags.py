@@ -5,4 +5,4 @@ class SwaggerTags:
     ORGANIZATION_MANAGEMENT_ORGANIZATIONS = "Organization management. Organizations"
     ORGANIZATION_MANAGEMENT_EMPLOYEES = "Organization management. Employees"
     PARENT_MANAGEMENT_FAMILIES = "Parent management. Families"
-    STUDENT_MANAGEMENT_STUDENT_PROFILE = "Student management. Student profile"
+    STUDENT_MANAGEMENT_STUDENTS = "Student management. Students"

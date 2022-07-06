@@ -15,7 +15,7 @@ class School(models.Model):
 class Student(models.Model):
     email = models.EmailField(max_length=255)
     identifier = models.UUIDField(default=uuid4)
-    school = models.ForeignKey(School, related_name='students', on_delete=models.CASCADE)
+    school = models.ForeignKey(School, related_name='student', on_delete=models.CASCADE)
 
     class Meta:
         unique_together = (
