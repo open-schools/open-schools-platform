@@ -6,7 +6,9 @@ from rest_framework_jwt.utils import unix_epoch
 
 from open_schools_platform.common.services import model_update
 from open_schools_platform.parent_management.parents.models import ParentProfile
+from open_schools_platform.parent_management.parents.selectors import get_parent_profile
 from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.student.selectors import get_student_profile
 from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
 
 from open_schools_platform.user_management.users.models import User, CreationToken
@@ -53,6 +55,13 @@ def user_update(*, user: User, data) -> User:
         fields=non_side_effect_fields,
         data=data
     )
+    student_profile = get_student_profile(filters={"user": user})
+    student_profile.name = user.name
+    student_profile.save()
+
+    parent_profile = get_parent_profile(filters={"user": user})
+    parent_profile.name = user.name
+    parent_profile.save()
 
     return user
 

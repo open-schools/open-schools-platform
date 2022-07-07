@@ -11,5 +11,14 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
     return student_profile
 
 
-def can_user_create_student_profile_check(family: Family, user: User) -> bool:
+def can_user_interact_with_student_profile_check(family: Family, user: User) -> bool:
     return user.parent_profile in family.parent_profiles.all()
+
+
+def update_student_profile(student_profile: StudentProfile, name: str, age: int) -> StudentProfile:
+    if name is not None:
+        student_profile.name = name
+    if age is not None:
+        student_profile.age = age
+    student_profile.save()
+    return student_profile

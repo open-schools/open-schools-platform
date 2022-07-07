@@ -3,6 +3,7 @@ import uuid
 from django.core.validators import MinValueValidator
 from django.db import models
 
+from open_schools_platform.common.models import BaseModel
 from open_schools_platform.user_management.users.models import User
 
 
@@ -18,7 +19,7 @@ class StudentProfileManager(models.Manager):
         return student_profile
 
 
-class StudentProfile(models.Model):
+class StudentProfile(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True, blank=True)
     name = models.CharField(max_length=200)
