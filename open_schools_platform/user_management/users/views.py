@@ -20,7 +20,8 @@ from open_schools_platform.user_management.users.serializers \
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
-from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase, \
+    firebase_error_dict_with_additional_info
 
 
 class CreationTokenApi(CreateAPIView):
@@ -44,7 +45,7 @@ class CreationTokenApi(CreateAPIView):
         response = send_firebase_sms(**token_serializer.data)
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
+            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
 
         token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
