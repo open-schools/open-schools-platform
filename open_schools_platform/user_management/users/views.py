@@ -29,7 +29,8 @@ class CreationTokenApi(CreateAPIView):
         operation_description="Send sms to entered phone number and"
                               "return token for phone verification. Creation token id as a response.",
         request_body=CreationTokenSerializer,
-        responses={200: "Use old sms, it is still alive.", 201: "Token created and SMS was sent.",
+        responses={200: "Use old sms, it is still alive. Creation token id as response.",
+                   201: "Token created and SMS was sent. Creation token id as response.",
                    422: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
                    404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
