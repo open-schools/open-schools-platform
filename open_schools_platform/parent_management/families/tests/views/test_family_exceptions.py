@@ -44,4 +44,3 @@ class FamilyExceptionsTests(TestCase):
 
         response_for_family_creation = self.client.post(self.family_create_url, data_for_family_creation)
         self.assertEqual(403, response_for_family_creation.status_code)
-
