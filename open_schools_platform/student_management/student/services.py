@@ -1,3 +1,4 @@
+from open_schools_platform.common.services import model_update
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.student_management.student.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
@@ -15,10 +16,12 @@ def can_user_interact_with_student_profile_check(family: Family, user: User) -> 
     return user.parent_profile in family.parent_profiles.all()
 
 
-def update_student_profile(student_profile: StudentProfile, name: str, age: int) -> StudentProfile:
-    if name is not None:
-        student_profile.name = name
-    if age is not None:
-        student_profile.age = age
-    student_profile.save()
+def update_student_profile(*, student_profile: StudentProfile, data) -> StudentProfile:
+    non_side_effect_fields = ['age', 'name']
+    filtered_data = {key: value for key, value in data.items() if value is not None}
+    student_profile, has_updated = model_update(
+        instance=student_profile,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
     return student_profile
