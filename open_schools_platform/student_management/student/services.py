@@ -1,4 +1,5 @@
 from open_schools_platform.common.services import model_update
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.student_management.student.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
@@ -18,7 +19,7 @@ def can_user_interact_with_student_profile_check(family: Family, user: User) -> 
 
 def update_student_profile(*, student_profile: StudentProfile, data) -> StudentProfile:
     non_side_effect_fields = ['age', 'name']
-    filtered_data = {key: value for key, value in data.items() if value is not None}
+    filtered_data = filter_dict_from_none_values(data)
     student_profile, has_updated = model_update(
         instance=student_profile,
         fields=non_side_effect_fields,
