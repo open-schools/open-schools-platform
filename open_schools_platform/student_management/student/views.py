@@ -10,7 +10,7 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.student_management.student.selectors import get_student_profile
 from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileDataSerializer
+    StudentProfileUpdateSerializer, StudentProfileSerializer
 from open_schools_platform.student_management.student.services import can_user_interact_with_student_profile_check, \
     create_student_profile, update_student_profile
 
@@ -20,7 +20,7 @@ class StudentProfileApi(CreateAPIView):
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
         request_body=StudentProfileCreateSerializer,
-        responses={201: "Student profile was successfully created", 404: "There is no such family",
+        responses={201: StudentProfileSerializer, 404: "There is no such family",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
@@ -36,14 +36,13 @@ class StudentProfileApi(CreateAPIView):
         student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
                                                  age=student_profile_serializer.validated_data['age'])
         add_student_profile_to_family(student_profile=student_profile, family=family)
-        return Response({"student_profile_id": student_profile.id,
-                         "student_profile_data": StudentProfileCreateSerializer(request.data).data}, status=201)
+        return Response(StudentProfileSerializer(student_profile).data, status=201)
 
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentProfileUpdateSerializer(),
-        responses={200: StudentProfileDataSerializer, 404: "There is no such student profile or family",
+        responses={200: StudentProfileSerializer, 404: "There is no such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
     def put(self, request):
@@ -65,4 +64,4 @@ class StudentProfileApi(CreateAPIView):
         update_student_profile(student_profile=student_profile,
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data,
                                                               ['student_profile', 'family']))
-        return Response(StudentProfileDataSerializer(student_profile).data, status=200)
+        return Response(StudentProfileSerializer(student_profile).data, status=200)

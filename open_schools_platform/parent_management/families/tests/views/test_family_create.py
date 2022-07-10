@@ -29,7 +29,7 @@ class FamilyCreateTests(TestCase):
         response_for_family_creation = self.client.post(self.family_create_url, data_for_family_creation)
         self.assertEqual(201, response_for_family_creation.status_code)
 
-    def test_name_for_family_is_generated_when_it_is_not_provided_in_request(self):
+    def test_name_generates_automatically_if_its_not_provided(self):
         credentials = {
             "phone": "+79020000000",
             "password": "123456",

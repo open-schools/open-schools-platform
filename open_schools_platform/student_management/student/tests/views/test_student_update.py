@@ -41,15 +41,15 @@ class StudentProfileUpdateTests(TestCase):
         self.assertEqual(16, updated_student_profile.age)
         data_for_student_profiles_age_and_name_update_request = {
             "student_profile": user.student.id,
-            "age": 16,
-            "name": "changed_name"
+            "age": 18,
+            "name": "new_changed_name"
         }
         response_for_student_profiles_age_and_name_update_request = \
             self.client.put(self.student_profile_update_url, data_for_student_profiles_age_and_name_update_request)
         self.assertEqual(200, response_for_student_profiles_age_and_name_update_request.status_code)
         updated_student_profile = get_student_profile(filters={"id": user.student.id})
-        self.assertEqual(16, updated_student_profile.age)
-        self.assertEqual("changed_name", updated_student_profile.name)
+        self.assertEqual(18, updated_student_profile.age)
+        self.assertEqual("new_changed_name", updated_student_profile.name)
 
     def test_successful_student_profile_in_family_update(self):
         credentials = {

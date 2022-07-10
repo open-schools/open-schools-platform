@@ -6,10 +6,12 @@ from rest_framework import serializers
 from open_schools_platform.student_management.student.models import StudentProfile
 
 
-class StudentProfileCreateSerializer(serializers.Serializer):
-    age = serializers.IntegerField(validators=[MinValueValidator(0)])
-    name = serializers.CharField(max_length=200)
+class StudentProfileCreateSerializer(serializers.ModelSerializer):
     family = serializers.UUIDField(default=uuid.uuid4)
+
+    class Meta:
+        model = StudentProfile
+        fields = ("age", "name", "family")
 
 
 class StudentProfileUpdateSerializer(serializers.Serializer):
@@ -19,7 +21,7 @@ class StudentProfileUpdateSerializer(serializers.Serializer):
     age = serializers.IntegerField(validators=[MinValueValidator(0)], required=False, default=None)
 
 
-class StudentProfileDataSerializer(serializers.ModelSerializer):
+class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile
         fields = ("name", "age", "id")
