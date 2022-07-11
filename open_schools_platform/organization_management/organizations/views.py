@@ -8,7 +8,6 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
-from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.selectors import get_employee, get_employee_profile
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee

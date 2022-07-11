@@ -1,5 +1,4 @@
-from django.contrib.contenttypes.fields import GenericForeignKey
-
+from open_schools_platform.organization_management.employees.models import EmployeeProfile, Employee
 from open_schools_platform.organization_management.organizations.models import Organization
 
 
@@ -11,8 +10,8 @@ def create_organization(name: str, inn: str) -> Organization:
     return organization
 
 
-def fill_employee_fields(organization: GenericForeignKey,
-                         employee_profiler: GenericForeignKey,
-                         employee: GenericForeignKey):
+def fill_employee_fields(organization: Organization,
+                         employee_profile: EmployeeProfile,
+                         employee: Employee):
     employee.organization = organization
-    employee.employee_profile = employee_profiler
+    employee.employee_profile = employee_profile

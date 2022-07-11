@@ -5,7 +5,6 @@ from typing import Any
 from open_schools_platform.common.models import BaseModel
 from django.db import models
 
-from open_schools_platform.common.utils import get_dict_including_fields
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
 
@@ -31,10 +30,10 @@ class OrganizationQueryHandler:
             return query.body
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
-            query.body.organization = query.sender
-            query.body.employee_profile = query.recipient
+            query.body.organization = query.sender  # type: ignore
+            query.body.employee_profile = query.recipient  # type: ignore
 
-        query.body.save()
+        query.body.save()  # type: ignore
 
         return query.body
 
