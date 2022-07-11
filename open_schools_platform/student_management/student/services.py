@@ -14,6 +14,7 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
 
 
 def can_user_interact_with_student_profile_check(family: Family, user: User) -> bool:
+    # TODO:  think about mypy check hidden attributes made by related_name
     return user.parent_profile in family.parent_profiles.all()
 
 

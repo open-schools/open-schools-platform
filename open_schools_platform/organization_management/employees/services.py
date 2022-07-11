@@ -13,7 +13,7 @@ from open_schools_platform.utils.sms_provider_requests import send_sms
 def create_employee(user: User, organization: Organization, name: str, position: str = "") -> Employee:
     employee = Employee.objects.create(
         name=name,
-        user=user,
+        employee_profile=user.employee_profile,
         organization=organization,
         position=position,
     )

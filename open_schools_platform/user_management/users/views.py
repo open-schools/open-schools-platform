@@ -20,7 +20,8 @@ from open_schools_platform.user_management.users.serializers \
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
     get_jwt_token, update_token_session, set_new_password_for_user
-from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase, \
+    firebase_error_dict_with_additional_info
 
 
 class CreationTokenApi(CreateAPIView):
@@ -28,7 +29,8 @@ class CreationTokenApi(CreateAPIView):
         operation_description="Send sms to entered phone number and"
                               "return token for phone verification. Creation token id as a response.",
         request_body=CreationTokenSerializer,
-        responses={200: "Use old sms, it is still alive.", 201: "Token created and SMS was sent.",
+        responses={200: "Use old sms, it is still alive. Creation token id as response.",
+                   201: "Token created and SMS was sent. Creation token id as response.",
                    422: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
                    404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
@@ -44,7 +46,7 @@ class CreationTokenApi(CreateAPIView):
         response = send_firebase_sms(**token_serializer.data)
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
+            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
 
         token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
