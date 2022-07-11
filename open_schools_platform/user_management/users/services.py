@@ -58,7 +58,11 @@ def user_update(*, user: User, data) -> User:
         fields=non_side_effect_fields,
         data=data
     )
+    user.student.name = user.name
+    user.student.save()
 
+    user.parent_profile.name = user.name
+    user.parent_profile.save()
     return user
 
 
