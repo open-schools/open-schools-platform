@@ -21,9 +21,33 @@ class EmployeeManager(models.Manager):
         return employee
 
 
+class EmployeeProfileManager(models.Manager):
+    def create(self, *args: Any, **kwargs: Any):
+        employee_profile = self.model(
+            *args,
+            **kwargs,
+        )
+
+        employee_profile.full_clean()
+        employee_profile.save(using=self._db)
+
+        return employee_profile
+
+
+class EmployeeProfile(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
+    name = models.CharField(max_length=200)
+
+    objects = EmployeeProfileManager()
+
+    def __str__(self):
+        return self.user.__str__()
+
+
 class Employee(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    user = models.ForeignKey(User, related_name='employees', on_delete=models.CASCADE)
+    employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees', on_delete=models.CASCADE)
     organization = models.ForeignKey(Organization, related_name='employees', on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255)
@@ -35,4 +59,4 @@ class Employee(BaseModel):
         return self.name
 
     class Meta:
-        unique_together = ('organization', 'user')
+        unique_together = ('organization', 'employee_profile')
