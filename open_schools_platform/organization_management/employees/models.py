@@ -47,11 +47,12 @@ class EmployeeProfile(BaseModel):
 
 class Employee(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
-    employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees', on_delete=models.CASCADE)
-    organization = models.ForeignKey(Organization, related_name='employees', on_delete=models.CASCADE)
+    employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees',
+                                         null=True, default=None, blank=True, on_delete=models.CASCADE)
+    organization = models.ForeignKey(Organization, related_name='employees',
+                                     null=True, default=None, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255)
-    is_accepted = models.BooleanField(default=False)
 
     objects = EmployeeManager()
 

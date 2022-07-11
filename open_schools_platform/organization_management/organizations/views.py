@@ -1,18 +1,25 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.utils import get_dict_excluding_fields
+from open_schools_platform.organization_management.employees.models import Employee
+from open_schools_platform.organization_management.employees.selectors import get_employee, get_employee_profile
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    OrganizationSerializer
+    OrganizationSerializer, OrganizationInviteSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization
+from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.services import create_query
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
@@ -55,3 +62,32 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
             view=self
         )
         return response
+
+
+class InviteEmployeeApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        request_body=OrganizationInviteSerializer,
+        responses={201: QueryStatusSerializer},
+        operation_description="Return paginated list of organizations.",
+    )
+    def post(self, request, pk) -> Response:
+        invite_serializer = OrganizationInviteSerializer(data=request.data)
+        invite_serializer.is_valid()
+
+        if not get_employee(filters={"user": request.user.id,
+                                     "organization": pk}):
+            raise PermissionDenied(detail="You are not a member of this organization")
+
+        phone = invite_serializer.validated_data["phone"]
+
+        employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
+                                                               fields=['phone']))
+        employee_profile = get_employee_profile(filters={'phone': phone})
+
+        query = create_query(sender_model_name="organization", sender_id=pk,
+                             recipient_model_name="employeeprofile", recipient_id=employee_profile.id,
+                             body_model_name="employee", body_id=employee.id)
+
+        return Response({"query": QueryStatusSerializer(query).data},
+                        status=201)

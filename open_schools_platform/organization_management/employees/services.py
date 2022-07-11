@@ -10,10 +10,10 @@ from open_schools_platform.user_management.users.services import create_user, ge
 from open_schools_platform.utils.sms_provider_requests import send_sms
 
 
-def create_employee(user: User, organization: Organization, name: str, position: str = "") -> Employee:
+def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
     employee = Employee.objects.create(
         name=name,
-        employee_profile=user.employee_profile,
+        employee_profile=user.employee_profile if user is not None else None,
         organization=organization,
         position=position,
     )

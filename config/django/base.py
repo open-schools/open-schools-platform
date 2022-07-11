@@ -46,6 +46,7 @@ LOCAL_APPS = [
     'open_schools_platform.parent_management.families.apps.FamiliesConfig',
     'open_schools_platform.parent_management.parents.apps.ParentsConfig',
     'open_schools_platform.student_management.student.apps.StudentConfig',
+    'open_schools_platform.query_management.queries.apps.QueriesConfig',
 ]
 
 THIRD_PARTY_APPS = [
