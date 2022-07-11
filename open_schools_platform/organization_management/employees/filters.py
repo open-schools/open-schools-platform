@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 
 from open_schools_platform.common.filters import BaseFilterSet
-from open_schools_platform.organization_management.employees.models import Employee
+from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 
 
 class EmployeeFilter(BaseFilterSet):
@@ -13,3 +13,11 @@ class EmployeeFilter(BaseFilterSet):
     class Meta:
         model = Employee
         fields = ('organization',)
+
+
+class EmployeeProfileFilter(BaseFilterSet):
+    phone = CharFilter(field_name="user__phone", lookup_expr="exact")
+
+    class Meta:
+        model = EmployeeProfile
+        fields = ('id',)
