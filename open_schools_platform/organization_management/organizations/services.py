@@ -10,8 +10,8 @@ def create_organization(name: str, inn: str) -> Organization:
     return organization
 
 
-def fill_employee_fields(organization: Organization,
-                         employee_profile: EmployeeProfile,
-                         employee: Employee):
+def update_employee(organization: Organization,
+                    employee_profile: EmployeeProfile,
+                    employee: Employee):
     employee.organization = organization
     employee.employee_profile = employee_profile

@@ -13,15 +13,15 @@ class QueryStatusChangeApi(views.APIView):
     @swagger_auto_schema(
         operation_description="Change query status.",
         request_body=QueryStatusSerializer,
-        responses={201: QueryStatusSerializer},
+        responses={200: QueryStatusSerializer},
         tags=[SwaggerTags.QUERY_MANAGEMENT_QUERIES],
     )
     def put(self, request):
         query_status_serializer = QueryStatusSerializer(data=request.data)
         query_status_serializer.is_valid(raise_exception=True)
 
-        query = get_query(filters=get_dict_including_fields(query_status_serializer.validated_data, ["id"]))
+        query = get_query(filters={"id": query_status_serializer.validated_data["id"]})
 
         run_sender_handler(query, query_status_serializer.validated_data["status"])
 
-        return Response({"detail": "Status was changed"}, status=200)
+        return Response({"detail": "Status was changed", "query": QueryStatusSerializer(query).data}, status=200)
