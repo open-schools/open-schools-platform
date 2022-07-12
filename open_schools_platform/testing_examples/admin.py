@@ -3,7 +3,7 @@ from django.contrib import admin
 from open_schools_platform.testing_examples.models import (
     School,
     SchoolCourse,
-    Student,
+    StudentExample,
     Roster
 )
 
@@ -38,7 +38,7 @@ class SchoolCourseAdmin(admin.ModelAdmin):
     inlines = (RosterSchoolCourseInline, )
 
 
-@admin.register(Student)
+@admin.register(StudentExample)
 class StudentAdmin(admin.ModelAdmin):
     list_display = ('email', 'identifier', 'school', )
     list_filter = ('school', )

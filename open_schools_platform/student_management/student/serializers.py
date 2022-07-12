@@ -21,6 +21,12 @@ class StudentProfileUpdateSerializer(serializers.Serializer):
     age = serializers.IntegerField(validators=[MinValueValidator(0)], required=False, default=None)
 
 
+class StudentJoinCircleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentProfile
+        fields = ("name", "age")
+
+
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile

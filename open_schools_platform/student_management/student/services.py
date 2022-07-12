@@ -1,7 +1,8 @@
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
+from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.student.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
 
 
@@ -11,6 +12,15 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
         age=age,
     )
     return student_profile
+
+
+def create_student(name: str, circle: Circle = None, student_profile: StudentProfile = None) -> Student:
+    student = Student.objects.create_student(
+        name=name,
+        circle=circle,
+        student_profile=student_profile
+    )
+    return student
 
 
 def can_user_interact_with_student_profile_check(family: Family, user: User) -> bool:

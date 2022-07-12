@@ -12,7 +12,7 @@ class School(models.Model):
         return self.name
 
 
-class Student(models.Model):
+class StudentExample(models.Model):
     email = models.EmailField(max_length=255)
     identifier = models.UUIDField(default=uuid4)
     school = models.ForeignKey(School, related_name='students', on_delete=models.CASCADE)
@@ -52,7 +52,7 @@ class SchoolCourse(models.Model):
 
 
 class Roster(models.Model):
-    student = models.ForeignKey(Student, related_name='rosters', on_delete=models.CASCADE)
+    student = models.ForeignKey(StudentExample, related_name='rosters', on_delete=models.CASCADE)
     school_course = models.ForeignKey(SchoolCourse, related_name='rosters', on_delete=models.CASCADE)
 
     start_date = models.DateField()
