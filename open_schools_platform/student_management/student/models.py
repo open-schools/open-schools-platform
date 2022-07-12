@@ -5,6 +5,7 @@ from django.db import models
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.user_management.users.models import User
+from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(models.Manager):
@@ -28,3 +29,13 @@ class StudentProfile(BaseModel):
 
     def __str__(self):
         return self.name.__str__()
+
+
+class Student(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(max_length=200)
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students")
+    student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students")
+
+    def __str__(self):
+        return self.name
