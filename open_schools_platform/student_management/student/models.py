@@ -49,7 +49,7 @@ class StudentProfile(BaseModel, StudentProfileQueryHandler):
 
 
 class StudentManager(models.Manager):
-    def create_student(self, name: str, circle: Circle, student_profile: StudentProfile):
+    def create_student(self, name: str, circle: Circle = None, student_profile: StudentProfile = None):
         student = self.model(
             name=name,
             circle=circle,
