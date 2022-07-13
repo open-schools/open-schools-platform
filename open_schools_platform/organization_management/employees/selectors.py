@@ -18,11 +18,3 @@ def get_employees(*, filters=None) -> QuerySet:
     qs = Employee.objects.all()
 
     return EmployeeFilter(filters, qs).qs
-
-
-def get_employee_profile(*, filters=None) -> EmployeeProfile:
-    filters = filters or {}
-
-    qs = EmployeeProfile.objects.all()
-
-    return EmployeeProfileFilter(filters, qs).qs.first()

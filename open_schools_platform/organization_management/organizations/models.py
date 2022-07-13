@@ -32,8 +32,7 @@ class OrganizationQueryHandler:
         if query.status == Query.Status.ACCEPTED:
             query.body.organization = query.sender  # type: ignore
             query.body.employee_profile = query.recipient  # type: ignore
-
-        query.body.save()  # type: ignore
+            query.body.save()  # type: ignore
 
         return query.body
 
