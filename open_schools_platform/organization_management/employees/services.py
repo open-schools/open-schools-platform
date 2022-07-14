@@ -19,11 +19,11 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
     return employee
 
 
-def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
+def get_employee_profile_or_create(phone: str, spare_name: str) -> EmployeeProfile:
     pwd = generate_user_password()
-    add_user = get_user(filters={"phone": phone})
+    user = get_user(filters={"phone": phone})
 
-    if not add_user:
+    if not user:
         msg = OrganizationConstants.get_invite_message(phone=phone, pwd=pwd)
         response = send_sms(to=[phone], msg=msg)
 
@@ -31,6 +31,6 @@ def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
             raise APIException(detail="Something wrong! Please, contact the administrator"
                                       "and tell him the error number.")
 
-        add_user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
+        user = create_user(phone=phone, password=pwd, name=spare_name)
 
-    return add_user.employee_profile
+    return user.employee_profile

@@ -9,9 +9,9 @@ from open_schools_platform.common.models import BaseModel
 
 class Query(BaseModel):
     class Status(models.TextChoices):
-        ACCEPTED = 'ACCEPTED', 'Accepted'
-        WAITING = 'WAITING', 'Waiting'
-        NOT_ACCEPTED = 'NOT_ACCEPTED', 'Not accepted'
+        ACCEPTED = 'ACCEPTED'
+        SENT = 'SENT'
+        NOT_ACCEPTED = 'NOT_ACCEPTED'
 
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
 
@@ -33,7 +33,7 @@ class Query(BaseModel):
     status = models.CharField(
         max_length=200,
         choices=Status.choices,
-        default=Status.WAITING,
+        default=Status.SENT,
     )
 
     class Meta:

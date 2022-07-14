@@ -82,8 +82,9 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 
         # TODO: Standardize phone numbers
         phone = invite_serializer.validated_data["phone"]
+        name = invite_serializer.validated_data["name"]
 
-        employee_profile = get_employee_profile_or_create(phone=phone.__str__())
+        employee_profile = get_employee_profile_or_create(phone=phone.__str__(), spare_name=name)
 
         employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
                                                                fields=['phone']))

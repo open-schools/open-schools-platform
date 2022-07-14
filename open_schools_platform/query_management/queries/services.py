@@ -4,6 +4,7 @@ from django.contrib.contenttypes.models import ContentType
 
 from open_schools_platform.common.services import model_update
 from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.user_management.users.models import User
 
 
 def create_query(sender_model_name: str, sender_id: uuid.UUID,
@@ -29,7 +30,7 @@ def query_update(*, query: Query, data) -> Query:
     return user
 
 
-def run_sender_handler(query: Query, new_status: str):
-    query.sender.query_handler(query, new_status)  # type: ignore
+def run_sender_handler(query: Query, new_status: str, user: User):
+    query.sender.query_handler(query, new_status, user)  # type: ignore
 
     return query
