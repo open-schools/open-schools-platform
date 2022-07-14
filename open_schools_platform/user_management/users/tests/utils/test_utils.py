@@ -3,7 +3,6 @@ from open_schools_platform.user_management.users.models import CreationToken
 from open_schools_platform.user_management.users.serializers import CreationTokenSerializer
 from open_schools_platform.user_management.users.services import create_token
 from open_schools_platform.utils.firebase_requests import send_firebase_sms
-from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.services import create_user
 
 
