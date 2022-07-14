@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.services import create_user
 
 
-def create_logged_in_user(instance) -> User:
+def create_logged_in_user(instance):
     credentials = {
         "phone": "+79025456481",
         "password": "123456",
@@ -19,7 +19,7 @@ def create_logged_in_user(instance) -> User:
     return user
 
 
-def create_not_logged_in_user() -> User:
+def create_not_logged_in_user():
     credentials = {
         "phone": "+79025456481",
         "password": "123456",
