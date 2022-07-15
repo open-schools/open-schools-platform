@@ -1,3 +1,4 @@
+from django.contrib.auth.middleware import get_user
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
 from rest_framework.response import Response
@@ -21,6 +22,6 @@ class QueryStatusChangeApi(views.APIView):
 
         query = get_query(filters={"id": query_status_serializer.validated_data["id"]})
 
-        run_sender_handler(query, query_status_serializer.validated_data["status"])
+        run_sender_handler(query, query_status_serializer.validated_data["status"], get_user(request))
 
         return Response({"detail": "Status was changed", "query": QueryStatusSerializer(query).data}, status=200)

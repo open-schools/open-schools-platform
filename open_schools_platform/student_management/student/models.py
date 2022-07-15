@@ -2,8 +2,10 @@ import uuid
 
 from django.core.validators import MinValueValidator
 from django.db import models
+from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.models import BaseModel
+from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.user_management.users.models import User
@@ -24,13 +26,22 @@ class StudentProfileManager(models.Manager):
 
 class StudentProfileQueryHandler:
     @staticmethod
-    def query_handler(query: Query, new_status: str):
+    def query_handler(query: Query, new_status: str, user: User):
         # TODO: Disable some statuses for some models here
         if query.status == new_status:
             return query.body
+        if query.sender in get_family(filters={"parent_profiles": user.parent_profile}).student_profiles.all():
+            if query.status != Query.Status.SENT:
+                raise NotAcceptable("Сan no longer change the query")
+            if new_status == Query.Status.DECLINED or Query.Status.ACCEPTED or Query.Status.IN_PROGRESS:
+                raise NotAcceptable("User can only set canceled status")
+        else:
+            if new_status == Query.Status.CANCELED:
+                raise NotAcceptable("Circle cannot cancel query, it can only decline it")
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
             query.body.circle = query.recipient  # type: ignore
+            query.body.student_profile = query.sender  # type: ignore
 
         query.body.save()  # type: ignore
 

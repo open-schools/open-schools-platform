@@ -13,7 +13,7 @@ from open_schools_platform.query_management.queries.serializers import QueryStat
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.student.selectors import get_student_profile
 from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleSerializer
+    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleReqSerializer
 from open_schools_platform.student_management.student.services import can_user_interact_with_student_profile_check, \
     create_student_profile, update_student_profile, create_student
 
@@ -75,22 +75,22 @@ class StudentJoinCircleApi(CreateAPIView):
         operation_description="Creates student profile, student and family.\n"
                               "Forms query for adding created student to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        request_body=StudentJoinCircleSerializer(),
+        request_body=StudentJoinCircleReqSerializer(),
         responses={201: QueryStatusSerializer, 406: "Current user already has family"}
     )
     def post(self, request, pk):
-        auto_generated_student_profile_serializer = StudentJoinCircleSerializer(data=request.data)
-        auto_generated_student_profile_serializer.is_valid(raise_exception=True)
+        student_join_circle_req_serializer = StudentJoinCircleReqSerializer(data=request.data)
+        student_join_circle_req_serializer.is_valid(raise_exception=True)
         user = get_user(request)
 
         if get_family(filters={"parent_profiles": user.parent_profile}):
             raise NotAcceptable("Please choose already created family")
-        student_profile = create_student_profile(name=auto_generated_student_profile_serializer.validated_data["name"],
-                                                 age=auto_generated_student_profile_serializer.validated_data["age"])
+        student_profile = create_student_profile(name=student_join_circle_req_serializer.validated_data["name"],
+                                                 age=student_join_circle_req_serializer.validated_data["age"])
         family = create_family(name=generate_name_for_family(parent=user.parent_profile))
         add_student_profile_to_family(family=family, student_profile=student_profile)
         add_parent_to_family(family=family, parent=user.parent_profile)
-        student = create_student(name=student_profile.name, student_profile=student_profile)
+        student = create_student(name=student_profile.name)
 
         query = create_query(sender_model_name="studentprofile", sender_id=student_profile.id,
                              recipient_model_name="circle", recipient_id=pk,
