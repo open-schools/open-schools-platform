@@ -9,28 +9,28 @@ from open_schools_platform.common.models import BaseModel
 
 class Query(BaseModel):
     class Status(models.TextChoices):
-        ACCEPTED = 'ACCEPTED', 'Accepted'
-        SENT = 'SENT', 'Sent'
-        IN_PROGRESS = 'IN_PROGRESS', 'In progress'
-        DECLINED = "DECLINED", 'Declined'
-        CANCELED = "CANCELED", 'Canceled'
+        ACCEPTED = "ACCEPTED"
+        SENT = "SENT"
+        IN_PROGRESS = "IN_PROGRESS"
+        DECLINED = "DECLINED"
+        CANCELED = "CANCELED"
 
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
 
     recipient_ct = models.ForeignKey(ContentType, related_name="recipient_ct", null=True, on_delete=models.CASCADE)
     recipient_id = models.UUIDField(default=uuid.uuid4)
 
-    recipient = GenericForeignKey('recipient_ct', 'recipient_id')
+    recipient = GenericForeignKey("recipient_ct", "recipient_id")
 
     sender_ct = models.ForeignKey(ContentType, related_name="sender_ct", null=True, on_delete=models.CASCADE)
     sender_id = models.UUIDField(default=uuid.uuid4)
 
-    sender = GenericForeignKey('sender_ct', 'sender_id')
+    sender = GenericForeignKey("sender_ct", "sender_id")
 
     body_ct = models.ForeignKey(ContentType, related_name="body_ct", null=True, on_delete=models.CASCADE)
     body_id = models.UUIDField(default=uuid.uuid4)
 
-    body = GenericForeignKey('body_ct', 'body_id')
+    body = GenericForeignKey("body_ct", "body_id")
 
     status = models.CharField(
         max_length=200,
