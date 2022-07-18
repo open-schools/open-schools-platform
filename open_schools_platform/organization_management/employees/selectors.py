@@ -19,6 +19,7 @@ def get_employees(*, filters=None) -> QuerySet:
 
     return EmployeeFilter(filters, qs).qs
 
+
 def get_employee_profile(*, filters=None) -> EmployeeProfile:
     filters = filters or {}
 

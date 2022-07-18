@@ -1,5 +1,4 @@
 from drf_yasg.utils import swagger_auto_schema
-from phonenumbers import PhoneNumber
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
@@ -76,15 +75,14 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         invite_serializer = OrganizationInviteSerializer(data=request.data)
         invite_serializer.is_valid()
 
-        if not get_employee(filters={"user": request.user.id,
-                                     "organization": pk}):
+        if not get_employee(filters={"user_id": request.user.id,
+                                     "organization_id": pk}):
             raise PermissionDenied(detail="You are not a member of this organization")
 
         # TODO: Standardize phone numbers
         phone = invite_serializer.validated_data["phone"]
-        name = invite_serializer.validated_data["name"]
 
-        employee_profile = get_employee_profile_or_create(phone=phone.__str__(), spare_name=name)
+        employee_profile = get_employee_profile_or_create(phone=phone.__str__())
 
         employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
                                                                fields=['phone']))

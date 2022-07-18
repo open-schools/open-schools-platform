@@ -19,7 +19,7 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
     return employee
 
 
-def get_employee_profile_or_create(phone: str, spare_name: str) -> EmployeeProfile:
+def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
     pwd = generate_user_password()
     user = get_user(filters={"phone": phone})
 
@@ -31,6 +31,13 @@ def get_employee_profile_or_create(phone: str, spare_name: str) -> EmployeeProfi
             raise APIException(detail="Something wrong! Please, contact the administrator"
                                       "and tell him the error number.")
 
-        user = create_user(phone=phone, password=pwd, name=spare_name)
+        user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
     return user.employee_profile
+
+
+def update_employee(organization: Organization,
+                    employee_profile: EmployeeProfile,
+                    employee: Employee):
+    employee.organization = organization
+    employee.employee_profile = employee_profile
