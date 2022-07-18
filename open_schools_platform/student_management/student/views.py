@@ -70,7 +70,7 @@ class StudentProfileApi(CreateAPIView):
         return Response(StudentProfileSerializer(student_profile).data, status=200)
 
 
-class StudentJoinCircleInquiryApi(CreateAPIView):
+class StudentJoinCircleQueryApi(CreateAPIView):
     @swagger_auto_schema(
         operation_description="Creates student profile, student and family.\n"
                               "Forms query for adding created student to circle",

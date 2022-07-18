@@ -2,18 +2,18 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from open_schools_platform.organization_management.circles.tests.utils.test_utils import create_test_circle
+from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
 from open_schools_platform.parent_management.families.services import create_family
 from open_schools_platform.student_management.student.services import create_student_profile
-from open_schools_platform.user_management.users.tests.utils.test_utils import create_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentProfileExceptionsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.student_profile_url = reverse("api:student-management:create-student-profile")
-        self.student_join_circle_inquiry_url = lambda pk: reverse("api:student-management:student-join-circle-inquiry",
-                                                                  args=[pk])
+        self.student_join_circle_query_url = lambda pk: reverse("api:student-management:student-join-circle-query",
+                                                                args=[pk])
 
     def test_family_does_not_exist(self):
         data_for_student_profile_create_request = {
@@ -88,6 +88,6 @@ class StudentProfileExceptionsTests(TestCase):
             "name": 'test_name',
             "age": 15
         }
-        response_for_student_join_circle_request = self.client.post(self.student_join_circle_inquiry_url(circle.id),
+        response_for_student_join_circle_request = self.client.post(self.student_join_circle_query_url(circle.id),
                                                                     data_for_student_join_circle_request)
         self.assertEqual(406, response_for_student_join_circle_request.status_code)

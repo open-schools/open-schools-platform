@@ -6,8 +6,7 @@ from rest_framework.test import APIClient
 import pytz
 
 from open_schools_platform.user_management.users.services import verify_token
-from open_schools_platform.user_management.users.tests.utils.test_utils import create_test_token, \
-    create_not_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_test_token, create_not_logged_in_user
 
 
 class UserExceptionsTests(TestCase):

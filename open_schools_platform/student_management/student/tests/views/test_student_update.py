@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from open_schools_platform.parent_management.families.services import create_family, add_parent_to_family
 from open_schools_platform.student_management.student.selectors import get_student_profile
-from open_schools_platform.user_management.users.tests.utils.test_utils import create_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentProfileUpdateTests(TestCase):

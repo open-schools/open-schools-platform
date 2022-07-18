@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from open_schools_platform.organization_management.circles.models import Circle
-from open_schools_platform.organization_management.circles.tests.utils.test_utils import create_test_circle
+from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
 
 
 class CreateCircleTests(TestCase):

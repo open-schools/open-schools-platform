@@ -3,7 +3,7 @@ from rest_framework.test import APIClient
 from django.urls import reverse
 
 from open_schools_platform.user_management.users.services import verify_token
-from open_schools_platform.user_management.users.tests.utils.test_utils import create_valid_test_token
+from open_schools_platform.user_management.users.tests.utils import create_valid_test_token
 
 
 class UserRequestsCycleTests(TestCase):

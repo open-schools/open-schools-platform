@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.user_management.users.tests.utils.test_utils import create_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class FamilyCreateTests(TestCase):
