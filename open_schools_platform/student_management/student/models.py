@@ -31,11 +31,25 @@ class StudentProfile(BaseModel):
         return self.name.__str__()
 
 
+class StudentManager(models.Manager):
+    def create_student(self, name: str, circle: Circle = None, student_profile: StudentProfile = None):
+        student = self.model(
+            name=name,
+            circle=circle,
+            student_profile=student_profile
+        )
+        student.full_clean()
+        student.save(using=self.db)
+        return student
+
+
 class Student(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
-    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students")
-    student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students")
+    circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)
+    student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students",
+                                        blank=True)
+    objects = StudentManager()
 
     def __str__(self):
         return self.name

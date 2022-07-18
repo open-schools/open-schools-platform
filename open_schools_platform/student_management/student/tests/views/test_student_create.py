@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from open_schools_platform.parent_management.families.services import create_family, add_parent_to_family
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
-from open_schools_platform.user_management.users.services import create_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentProfileCreateTests(TestCase):
@@ -13,14 +13,7 @@ class StudentProfileCreateTests(TestCase):
         self.student_profile_create_url = reverse("api:student-management:create-student-profile")
 
     def test_successful_student_profile_creation(self):
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        user = create_user(**credentials)
-        self.client.login(**credentials)
+        user = create_logged_in_user(instance=self)
 
         parent = get_parent_profile(filters={"user": user})
         family = create_family(name="Test_name")

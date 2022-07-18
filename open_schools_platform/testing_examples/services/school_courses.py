@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from open_schools_platform.testing_examples.models import (
     SchoolCourse,
     School,
-    Student,
+    StudentExample,
     Roster
 )
 
@@ -18,7 +18,7 @@ def school_course_create(
     name: str,
     slug: Optional[str] = None,
     school: School,
-    students: Iterable[Student],
+    students: Iterable[StudentExample],
     start_date: date,
     end_date: date
 ) -> SchoolCourse:

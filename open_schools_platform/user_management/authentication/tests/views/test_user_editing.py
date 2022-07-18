@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.user_management.users.selectors import get_user
-from open_schools_platform.user_management.users.services import create_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_not_logged_in_user
 
 
 class UserEditingTests(TestCase):
@@ -14,15 +14,7 @@ class UserEditingTests(TestCase):
         self.jwt_login_url = reverse('api:user-management:authentication:jwt:login')
 
     def test_name_successfully_changed(self):
-        credentials = {
-            "phone": "+79025456481",
-            "password": "654321",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-        self.client.post(self.jwt_login_url, credentials)
-
+        create_logged_in_user(instance=self)
         data = {
             "name": "test_user_changed_name"
         }
@@ -33,36 +25,19 @@ class UserEditingTests(TestCase):
         self.assertEqual("test_user_changed_name", user.name)
 
     def test_user_successfully_changed_password(self):
-
-        credentials = {
-            "phone": "+79025456481",
-            "password": "654321",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-        self.client.post(self.jwt_login_url, credentials)
-
+        create_logged_in_user(instance=self)
         data = {
-            "old_password": "654321",
-            "new_password": "123456"
+            "old_password": "123456",
+            "new_password": "654321"
         }
 
         response = self.client.put(self.user_update_password_url, data)
         self.assertEqual(200, response.status_code)
         user = get_user(filters={"phone": "+79025456481"})
-        self.assertTrue(user.check_password("123456"))
+        self.assertTrue(user.check_password("654321"))
 
     def test_old_password_does_not_match_with_actual_one(self):
-        credentials = {
-            "phone": "+79025456481",
-            "password": "654321",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-        self.client.post(self.jwt_login_url, credentials)
-
+        create_logged_in_user(instance=self)
         data = {
             "old_password": "000000",
             "new_password": "123456"
@@ -72,15 +47,7 @@ class UserEditingTests(TestCase):
         self.assertEqual(401, response.status_code)
 
     def test_old_password_match_with_new_one(self):
-        credentials = {
-            "phone": "+79025456481",
-            "password": "654321",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-        self.client.post(self.jwt_login_url, credentials)
-
+        create_logged_in_user(instance=self)
         data = {
             "old_password": "654321",
             "new_password": "654321"
@@ -90,13 +57,7 @@ class UserEditingTests(TestCase):
         self.assertEqual(401, response.status_code)
 
     def test_request_user_is_not_logged_in(self):
-        credentials = {
-            "phone": "+79025456481",
-            "password": "654321",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
+        create_not_logged_in_user()
         data_for_name_change = {
             "name": "Alex"
         }

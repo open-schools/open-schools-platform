@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from open_schools_platform.parent_management.families.services import create_family, add_parent_to_family
 from open_schools_platform.student_management.student.selectors import get_student_profile
-from open_schools_platform.user_management.users.services import create_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentProfileUpdateTests(TestCase):
@@ -13,14 +13,7 @@ class StudentProfileUpdateTests(TestCase):
         self.student_profile_update_url = reverse("api:student-management:create-student-profile")
 
     def test_successful_student_profile_update(self):
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        user = create_user(**credentials)
-        self.client.login(**credentials)
+        user = create_logged_in_user(instance=self)
         data_for_student_profiles_name_update_request = {
             "student_profile": user.student.id,
             "name": "changed_name"
@@ -52,14 +45,7 @@ class StudentProfileUpdateTests(TestCase):
         self.assertEqual("new_changed_name", updated_student_profile.name)
 
     def test_successful_student_profile_in_family_update(self):
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        user = create_user(**credentials)
-        self.client.login(**credentials)
+        user = create_logged_in_user(instance=self)
         family = create_family(name="test_family")
         add_parent_to_family(family=family, parent=user.parent_profile)
         data = {
