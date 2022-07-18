@@ -12,7 +12,8 @@ class StudentProfileExceptionsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.student_profile_url = reverse("api:student-management:create-student-profile")
-        self.student_join_circle_url = lambda pk: reverse("api:student-management:student-join-circle", args=[pk])
+        self.student_join_circle_inquiry_url = lambda pk: reverse("api:student-management:student-join-circle-inquiry",
+                                                                  args=[pk])
 
     def test_family_does_not_exist(self):
         data_for_student_profile_create_request = {
@@ -87,6 +88,6 @@ class StudentProfileExceptionsTests(TestCase):
             "name": 'test_name',
             "age": 15
         }
-        response_for_student_join_circle_request = self.client.post(self.student_join_circle_url(circle.id),
+        response_for_student_join_circle_request = self.client.post(self.student_join_circle_inquiry_url(circle.id),
                                                                     data_for_student_join_circle_request)
         self.assertEqual(406, response_for_student_join_circle_request.status_code)

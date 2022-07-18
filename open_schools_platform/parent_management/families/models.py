@@ -3,6 +3,7 @@ import uuid
 from django.db import models
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.parent_management.parents.models import ParentProfile
+from open_schools_platform.student_management.student.models import StudentProfile
 
 
 class FamilyManager(models.Manager):
@@ -18,7 +19,7 @@ class FamilyManager(models.Manager):
 class Family(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     parent_profiles = models.ManyToManyField(ParentProfile, related_name="parent_families")
-    student_profiles = models.ManyToManyField('student.StudentProfile', related_name="student_families")
+    student_profiles = models.ManyToManyField(StudentProfile, related_name="student_families")
     name = models.CharField(max_length=200)
     objects = FamilyManager()
 

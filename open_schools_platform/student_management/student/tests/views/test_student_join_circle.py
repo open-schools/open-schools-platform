@@ -13,7 +13,8 @@ from open_schools_platform.user_management.users.tests.utils.test_utils import c
 class StudentJoinCirclesTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_join_circle_url = lambda pk: reverse("api:student-management:student-join-circle", args=[pk])
+        self.student_join_circle_inquiry_url = lambda pk: reverse("api:student-management:student-join-circle-inquiry",
+                                                                  args=[pk])
 
     def test_student_join_circle_query_successfully_formed(self):
         user = create_logged_in_user(instance=self)
@@ -22,7 +23,7 @@ class StudentJoinCirclesTests(TestCase):
             "name": "test_name",
             "age": 15
         }
-        response = self.client.post(self.student_join_circle_url(circle.id), data)
+        response = self.client.post(self.student_join_circle_inquiry_url(circle.id), data)
         self.assertEqual(201, response.status_code)
         self.assertTrue(get_student_profile(filters={"name": data["name"]}))
         family = get_family(filters={"parent_profiles": user.parent_profile})
