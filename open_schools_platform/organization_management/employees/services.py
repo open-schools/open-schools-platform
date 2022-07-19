@@ -20,10 +20,10 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
 
 
 def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
-    pwd = generate_user_password()
     user = get_user(filters={"phone": phone})
 
     if not user:
+        pwd = generate_user_password()
         msg = OrganizationConstants.get_invite_message(phone=phone, pwd=pwd)
         response = send_sms(to=[phone], msg=msg)
 

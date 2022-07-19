@@ -9,12 +9,10 @@ class EmployeeFilter(BaseFilterSet):
     name = CharFilter(field_name="name", lookup_expr="icontains")
     position = CharFilter(field_name="position", lookup_expr="icontains")
     phone = CharFilter(field_name="employee_profile__user__phone", lookup_expr="icontains")
-    organization_id = CharFilter(field_name="organization__id", lookup_expr="icontains")
-    user_id = CharFilter(field_name="employee_profile__user__id", lookup_expr="icontains")
 
     class Meta:
         model = Employee
-        fields = ("organization",)
+        fields = ("organization", "employee_profile")
 
 
 class EmployeeProfileFilter(BaseFilterSet):

@@ -15,7 +15,6 @@ def create_organization(name: str, inn: str) -> Organization:
 
 
 class OrganizationQueryHandler:
-    # TODO: Add DECLINED status, may be add new AllowedStatus class
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED]
 
     @staticmethod
@@ -31,6 +30,8 @@ class OrganizationQueryHandler:
 
         if type(query.recipient) is not EmployeeProfile:
             raise ValidationError(detail="The recipient must be an Employee if the sender is an organization")
+
+        # TODO: think about type: ignore lines -
 
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:

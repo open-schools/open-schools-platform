@@ -28,7 +28,7 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         # TODO: we should add permission checks here
-        if not get_employee(filters={"user": request.user.id,
+        if not get_employee(filters={"employee_profile": request.user.employee_profile,
                                      "organization": request.GET.get("organization")}):
             raise PermissionDenied(detail="You are not a member of this organization")
 

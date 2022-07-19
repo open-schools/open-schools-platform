@@ -75,8 +75,8 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         invite_serializer = OrganizationInviteSerializer(data=request.data)
         invite_serializer.is_valid()
 
-        if not get_employee(filters={"user_id": request.user.id,
-                                     "organization_id": pk}):
+        if not get_employee(filters={"employee_profile": request.user.employee_profile,
+                                     "organization": pk}):
             raise PermissionDenied(detail="You are not a member of this organization")
 
         # TODO: Standardize phone numbers
