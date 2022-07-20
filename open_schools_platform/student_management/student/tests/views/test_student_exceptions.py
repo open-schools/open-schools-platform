@@ -17,79 +17,79 @@ class StudentProfileExceptionsTests(TestCase):
 
     def test_family_does_not_exist(self):
         create_logged_in_user(instance=self)
-        student_profile_create_request_data = {
+        student_profile_create_data = {
             "age": 15,
             "name": "test_student_profile",
             "family": "99999999-9999-9999-9999-999999999999",
         }
-        student_profile_create_request_response = self.client.post(self.student_profile_url,
-                                                                   student_profile_create_request_data)
-        self.assertEqual(404, student_profile_create_request_response.status_code)
+        student_profile_create_response = self.client.post(self.student_profile_url,
+                                                           student_profile_create_data)
+        self.assertEqual(404, student_profile_create_response.status_code)
 
         student_profile = create_student_profile(name="test_name", age=15)
 
-        student_profile_update_request_data = {
+        student_profile_update_data = {
             "student_profile": student_profile.id,
             "family": "99999999-9999-9999-9999-999999999999",
             "age": 15,
             "name": "test_student_profile"
         }
-        student_profile_update_request_response = self.client.put(self.student_profile_url,
-                                                                  student_profile_update_request_data)
-        self.assertEqual(404, student_profile_update_request_response.status_code)
+        student_profile_update_response = self.client.put(self.student_profile_url,
+                                                          student_profile_update_data)
+        self.assertEqual(404, student_profile_update_response.status_code)
 
     def test_current_user_cannot_interact_with_student_profile(self):
         create_logged_in_user(instance=self)
         user = create_test_user(phone="+79020000000")
         family = create_family(name="test_family", parent=user.parent_profile)
-        student_profile_create_request_data = {
+        student_profile_create_data = {
             "age": 15,
             "name": "test_student_profile",
             "family": family.id,
         }
-        student_profile_create_request_response = self.client.post(self.student_profile_url,
-                                                                   student_profile_create_request_data)
-        self.assertEqual(403, student_profile_create_request_response.status_code)
+        student_profile_create_response = self.client.post(self.student_profile_url,
+                                                           student_profile_create_data)
+        self.assertEqual(403, student_profile_create_response.status_code)
 
         student_profile = create_student_profile(name="test_name", age=15)
-        student_profile_update_request_with_family_data = {
+        student_profile_update_with_family_data = {
             "student_profile": student_profile.id,
             "family": family.id,
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_request_with_family_response = \
-            self.client.put(self.student_profile_url, student_profile_update_request_with_family_data)
-        self.assertEqual(403, student_profile_update_request_with_family_response.status_code)
+        student_profile_update_with_family_response = \
+            self.client.put(self.student_profile_url, student_profile_update_with_family_data)
+        self.assertEqual(403, student_profile_update_with_family_response.status_code)
 
-        student_profile_update_request_data = {
+        student_profile_update_data = {
             "student_profile": student_profile.id,
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_request_response = self.client.put(self.student_profile_url,
-                                                                  student_profile_update_request_data)
-        self.assertEqual(403, student_profile_update_request_response.status_code)
+        student_profile_update_response = self.client.put(self.student_profile_url,
+                                                          student_profile_update_data)
+        self.assertEqual(403, student_profile_update_response.status_code)
 
     def test_student_profile_does_not_exist(self):
         create_logged_in_user(instance=self)
-        student_profile_update_request_data = {
+        student_profile_update_data = {
             "student_profile": "99999999-9999-9999-9999-999999999999",
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_request_response = self.client.put(self.student_profile_url,
-                                                                  student_profile_update_request_data)
-        self.assertEqual(404, student_profile_update_request_response.status_code)
+        student_profile_update_response = self.client.put(self.student_profile_url,
+                                                          student_profile_update_data)
+        self.assertEqual(404, student_profile_update_response.status_code)
 
     def test_family_already_exists(self):
         user = create_logged_in_user(instance=self)
         create_family(name="test_family", parent=user.parent_profile)
         circle = create_test_circle()
-        student_join_circle_query_request_data = {
+        student_join_circle_query_data = {
             "name": 'test_name',
             "age": 15
         }
-        student_join_circle_query_request_response = self.client.post(self.student_join_circle_query_url(circle.id),
-                                                                      student_join_circle_query_request_data)
-        self.assertEqual(406, student_join_circle_query_request_response.status_code)
+        student_join_circle_query_response = self.client.post(self.student_join_circle_query_url(circle.id),
+                                                              student_join_circle_query_data)
+        self.assertEqual(406, student_join_circle_query_response.status_code)
