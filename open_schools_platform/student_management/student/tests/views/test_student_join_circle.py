@@ -26,7 +26,7 @@ class StudentJoinCirclesTests(TestCase):
         response = self.client.post(self.student_join_circle_query_url(circle.id), data)
         self.assertEqual(201, response.status_code)
         self.assertTrue(get_student_profile(filters={"name": data["name"]}))
-        family = get_family(filters={"parent_profiles": user.parent_profile})
+        family = get_family(filters={"parent_profiles": {user.parent_profile}})
         self.assertTrue(family)
         self.assertTrue(get_student_profile(filters={"name": data["name"]}) in family.student_profiles.all())
         self.assertTrue(user.parent_profile in family.parent_profiles.all())

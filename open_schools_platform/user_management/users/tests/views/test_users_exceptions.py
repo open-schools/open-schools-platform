@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 import pytz
 
 from open_schools_platform.user_management.users.services import verify_token
-from open_schools_platform.user_management.users.tests.utils import create_test_token, create_not_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_test_token, create_test_user
 
 
 class UserExceptionsTests(TestCase):
@@ -21,91 +21,91 @@ class UserExceptionsTests(TestCase):
         self.user_reset_password_url = reverse("api:user-management:users:reset-password")
 
     def test_firebase_response_is_not_200(self):
-        data_for_token_creation_request = {
+        token_creation_request_data = {
             "phone": "+79020000000",
             "recaptcha": "123456"
         }
-        response_for_token_creation_request = self.client.post(self.token_creation_url, data_for_token_creation_request)
-        self.assertEqual(422, response_for_token_creation_request.status_code)
+        token_creation_request_response = self.client.post(self.token_creation_url, token_creation_request_data)
+        self.assertEqual(422, token_creation_request_response.status_code)
 
         token = create_test_token()
 
-        data_for_token_verification_request = {
+        token_verification_request_data = {
             "otp": "123456"
         }
-        response_for_token_verification_request = self.client.put(self.token_verification_url(token.key),
-                                                                  data_for_token_verification_request)
-        self.assertEqual(422, response_for_token_verification_request.status_code)
+        token_verification_request_response = self.client.put(self.token_verification_url(token.key),
+                                                              token_verification_request_data)
+        self.assertEqual(422, token_verification_request_response.status_code)
 
     def test_token_does_not_exist(self):
-        data_for_user_creation_request = {
+        user_creation_request_data = {
             "token": "99999999-9999-9999-9999-999999999999",
             "name": "test_user",
             "password": "123456",
         }
-        response_for_user_creation_request = self.client.post(self.user_creation_url, data_for_user_creation_request)
-        self.assertEqual(404, response_for_user_creation_request.status_code)
+        user_creation_request_response = self.client.post(self.user_creation_url, user_creation_request_data)
+        self.assertEqual(404, user_creation_request_response.status_code)
 
-        data_for_token_verification_request = {
+        token_verification_request_data = {
             "otp": "123456"
         }
         token = "99999999-9999-9999-9999-999999999999"
-        response_for_token_verification_request = self.client.put(self.token_verification_url(token),
-                                                                  data_for_token_verification_request)
-        self.assertEqual(404, response_for_token_verification_request.status_code)
+        token_verification_request_response = self.client.put(self.token_verification_url(token),
+                                                              token_verification_request_data)
+        self.assertEqual(404, token_verification_request_response.status_code)
 
-        data_for_sms_resend_request = {
+        sms_resend_request_data = {
             "recaptcha": "123456"
         }
-        response_for_sms_resend_request = self.client.post(self.sms_resend_url(token), data_for_sms_resend_request)
-        self.assertEqual(404, response_for_sms_resend_request.status_code)
+        sms_resend_request_response = self.client.post(self.sms_resend_url(token), sms_resend_request_data)
+        self.assertEqual(404, sms_resend_request_response.status_code)
 
-        response_for_token_data_resend_request = self.client.get(self.token_data_resend_url(token))
-        self.assertEqual(404, response_for_token_data_resend_request.status_code)
+        token_data_resend_request_response = self.client.get(self.token_data_resend_url(token))
+        self.assertEqual(404, token_data_resend_request_response.status_code)
 
-        data_for_password_reset_request = {
+        password_reset_request_data = {
             "token": token,
             "password": "123456",
         }
-        response_for_password_reset_request = self.client.post(self.user_reset_password_url,
-                                                               data_for_password_reset_request)
-        self.assertEqual(404, response_for_password_reset_request.status_code)
+        password_reset_request_response = self.client.post(self.user_reset_password_url,
+                                                           password_reset_request_data)
+        self.assertEqual(404, password_reset_request_response.status_code)
 
     def test_token_is_overdue(self):
         token = create_test_token()
         token.created_at = datetime.datetime(2000, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
         verify_token(token)
 
-        data_for_user_creation_request = {
+        user_creation_request_data = {
             "token": token.key,
             "name": "test_user",
             "password": "123456",
         }
-        response_for_user_creation_request = self.client.post(self.user_creation_url, data_for_user_creation_request)
-        self.assertEqual(401, response_for_user_creation_request.status_code)
+        user_creation_request_response = self.client.post(self.user_creation_url, user_creation_request_data)
+        self.assertEqual(401, user_creation_request_response.status_code)
 
-        data_for_token_verification_request = {
+        token_verification_request_data = {
             "otp": "123456"
         }
-        response_for_token_verification_request = self.client.put(self.token_verification_url(token.key),
-                                                                  data_for_token_verification_request)
-        self.assertEqual(401, response_for_token_verification_request.status_code)
+        token_verification_request_response = self.client.put(self.token_verification_url(token.key),
+                                                              token_verification_request_data)
+        self.assertEqual(401, token_verification_request_response.status_code)
 
-        data_for_sms_resend_request = {
+        sms_resend_request_data = {
             "recaptcha": "123456"
         }
-        response_for_sms_resend_request = self.client.post(self.sms_resend_url(token.key), data_for_sms_resend_request)
-        self.assertEqual(401, response_for_sms_resend_request.status_code)
+        sms_resend_request_response = self.client.post(self.sms_resend_url(token.key), sms_resend_request_data)
+        self.assertEqual(401, sms_resend_request_response.status_code)
 
-        data_for_password_reset = {
+        password_reset_data = {
             "token": token.key,
             "password": "123456"
         }
 
-        create_not_logged_in_user()
+        create_test_user()
 
-        response_for_password_reset = self.client.post(self.user_reset_password_url, data_for_password_reset)
-        self.assertEqual(401, response_for_password_reset.status_code)
+        password_reset_response = self.client.post(self.user_reset_password_url, password_reset_data)
+        self.assertEqual(401, password_reset_response.status_code)
 
     def test_token_is_not_verified(self):
         token = create_test_token()
@@ -117,15 +117,14 @@ class UserExceptionsTests(TestCase):
         response = self.client.post(self.user_creation_url, data)
         self.assertEqual(401, response.status_code)
 
-        data_for_password_reset_request = {
+        password_reset_request_data = {
             "token": token.key,
             "password": "123456"
         }
 
-        create_not_logged_in_user()
-        response_for_password_reset_request = self.client.post(self.user_reset_password_url,
-                                                               data_for_password_reset_request)
-        self.assertEqual(401, response_for_password_reset_request.status_code)
+        password_reset_request_response = self.client.post(self.user_reset_password_url,
+                                                           password_reset_request_data)
+        self.assertEqual(401, password_reset_request_response.status_code)
 
     def test_sms_cannot_be_resend(self):
         token = create_test_token()
@@ -139,12 +138,12 @@ class UserExceptionsTests(TestCase):
         token = create_test_token()
         verify_token(token)
 
-        data_for_password_reset_request = {
+        password_reset_request_data = {
             "token": token.key,
             "password": "123456"
         }
 
-        response_for_password_reset_request = self.client.post(self.user_reset_password_url,
-                                                               data_for_password_reset_request)
+        password_reset_request_response = self.client.post(self.user_reset_password_url,
+                                                           password_reset_request_data)
 
-        self.assertEqual(404, response_for_password_reset_request.status_code)
+        self.assertEqual(404, password_reset_request_response.status_code)

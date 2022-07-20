@@ -54,7 +54,7 @@ class StudentProfileQueryHandler:
             return query.body
         if new_status not in allowed_statuses:
             raise NotAcceptable("Please enter a valid status for query")
-        if query.sender in get_family(filters={"parent_profiles": user.parent_profile}).student_profiles.all():
+        if query.sender in get_family(filters={"parent_profiles": {user.parent_profile}}).student_profiles.all():
             if query.status != Query.Status.SENT:
                 raise NotAcceptable("Сan no longer change the query")
             if new_status == Query.Status.DECLINED or Query.Status.ACCEPTED or Query.Status.IN_PROGRESS:

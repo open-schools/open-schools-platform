@@ -5,4 +5,4 @@ from open_schools_platform.parent_management.families.models import Family
 class FamilyFilter(BaseFilterSet):
     class Meta:
         model = Family
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'parent_profiles', 'student_profiles')
