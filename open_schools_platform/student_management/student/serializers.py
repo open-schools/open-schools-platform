@@ -22,12 +22,14 @@ class StudentProfileUpdateSerializer(serializers.Serializer):
 
 
 class StudentJoinCircleReqSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = StudentProfile
         fields = ("name", "age")
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = StudentProfile
-        fields = ("name", "age", "id")
+        fields = ("id", "name", "age", "user")

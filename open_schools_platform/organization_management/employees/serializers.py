@@ -3,16 +3,28 @@ from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.serializers import OrganizationSerializer
-from open_schools_platform.user_management.users.serializers import UserSerializer
+from open_schools_platform.user_management.users.models import User
 
 
-class EmployeeProfileSerializer(serializers.ModelSerializer):
-    user = UserSerializer()
+class EmployeeProfileUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id", "phone", "name")
+
+
+class EmployeeProfileWithUserSerializer(serializers.ModelSerializer):
+    user = EmployeeProfileUserSerializer()
 
     class Meta:
         model = EmployeeProfile
-        fields = ("id", "user")
+        fields = ("id", "name", "user")
         read_only_fields = fields
+
+
+class EmployeeProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeProfile
+        fields = ("id", "name", "user")
 
 
 class EmployeeSerializer(serializers.ModelSerializer):
@@ -25,7 +37,7 @@ class EmployeeSerializer(serializers.ModelSerializer):
 
 
 class EmployeeListSerializer(serializers.ModelSerializer):
-    employee_profile = EmployeeProfileSerializer()
+    employee_profile = EmployeeProfileWithUserSerializer()
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

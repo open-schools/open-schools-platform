@@ -15,32 +15,32 @@ class StudentProfileUpdateTests(TestCase):
     def test_successful_student_profile_update(self):
         user = create_logged_in_user(instance=self)
         data_for_student_profiles_name_update_request = {
-            "student_profile": user.student.id,
+            "student_profile": user.student_profile.id,
             "name": "changed_name"
         }
         response_for_student_profiles_name_update_request =\
             self.client.put(self.student_profile_update_url, data_for_student_profiles_name_update_request)
         self.assertEqual(200, response_for_student_profiles_name_update_request.status_code)
-        updated_student_profile = get_student_profile(filters={"id": user.student.id})
+        updated_student_profile = get_student_profile(filters={"id": user.student_profile.id})
         self.assertEqual('changed_name', updated_student_profile.name)
         data_for_student_profiles_age_update_request = {
-            "student_profile": user.student.id,
+            "student_profile": user.student_profile.id,
             "age": 16
         }
         response_for_student_profiles_age_update_request = self.client.put(self.student_profile_update_url,
                                                                            data_for_student_profiles_age_update_request)
         self.assertEqual(200, response_for_student_profiles_age_update_request.status_code)
-        updated_student_profile = get_student_profile(filters={"id": user.student.id})
+        updated_student_profile = get_student_profile(filters={"id": user.student_profile.id})
         self.assertEqual(16, updated_student_profile.age)
         data_for_student_profiles_age_and_name_update_request = {
-            "student_profile": user.student.id,
+            "student_profile": user.student_profile.id,
             "age": 18,
             "name": "new_changed_name"
         }
         response_for_student_profiles_age_and_name_update_request = \
             self.client.put(self.student_profile_update_url, data_for_student_profiles_age_and_name_update_request)
         self.assertEqual(200, response_for_student_profiles_age_and_name_update_request.status_code)
-        updated_student_profile = get_student_profile(filters={"id": user.student.id})
+        updated_student_profile = get_student_profile(filters={"id": user.student_profile.id})
         self.assertEqual(18, updated_student_profile.age)
         self.assertEqual("new_changed_name", updated_student_profile.name)
 
@@ -49,13 +49,13 @@ class StudentProfileUpdateTests(TestCase):
         family = create_family(name="test_family")
         add_parent_to_family(family=family, parent=user.parent_profile)
         data = {
-            "student_profile": user.student.id,
+            "student_profile": user.student_profile.id,
             "family": family.id,
             "age": 16,
             "name": "changed_name"
         }
         response_for_student_profile_in_family_update_request = self.client.put(self.student_profile_update_url, data)
         self.assertEqual(200, response_for_student_profile_in_family_update_request.status_code)
-        updated_student_profile = get_student_profile(filters={"id": user.student.id})
+        updated_student_profile = get_student_profile(filters={"id": user.student_profile.id})
         self.assertEqual(16, updated_student_profile.age)
         self.assertEqual("changed_name", updated_student_profile.name)
