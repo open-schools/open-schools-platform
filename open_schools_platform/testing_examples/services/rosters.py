@@ -3,7 +3,7 @@ from typing import Optional
 
 from django.core.exceptions import ValidationError
 
-from open_schools_platform.testing_examples.models import Student, SchoolCourse, Roster
+from open_schools_platform.testing_examples.models import StudentExample, SchoolCourse, Roster
 
 
 ROSTER_VALIDATE_PERIOD_OUTSIDE_COURSE_PERIOD = 'Roster period cannot be outside {school_course} period'
@@ -31,7 +31,7 @@ def roster_validate_period(
 
 def roster_create(
     *,
-    student: Student,
+    student: StudentExample,
     school_course: SchoolCourse,
     start_date: Optional[date] = None,
     end_date: Optional[date] = None

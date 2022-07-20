@@ -5,13 +5,11 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 import pytz
 
-from open_schools_platform.user_management.users.services import create_token, create_user, verify_token
+from open_schools_platform.user_management.users.services import verify_token
+from open_schools_platform.user_management.users.tests.utils import create_test_token, create_not_logged_in_user
 
 
 class UserExceptionsTests(TestCase):
-    """
-        Session parameters that are used in tests below are invalid.
-    """
     def setUp(self):
         self.client = APIClient()
         self.token_creation_url = reverse("api:user-management:users:create-token")
@@ -30,11 +28,7 @@ class UserExceptionsTests(TestCase):
         response_for_token_creation_request = self.client.post(self.token_creation_url, data_for_token_creation_request)
         self.assertEqual(422, response_for_token_creation_request.status_code)
 
-        data_for_token_creation = {
-            "phone": "+79020000000",
-            "session": "000000"
-        }
-        token = create_token(**data_for_token_creation)
+        token = create_test_token()
 
         data_for_token_verification_request = {
             "otp": "123456"
@@ -78,11 +72,7 @@ class UserExceptionsTests(TestCase):
         self.assertEqual(404, response_for_password_reset_request.status_code)
 
     def test_token_is_overdue(self):
-        data_for_token_creation = {
-            "phone": "+79020000000",
-            "session": "000000"
-        }
-        token = create_token(**data_for_token_creation)
+        token = create_test_token()
         token.created_at = datetime.datetime(2000, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
         verify_token(token)
 
@@ -112,23 +102,13 @@ class UserExceptionsTests(TestCase):
             "password": "123456"
         }
 
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
+        create_not_logged_in_user()
 
         response_for_password_reset = self.client.post(self.user_reset_password_url, data_for_password_reset)
         self.assertEqual(401, response_for_password_reset.status_code)
 
     def test_token_is_not_verified(self):
-        data_for_token_creation = {
-            "phone": "+79020000000",
-            "session": "000000"
-        }
-        token = create_token(**data_for_token_creation)
+        token = create_test_token()
         data = {
             "token": token.key,
             "name": "test_user",
@@ -142,25 +122,13 @@ class UserExceptionsTests(TestCase):
             "password": "123456"
         }
 
-        credentials = {
-            "phone": "+79020000000",
-            "password": "123456",
-            "name": "test_user"
-        }
-
-        create_user(**credentials)
-
+        create_not_logged_in_user()
         response_for_password_reset_request = self.client.post(self.user_reset_password_url,
                                                                data_for_password_reset_request)
         self.assertEqual(401, response_for_password_reset_request.status_code)
 
     def test_sms_cannot_be_resend(self):
-        data_for_token_creation = {
-            "phone": "+79020000000",
-            "session": "000000"
-        }
-
-        token = create_token(**data_for_token_creation)
+        token = create_test_token()
         data = {
             "recaptcha": "123456"
         }
@@ -168,11 +136,7 @@ class UserExceptionsTests(TestCase):
         self.assertEqual(422, response.status_code)
 
     def test_user_does_not_exist(self):
-        data_for_token_creation = {
-            "phone": "+79022222222",
-            "session": "000000"
-        }
-        token = create_token(**data_for_token_creation)
+        token = create_test_token()
         verify_token(token)
 
         data_for_password_reset_request = {

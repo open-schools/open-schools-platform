@@ -7,7 +7,7 @@ from django.utils.text import slugify
 from open_schools_platform.utils.tests import faker
 from open_schools_platform.testing_examples.models import (
     School,
-    Student,
+    StudentExample,
     Roster,
     SchoolCourse
 )
@@ -23,7 +23,7 @@ class SchoolFactory(factory.django.DjangoModelFactory):
 
 class StudentFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Student
+        model = StudentExample
 
     email = factory.LazyAttribute(lambda _: faker.unique.email())
     identifier = factory.LazyAttribute(lambda _: faker.unique.uuid4())

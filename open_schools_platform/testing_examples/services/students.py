@@ -4,7 +4,7 @@ from typing import Optional
 from django.utils import timezone
 from django.db import transaction
 
-from open_schools_platform.testing_examples.models import Student, School
+from open_schools_platform.testing_examples.models import StudentExample, School
 from open_schools_platform.testing_examples.services.rosters import roster_create
 from open_schools_platform.testing_examples.selectors.schools import school_list_school_courses
 
@@ -15,8 +15,8 @@ def student_create(
     email: str,
     school: School,
     start_date: Optional[date] = None
-) -> Student:
-    student = Student(
+) -> StudentExample:
+    student = StudentExample(
         email=email,
         school=school
     )

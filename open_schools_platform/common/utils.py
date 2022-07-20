@@ -46,3 +46,7 @@ def get_dict_excluding_fields(dictionary: Dict[str, Any], fields: List[str]):
 
 def get_dict_including_fields(dictionary: Dict[str, Any], fields: List[str]):
     return dict(filter(lambda x: x[0] in fields, dictionary.items()))
+
+
+def filter_dict_from_none_values(dictionary: Dict[str, Any]):
+    return {key: value for key, value in dictionary.items() if value is not None}
