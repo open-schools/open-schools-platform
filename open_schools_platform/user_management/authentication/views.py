@@ -16,7 +16,6 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.selectors import get_user
 from ..users.serializers import UserSerializer, UserWithProfilesSerializer
 from ..users.services import set_new_password_for_user, user_update
 
@@ -69,7 +68,7 @@ class UserMeApi(ApiAuthMixin, APIView):
         responses={200: UserSerializer}
     )
     def put(self, request):
-        user = get_user(request)
+        user = request.user
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
@@ -86,7 +85,7 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
     def put(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        user = get_user(request)
+        user = request.user
 
         old_password = user_serializer.validated_data['old_password']
         new_password = user_serializer.validated_data['new_password']
