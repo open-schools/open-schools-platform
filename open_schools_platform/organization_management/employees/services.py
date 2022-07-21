@@ -1,7 +1,6 @@
-from rest_framework.exceptions import PermissionDenied, APIException
+from rest_framework.exceptions import APIException
 
-from open_schools_platform.organization_management.employees.models import Employee
-from open_schools_platform.organization_management.employees.selectors import get_employee
+from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
@@ -20,17 +19,11 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
     return employee
 
 
-def add_employee_to_organization(user: User, phone: str,
-                                 organization: Organization, name: str, position: str = "") -> Employee:
-    employee = get_employee(filters={"user": user, "organization": organization})
+def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
+    user = get_user(filters={"phone": phone})
 
-    # TODO:implement permissions here
-    if not employee:
-        raise PermissionDenied()
-
-    pwd = generate_user_password()
-    add_user = get_user(filters={"phone": phone})
-    if not add_user:
+    if not user:
+        pwd = generate_user_password()
         msg = OrganizationConstants.get_invite_message(phone=phone, pwd=pwd)
         response = send_sms(to=[phone], msg=msg)
 
@@ -38,11 +31,13 @@ def add_employee_to_organization(user: User, phone: str,
             raise APIException(detail="Something wrong! Please, contact the administrator"
                                       "and tell him the error number.")
 
-        add_user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
+        user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
-    new_employee = create_employee(user=add_user,
-                                   organization=organization,
-                                   position=position,
-                                   name=name)
+    return user.employee_profile
 
-    return new_employee
+
+def update_employee(organization: Organization,
+                    employee_profile: EmployeeProfile,
+                    employee: Employee):
+    employee.organization = organization
+    employee.employee_profile = employee_profile

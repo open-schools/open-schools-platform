@@ -7,9 +7,9 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
-from open_schools_platform.organization_management.employees.selectors import get_employee_profile
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
-from open_schools_platform.organization_management.employees.services import create_employee
+from open_schools_platform.organization_management.employees.services import create_employee, \
+    get_employee_profile_or_create
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
@@ -75,9 +75,10 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 
         phone = invite_serializer.validated_data["phone"]
 
+        employee_profile = get_employee_profile_or_create(phone=phone.__str__())
+
         employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
                                                                fields=['phone']))
-        employee_profile = get_employee_profile(filters={'phone': phone})
 
         query = create_query(sender_model_name="organization", sender_id=pk,
                              recipient_model_name="employeeprofile", recipient_id=employee_profile.id,
