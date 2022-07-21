@@ -3,7 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
-from open_schools_platform.parent_management.families.services import create_family
+from open_schools_platform.parent_management.families.services import create_family, add_parent_to_family, \
+    add_student_profile_to_family
 from open_schools_platform.student_management.student.services import create_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
@@ -16,6 +17,7 @@ class StudentProfileExceptionsTests(TestCase):
                                                                 args=[pk])
 
     def test_family_does_not_exist(self):
+        user = create_logged_in_user(instance=self)
         data_for_student_profile_create_request = {
             "age": 15,
             "name": "test_student_profile",
@@ -26,6 +28,9 @@ class StudentProfileExceptionsTests(TestCase):
         self.assertEqual(404, response_for_student_profile_create_request.status_code)
 
         student_profile = create_student_profile(name="test_name", age=15)
+        family = create_family("Simpsons")
+        add_parent_to_family(family=family, parent=user.parent_profile)
+        add_student_profile_to_family(family=family, student_profile=student_profile)
 
         data_for_student_profile_update_request = {
             "student_profile": student_profile.id,
@@ -70,6 +75,7 @@ class StudentProfileExceptionsTests(TestCase):
         self.assertEqual(403, response_for_student_profile_update_request.status_code)
 
     def test_student_profile_does_not_exist(self):
+        create_logged_in_user(instance=self)
         data_for_student_profile_update_request = {
             "student_profile": "99999999-9999-9999-9999-999999999999",
             "age": 15,
