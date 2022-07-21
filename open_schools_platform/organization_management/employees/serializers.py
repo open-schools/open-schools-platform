@@ -1,4 +1,3 @@
-from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile

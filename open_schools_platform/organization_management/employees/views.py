@@ -8,7 +8,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
-from open_schools_platform.organization_management.employees.selectors import get_employees, get_employee
+from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer
 
 

@@ -19,7 +19,7 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
     return employee
 
 
-def get_employee_profile_or_create(phone: str) -> EmployeeProfile:
+def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
     user = get_user(filters={"phone": phone})
 
     if not user:

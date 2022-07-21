@@ -9,7 +9,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
-    get_employee_profile_or_create
+    get_employee_profile_or_create_new_user
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
@@ -75,7 +75,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 
         phone = invite_serializer.validated_data["phone"]
 
-        employee_profile = get_employee_profile_or_create(phone=phone.__str__())
+        employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__())
 
         employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
                                                                fields=['phone']))
