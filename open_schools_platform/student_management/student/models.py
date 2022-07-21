@@ -22,7 +22,7 @@ class StudentProfileManager(models.Manager):
 
 class StudentProfile(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student', null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
     name = models.CharField(max_length=200)
     age = models.IntegerField(validators=[MinValueValidator(0)])
     objects = StudentProfileManager()

@@ -20,4 +20,4 @@ class EmployeeProfileFilter(BaseFilterSet):
 
     class Meta:
         model = EmployeeProfile
-        fields = ('id',)
+        fields = ('id', 'user')

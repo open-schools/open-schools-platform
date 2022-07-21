@@ -21,6 +21,8 @@ organization_management_urls = [
          include(('open_schools_platform.organization_management.organizations.urls', 'organizations'))),
     path('employees/',
          include(('open_schools_platform.organization_management.employees.urls', 'employees'))),
+    path('circles/',
+         include(('open_schools_platform.organization_management.circles.urls', 'circles'))),
 ]
 
 urlpatterns = [

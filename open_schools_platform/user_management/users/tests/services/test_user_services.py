@@ -57,7 +57,7 @@ class UserUpdateTests(TestCase):
         user_update(user=user, data=data_for_user_update)
         self.assertEqual(user.name, "Schwarz")
         self.assertEqual(user.parent_profile.name, 'Schwarz')
-        self.assertEqual(user.student.name, 'Schwarz')
+        self.assertEqual(user.student_profile.name, 'Schwarz')
 
 
 class VerifyTokenTests(TestCase):

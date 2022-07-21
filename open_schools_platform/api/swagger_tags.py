@@ -4,6 +4,7 @@ class SwaggerTags:
     USER_MANAGEMENT_AUTH = "User management. Authentication"
     ORGANIZATION_MANAGEMENT_ORGANIZATIONS = "Organization management. Organizations"
     ORGANIZATION_MANAGEMENT_EMPLOYEES = "Organization management. Employees"
+    ORGANIZATION_MANAGEMENT_CIRCLES = "Organization management. Circles"
     PARENT_MANAGEMENT_FAMILIES = "Parent management. Families"
     STUDENT_MANAGEMENT_STUDENTS = "Student management. Students"
     QUERY_MANAGEMENT_QUERIES = "Query management. Queries"

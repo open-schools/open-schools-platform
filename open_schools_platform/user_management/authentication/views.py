@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.middleware import get_user
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import AuthenticationFailed
 
@@ -17,7 +16,7 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer
+from ..users.serializers import UserSerializer, UserWithProfilesSerializer
 from ..users.services import set_new_password_for_user, user_update
 
 
@@ -57,11 +56,10 @@ class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get user data.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        responses={200: UserSerializer},
+        responses={200: UserWithProfilesSerializer},
     )
     def get(self, request):
-        return Response({"user": UserSerializer(request.user).data},
-                        status=200)
+        return Response(UserWithProfilesSerializer(request.user).data, status=200)
 
     @swagger_auto_schema(
         operation_description="Update user.",
@@ -70,7 +68,7 @@ class UserMeApi(ApiAuthMixin, APIView):
         responses={200: UserSerializer}
     )
     def put(self, request):
-        user = get_user(request)
+        user = request.user
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
@@ -87,7 +85,7 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
     def put(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        user = get_user(request)
+        user = request.user
 
         old_password = user_serializer.validated_data['old_password']
         new_password = user_serializer.validated_data['new_password']
