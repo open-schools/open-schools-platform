@@ -24,5 +24,5 @@ class FamilyCreateTests(TestCase):
     def test_name_generates_automatically_if_its_not_provided(self):
         user = create_logged_in_user(instance=self)
         self.client.post(self.family_create_url)
-        family = get_family(filters={"parent_profiles": {user.parent_profile}})
+        family = get_family(filters={"parent_profiles": str(user.parent_profile.id)})
         self.assertTrue(family.name)

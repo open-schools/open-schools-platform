@@ -3,8 +3,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
-from open_schools_platform.parent_management.families.services import create_family, add_parent_to_family, \
-    add_student_profile_to_family
+from open_schools_platform.parent_management.families.services import create_family, \
+    add_student_profile_to_family, add_parent_profile_to_family
 from open_schools_platform.student_management.student.services import create_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_test_user
 
@@ -28,8 +28,8 @@ class StudentProfileExceptionsTests(TestCase):
         self.assertEqual(404, student_profile_create_response.status_code)
 
         student_profile = create_student_profile(name="test_name", age=15)
-        family = create_family("Simpsons")
-        add_parent_to_family(family=family, parent=user.parent_profile)
+        family = create_family(user.parent_profile, "Simpsons")
+        add_parent_profile_to_family(family=family, parent=user.parent_profile)
         add_student_profile_to_family(family=family, student_profile=student_profile)
 
         student_profile_update_data = {

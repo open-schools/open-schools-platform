@@ -1,5 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.generics import CreateAPIView
+from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -8,7 +8,7 @@ from open_schools_platform.parent_management.families.services import create_fam
 from rest_framework.response import Response
 
 
-class FamilyApi(ApiAuthMixin, CreateAPIView):
+class FamilyApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates Family.\n"
                               "Returns Family data.",

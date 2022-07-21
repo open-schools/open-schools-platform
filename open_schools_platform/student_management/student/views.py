@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound, PermissionDenied, NotAcceptable
-from rest_framework.generics import CreateAPIView
+from rest_framework.exceptions import NotFound, NotAcceptable
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -18,7 +17,7 @@ from open_schools_platform.student_management.student.services import \
     create_student_profile, update_student_profile, create_student
 
 
-class StudentProfileApi(CreateAPIView):
+class StudentProfileApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
@@ -66,7 +65,7 @@ class StudentProfileApi(CreateAPIView):
         return Response(StudentProfileSerializer(student_profile).data, status=200)
 
 
-class StudentJoinCircleQueryApi(ApiAuthMixin, CreateAPIView):
+class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates student profile, student and family.\n"
                               "Forms query for adding created student to circle",
