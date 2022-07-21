@@ -69,8 +69,7 @@ class UserMeApi(ApiAuthMixin, APIView):
         responses={200: UserSerializer}
     )
     def put(self, request):
-        user_id = UserSerializer(request.user).data["id"]
-        user = get_user(filters={"id": user_id})
+        user = get_user(request)
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
@@ -87,8 +86,7 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
     def put(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
-        user_id = UserSerializer(request.user).data["id"]
-        user = get_user(filters={"id": user_id})
+        user = get_user(request)
 
         old_password = user_serializer.validated_data['old_password']
         new_password = user_serializer.validated_data['new_password']

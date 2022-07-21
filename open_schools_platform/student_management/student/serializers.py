@@ -32,4 +32,4 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ("id", "name", "age", "user")
+        fields = ("name", "age", "id")

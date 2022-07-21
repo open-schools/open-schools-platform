@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import verify_token
-from open_schools_platform.user_management.users.tests.utils import create_valid_test_token, create_not_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_valid_test_token, create_test_user
 
 
 class UserResetPasswordTests(TestCase):
@@ -16,7 +16,7 @@ class UserResetPasswordTests(TestCase):
         token = create_valid_test_token()
         verify_token(token)
 
-        create_not_logged_in_user()
+        create_test_user()
 
         data = {
             "token": token.key,
