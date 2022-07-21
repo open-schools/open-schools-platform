@@ -1,5 +1,5 @@
 from open_schools_platform.common.utils import get_dict_from_response
-from open_schools_platform.user_management.users.models import CreationToken
+from open_schools_platform.user_management.users.models import CreationToken, User
 from open_schools_platform.user_management.users.serializers import CreationTokenSerializer
 from open_schools_platform.user_management.users.services import create_token
 from open_schools_platform.utils.firebase_requests import send_firebase_sms
@@ -18,21 +18,19 @@ def create_logged_in_user(instance):
     return user
 
 
-def create_not_logged_in_user():
-    credentials = {
-        "phone": "+79025456481",
-        "password": "123456",
-        "name": "test_user"
-    }
-
-    user = create_user(**credentials)
+def create_test_user(phone: str = "+79025456481") -> User:
+    user = create_user(
+        phone=phone,
+        password="123456",
+        name="test_user"
+    )
     return user
 
 
-def create_test_token() -> CreationToken:
+def create_test_token(phone: str = "+79020000000") -> CreationToken:
     # session used in here is invalid
     data = {
-        "phone": "+79020000000",
+        "phone": phone,
         "session": "000000"
     }
     token = create_token(**data)

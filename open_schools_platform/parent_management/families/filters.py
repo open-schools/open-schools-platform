@@ -14,4 +14,4 @@ class FamilyFilter(BaseFilterSet):
 
     class Meta:
         model = Family
-        fields = ('id', 'name')
+        fields = ('id', 'name', 'parent_profiles', 'student_profiles')

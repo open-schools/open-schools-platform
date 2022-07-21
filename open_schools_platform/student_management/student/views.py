@@ -1,24 +1,23 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotFound, NotAcceptable
-from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family, \
-    add_parent_to_family, generate_name_for_family
+from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.student.selectors import get_student_profile
 from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleReqSerializer
+    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer
 from open_schools_platform.student_management.student.services import \
     create_student_profile, update_student_profile, create_student
 
 
-class StudentProfileApi(ApiAuthMixin, CreateAPIView):
+class StudentProfileApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
@@ -66,16 +65,16 @@ class StudentProfileApi(ApiAuthMixin, CreateAPIView):
         return Response(StudentProfileSerializer(student_profile).data, status=200)
 
 
-class StudentJoinCircleQueryApi(ApiAuthMixin, CreateAPIView):
+class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates student profile, student and family.\n"
                               "Forms query for adding created student to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        request_body=StudentJoinCircleReqSerializer(),
+        request_body=StudentJoinCircleQuerySerializer(),
         responses={201: QueryStatusSerializer, 406: "Current user already has family"}
     )
     def post(self, request, pk):
-        student_join_circle_req_serializer = StudentJoinCircleReqSerializer(data=request.data)
+        student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         user = request.user
 
@@ -83,9 +82,8 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, CreateAPIView):
             raise NotAcceptable("Please choose already created family")
         student_profile = create_student_profile(name=student_join_circle_req_serializer.validated_data["name"],
                                                  age=student_join_circle_req_serializer.validated_data["age"])
-        family = create_family(name=generate_name_for_family(parent=user.parent_profile))
+        family = create_family(parent=request.user.parent_profile)
         add_student_profile_to_family(family=family, student_profile=student_profile)
-        add_parent_to_family(family=family, parent=user.parent_profile)
         student = create_student(name=student_profile.name)
 
         query = create_query(sender_model_name="studentprofile", sender_id=student_profile.id,

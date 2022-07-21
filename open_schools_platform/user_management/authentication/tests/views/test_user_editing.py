@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.user_management.users.selectors import get_user
-from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_not_logged_in_user
+from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_test_user
 
 
 class UserEditingTests(TestCase):
@@ -57,15 +57,15 @@ class UserEditingTests(TestCase):
         self.assertEqual(401, response.status_code)
 
     def test_request_user_is_not_logged_in(self):
-        create_not_logged_in_user()
-        data_for_name_change = {
+        create_test_user()
+        name_change_data = {
             "name": "Alex"
         }
-        data_for_password_update = {
+        password_update_data = {
             "old_password": "111111",
             "new_password": "222222"
         }
-        response_for_name_change = self.client.put(self.user_change_name_url, data_for_name_change)
-        self.assertEqual(401, response_for_name_change.status_code)
-        response_for_password_update = self.client.put(self.user_update_password_url, data_for_password_update)
-        self.assertEqual(401, response_for_password_update.status_code)
+        name_change_response = self.client.put(self.user_change_name_url, name_change_data)
+        self.assertEqual(401, name_change_response.status_code)
+        password_update_response = self.client.put(self.user_update_password_url, password_update_data)
+        self.assertEqual(401, password_update_response.status_code)
