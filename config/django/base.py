@@ -60,6 +60,7 @@ THIRD_PARTY_APPS = [
     'rest_framework_jwt',
     'drf_yasg',
     'phonenumber_field',
+    'rules.apps.AutodiscoverRulesConfig',
 ]
 
 INSTALLED_APPS = [
@@ -178,6 +179,11 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
+
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
 
 from config.settings.cors import *  # noqa
 from config.settings.jwt import *  # noqa

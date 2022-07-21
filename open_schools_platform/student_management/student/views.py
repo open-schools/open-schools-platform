@@ -1,3 +1,4 @@
+from django.contrib.auth import get_user
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotFound, PermissionDenied, NotAcceptable
 from rest_framework.generics import CreateAPIView
@@ -13,11 +14,11 @@ from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.student.selectors import get_student_profile
 from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer
-from open_schools_platform.student_management.student.services import can_user_interact_with_student_profile_check, \
+from open_schools_platform.student_management.student.services import \
     create_student_profile, update_student_profile, create_student
 
 
-class StudentProfileApi(ApiAuthMixin, CreateAPIView):
+class StudentProfileApi(CreateAPIView):
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
@@ -29,11 +30,9 @@ class StudentProfileApi(ApiAuthMixin, CreateAPIView):
     def post(self, request):
         student_profile_serializer = StudentProfileCreateSerializer(data=request.data)
         student_profile_serializer.is_valid(raise_exception=True)
-        family = get_family(filters={"id": student_profile_serializer.validated_data['family']})
+        family = get_family(filters={"id": student_profile_serializer.validated_data['family']}, user=request.user)
         if not family:
             raise NotFound("There is no such family")
-        if not can_user_interact_with_student_profile_check(family=family, user=request.user):
-            raise PermissionDenied
         student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
                                                  age=student_profile_serializer.validated_data['age'])
         add_student_profile_to_family(student_profile=student_profile, family=family)
@@ -50,17 +49,17 @@ class StudentProfileApi(ApiAuthMixin, CreateAPIView):
         student_profile_update_serializer = StudentProfileUpdateSerializer(data=request.data)
         student_profile_update_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(
-            filters={'id': student_profile_update_serializer.validated_data['student_profile']})
+            filters={'id': student_profile_update_serializer.validated_data['student_profile']},
+            user=request.user,
+        )
         if not student_profile:
             raise NotFound("There is no such student_profile")
+
         if student_profile_update_serializer.validated_data['family']:
-            family = get_family(filters={"id": student_profile_update_serializer.validated_data['family']})
+            family = get_family(filters={"id": student_profile_update_serializer.validated_data['family']},
+                                user=request.user)
             if not family:
                 raise NotFound('There is no such family')
-            if not can_user_interact_with_student_profile_check(family=family, user=request.user):
-                raise PermissionDenied
-        elif student_profile.user != request.user:
-            raise PermissionDenied
         update_student_profile(student_profile=student_profile,
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data,
                                                               ['student_profile', 'family']))
@@ -78,7 +77,9 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, CreateAPIView):
     def post(self, request, pk):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
-        if get_family(filters={"parent_profiles": {request.user.parent_profile}}):
+        user = request.user
+
+        if get_family(filters={"parent_profiles": str(user.parent_profile.id)}, user=request.user):
             raise NotAcceptable("Please choose already created family")
         student_profile = create_student_profile(name=student_join_circle_req_serializer.validated_data["name"],
                                                  age=student_join_circle_req_serializer.validated_data["age"])
