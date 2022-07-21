@@ -12,7 +12,7 @@ class EmployeeFilter(BaseFilterSet):
 
     class Meta:
         model = Employee
-        fields = ('organization', 'employee_profile')
+        fields = ("organization", "employee_profile")
 
 
 class EmployeeProfileFilter(BaseFilterSet):

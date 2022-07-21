@@ -1,7 +1,6 @@
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.generics import CreateAPIView, ListAPIView
-from rest_framework.response import Response
+from rest_framework.generics import ListAPIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
@@ -10,27 +9,7 @@ from open_schools_platform.organization_management.employees.filters import Empl
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
 from open_schools_platform.organization_management.employees.selectors import get_employees
-from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
-    CreateEmployeeSerializer, EmployeeListSerializer
-from open_schools_platform.organization_management.employees.services import add_employee_to_organization
-
-
-class EmployeeCreateApi(ApiAuthMixin, CreateAPIView):
-
-    @swagger_auto_schema(
-        operation_description="Create employee with attached organization and user.",
-        request_body=CreateEmployeeSerializer,
-        responses={201: EmployeeSerializer},
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
-    )
-    def post(self, request, *args, **kwargs):
-        employee_serializer = CreateEmployeeSerializer(data=request.data)
-        employee_serializer.is_valid(raise_exception=True)
-
-        employee = add_employee_to_organization(request.user, **employee_serializer.validated_data)
-
-        return Response({"employee": EmployeeSerializer(employee).data},
-                        status=201)
+from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer
 
 
 class EmployeeListApi(ApiAuthMixin, ListAPIView):
