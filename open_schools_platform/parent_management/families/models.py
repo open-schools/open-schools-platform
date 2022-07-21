@@ -18,8 +18,8 @@ class FamilyManager(models.Manager):
 
 class Family(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    parent_profiles = models.ManyToManyField(ParentProfile, related_name="parent_families")
-    student_profiles = models.ManyToManyField(StudentProfile, related_name="student_families")
+    parent_profiles = models.ManyToManyField(ParentProfile, related_name="families")
+    student_profiles = models.ManyToManyField(StudentProfile, related_name="families")
     name = models.CharField(max_length=200)
     objects = FamilyManager()
 

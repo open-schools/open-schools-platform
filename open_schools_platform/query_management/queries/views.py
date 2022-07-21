@@ -20,7 +20,7 @@ class QueryStatusChangeApi(views.APIView):
         query_status_serializer = QueryStatusSerializer(data=request.data)
         query_status_serializer.is_valid(raise_exception=True)
 
-        query = get_query(filters={"id": query_status_serializer.validated_data["id"]})
+        query = get_query(filters={"id": query_status_serializer.validated_data["id"]}, user=request.user)
 
         run_sender_handler(query, query_status_serializer.validated_data["status"], get_user(request))
 

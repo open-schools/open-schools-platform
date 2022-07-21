@@ -1,5 +1,4 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,7 +7,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
-from open_schools_platform.organization_management.employees.selectors import get_employee, get_employee_profile
+from open_schools_platform.organization_management.employees.selectors import get_employee_profile
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -73,10 +72,6 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
     def post(self, request, pk) -> Response:
         invite_serializer = OrganizationInviteSerializer(data=request.data)
         invite_serializer.is_valid()
-
-        if not get_employee(filters={"user": request.user.id,
-                                     "organization": pk}):
-            raise PermissionDenied(detail="You are not a member of this organization")
 
         phone = invite_serializer.validated_data["phone"]
 
