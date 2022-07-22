@@ -4,7 +4,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
 
 

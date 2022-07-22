@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('student', '0004_auto_20220712_1510'),
+        ('students', '0004_auto_20220712_1510'),
         ('parents', '0001_initial'),
         ('families', '0001_initial'),
     ]
@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='family',
             name='student_profiles',
-            field=models.ManyToManyField(related_name='families', to='student.StudentProfile'),
+            field=models.ManyToManyField(related_name='families', to='students.StudentProfile'),
         ),
     ]

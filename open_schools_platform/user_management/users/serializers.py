@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.serializers import EmployeeProfileSerializer
 from open_schools_platform.parent_management.parents.serializers import ParentProfileSerializer
-from open_schools_platform.student_management.student.serializers import StudentProfileSerializer
+from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
 from open_schools_platform.user_management.users.models import CreationToken, User
 
 

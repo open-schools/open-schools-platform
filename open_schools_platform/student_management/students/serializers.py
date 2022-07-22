@@ -3,7 +3,7 @@ import uuid
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
 
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 
 
 class StudentProfileCreateSerializer(serializers.ModelSerializer):

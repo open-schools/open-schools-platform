@@ -1,8 +1,8 @@
 from django.test import TestCase
 
 from open_schools_platform.parent_management.families.services import create_family
-from open_schools_platform.student_management.student.models import StudentProfile
-from open_schools_platform.student_management.student.services import create_student_profile, \
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.services import create_student_profile, \
     can_user_interact_with_student_profile_check, update_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_test_user
 

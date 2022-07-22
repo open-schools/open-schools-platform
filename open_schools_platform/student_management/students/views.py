@@ -10,10 +10,10 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
 from open_schools_platform.query_management.queries.services import create_query
-from open_schools_platform.student_management.student.selectors import get_student_profile
-from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
+from open_schools_platform.student_management.students.selectors import get_student_profile
+from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer
-from open_schools_platform.student_management.student.services import \
+from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, create_student
 
 
@@ -38,10 +38,10 @@ class StudentProfileApi(ApiAuthMixin, APIView):
         return Response(StudentProfileSerializer(student_profile).data, status=201)
 
     @swagger_auto_schema(
-        operation_description="Update student profile",
+        operation_description="Update students profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentProfileUpdateSerializer(),
-        responses={200: StudentProfileSerializer, 404: "There is no such student profile or family",
+        responses={200: StudentProfileSerializer, 404: "There is no such students profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
     def put(self, request):
@@ -67,8 +67,8 @@ class StudentProfileApi(ApiAuthMixin, APIView):
 
 class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        operation_description="Creates student profile, student and family.\n"
-                              "Forms query for adding created student to circle",
+        operation_description="Creates students profile, students and family.\n"
+                              "Forms query for adding created students to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQuerySerializer(),
         responses={201: QueryStatusSerializer, 406: "Current user already has family"}
@@ -88,6 +88,6 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
 
         query = create_query(sender_model_name="studentprofile", sender_id=student_profile.id,
                              recipient_model_name="circle", recipient_id=pk,
-                             body_model_name="student", body_id=student.id)
+                             body_model_name="students", body_id=student.id)
 
         return Response(QueryStatusSerializer(query).data, status=201)

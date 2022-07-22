@@ -5,15 +5,15 @@ from rest_framework.test import APIClient
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
 from open_schools_platform.parent_management.families.services import create_family, \
     add_student_profile_to_family, add_parent_profile_to_family
-from open_schools_platform.student_management.student.services import create_student_profile
+from open_schools_platform.student_management.students.services import create_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_test_user
 
 
 class StudentProfileExceptionsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_profile_url = reverse("api:student-management:create-student-profile")
-        self.student_join_circle_query_url = lambda pk: reverse("api:student-management:student-join-circle-query",
+        self.student_profile_url = reverse("api:students-management:create-students-profile")
+        self.student_join_circle_query_url = lambda pk: reverse("api:students-management:students-join-circle-query",
                                                                 args=[pk])
 
     def test_family_does_not_exist(self):
