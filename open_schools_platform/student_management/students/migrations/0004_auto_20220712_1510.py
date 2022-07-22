@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterField(
-            model_name='students',
+            model_name='student',
             name='circle',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='circles.circle'),
         ),
         migrations.AlterField(
-            model_name='students',
+            model_name='student',
             name='student_profile',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='students.studentprofile'),
         ),
