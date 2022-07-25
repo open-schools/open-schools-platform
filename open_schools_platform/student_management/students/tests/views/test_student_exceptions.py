@@ -13,8 +13,7 @@ class StudentProfileExceptionsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.student_profile_url = reverse("api:students-management:create-students-profile")
-        self.student_join_circle_query_url = lambda pk: reverse("api:students-management:students-join-circle-query",
-                                                                args=[pk])
+        self.student_join_circle_query_url = reverse("api:students-management:students-join-circle-query")
 
     def test_family_does_not_exist(self):
         user = create_logged_in_user(instance=self)
@@ -92,8 +91,9 @@ class StudentProfileExceptionsTests(TestCase):
         circle = create_test_circle()
         student_join_circle_query_data = {
             "name": 'test_name',
-            "age": 15
+            "age": 15,
+            "circle": circle.id,
         }
-        student_join_circle_query_response = self.client.post(self.student_join_circle_query_url(circle.id),
+        student_join_circle_query_response = self.client.post(self.student_join_circle_query_url,
                                                               student_join_circle_query_data)
         self.assertEqual(406, student_join_circle_query_response.status_code)

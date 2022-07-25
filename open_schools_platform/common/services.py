@@ -1,6 +1,10 @@
 from typing import List, Dict, Any, Tuple
 
+from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+
 from open_schools_platform.common.types import DjangoModelType
+from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.user_management.users.models import User
 
 
 def model_update(
@@ -46,3 +50,20 @@ def model_update(
         instance.save(update_fields=fields)
 
     return instance, has_updated
+
+
+class BaseQueryHandler:
+    allowed_statuses: List[str] = []
+
+    @staticmethod
+    def query_handler(query: Query, new_status: str, user: User):
+        raise NotImplementedError
+
+    @staticmethod
+    def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User):
+        if new_status not in query_handler_class.allowed_statuses:
+            raise NotAcceptable("Not allowed status")
+        if query.status == new_status:
+            raise ValidationError(detail="Identical statuses")
+        if query.recipient is None or query.sender is None or query.body is None:
+            raise MethodNotAllowed("put", detail="Query is corrupted")

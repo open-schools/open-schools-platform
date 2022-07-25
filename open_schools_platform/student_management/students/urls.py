@@ -4,6 +4,6 @@ from open_schools_platform.student_management.students.views import StudentProfi
 
 urlpatterns = [
     path('students-profile', StudentProfileApi.as_view(), name='create-students-profile'),
-    path('<uuid:pk>/students-join-cricle-query', StudentJoinCircleQueryApi.as_view(),
+    path('students-join-cricle-query', StudentJoinCircleQueryApi.as_view(),
          name='students-join-circle-query')
 ]

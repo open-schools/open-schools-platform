@@ -1,6 +1,6 @@
 import django_filters
 from django.db.models import Q
-from django_filters import CharFilter
+from django_filters import CharFilter, BaseInFilter, UUIDFilter
 from rest_framework.exceptions import ValidationError
 
 
@@ -50,3 +50,12 @@ class BaseFilterSet(django_filters.FilterSet):
                 query |= Q(**{"{0}__icontains".format(filter.field_name): self.search_value})
 
         return base_queryset.filter(query)
+
+
+class UUIDInFilter(BaseInFilter, UUIDFilter):
+    pass
+
+
+def filter_by_ids(queryset, name, value):
+    values = value.split(',')
+    return queryset.filter(id__in=values)

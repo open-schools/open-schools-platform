@@ -35,4 +35,4 @@ def get_organizations_by_user(user: User) -> QuerySet:
     qs = get_employees(filters={"employee_profile": user.employee_profile})
 
     return qs if len(qs) == 0 else \
-        get_organizations(filters={"ids": list(map(lambda x: x.organization.id, list(qs)))})
+        get_organizations(filters={"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})

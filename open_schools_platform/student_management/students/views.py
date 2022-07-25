@@ -73,7 +73,7 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         request_body=StudentJoinCircleQuerySerializer(),
         responses={201: QueryStatusSerializer, 406: "Current user already has family"}
     )
-    def post(self, request, pk):
+    def post(self, request):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         user = request.user
@@ -86,8 +86,10 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         add_student_profile_to_family(family=family, student_profile=student_profile)
         student = create_student(name=student_profile.name)
 
-        query = create_query(sender_model_name="studentprofile", sender_id=student_profile.id,
-                             recipient_model_name="circle", recipient_id=pk,
-                             body_model_name="students", body_id=student.id)
+        query = create_query(
+            sender_model_name="studentprofile", sender_id=student_profile.id,
+            recipient_model_name="circle", recipient_id=student_join_circle_req_serializer.validated_data["circle"],
+            body_model_name="student", body_id=student.id
+        )
 
         return Response(QueryStatusSerializer(query).data, status=201)

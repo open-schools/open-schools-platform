@@ -13,17 +13,17 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class StudentJoinCirclesTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_join_circle_query_url = lambda pk: reverse("api:students-management:students-join-circle-query",
-                                                                args=[pk])
+        self.student_join_circle_query_url = reverse("api:students-management:students-join-circle-query")
 
     def test_student_join_circle_query_successfully_formed(self):
         user = create_logged_in_user(instance=self)
         circle = create_test_circle()
         data = {
             "name": "test_name",
-            "age": 15
+            "age": 15,
+            "circle": circle.id,
         }
-        response = self.client.post(self.student_join_circle_query_url(circle.id), data)
+        response = self.client.post(self.student_join_circle_query_url, data)
         self.assertEqual(201, response.status_code)
         self.assertTrue(get_student_profile(filters={"name": data["name"]}))
         family = get_family(filters={"parent_profiles": str(user.parent_profile.id)})
