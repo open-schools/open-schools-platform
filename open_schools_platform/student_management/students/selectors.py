@@ -1,7 +1,7 @@
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.student_management.student.filters import StudentProfileFilter, StudentFilter
-from open_schools_platform.student_management.student.models import StudentProfile, Student
+from open_schools_platform.student_management.students.filters import StudentProfileFilter
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
 
 

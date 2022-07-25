@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.services import is_token_alive, verify_token, \
      user_update, get_jwt_token, update_token_session, generate_user_password, set_new_password_for_user

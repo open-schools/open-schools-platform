@@ -12,12 +12,11 @@ from open_schools_platform.parent_management.families.services import add_studen
 from open_schools_platform.query_management.queries.selectors import get_query, get_queries
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, QuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
-from open_schools_platform.student_management.student.selectors import get_student_profile, get_student
-from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer, \
-    StudentJoinCircleQueryUpdateSerializer, StudentListSerializer
-from open_schools_platform.student_management.student.services import \
-    create_student_profile, update_student_profile, create_student, update_student
+from open_schools_platform.student_management.students.selectors import get_student_profile
+from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
+    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer
+from open_schools_platform.student_management.students.services import \
+    create_student_profile, update_student_profile, create_student
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -76,7 +75,7 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         request_body=StudentJoinCircleQuerySerializer(),
         responses={201: QueryStatusSerializer, 406: "Current user already has family"}
     )
-    def post(self, request, pk):
+    def post(self, request):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         user = request.user
@@ -89,9 +88,11 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         add_student_profile_to_family(family=family, student_profile=student_profile)
         student = create_student(name=student_profile.name)
 
-        query = create_query(sender_model_name="studentprofile", sender_id=student_profile.id,
-                             recipient_model_name="circle", recipient_id=pk,
-                             body_model_name="student", body_id=student.id)
+        query = create_query(
+            sender_model_name="studentprofile", sender_id=student_profile.id,
+            recipient_model_name="circle", recipient_id=student_join_circle_req_serializer.validated_data["circle"],
+            body_model_name="student", body_id=student.id
+        )
 
         return Response(QueryStatusSerializer(query).data, status=201)
 

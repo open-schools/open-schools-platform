@@ -1,6 +1,6 @@
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 
 
 def add_parent_profile_to_family(family: Family, parent: ParentProfile):

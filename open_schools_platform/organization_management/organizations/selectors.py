@@ -1,10 +1,6 @@
-import array
-
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.organization_management.circles.models import Circle
-from open_schools_platform.organization_management.circles.selectors import get_circles
 from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -39,8 +35,4 @@ def get_organizations_by_user(user: User) -> QuerySet:
     qs = get_employees(filters={"employee_profile": user.employee_profile})
 
     return qs if len(qs) == 0 else \
-        get_organizations(filters={"ids": list(map(lambda x: x.organization.id, list(qs)))})
-
-
-def get_circles_for_user_with_multiple_organizations(organizations: QuerySet) -> array:
-    return get_circles(filters={'organizations': list(map(lambda x: x.circles, list(organizations)))})
+        get_organizations(filters={"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})

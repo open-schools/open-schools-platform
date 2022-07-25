@@ -1,11 +1,5 @@
-from django_filters import UUIDFilter, BaseInFilter
-
-from open_schools_platform.common.filters import BaseFilterSet
+from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter
 from open_schools_platform.parent_management.families.models import Family
-
-
-class UUIDInFilter(BaseInFilter, UUIDFilter):
-    pass
 
 
 class FamilyFilter(BaseFilterSet):

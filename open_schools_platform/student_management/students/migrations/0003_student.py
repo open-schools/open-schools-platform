@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('circles', '0001_initial'),
-        ('student', '0002_auto_20220707_1311'),
+        ('students', '0002_auto_20220707_1311'),
     ]
 
     operations = [
@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
                 ('circle', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='circles.circle')),
-                ('student_profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='student.studentprofile')),
+                ('student_profile', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='students.studentprofile')),
             ],
             options={
                 'abstract': False,

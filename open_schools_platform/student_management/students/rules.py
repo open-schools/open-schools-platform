@@ -1,7 +1,7 @@
 import rules
 
 from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.student_management.student.models import StudentProfile, Student
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
 
 
@@ -16,11 +16,4 @@ def has_family_with_this_student_profile(user: User, student_profile: StudentPro
                                "parent_profiles": str(user.parent_profile.id)}) is not None
 
 
-@rules.predicate
-def has_student_with_student_profile_from_user_family(user: User, student: Student):
-    return student.student_profiles in \
-           get_family(filters={"parent_profiles": str(user.parent_profile.id)}).student_profiles
-
-
 rules.add_perm("students.student_profile_access", is_student_profile_owner | has_family_with_this_student_profile)
-rules.add_perm("students.student_access", has_student_with_student_profile_from_user_family)

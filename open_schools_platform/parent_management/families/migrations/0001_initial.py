@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('student', '0001_initial'),
+        ('students', '0001_initial'),
         ('parents', '0001_initial'),
     ]
 
@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
                 ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
                 ('parent_profiles', models.ManyToManyField(related_name='parent_families', to='parents.ParentProfile')),
-                ('student_profiles', models.ManyToManyField(related_name='student_families', to='student.StudentProfile')),
+                ('student_profiles', models.ManyToManyField(related_name='student_families', to='students.StudentProfile')),
             ],
             options={
                 'abstract': False,

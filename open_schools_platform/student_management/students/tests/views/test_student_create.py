@@ -3,15 +3,15 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.parent_management.families.services import create_family
-from open_schools_platform.student_management.student.models import StudentProfile
-from open_schools_platform.student_management.student.selectors import get_student_profile
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.selectors import get_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentProfileCreateTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_profile_create_url = reverse("api:student-management:create-student-profile")
+        self.student_profile_create_url = reverse("api:students-management:create-students-profile")
 
     def test_successful_student_profile_creation(self):
         user = create_logged_in_user(instance=self)

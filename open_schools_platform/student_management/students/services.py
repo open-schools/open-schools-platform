@@ -1,13 +1,12 @@
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
 
-from open_schools_platform.common.services import model_update
+from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
-from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
-from open_schools_platform.student_management.student.models import StudentProfile, Student
+from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
 
 
@@ -19,9 +18,11 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
     return student_profile
 
 
-def create_student(name: str) -> Student:
+def create_student(name: str, circle: Circle = None, student_profile: StudentProfile = None) -> Student:
     student = Student.objects.create_student(
         name=name,
+        circle=circle,
+        student_profile=student_profile
     )
     return student
 
@@ -42,41 +43,34 @@ def update_student_profile(*, student_profile: StudentProfile, data) -> StudentP
     return student_profile
 
 
-def update_student(*, student: Student, data) -> Student:
-    non_side_effect_fields = ['name']
-    filtered_data = filter_dict_from_none_values(data)
-    student, has_updated = model_update(
-        instance=student,
-        fields=non_side_effect_fields,
-        data=filtered_data
-    )
-    return student
+class StudentProfileQueryHandler(BaseQueryHandler):
+    allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
+                        Query.Status.CANCELED]
 
-class StudentProfileQueryHandler:
     @staticmethod
     def query_handler(query: Query, new_status: str, user: User):
-        # TODO: Disable some statuses for some models here
-        allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
-                            Query.Status.CANCELED]
-        if query.status == new_status:
-            return query.body
-        if new_status not in allowed_statuses:
-            raise NotAcceptable("Please enter a valid status for query")
-        if query.sender in get_family(filters={"parent_profiles": {user.parent_profile}}).student_profiles.all():
+        BaseQueryHandler.query_handler_checks(StudentProfileQueryHandler, query, new_status, user)
+
+        circle_access = user.has_perm("circles.circle_access", query.recipient)
+        student_profile_access = user.has_perm("students.student_profile_access", query.sender)
+
+        if not circle_access:
             if query.status != Query.Status.SENT:
                 raise NotAcceptable("Сan no longer change the query")
-            if new_status == Query.Status.DECLINED or Query.Status.ACCEPTED or Query.Status.IN_PROGRESS:
+            if new_status != Query.Status.CANCELED:
                 raise NotAcceptable("User can only set canceled status")
-        else:
+        elif not student_profile_access:
             if new_status == Query.Status.CANCELED:
                 raise NotAcceptable("Circle cannot cancel query, it can only decline it")
+
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
-            query.body.circles.add(query.recipient)  # type: ignore
-            query.body.student_profiles.add(query.sender)  # type: ignore
+            if query.body is None:
+                raise MethodNotAllowed("put", detail="Query is corrupted")
+            query.body.circle = query.recipient
+            query.body.student_profile = query.sender
+            query.body.save()
 
-        query.body.save()  # type: ignore
+        return query
 
-        return query.body
-
-    StudentProfile.query_handler = query_handler  # type: ignore
+    StudentProfile.query_handler = query_handler

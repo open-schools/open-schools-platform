@@ -5,25 +5,25 @@ from rest_framework.test import APIClient
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.student.models import Student
-from open_schools_platform.student_management.student.selectors import get_student_profile
+from open_schools_platform.student_management.students.models import Student
+from open_schools_platform.student_management.students.selectors import get_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
 class StudentJoinCirclesTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_join_circle_query_url = lambda pk: reverse("api:student-management:student-join-circle-query",
-                                                                args=[pk])
+        self.student_join_circle_query_url = reverse("api:students-management:students-join-circle-query")
 
     def test_student_join_circle_query_successfully_formed(self):
         user = create_logged_in_user(instance=self)
         circle = create_test_circle()
         data = {
             "name": "test_name",
-            "age": 15
+            "age": 15,
+            "circle": circle.id,
         }
-        response = self.client.post(self.student_join_circle_query_url(circle.id), data)
+        response = self.client.post(self.student_join_circle_query_url, data)
         self.assertEqual(201, response.status_code)
         self.assertTrue(get_student_profile(filters={"name": data["name"]}))
         family = get_family(filters={"parent_profiles": str(user.parent_profile.id)})

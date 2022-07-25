@@ -3,7 +3,7 @@ from django.test import TestCase
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import create_family, add_parent_profile_to_family, \
     add_student_profile_to_family
-from open_schools_platform.student_management.student.services import create_student_profile
+from open_schools_platform.student_management.students.services import create_student_profile
 from open_schools_platform.user_management.users.tests.utils import create_test_user
 
 

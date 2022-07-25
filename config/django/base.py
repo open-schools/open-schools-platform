@@ -45,7 +45,7 @@ LOCAL_APPS = [
     'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
     'open_schools_platform.parent_management.families.apps.FamiliesConfig',
     'open_schools_platform.parent_management.parents.apps.ParentsConfig',
-    'open_schools_platform.student_management.student.apps.StudentConfig',
+    'open_schools_platform.student_management.students.apps.StudentConfig',
     'open_schools_platform.query_management.queries.apps.QueriesConfig',
     'open_schools_platform.organization_management.circles.apps.CirclesConfig'
 ]

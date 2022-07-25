@@ -137,7 +137,7 @@ class CodeResendApi(APIView):
         response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
+            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
 
         update_token_session(token, get_dict_from_response(response)["sessionInfo"])
         return Response({"detail": "SMS was resent."}, status=200)

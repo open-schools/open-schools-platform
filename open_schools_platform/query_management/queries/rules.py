@@ -6,7 +6,7 @@ from open_schools_platform.organization_management.organizations.models import O
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.models import User
 
 
