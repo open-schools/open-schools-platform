@@ -8,7 +8,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('circles', '0001_initial'),
-        ('student', '0003_student'),
+        ('students', '0003_student'),
     ]
 
     operations = [
@@ -20,6 +20,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='student',
             name='student_profile',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='student.studentprofile'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='students', to='students.studentprofile'),
         ),
     ]

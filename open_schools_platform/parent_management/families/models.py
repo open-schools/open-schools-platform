@@ -3,7 +3,7 @@ import uuid
 from django.db import models
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile
 
 
 class FamilyManager(models.Manager):

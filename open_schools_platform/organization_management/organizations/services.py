@@ -1,5 +1,6 @@
-from rest_framework.exceptions import ValidationError, PermissionDenied
+from rest_framework.exceptions import ValidationError, MethodNotAllowed
 
+from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
@@ -14,17 +15,12 @@ def create_organization(name: str, inn: str) -> Organization:
     return organization
 
 
-class OrganizationQueryHandler:
+class OrganizationQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED]
 
     @staticmethod
     def query_handler(query: Query, new_status: str, user: User):
-        if new_status not in OrganizationQueryHandler.allowed_statuses:
-            raise ValidationError(detail="Not allowed status")
-        if user.employee_profile != query.recipient:
-            raise PermissionDenied(detail="You have not access this query")
-        if query.status == new_status:
-            raise ValidationError(detail="Identical statuses")
+        BaseQueryHandler.query_handler_checks(OrganizationQueryHandler, query, new_status, user)
 
         from open_schools_platform.organization_management.employees.models import EmployeeProfile
 
@@ -35,10 +31,12 @@ class OrganizationQueryHandler:
 
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
-            query.body.organization = query.sender  # type: ignore
-            query.body.employee_profile = query.recipient  # type: ignore
-            query.body.save()  # type: ignore
+            if query.body is None:
+                raise MethodNotAllowed("put", detail="Query is corrupted")
+            query.body.organization = query.sender
+            query.body.employee_profile = query.recipient
+            query.body.save()
 
-        return query.body
+        return query
 
-    Organization.query_handler = query_handler  # type: ignore
+    Organization.query_handler = query_handler

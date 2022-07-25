@@ -1,4 +1,3 @@
-from django.contrib.auth.middleware import get_user
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
 from rest_framework.response import Response
@@ -22,6 +21,6 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
         query_status_serializer.is_valid(raise_exception=True)
         query = get_query(filters={"id": query_status_serializer.validated_data["id"]}, user=request.user)
 
-        run_sender_handler(query, query_status_serializer.validated_data["status"], get_user(request))
+        query = run_sender_handler(query, query_status_serializer.validated_data["status"], request.user)
 
         return Response({"detail": "Status was changed", "query": QueryStatusSerializer(query).data}, status=200)
