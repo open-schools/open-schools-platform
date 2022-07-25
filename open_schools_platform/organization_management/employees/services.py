@@ -1,5 +1,7 @@
 from rest_framework.exceptions import APIException
 
+from open_schools_platform.common.services import model_update
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -36,8 +38,12 @@ def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
     return user.employee_profile
 
 
-def update_employee(organization: Organization,
-                    employee_profile: EmployeeProfile,
-                    employee: Employee):
-    employee.organization = organization
-    employee.employee_profile = employee_profile
+def update_employee(*, employee: Employee, data) -> Employee:
+    non_side_effect_fields = ['name', 'position']
+    filtered_data = filter_dict_from_none_values(data)
+    employee, has_updated = model_update(
+        instance=employee,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return employee

@@ -15,3 +15,15 @@ def get_query(*, filters=None, user: User = None) -> Query:
         raise PermissionDenied
 
     return query
+
+
+def get_queries(*, filters=None, user: User = None) -> Query:
+    filters = filters or {}
+
+    qs = Query.objects.all()
+    queries = QueryFilter(filters, qs).qs
+
+    if user and queries and not user.has_perm("queries.queries_list_access", filters):
+        raise PermissionDenied
+
+    return queries

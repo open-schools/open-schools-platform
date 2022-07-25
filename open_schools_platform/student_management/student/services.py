@@ -19,11 +19,9 @@ def create_student_profile(name: str, age: int) -> StudentProfile:
     return student_profile
 
 
-def create_student(name: str, circle: Circle = None, student_profile: StudentProfile = None) -> Student:
+def create_student(name: str) -> Student:
     student = Student.objects.create_student(
         name=name,
-        circle=circle,
-        student_profile=student_profile
     )
     return student
 
@@ -43,6 +41,16 @@ def update_student_profile(*, student_profile: StudentProfile, data) -> StudentP
     )
     return student_profile
 
+
+def update_student(*, student: Student, data) -> Student:
+    non_side_effect_fields = ['name']
+    filtered_data = filter_dict_from_none_values(data)
+    student, has_updated = model_update(
+        instance=student,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return student
 
 class StudentProfileQueryHandler:
     @staticmethod
@@ -64,8 +72,8 @@ class StudentProfileQueryHandler:
                 raise NotAcceptable("Circle cannot cancel query, it can only decline it")
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
-            query.body.circle = query.recipient  # type: ignore
-            query.body.student_profile = query.sender  # type: ignore
+            query.body.circles.add(query.recipient)  # type: ignore
+            query.body.student_profiles.add(query.sender)  # type: ignore
 
         query.body.save()  # type: ignore
 

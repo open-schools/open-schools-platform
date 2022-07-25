@@ -1,7 +1,7 @@
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.student_management.student.filters import StudentProfileFilter
-from open_schools_platform.student_management.student.models import StudentProfile
+from open_schools_platform.student_management.student.filters import StudentProfileFilter, StudentFilter
+from open_schools_platform.student_management.student.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
 
 
@@ -15,3 +15,15 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
         raise PermissionDenied
 
     return student_profile
+
+
+def get_student(*, filters=None, user: User = None) -> Student:
+    filters = filters or {}
+
+    qs = Student.objects.all()
+    student = StudentFilter(filters, qs).qs.first()
+
+    if user and student and not user.has_perm('students.student_access', student):
+        raise PermissionDenied
+
+    return student

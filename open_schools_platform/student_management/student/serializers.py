@@ -33,3 +33,13 @@ class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile
         fields = ("name", "age", "id")
+
+
+class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
+    query = serializers.UUIDField(required=True)
+    name = serializers.CharField(required=False, default=None)
+
+
+class StudentListSerializer(serializers.Serializer):
+    student_profile = serializers.UUIDField(required=True)
+    a = serializers.UUIDField(required=True)

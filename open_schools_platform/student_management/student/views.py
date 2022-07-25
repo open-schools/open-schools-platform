@@ -6,15 +6,18 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
+from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.selectors import get_query, get_queries
+from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, QuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
-from open_schools_platform.student_management.student.selectors import get_student_profile
+from open_schools_platform.student_management.student.selectors import get_student_profile, get_student
 from open_schools_platform.student_management.student.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer
+    StudentProfileUpdateSerializer, StudentProfileSerializer, StudentJoinCircleQuerySerializer, \
+    StudentJoinCircleQueryUpdateSerializer, StudentListSerializer
 from open_schools_platform.student_management.student.services import \
-    create_student_profile, update_student_profile, create_student
+    create_student_profile, update_student_profile, create_student, update_student
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -91,3 +94,64 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
                              body_model_name="student", body_id=student.id)
 
         return Response(QueryStatusSerializer(query).data, status=201)
+
+
+class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Update body of student join circle query",
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        request_body=StudentJoinCircleQueryUpdateSerializer(),
+        responses={201: QuerySerializer()}
+    )
+    def put(self, request):
+        query_update_serializer = StudentJoinCircleQueryUpdateSerializer(data=request.data)
+        query_update_serializer.is_valid(raise_exception=True)
+
+        query = get_query(filters={"id": query_update_serializer.validated_data["query"]}, user=request.user)
+        if not query:
+            raise NotFound("There is no such query")
+        update_student(student=query.body, data=get_dict_excluding_fields(query_update_serializer.validated_data,
+                                                                          ['query']))
+        return Response(QuerySerializer(query).data, status=200)
+
+
+class StudentQueriesListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        query_serializer=StudentListSerializer(),
+        operation_description="Get all queries for provided student profile",
+    )
+    def get(self, request):
+        student_serializer = StudentListSerializer(data=request.data)
+        student_serializer.is_valid(raise_exception=True)
+        serializer_class = QuerySerializer
+        if not get_student_profile(filters={'id': str(student_serializer.validated_data['student_profile'])}):
+            raise NotFound('There is no such student profile')
+        queries = get_queries(filters={'sender_id': str(student_serializer.validated_data['student_profile'])},
+                              user=request.user)
+        if not queries:
+            raise NotFound('There are no queries with such sender')
+        serializer = serializer_class(queries, many=True)
+        return Response(data=serializer.data)
+
+
+class StudentCirclesListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        request_body=StudentListSerializer(),
+        operation_description="Get all circles for provided student profile",
+    )
+    def get(self, request):
+        student_serializer = StudentListSerializer(data=request.data)
+        student_serializer.is_valid(raise_exception=True)
+        serializer_class = CircleSerializer
+        if not get_student_profile(filters={'id': str(student_serializer.validated_data['student_profile'])}):
+            raise NotFound('There is no such student profile')
+        student = get_student(filters={'student_profile': str(student_serializer.validated_data['student_profile'])},
+                              user=request.user)
+        if not student:
+            raise NotFound('There is no such student with this student_profile')
+        elif not student.circles:
+            raise NotFound('This student does not have any circles')
+        serializer = serializer_class(student.circles, many=True)
+        return Response(data=serializer.data)
