@@ -35,6 +35,12 @@ class EmployeeSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
+class QueryEmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ("id", "name", "position")
+
+
 class EmployeeListSerializer(serializers.ModelSerializer):
     employee_profile = EmployeeProfileWithUserSerializer()
 

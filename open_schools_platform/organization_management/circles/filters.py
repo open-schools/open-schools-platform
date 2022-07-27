@@ -1,13 +1,12 @@
-from django_filters import RangeFilter
+from django_filters import CharFilter
 
-from open_schools_platform.common.filters import BaseFilterSet
+from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.models import Circle
 
 
 class CircleFilter(BaseFilterSet):
-    organizations = RangeFilter(field_name='organization', lookup_expr='in')
+    students = CharFilter(method=filter_by_ids)
 
     class Meta:
         model = Circle
         fields = ("id", "organization", "name")
-

@@ -43,6 +43,17 @@ def update_student_profile(*, student_profile: StudentProfile, data) -> StudentP
     return student_profile
 
 
+def update_student(*, student: Student, data) -> Student:
+    non_side_effect_fields = ['name']
+    filtered_data = filter_dict_from_none_values(data)
+    student, has_updated = model_update(
+        instance=student,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return student
+
+
 class StudentProfileQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
                         Query.Status.CANCELED]

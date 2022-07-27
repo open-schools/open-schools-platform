@@ -12,8 +12,10 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class StudentProfileExceptionsTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_profile_url = reverse("api:students-management:create-students-profile")
-        self.student_join_circle_query_url = reverse("api:students-management:students-join-circle-query")
+        self.student_profile_url = reverse("api:students-management:students:create-student-profile")
+        self.student_profile_update_url = lambda pk: reverse("api:students-management:students:update-student-profile",
+                                                             args=[pk])
+        self.student_join_circle_query_url = reverse("api:students-management:students:auto-student-join-circle-query")
 
     def test_family_does_not_exist(self):
         user = create_logged_in_user(instance=self)
@@ -32,12 +34,11 @@ class StudentProfileExceptionsTests(TestCase):
         add_student_profile_to_family(family=family, student_profile=student_profile)
 
         student_profile_update_data = {
-            "student_profile": student_profile.id,
             "family": "99999999-9999-9999-9999-999999999999",
             "age": 15,
             "name": "test_student_profile"
         }
-        student_profile_update_response = self.client.put(self.student_profile_url,
+        student_profile_update_response = self.client.put(self.student_profile_update_url(student_profile.id),
                                                           student_profile_update_data)
         self.assertEqual(404, student_profile_update_response.status_code)
 
@@ -56,32 +57,31 @@ class StudentProfileExceptionsTests(TestCase):
 
         student_profile = create_student_profile(name="test_name", age=15)
         student_profile_update_with_family_data = {
-            "student_profile": student_profile.id,
             "family": family.id,
             "age": 15,
             "name": "test_name"
         }
         student_profile_update_with_family_response = \
-            self.client.put(self.student_profile_url, student_profile_update_with_family_data)
+            self.client.put(self.student_profile_update_url(student_profile.id),
+                            student_profile_update_with_family_data)
         self.assertEqual(403, student_profile_update_with_family_response.status_code)
 
         student_profile_update_data = {
-            "student_profile": student_profile.id,
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_response = self.client.put(self.student_profile_url,
+        student_profile_update_response = self.client.put(self.student_profile_update_url(student_profile.id),
                                                           student_profile_update_data)
         self.assertEqual(403, student_profile_update_response.status_code)
 
     def test_student_profile_does_not_exist(self):
         create_logged_in_user(instance=self)
         student_profile_update_data = {
-            "student_profile": "99999999-9999-9999-9999-999999999999",
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_response = self.client.put(self.student_profile_url,
+        student_profile_update_response = self.client.put(self.student_profile_update_url
+                                                          ("99999999-9999-9999-9999-999999999999"),
                                                           student_profile_update_data)
         self.assertEqual(404, student_profile_update_response.status_code)
 

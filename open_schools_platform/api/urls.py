@@ -25,12 +25,15 @@ organization_management_urls = [
          include(('open_schools_platform.organization_management.circles.urls', 'circles'))),
 ]
 
+students_management_urls = [
+    path('students/', include(('open_schools_platform.student_management.students.urls', 'students')))
+]
+
 urlpatterns = [
     path('user-management/', include((user_management_urls, "user-management"))),
     path('organization-management/', include(organization_management_urls)),
     path('query-management/', include((query_management_urls, 'query-management'))),
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
     path('parent-management/', include((parent_management_urls, "parent-management"))),
-    path('students-management/', include(('open_schools_platform.student_management.students.urls',
-                                         'students-management')))
+    path('students-management/', include((students_management_urls, 'students-management')))
 ]

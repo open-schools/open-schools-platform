@@ -3,7 +3,7 @@ import uuid
 from django.core.validators import MinValueValidator
 from rest_framework import serializers
 
-from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile, Student
 
 
 class StudentProfileCreateSerializer(serializers.ModelSerializer):
@@ -21,12 +21,16 @@ class StudentProfileUpdateSerializer(serializers.Serializer):
     age = serializers.IntegerField(validators=[MinValueValidator(0)], required=False, default=None)
 
 
-class StudentJoinCircleQuerySerializer(serializers.ModelSerializer):
+class AutoStudentJoinCircleQuerySerializer(serializers.ModelSerializer):
     circle = serializers.UUIDField()
 
     class Meta:
         model = StudentProfile
         fields = ("name", "age", "circle")
+
+
+class StudentJoinCircleQuerySerializer(serializers.Serializer):
+    circle = serializers.UUIDField()
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
@@ -41,6 +45,7 @@ class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, default=None)
 
 
-class StudentListSerializer(serializers.Serializer):
-    student_profile = serializers.UUIDField(required=True)
-    a = serializers.UUIDField(required=True)
+class QueryStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ('id', 'name')

@@ -8,20 +8,19 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
-from open_schools_platform.organization_management.circles.selectors import get_circles
-from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
     get_employee_profile_or_create_new_user, update_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
-    get_organization, get_circles_for_user_with_multiple_organizations
+    get_organization
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    OrganizationSerializer, OrganizationInviteSerializer, InviteEmployeeUpdateSerializer
+    OrganizationSerializer, OrganizationInviteSerializer, OrganizationInviteUpdateSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization
-from open_schools_platform.query_management.queries.selectors import get_query
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, QuerySerializer
+from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
+from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
+    OrganizationQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 
 
@@ -96,20 +95,19 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        request_body=InviteEmployeeUpdateSerializer,
-        responses={200: QuerySerializer},
+        request_body=OrganizationInviteUpdateSerializer,
+        responses={200: OrganizationQuerySerializer, 404: "There is no such query",
+                   406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
     def put(self, request):
-        query_update_serializer = InviteEmployeeUpdateSerializer(data=request.data)
+        query_update_serializer = OrganizationInviteUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
-
-        query = get_query(filters={"id": query_update_serializer.validated_data["query"]}, user=request.user)
-        if not query:
-            raise NotFound("There is no such query")
+        query = get_query_with_checks(pk=str(query_update_serializer.validated_data["query"]), user=request.user,
+                                      update_query_check=True)
         update_employee(employee=query.body, data=get_dict_excluding_fields(query_update_serializer.validated_data,
-                                                                            ['query']))
-        return Response(QuerySerializer(query).data, status=200)
+                                                                            ["query"]))
+        return Response(OrganizationQuerySerializer(query).data, status=200)
 
 
 class OrganizationQueriesListApi(ApiAuthMixin, APIView):
@@ -117,20 +115,11 @@ class OrganizationQueriesListApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Get all queries for organization of current user",
     )
-    def get(self, request):
-        pass
-
-
-class OrganizationCirclesListApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        operation_description="Get all circles for organization of current user",
-    )
-    def get(self, request):
-        serializer_class = CircleSerializer
-        organizations = get_organizations_by_user(user=request.user)
-        circles = get_circles_for_user_with_multiple_organizations(organizations=organizations)
-        if not circles:
-            raise NotFound('There are no circles.')
-        serializer = serializer_class(circles, many=True)
-        return Response(data=serializer.data)
+    def get(self, request, pk):
+        if not get_organization(filters={'id': str(pk)}):
+            raise NotFound('There is no such organization')
+        organization = get_organization(filters={'id': str(pk)}, user=request.user)
+        queries = get_queries(filters={'sender_id': organization.id})
+        if not queries:
+            raise NotFound('There are no queries with such sender')
+        return Response(OrganizationQuerySerializer(queries, many=True).data, status=200)

@@ -1,5 +1,5 @@
 from open_schools_platform.common.filters import BaseFilterSet
-from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile, Student
 
 
 class StudentProfileFilter(BaseFilterSet):
@@ -11,4 +11,4 @@ class StudentProfileFilter(BaseFilterSet):
 class StudentFilter(BaseFilterSet):
     class Meta:
         model = Student
-        fields = ('id', 'name', 'circles', 'student_profiles')
+        fields = ('id', 'name', 'circle', 'student_profile')
