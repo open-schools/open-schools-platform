@@ -22,5 +22,13 @@ class OrganizationQuerySerializer(QuerySerializer):
     body = QueryEmployeeBodySerializer()
 
 
+class EmployeeProfileQuerySerializer(serializers.ModelSerializer):
+    body = QueryEmployeeSerializer()
+
+    class Meta:
+        model = Query
+        fields = ('id', 'sender_id', 'recipient_id', 'status', 'body')
+
+
 class StudentProfileQuerySerializer(QuerySerializer):
     body = QueryStudentBodySerializer()

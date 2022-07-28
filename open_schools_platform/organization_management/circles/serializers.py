@@ -10,10 +10,10 @@ class CreateCircleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circle
-        fields = ('name', 'organization')
+        fields = ('name', 'organization', 'address', 'capacity', 'description')
 
 
 class CircleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
-        fields = ('id', 'name', 'organization')
+        fields = ('id', 'name', 'organization', 'address', 'capacity', 'description')
