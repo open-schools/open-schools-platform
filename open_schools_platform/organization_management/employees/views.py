@@ -3,8 +3,6 @@ from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response, ApiListPagination
@@ -13,11 +11,9 @@ from open_schools_platform.organization_management.employees.filters import Empl
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
 from open_schools_platform.organization_management.employees.selectors import get_employees, get_employee_profile
-from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer, \
-    EmployeeProfileSerializer
+from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer
 
 from open_schools_platform.query_management.queries.selectors import get_queries
-from open_schools_platform.organization_management.employees.serializers import QueryEmployeeSerializer
 from open_schools_platform.query_management.queries.serializers import EmployeeProfileQuerySerializer
 
 
