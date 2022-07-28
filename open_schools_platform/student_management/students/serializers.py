@@ -45,7 +45,7 @@ class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(required=False, default=None)
 
 
-class QueryStudentSerializer(serializers.ModelSerializer):
+class QueryStudentBodySerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ('id', 'name')

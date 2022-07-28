@@ -67,7 +67,7 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ("id", "phone", "name")
 
 
-class UserWithProfilesSerializer(serializers.ModelSerializer):
+class UserProfilesSerializer(serializers.ModelSerializer):
     parent_profile = ParentProfileSerializer()
     employee_profile = EmployeeProfileSerializer()
     student_profile = StudentProfileSerializer()

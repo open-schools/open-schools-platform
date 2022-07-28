@@ -12,14 +12,14 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
-    OrganizationQuerySerializer, StudentProfileQuerySerializer
+    StudentProfileQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
     StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
 from open_schools_platform.student_management.students.services import \
-    create_student_profile, update_student_profile, create_student, update_student
+    create_student_profile, update_student_profile, create_student, update_student_join_circle_body
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -132,17 +132,22 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         operation_description="Update body of student join circle query",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQueryUpdateSerializer(),
-        responses={201: OrganizationQuerySerializer(), 404: "There is no such query",
+        responses={201: StudentProfileQuerySerializer(), 404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"}
     )
     def put(self, request):
         query_update_serializer = StudentJoinCircleQueryUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
 
-        query = get_query_with_checks(pk=str(query_update_serializer.validated_data["query"]), user=request.user,
-                                      update_query_check=True)
-        update_student(student=query.body, data=get_dict_excluding_fields(query_update_serializer.validated_data,
-                                                                          ["query"]))
+        query = get_query_with_checks(
+            pk=str(query_update_serializer.validated_data["query"]),
+            user=request.user,
+            update_query_check=True
+        )
+        update_student_join_circle_body(
+            query=query,
+            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+        )
         return Response(StudentProfileQuerySerializer(query).data, status=200)
 
 

@@ -10,8 +10,8 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class StudentProfileUpdateTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_profile_update_url = lambda pk: reverse("api:students-management:students:update-student-profile",
-                                                             args=[pk])
+        self.student_profile_update_url = lambda pk: \
+            reverse("api:students-management:students:update-student-profile", args=[pk])
 
     def test_successful_student_profile_update(self):
         user = create_logged_in_user(instance=self)

@@ -10,7 +10,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
-    get_employee_profile_or_create_new_user, update_employee
+    get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
@@ -103,10 +103,15 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     def put(self, request):
         query_update_serializer = OrganizationInviteUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
-        query = get_query_with_checks(pk=str(query_update_serializer.validated_data["query"]), user=request.user,
-                                      update_query_check=True)
-        update_employee(employee=query.body, data=get_dict_excluding_fields(query_update_serializer.validated_data,
-                                                                            ["query"]))
+        query = get_query_with_checks(
+            pk=str(query_update_serializer.validated_data["query"]),
+            user=request.user,
+            update_query_check=True
+        )
+        update_invite_employee_body(
+            query=query,
+            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+        )
         return Response(OrganizationQuerySerializer(query).data, status=200)
 
 
@@ -116,9 +121,9 @@ class OrganizationQueriesListApi(ApiAuthMixin, APIView):
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):
-        if not get_organization(filters={'id': str(pk)}):
-            raise NotFound('There is no such organization')
         organization = get_organization(filters={'id': str(pk)}, user=request.user)
+        if not organization:
+            raise NotFound('There is no such organization')
         queries = get_queries(filters={'sender_id': organization.id})
         if not queries:
             raise NotFound('There are no queries with such sender')
