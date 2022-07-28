@@ -26,3 +26,11 @@ class StudentProfileQuerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Query
         fields = ('id', 'sender_ct', 'sender_id', 'recipient_ct', 'recipient_id', 'status', 'body')
+
+
+class EmployeeProfileQuerySerializer(serializers.ModelSerializer):
+    body = QueryEmployeeSerializer()
+
+    class Meta:
+        model = Query
+        fields = ('id', 'sender_id', 'recipient_id', 'status', 'body')
