@@ -19,14 +19,11 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
     return organization
 
 
-def get_organizations(*, filters=None, user: User = None) -> QuerySet:
+def get_organizations(*, filters=None) -> QuerySet:
     filters = filters or {}
 
     qs = Organization.objects.all()
     organizations = OrganizationFilter(filters, qs).qs
-
-    if user and not user.has_perm("organizations.organization_list_access", filters):
-        raise PermissionDenied
 
     return organizations
 

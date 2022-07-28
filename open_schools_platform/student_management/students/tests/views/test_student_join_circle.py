@@ -13,7 +13,7 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class StudentJoinCirclesTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_join_circle_query_url = reverse("api:students-management:students-join-circle-query")
+        self.student_join_circle_query_url = reverse("api:students-management:students:auto-student-join-circle-query")
 
     def test_student_join_circle_query_successfully_formed(self):
         user = create_logged_in_user(instance=self)

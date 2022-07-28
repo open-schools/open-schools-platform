@@ -1,4 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -9,14 +10,17 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
-    get_employee_profile_or_create_new_user
+    get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
-from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
+from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
+    get_organization
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    OrganizationSerializer, OrganizationInviteSerializer
+    OrganizationSerializer, OrganizationInviteSerializer, OrganizationInviteUpdateSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
+from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
+    OrganizationQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 
 
@@ -86,3 +90,41 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 
         return Response({"query": QueryStatusSerializer(query).data},
                         status=201)
+
+
+class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        request_body=OrganizationInviteUpdateSerializer,
+        responses={200: OrganizationQuerySerializer, 404: "There is no such query",
+                   406: "Cant update query because it's status is not SENT"},
+        operation_description="Update body of invite employee query",
+    )
+    def put(self, request):
+        query_update_serializer = OrganizationInviteUpdateSerializer(data=request.data)
+        query_update_serializer.is_valid(raise_exception=True)
+        query = get_query_with_checks(
+            pk=str(query_update_serializer.validated_data["query"]),
+            user=request.user,
+            update_query_check=True
+        )
+        update_invite_employee_body(
+            query=query,
+            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+        )
+        return Response(OrganizationQuerySerializer(query).data, status=200)
+
+
+class OrganizationQueriesListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Get all queries for organization of current user",
+    )
+    def get(self, request, pk):
+        organization = get_organization(filters={'id': str(pk)}, user=request.user)
+        if not organization:
+            raise NotFound('There is no such organization')
+        queries = get_queries(filters={'sender_id': organization.id})
+        if not queries:
+            raise NotFound('There are no queries with such sender')
+        return Response(OrganizationQuerySerializer(queries, many=True).data, status=200)

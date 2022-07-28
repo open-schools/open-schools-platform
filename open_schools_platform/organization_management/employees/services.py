@@ -1,8 +1,11 @@
-from rest_framework.exceptions import APIException
+from rest_framework.exceptions import APIException, NotAcceptable
 
+from open_schools_platform.common.services import model_update
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import create_user, generate_user_password
@@ -17,6 +20,19 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
         position=position,
     )
     return employee
+
+
+def update_invite_employee_body(*, query: Query, data) -> Query:
+    non_side_effect_fields = ['name', 'position']
+    filtered_data = filter_dict_from_none_values(data)
+    if query.body is None:
+        raise NotAcceptable
+    query.body, has_updated = model_update(
+        instance=query.body,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return query
 
 
 def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
@@ -34,10 +50,3 @@ def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
         user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
     return user.employee_profile
-
-
-def update_employee(organization: Organization,
-                    employee_profile: EmployeeProfile,
-                    employee: Employee):
-    employee.organization = organization
-    employee.employee_profile = employee_profile

@@ -11,7 +11,7 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class StudentProfileCreateTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.student_profile_create_url = reverse("api:students-management:create-students-profile")
+        self.student_profile_create_url = reverse("api:students-management:students:create-student-profile")
 
     def test_successful_student_profile_creation(self):
         user = create_logged_in_user(instance=self)
