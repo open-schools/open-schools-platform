@@ -30,13 +30,10 @@ def get_student(*, filters=None, user: User = None) -> Student:
     return student
 
 
-def get_students(*, filters=None, user: User = None) -> QuerySet:
+def get_students(*, filters=None) -> QuerySet:
     filters = filters or {}
 
     qs = Student.objects.all()
     students = StudentFilter(filters, qs).qs
-
-    if user and students and not user.has_perm('students.student_profile_access', filters):
-        raise PermissionDenied
 
     return students

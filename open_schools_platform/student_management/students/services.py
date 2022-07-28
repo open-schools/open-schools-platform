@@ -43,15 +43,17 @@ def update_student_profile(*, student_profile: StudentProfile, data) -> StudentP
     return student_profile
 
 
-def update_student(*, student: Student, data) -> Student:
+def update_student_join_circle_body(*, query: Query, data) -> Query:
     non_side_effect_fields = ['name']
     filtered_data = filter_dict_from_none_values(data)
-    student, has_updated = model_update(
-        instance=student,
+    if query.body is None:
+        raise NotAcceptable
+    query.body, has_updated = model_update(
+        instance=query.body,
         fields=non_side_effect_fields,
         data=filtered_data
     )
-    return student
+    return query
 
 
 class StudentProfileQueryHandler(BaseQueryHandler):

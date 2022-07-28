@@ -16,7 +16,7 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer, UserWithProfilesSerializer
+from ..users.serializers import UserSerializer, UserProfilesSerializer
 from ..users.services import set_new_password_for_user, user_update
 
 
@@ -56,10 +56,10 @@ class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get user data.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        responses={200: UserWithProfilesSerializer},
+        responses={200: UserProfilesSerializer},
     )
     def get(self, request):
-        return Response(UserWithProfilesSerializer(request.user).data, status=200)
+        return Response({"user": UserProfilesSerializer(request.user).data}, status=200)
 
     @swagger_auto_schema(
         operation_description="Update user.",

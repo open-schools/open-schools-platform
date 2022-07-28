@@ -29,4 +29,4 @@ def get_circle(*, filters=None, user: User = None) -> Circle:
 
 def get_circles_by_students(students: QuerySet) -> QuerySet:
     return students if len(students) == 0 else \
-        get_circles(filters={"students": ','.join(list(map(lambda x: str(x.circle.id), list(students))))})
+        get_circles(filters={"ids": ','.join(list(map(lambda x: str(x.circle.id), list(students))))})
