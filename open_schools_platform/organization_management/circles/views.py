@@ -13,6 +13,7 @@ from open_schools_platform.organization_management.circles.services import creat
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from ...api.pagination import ApiListPagination
+from ...common.utils import get_dict_excluding_fields
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -28,7 +29,8 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         organization = get_organization(filters={"id": create_circle_serializer.validated_data['organization']})
         if not organization:
             raise NotFound("There is no such organization")
-        circle = create_circle(name=create_circle_serializer.validated_data['name'], organization=organization)
+        circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
+                               organization=organization)
         return Response(CircleSerializer(circle).data, status=201)
 
 
