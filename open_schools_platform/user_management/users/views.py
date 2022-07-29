@@ -64,7 +64,7 @@ class RetrieveCreationTokenApi(APIView):
         if not token:
             raise NotFound(detail="No such token.")
 
-        return Response(RetrieveCreationTokenSerializer(token).data)
+        return Response({"token_data": RetrieveCreationTokenSerializer(token).data}, status=200)
 
 
 class UserApi(CreateAPIView):

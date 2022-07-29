@@ -10,5 +10,5 @@ urlpatterns = [
                                   'post': OrganizationCreateApi}).as_view(), name='organization-api'),
     path('<uuid:pk>/invite-employee', InviteEmployeeApi.as_view(), name='invite-employee'),
     path('invite-employee', InviteEmployeeUpdateApi.as_view(), name='invite-employee-update'),
-    path('<uuid:pk>/queries', OrganizationQueriesListApi.as_view(), name='queries-list'),
+    path('<uuid:pk>/invite-employee-queries', OrganizationQueriesListApi.as_view(), name='queries-list'),
 ]

@@ -40,7 +40,7 @@ class StudentProfileApi(ApiAuthMixin, APIView):
         student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
                                                  age=student_profile_serializer.validated_data['age'])
         add_student_profile_to_family(student_profile=student_profile, family=family)
-        return Response(StudentProfileSerializer(student_profile).data, status=201)
+        return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
 
 class StudentProfileUpdateApi(ApiAuthMixin, APIView):
@@ -69,7 +69,7 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
         update_student_profile(student_profile=student_profile,
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data,
                                                               ['student_profile', 'family']))
-        return Response(StudentProfileSerializer(student_profile).data, status=200)
+        return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=200)
 
 
 class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
@@ -99,7 +99,7 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
             body_model_name="student", body_id=student.id
         )
 
-        return Response(QueryStatusSerializer(query).data, status=201)
+        return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
 
 class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
@@ -124,7 +124,7 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
             recipient_model_name="circle", recipient_id=circle.id,
             body_model_name="student", body_id=student.id
         )
-        return Response(QueryStatusSerializer(query).data, status=201)
+        return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
 
 class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
@@ -148,7 +148,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
             query=query,
             data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
         )
-        return Response(StudentProfileQuerySerializer(query).data, status=200)
+        return Response({"query": StudentProfileQuerySerializer(query).data}, status=200)
 
 
 class StudentQueriesListApi(ApiAuthMixin, APIView):
@@ -163,7 +163,7 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
         queries = get_queries(filters={'sender_id': str(student_profile.id)})
         if not queries:
             raise NotFound('There are no queries with such sender')
-        return Response(StudentProfileQuerySerializer(queries, many=True).data, status=200)
+        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
 class StudentCirclesListApi(ApiAuthMixin, APIView):
@@ -180,5 +180,5 @@ class StudentCirclesListApi(ApiAuthMixin, APIView):
         if not students:
             raise NotFound('There are no students with such student_profile')
         if not circles:
-            raise NotFound('Such student_profile does not have any circles')
-        return Response(CircleSerializer(circles, many=True).data, status=200)
+            raise NotFound('Such student profile does not have any circles')
+        return Response({"results": CircleSerializer(circles, many=True).data}, status=200)
