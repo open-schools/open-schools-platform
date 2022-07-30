@@ -10,7 +10,7 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class FamilyCreateTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.family_create_url = reverse("api:parent-management:families:family-api")
+        self.family_create_url = reverse("api:parent-management:families:families")
 
     def test_successful_family_creation(self):
         create_logged_in_user(instance=self)
