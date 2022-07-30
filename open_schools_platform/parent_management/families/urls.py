@@ -1,6 +1,5 @@
 from django.urls import path
 
-from open_schools_platform.common.views import MultipleViewManager
 from open_schools_platform.parent_management.families.views import FamilyApi, FamilyStudentProfilesListApi
 
 urlpatterns = [
