@@ -4,6 +4,8 @@ from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.parent_management.families.filters import FamilyFilter
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.user_management.users.models import User
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.filters import StudentProfileFilter
 
 
 def get_family(*, filters=None, user: User = None) -> Family:

@@ -3,6 +3,7 @@ from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.pagination import ApiListPagination, get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer
@@ -28,6 +29,9 @@ class FamilyApi(ApiAuthMixin, APIView):
 
 
 class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
+    pagination_class = ApiListPagination
+    serializer_class = StudentProfileSerializer
+
     @swagger_auto_schema(
         operation_description="Get all student profiles for provided family.",
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
@@ -36,7 +40,15 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
         family = get_family(filters={'id': str(pk)}, user=request.user)
         if not family:
             raise NotFound("There is no such family")
-        return Response({"results": StudentProfileSerializer(family.student_profiles, many=True).data}, status=200)
+
+        response = get_paginated_response(
+            pagination_class=ApiListPagination,
+            serializer_class=StudentProfileSerializer,
+            queryset=family.student_profiles.all(),
+            request=request,
+            view=self,
+        )
+        return response
 
 
 class FamiliesListApi(ApiAuthMixin, APIView):
