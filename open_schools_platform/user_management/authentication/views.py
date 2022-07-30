@@ -72,7 +72,7 @@ class UserMeApi(ApiAuthMixin, APIView):
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
-        return Response(UserSerializer(user).data)
+        return Response({"user": UserSerializer(user).data})
 
 
 class UpdatePasswordApi(ApiAuthMixin, APIView):

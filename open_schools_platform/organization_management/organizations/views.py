@@ -112,7 +112,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
             query=query,
             data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
         )
-        return Response(OrganizationQuerySerializer(query).data, status=200)
+        return Response({"query": OrganizationQuerySerializer(query).data}, status=200)
 
 
 class OrganizationQueriesListApi(ApiAuthMixin, APIView):
@@ -127,4 +127,4 @@ class OrganizationQueriesListApi(ApiAuthMixin, APIView):
         queries = get_queries(filters={'sender_id': organization.id})
         if not queries:
             raise NotFound('There are no queries with such sender')
-        return Response(OrganizationQuerySerializer(queries, many=True).data, status=200)
+        return Response({"results": OrganizationQuerySerializer(queries, many=True).data}, status=200)

@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.parent_management.families.filters import FamilyFilter
@@ -13,5 +14,14 @@ def get_family(*, filters=None, user: User = None) -> Family:
 
     if user and family and not user.has_perm('families.family_access', family):
         raise PermissionDenied
+
+    return family
+
+
+def get_families(*, filters=None) -> QuerySet:
+    filters = filters or {}
+
+    qs = Family.objects.all()
+    family = FamilyFilter(filters, qs).qs
 
     return family

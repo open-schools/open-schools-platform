@@ -1,10 +1,12 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.views import APIView
+
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 
-from .selectors import get_circles
+from .selectors import get_circles, get_circle
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -14,6 +16,8 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
+from ...query_management.queries.selectors import get_queries
+from ...query_management.queries.serializers import StudentProfileQuerySerializer
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -31,7 +35,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
             raise NotFound("There is no such organization")
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
                                organization=organization)
-        return Response(CircleSerializer(circle).data, status=201)
+        return Response({"circle": CircleSerializer(circle).data}, status=201)
 
 
 class GetCircles(ApiAuthMixin, ListAPIView):
@@ -53,4 +57,19 @@ class GetCircles(ApiAuthMixin, ListAPIView):
             request=request,
             view=self
         )
-        return response  # Response(CircleSerializer(circles, many=True).data, status=200)
+        return response
+
+
+class CirclesQueriesListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get all queries for provided circle.",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+    )
+    def get(self, request, pk):
+        circle = get_circle(filters={"id": str(pk)}, user=request.user)
+        if not circle:
+            raise NotFound("There is no such circle.")
+        queries = get_queries(filters={"recipient_id": str(pk)})
+        if not queries:
+            raise NotFound("There are no queries with such recipient.")
+        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
