@@ -18,6 +18,7 @@ from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer
+from ...student_management.students.serializers import StudentSerializer
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -73,3 +74,13 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
         if not queries:
             raise NotFound("There are no queries with such recipient.")
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+
+
+class CirclesStudentsListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(operation_description="Get students in this circle",
+                         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+                         )
+    def get(self, request, pk):
+        circle = get_circle(filters={"id": str(pk)}, user=request.user)
+        qs = circle.students.all()
+        return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
