@@ -1,7 +1,5 @@
 from json import loads
 
-key_transform = {"id": str}
-
 
 class GetRequestTesting:
     '''

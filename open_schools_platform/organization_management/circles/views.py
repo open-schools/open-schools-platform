@@ -42,11 +42,11 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
 class GetCircles(ApiAuthMixin, ListAPIView):
     filterset_class = CircleFilter
     pagination_class = ApiListPagination
-    serializer_class = CircleSerializer
 
     @swagger_auto_schema(
         operation_description="Get all circles",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: CircleSerializer}
     )
     def get(self, request):
         circles = get_circles()
@@ -65,6 +65,7 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: StudentProfileQuerySerializer}
     )
     def get(self, request, pk):
         circle = get_circle(filters={"id": str(pk)}, user=request.user)
@@ -79,6 +80,7 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
 class CirclesStudentsListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(operation_description="Get students in this circle",
                          tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+                         responses={200: StudentSerializer}
                          )
     def get(self, request, pk):
         circle = get_circle(filters={"id": str(pk)}, user=request.user)

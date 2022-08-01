@@ -12,16 +12,14 @@ class FamilyStudentProfilesListApiTests(TestCase):
         self.client = APIClient()
         self.user = create_logged_in_user(instance=self)
         self.family = create_family(parent=self.user.parent_profile, name="test_family")
-        self.studentprofiles_count = 30
 
         self.student_profiles = GetRequestTesting \
             .create_testdata_in_db(
-                creation_count=self.studentprofiles_count,
+                creation_count=100,
                 creation_function=create_student_profile_in_family,
                 creation_function_args={"family": self.family}
             )
 
-        self.assertEqual(self.studentprofiles_count, self.family.student_profiles.count())
         self.reverse_url = reverse("api:parent-management:families:student-profiles-list", args=[self.family.id])
 
     def test_studentprofiles_list_api(self):

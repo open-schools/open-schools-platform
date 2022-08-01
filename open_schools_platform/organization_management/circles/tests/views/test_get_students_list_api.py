@@ -16,14 +16,14 @@ class CirclesStudentsListApiTests(TestCase):
         self.client = APIClient()
         self.user = create_logged_in_user(instance=self)
 
-        organization = create_organization(inn="12345678901234567890", name="Zavod 911")
-        create_employee(name="Skala", user=self.user, organization=organization, position="CoolMan")
-        circle = create_circle(address="Buba", capacity=34, description="biba", name="HSE",
+        organization = create_organization(inn="12345678901234567890", name="VeryFamousOrg")
+        create_employee(name="Van", user=self.user, organization=organization, position="Master of fantasy")
+        circle = create_circle(address="Dungeon str", capacity=34, description="private circle", name="Van's circle",
                                organization=organization)
         self.reverse_url = reverse("api:organization-management:circles:students-list", args=[circle.id])
 
         self.students = GetRequestTesting.create_testdata_in_db(
-            creation_count=50,
+            creation_count=100,
             creation_function=create_student_and_add_to_the_circle,
             creation_function_args={"circle": circle}
         )
