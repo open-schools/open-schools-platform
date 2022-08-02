@@ -75,6 +75,8 @@ class StudentProfileQueryHandler(BaseQueryHandler):
         elif not student_profile_access:
             if new_status == Query.Status.CANCELED:
                 raise NotAcceptable("Circle cannot cancel query, it can only decline it")
+            if query.status == Query.Status.CANCELED:
+                raise NotAcceptable("Сan no longer change the query")
 
         query_update(query=query, data={"status": new_status})
         if query.status == Query.Status.ACCEPTED:
