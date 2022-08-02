@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 
+from .models import Circle
 from .selectors import get_circles, get_circle
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -16,8 +17,10 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
+from ...common.views import swagger_dict_response
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer
+from ...student_management.students.serializers import StudentSerializer
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -38,7 +41,8 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         return Response({"circle": CircleSerializer(circle).data}, status=201)
 
 
-class GetCircles(ApiAuthMixin, ListAPIView):
+class GetCirclesApi(ApiAuthMixin, ListAPIView):
+    queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiListPagination
     serializer_class = CircleSerializer
@@ -64,6 +68,7 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: swagger_dict_response({"results": StudentProfileQuerySerializer(many=True)})}
     )
     def get(self, request, pk):
         circle = get_circle(filters={"id": str(pk)}, user=request.user)
@@ -73,3 +78,15 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
         if not queries:
             raise NotFound("There are no queries with such recipient.")
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+
+
+class CirclesStudentsListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get students in this circle",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
+    )
+    def get(self, request, pk):
+        circle = get_circle(filters={"id": str(pk)}, user=request.user)
+        qs = circle.students.all()
+        return Response({"results": StudentSerializer(qs, many=True).data}, status=200)

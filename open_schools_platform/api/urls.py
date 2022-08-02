@@ -31,7 +31,7 @@ students_management_urls = [
 
 urlpatterns = [
     path('user-management/', include((user_management_urls, "user-management"))),
-    path('organization-management/', include(organization_management_urls)),
+    path('organization-management/', include((organization_management_urls, "organization-management"))),
     path('query-management/', include((query_management_urls, 'query-management'))),
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
     path('parent-management/', include((parent_management_urls, "parent-management"))),

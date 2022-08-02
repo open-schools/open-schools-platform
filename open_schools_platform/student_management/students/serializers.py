@@ -34,7 +34,6 @@ class StudentJoinCircleQuerySerializer(serializers.Serializer):
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = StudentProfile
         fields = ("name", "age", "id")
@@ -49,3 +48,9 @@ class QueryStudentBodySerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ('id', 'name')
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = ("id", "name", "circle")
