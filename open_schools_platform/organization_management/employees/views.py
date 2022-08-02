@@ -3,10 +3,13 @@ from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import ListAPIView
 from rest_framework.exceptions import NotFound
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.api.pagination import get_paginated_response, ApiListPagination
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
@@ -41,13 +44,12 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
         return response
 
 
-class EmployeeQueriesListApi(ApiAuthMixin, ListAPIView):
-    pagination_class = ApiListPagination
-    serializer_class = EmployeeProfileQuerySerializer
-
-    @swagger_auto_schema(tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
-                         operation_description="Get all queries for the provided employee profile",
-                         )
+class EmployeeQueriesListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
+        operation_description="Get all queries for the provided employee profile",
+        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer()})}
+    )
     def get(self, request):
         employee_profile = get_employee_profile(filters={'id': str(request.user.employee_profile.id)},
                                                 user=request.user)
@@ -60,12 +62,4 @@ class EmployeeQueriesListApi(ApiAuthMixin, ListAPIView):
         if not queries:
             raise NotFound('There are no queries with such content type')
 
-        response = get_paginated_response(
-            pagination_class=ApiListPagination,
-            serializer_class=EmployeeProfileQuerySerializer,
-            queryset=queries,
-            request=request,
-            view=self
-        )
-
-        return response  # Response(EmployeeProfileQuerySerializer(queries, many=True).data, status=200)
+        return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
