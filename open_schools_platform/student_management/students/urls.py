@@ -15,5 +15,4 @@ urlpatterns = [
          name='student-join-circle-update-query'),
     path('student-profile/<uuid:pk>/queries', StudentQueriesListApi.as_view(), name='queries-list'),
     path('student-profile/<uuid:pk>/circles', StudentCirclesListApi.as_view(), name='circles-list')
-
 ]
