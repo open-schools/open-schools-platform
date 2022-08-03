@@ -48,7 +48,7 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Get all queries for the provided employee profile",
-        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer()})}
+        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})}
     )
     def get(self, request):
         employee_profile = get_employee_profile(filters={'id': str(request.user.employee_profile.id)},
