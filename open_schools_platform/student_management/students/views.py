@@ -6,13 +6,13 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
+from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
 from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
-    StudentProfileQuerySerializer
+from open_schools_platform.query_management.queries.serializers import StudentProfileQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
@@ -27,7 +27,8 @@ class StudentProfileApi(ApiAuthMixin, APIView):
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
         request_body=StudentProfileCreateSerializer,
-        responses={201: StudentProfileSerializer, 404: "There is no such family",
+        responses={201: swagger_dict_response({"student_profile": StudentProfileSerializer()}),
+                   404: "There is no such family",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
@@ -48,7 +49,8 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentProfileUpdateSerializer(),
-        responses={200: StudentProfileSerializer, 404: "There is no such student profile or family",
+        responses={200: swagger_dict_response({"student_profile": StudentProfileSerializer()}),
+                   404: "There is no such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
     def put(self, request, pk):
@@ -78,7 +80,8 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
                               "Forms query for adding created student to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=AutoStudentJoinCircleQuerySerializer(),
-        responses={201: QueryStatusSerializer, 406: "Current user already has family"}
+        responses={201: swagger_dict_response({"query": StudentProfileQuerySerializer()}),
+                   406: "Current user already has family"}
     )
     def post(self, request):
         student_join_circle_req_serializer = AutoStudentJoinCircleQuerySerializer(data=request.data)
@@ -107,7 +110,8 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         operation_description="Forms query for adding created student to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQuerySerializer(),
-        responses={201: QueryStatusSerializer, 404: "There is no such student profile"}
+        responses={201: swagger_dict_response({"query": StudentProfileQuerySerializer()}),
+                   404: "There is no such student profile"}
     )
     def post(self, request, pk):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
@@ -132,7 +136,8 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         operation_description="Update body of student join circle query",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQueryUpdateSerializer(),
-        responses={201: StudentProfileQuerySerializer(), 404: "There is no such query",
+        responses={201: swagger_dict_response({"query": StudentProfileQuerySerializer()}),
+                   404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"}
     )
     def put(self, request):
@@ -154,6 +159,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
 class StudentQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        responses={200: swagger_dict_response({"results": StudentProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for provided student profile",
     )
     def get(self, request, pk):
@@ -169,6 +175,7 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
 class StudentCirclesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        responses={200: swagger_dict_response({"results": CircleSerializer(many=True)})},
         operation_description="Get all circles for provided student profile",
     )
     def get(self, request, pk):

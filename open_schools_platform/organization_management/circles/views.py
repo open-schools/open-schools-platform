@@ -27,7 +27,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create circle via provided name and organization.",
         request_body=CreateCircleSerializer,
-        responses={201: CircleSerializer, 404: "There is no such organization"},
+        responses={201: swagger_dict_response({"circle": CircleSerializer()}), 404: "There is no such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def post(self, request):

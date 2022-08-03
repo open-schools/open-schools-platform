@@ -8,6 +8,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
+from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
     get_employee_profile_or_create_new_user, update_invite_employee_body
@@ -28,7 +29,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user.",
         request_body=CreateOrganizationSerializer,
-        responses={201: EmployeeSerializer},
+        responses={201: swagger_dict_response({"creator_employee": EmployeeSerializer()})},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
     )
     def post(self, request, *args, **kwargs):
@@ -70,8 +71,8 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationInviteSerializer,
-        responses={201: QueryStatusSerializer},
-        operation_description="Return paginated list of organizations.",
+        responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
+        operation_description="Creates invite employee query.",
     )
     def post(self, request, pk) -> Response:
         invite_serializer = OrganizationInviteSerializer(data=request.data)
@@ -96,7 +97,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationInviteUpdateSerializer,
-        responses={200: OrganizationQuerySerializer, 404: "There is no such query",
+        responses={200: swagger_dict_response({"query": OrganizationQuerySerializer()}), 404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
@@ -118,6 +119,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
 class OrganizationQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: swagger_dict_response({"results": OrganizationQuerySerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):

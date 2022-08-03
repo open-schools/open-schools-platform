@@ -18,6 +18,7 @@ from open_schools_platform.user_management.authentication.services import auth_l
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from ..users.serializers import UserSerializer, UserProfilesSerializer
 from ..users.services import set_new_password_for_user, user_update
+from ...common.views import swagger_dict_response
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
@@ -56,7 +57,7 @@ class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get user data.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        responses={200: UserProfilesSerializer},
+        responses={200: swagger_dict_response({"user": UserProfilesSerializer()})},
     )
     def get(self, request):
         return Response({"user": UserProfilesSerializer(request.user).data}, status=200)
@@ -65,14 +66,14 @@ class UserMeApi(ApiAuthMixin, APIView):
         operation_description="Update user.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
         request_body=UserUpdateSerializer,
-        responses={200: UserSerializer}
+        responses={200: swagger_dict_response({"user": UserSerializer()})}
     )
     def put(self, request):
         user = request.user
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
-        return Response({"user": UserSerializer(user).data})
+        return Response({"user": UserSerializer(user).data}, status=200)
 
 
 class UpdatePasswordApi(ApiAuthMixin, APIView):
