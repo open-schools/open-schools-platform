@@ -47,13 +47,11 @@ class GetCircles(ApiAuthMixin, ListAPIView):
         operation_description="Get all circles",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
-    def get(self, request):
-        circles = get_circles()
-
+    def get(self, request, *args, **kwargs):
         response = get_paginated_response(
             pagination_class=ApiListPagination,
             serializer_class=CircleSerializer,
-            queryset=circles,
+            queryset=get_circles(filters=request.GET.dict()),
             request=request,
             view=self
         )
