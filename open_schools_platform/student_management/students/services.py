@@ -67,7 +67,9 @@ class StudentProfileQueryHandler(BaseQueryHandler):
         circle_access = user.has_perm("circles.circle_access", query.recipient)
         student_profile_access = user.has_perm("students.student_profile_access", query.sender)
 
-        if student_profile_access:
+        if student_profile_access and circle_access:
+            pass
+        elif student_profile_access:
             if query.status != Query.Status.SENT:
                 raise NotAcceptable("Сan no longer change the query")
             if new_status != Query.Status.CANCELED:
