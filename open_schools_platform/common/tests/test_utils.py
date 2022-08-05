@@ -14,6 +14,8 @@ class GetRequestTesting:
     @staticmethod
     def create_testdata_in_db(creation_count, creation_function,
                               creation_function_args=None):
+        if creation_function_args is None:
+            creation_function_args = {}
         id_list = []
 
         for i in range(creation_count):
@@ -25,6 +27,13 @@ class GetRequestTesting:
 
     @staticmethod
     def get_results(response):
+        print(response.content.decode())
         data = [item["id"] for item in loads(response.content.decode())["results"]]
+        data.sort()
+        return data
+
+    @staticmethod
+    def get_results_for_argument(response, arg):
+        data = [item[arg] for item in loads(response.content.decode())["results"]]
         data.sort()
         return data
