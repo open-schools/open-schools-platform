@@ -18,14 +18,11 @@ def get_employee(*, filters=None, user: User = None) -> Employee:
     return employee
 
 
-def get_employees(*, filters=None, user: User = None) -> QuerySet:
+def get_employees(*, filters=None) -> QuerySet:
     filters = filters or {}
 
     qs = Employee.objects.all()
     employees = EmployeeFilter(filters, qs).qs
-
-    if user and not user.has_perm("employees.employee_list_access", filters):
-        raise PermissionDenied
 
     return employees
 
