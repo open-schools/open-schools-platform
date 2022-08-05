@@ -69,7 +69,8 @@ class GettingEmployeesTests(TestCase):
         correct_answers = ["+79999999902"]
         data = {
             "organization": self.organization.id,
-            "search": "Chief cleaner"}
+            "search": "Chief cleaner"
+        }
 
         self.get_employees_test(correct_answers, data)
 
@@ -77,7 +78,8 @@ class GettingEmployeesTests(TestCase):
         correct_answers = ["+79999999901", "+79999999902"]
         data = {
             "organization": self.organization.id,
-            "search": "Chief"}
+            "search": "Chief"
+        }
 
         self.get_employees_test(correct_answers, data)
 

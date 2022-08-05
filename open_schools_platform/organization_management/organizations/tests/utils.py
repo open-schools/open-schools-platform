@@ -1,10 +1,12 @@
+from typing import List
+
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.services import create_organization
 from open_schools_platform.user_management.users.models import User
 
 
-def create_test_employees(user: User, organizations: list[Organization]):
+def create_test_employees(user: User, organizations: List[Organization]):
     employees = []
 
     for organization in organizations:

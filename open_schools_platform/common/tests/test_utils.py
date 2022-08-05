@@ -27,7 +27,6 @@ class GetRequestTesting:
 
     @staticmethod
     def get_results(response):
-        print(response.content.decode())
         data = [item["id"] for item in loads(response.content.decode())["results"]]
         data.sort()
         return data
