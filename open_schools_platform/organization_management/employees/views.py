@@ -13,8 +13,11 @@ from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
-from open_schools_platform.organization_management.employees.selectors import get_employees, get_employee_profile
-from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer
+from open_schools_platform.organization_management.employees.selectors import get_employees, get_employee_profile, \
+    get_employee
+from open_schools_platform.organization_management.employees.serializers import EmployeeListSerializer, \
+    EmployeeSerializer, EmployeeUpdateSerializer
+from open_schools_platform.organization_management.employees.services import update_employee
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 
 from open_schools_platform.query_management.queries.selectors import get_queries
@@ -59,7 +62,7 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
         employee_profile = get_employee_profile(filters={'id': str(request.user.employee_profile.id)},
                                                 user=request.user)
         if employee_profile is None:
-            raise NotFound('There is no such student profile')
+            raise NotFound('There is no such employee profile')
         queries = get_queries(
             filters={'recipient_id': str(employee_profile.id),
                      'sender_ct': ContentType.objects.get(model="organization")})
@@ -68,3 +71,21 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
             raise NotFound('There are no queries with such content type')
 
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
+
+
+class EmployeeUpdateApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
+        request_body=EmployeeUpdateSerializer,
+        operation_description="Update data of provided employee.",
+        responses={200: swagger_dict_response({"employee": EmployeeSerializer()}), 404: "There is no such employee"}
+    )
+    def put(self, request, pk):
+        employee_update_serializer = EmployeeUpdateSerializer(data=request.data)
+        employee_update_serializer.is_valid()
+        employee = get_employee(filters={"id": str(pk)})
+        if not employee:
+            raise NotFound("There is no such employee")
+        get_employee_profile(filters={"id": str(employee.employee_profile.id)}, user=request.user)
+        update_employee(employee=employee, data=employee_update_serializer.validated_data)
+        return Response({"employee": EmployeeSerializer(employee).data}, status=200)

@@ -75,3 +75,7 @@ def create_test_organizations():
         organizations.append(organization)
 
     return organizations
+
+
+def create_test_employee(user):
+    return create_employee(name="test_employee", position="test", user=user)
