@@ -40,3 +40,6 @@ class Query(BaseModel):
 
     class Meta:
         unique_together = ('recipient_ct', 'recipient_id', 'sender_ct', 'sender_id')
+
+    def __str__(self):
+        return self.id.__str__()
