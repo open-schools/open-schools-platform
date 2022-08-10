@@ -1,9 +1,7 @@
 from django.contrib import admin
-from django.db.models import Q
-
 from open_schools_platform.common.admin import InputFilter
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.selectors import get_query
+from open_schools_platform.query_management.queries.selectors import get_query, get_queries
 from open_schools_platform.query_management.queries.services import run_sender_handler
 from django.utils.translation import gettext_lazy as _
 
@@ -16,10 +14,7 @@ class SenderFilter(InputFilter):
         if self.value() is not None:
             sender = self.value()
 
-            return queryset.filter(
-                Q(sender_ct__app_label__icontains=sender) |
-                Q(sender_ct__model__icontains=sender)
-            )
+            return get_queries(filters={"sender_ct_search": sender})
 
 
 class RecipientFilter(InputFilter):
@@ -30,10 +25,7 @@ class RecipientFilter(InputFilter):
         if self.value() is not None:
             recipient = self.value()
 
-            return queryset.filter(
-                Q(recipient_ct__app_label__icontains=recipient) |
-                Q(recipient_ct__model__icontains=recipient)
-            )
+            return get_queries(filters={"recipient_ct_search": recipient})
 
 
 class QueryAdmin(admin.ModelAdmin):

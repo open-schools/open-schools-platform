@@ -1,22 +1,19 @@
 from django.contrib import admin
-from django.db.models import Q
-
 from .models import Circle
+from .selectors import get_circles
 from ...common.admin import InputFilter
 from django.utils.translation import gettext_lazy as _
 
 
 class OrganizationFilter(InputFilter):
-    parameter_name = 'organization'
-    title = _('organization')
+    parameter_name = 'organization_name'
+    title = _('organization name')
 
     def queryset(self, request, queryset):
         if self.value() is not None:
-            name = self.value()
+            organization = self.value()
 
-            return queryset.filter(
-                Q(organization__name__icontains=name)
-            )
+            return get_circles(filters={"organization_name": organization})
 
 
 class AddressFilter(InputFilter):
@@ -26,10 +23,7 @@ class AddressFilter(InputFilter):
     def queryset(self, request, queryset):
         if self.value() is not None:
             address = self.value()
-
-            return queryset.filter(
-                Q(address__icontains=address)
-            )
+            return get_circles(filters={"address": address})
 
 
 class CircleAdmin(admin.ModelAdmin):

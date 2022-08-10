@@ -1,9 +1,9 @@
 from django.contrib import admin
-from django.db.models import Q
-
 from open_schools_platform.common.admin import InputFilter
 from open_schools_platform.organization_management.organizations.models import Organization
 from django.utils.translation import gettext_lazy as _
+
+from open_schools_platform.organization_management.organizations.selectors import get_organizations
 
 
 class INNFilter(InputFilter):
@@ -14,9 +14,7 @@ class INNFilter(InputFilter):
         if self.value() is not None:
             inn = self.value()
 
-            return queryset.filter(
-                Q(inn=inn)
-            )
+            return get_organizations(filters={"inn": inn})
 
 
 class OrganizationAdmin(admin.ModelAdmin):
