@@ -50,3 +50,14 @@ def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
         user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
 
     return user.employee_profile
+
+
+def update_employee(*, employee: Employee, data) -> Employee:
+    non_side_effect_fields = ['name']
+    filtered_data = filter_dict_from_none_values(data)
+    employee, has_updated = model_update(
+        instance=employee,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return employee
