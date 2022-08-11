@@ -37,4 +37,10 @@ class UserAdmin(admin.ModelAdmin):
             self.message_user(request, str(exc), messages.ERROR)
 
 
-admin.site.register(CreationToken)
+class CreationTokenAdmin(admin.ModelAdmin):
+    list_display = ("key", "phone", "session", "is_verified")
+    search_fields = ("key", "phone")
+    list_filter = ("is_verified",)
+
+
+admin.site.register(CreationToken, CreationTokenAdmin)

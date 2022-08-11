@@ -118,3 +118,6 @@ class CreationToken(BaseModel):
     objects = CreationTokenManager()
 
     USERNAME_FIELD = 'key'
+
+    def __str__(self):
+        return self.key.__str__()
