@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django_filters import CharFilter
 
 from open_schools_platform.common.filters import BaseFilterSet
@@ -10,12 +9,10 @@ class QueryFilter(BaseFilterSet):
     recipient_ct_search = CharFilter(field_name="recipient_ct", method="recipient_ct_filter")
 
     def sender_ct_filter(self, queryset, name, value):
-        return queryset.filter(Q(sender_ct__app_label__icontains=value) |
-                               Q(sender_ct__model__icontains=value.replace(" ", "")))
+        return queryset.filter(sender_ct__model=value.replace(" ", ""))
 
     def recipient_ct_filter(self, queryset, name, value):
-        return queryset.filter(Q(sender_ct__app_label__icontains=value) |
-                               Q(recipient_ct__model__icontains=value.replace(" ", "")))
+        return queryset.filter(recipient_ct__model=value.replace(" ", ""))
 
     class Meta:
         model = Query
