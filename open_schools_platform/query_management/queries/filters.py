@@ -17,3 +17,9 @@ class QueryFilter(BaseFilterSet):
     class Meta:
         model = Query
         fields = ('id', 'status', 'created_at', 'updated_at', 'sender_id', 'recipient_id', 'recipient_ct', 'sender_ct')
+
+
+class QueryFilterByStatus(BaseFilterSet):
+    class Meta:
+        model = Query
+        fields = ('status',)

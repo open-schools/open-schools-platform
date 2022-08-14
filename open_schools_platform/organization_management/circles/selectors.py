@@ -1,7 +1,7 @@
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.organization_management.circles.filters import CircleFilter
+from open_schools_platform.organization_management.circles.filters import CircleFilter, StudentQueryFilter
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.user_management.users.models import User
 
@@ -30,3 +30,10 @@ def get_circle(*, filters=None, user: User = None) -> Circle:
 def get_circles_by_students(students: QuerySet) -> QuerySet:
     return students if len(students) == 0 else \
         get_circles(filters={"ids": ','.join(list(map(lambda x: str(x.circle.id), list(students))))})
+
+
+def get_queries_for_circle(*, filters=None, qs):
+    filters = filters or {}
+    queries = StudentQueryFilter(filters, qs).qs
+
+    return queries
