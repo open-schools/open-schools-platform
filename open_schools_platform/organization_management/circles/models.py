@@ -27,6 +27,8 @@ class Circle(BaseModel):
     capacity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
+    latitude = models.DecimalField(max_digits=22, decimal_places=16, default=None, null=True)
+    longitude = models.DecimalField(max_digits=22, decimal_places=16, default=None, null=True)
 
     def __str__(self):
         return self.name

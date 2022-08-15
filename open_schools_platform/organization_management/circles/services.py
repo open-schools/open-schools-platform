@@ -3,13 +3,16 @@ from open_schools_platform.organization_management.organizations.models import O
 from open_schools_platform.student_management.students.models import Student
 
 
-def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str) -> Circle:
+def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
+                  latitude: float, longitude: float) -> Circle:
     circle = Circle.objects.create(
         name=name,
         organization=organization,
         description=description,
         address=address,
-        capacity=capacity
+        capacity=capacity,
+        latitude=latitude,
+        longitude=longitude
     )
     return circle
 

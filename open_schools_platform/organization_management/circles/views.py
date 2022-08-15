@@ -62,6 +62,19 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
         return response
 
 
+class GetCircleApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get circle via UUID",
+        responses={200: swagger_dict_response({"circle": CircleSerializer()}), 404: "There is no such circle"},
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+    )
+    def get(self, request, pk):
+        circle = get_circle(filters={"id": pk})
+        if not circle:
+            raise NotFound("There is no such circle")
+        return Response({"circle": CircleSerializer(circle).data}, status=200)
+
+
 class CirclesQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle.",

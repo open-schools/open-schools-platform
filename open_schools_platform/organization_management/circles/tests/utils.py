@@ -8,7 +8,8 @@ from open_schools_platform.student_management.students.services import create_st
 
 def create_test_circle() -> Circle:
     organization = create_organization(name="test_org", inn="1111111111")
-    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal")
+    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal",
+                           latitude=0.0, longitude=0.0)
     return circle
 
 
@@ -17,7 +18,8 @@ def create_test_circle_with_user_in_org(user: User) -> Circle:
     employee = create_employee(name="test_employee", position="test", user=user)
     employee.organization = organization
     employee.save()
-    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal")
+    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal",
+                           latitude=0.0, longitude=0.0)
     return circle
 
 

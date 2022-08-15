@@ -19,7 +19,7 @@ class CirclesStudentsListApiTests(TestCase):
         organization = create_organization(inn="12345678901234567890", name="VeryFamousOrg")
         create_employee(name="Van", user=self.user, organization=organization, position="Master of fantasy")
         circle = create_circle(address="Dungeon str", capacity=34, description="private circle", name="Van's circle",
-                               organization=organization)
+                               organization=organization, latitude=0.0, longitude=0.0)
         self.reverse_url = reverse("api:organization-management:circles:students-list", args=[circle.id])
 
         self.students = GetRequestTesting.create_testdata_in_db(
