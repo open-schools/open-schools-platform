@@ -1,7 +1,41 @@
 import django_filters
 from django.db.models import Q
 from django_filters import CharFilter, BaseInFilter, UUIDFilter
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
+
+
+class CustomDjangoFilterBackend(DjangoFilterBackend):
+    """
+        CustomDjangoFilterBackend provide you some useful features:
+
+        1. Generate custom filter fields with swagger_filter_fields field in your view
+            define dict of pairs that contain: field name and filter
+    """
+
+    def get_filterset_class(self, view, queryset=None):
+        response = super().get_filterset_class(view, queryset=queryset)
+
+        if response:
+            return response
+
+        swagger_filter_fields = getattr(view, 'swagger_filter_fields', None)
+
+        if swagger_filter_fields is not None:
+            class AutoFilterSet(self.filterset_base):
+                pass
+
+            fields = {}
+
+            for key, value in swagger_filter_fields.items():
+                fields[key] = value
+
+            AutoFilterSet.declared_filters = fields
+            AutoFilterSet.base_filters = fields
+
+            return AutoFilterSet
+
+        return None
 
 
 class BaseFilterSet(django_filters.FilterSet):
@@ -50,6 +84,10 @@ class BaseFilterSet(django_filters.FilterSet):
                 query |= Q(**{"{0}__icontains".format(filter.field_name): self.search_value})
 
         return base_queryset.filter(query)
+
+    @staticmethod
+    def get_dict_filters(classname):
+        return classname.declared_filters
 
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
