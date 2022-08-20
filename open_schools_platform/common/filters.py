@@ -1,3 +1,5 @@
+from typing import List
+
 import django_filters
 from django.db.models import Q
 from django_filters import CharFilter, BaseInFilter, UUIDFilter
@@ -86,8 +88,25 @@ class BaseFilterSet(django_filters.FilterSet):
         return base_queryset.filter(query)
 
     @staticmethod
-    def get_dict_filters(classname):
-        return classname.declared_filters
+    def get_dict_filters(filter_class: django_filters.FilterSet, prefix: str = "", include: List[str] = []):
+        response = {}
+
+        for key, value in filter_class.get_filters().items():
+            if key in include:
+                new_key = key if prefix == "" else prefix + "__" + key
+                response[new_key] = value
+
+        return response
+
+    @staticmethod
+    def get_dict_filters_without_prefix(filters):
+        response = {}
+
+        for key, value in filters.items():
+            new_key = key.split("__")[1] if len(key.split("__")) > 1 else key.split("__")[0]
+            response[new_key] = value
+
+        return response
 
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
@@ -97,3 +116,10 @@ class UUIDInFilter(BaseInFilter, UUIDFilter):
 def filter_by_ids(queryset, name, value):
     values = value.split(',')
     return queryset.filter(id__in=values)
+
+
+def filter_by_object_ids(object_name: str):
+    def func(queryset, name, value):
+        values = value.split(',')
+        return queryset.filter(**{"{object_name}__in".format(object_name=object_name): values})
+    return func

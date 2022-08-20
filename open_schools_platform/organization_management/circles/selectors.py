@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
+from open_schools_platform.common.selectors import selector_wrapper
 from open_schools_platform.organization_management.circles.filters import CircleFilter
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.user_management.users.models import User
@@ -15,6 +16,7 @@ def get_circles(*, filters=None) -> QuerySet:
     return circles
 
 
+@selector_wrapper
 def get_circle(*, filters=None, user: User = None) -> Circle:
     filters = filters or {}
 
