@@ -1,3 +1,4 @@
+from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied, NotFound, NotAcceptable
 
 from open_schools_platform.query_management.queries.filters import QueryFilter
@@ -28,7 +29,7 @@ def get_query_with_checks(pk: str, user: User, update_query_check: bool = False)
     return query
 
 
-def get_queries(*, filters=None) -> Query:
+def get_queries(*, filters=None) -> QuerySet:
     filters = filters or {}
 
     qs = Query.objects.all()
