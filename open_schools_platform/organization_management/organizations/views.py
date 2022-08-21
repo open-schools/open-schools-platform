@@ -1,15 +1,16 @@
 from django_filters import UUIDFilter
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.api.pagination import get_paginated_response, ApiListPagination
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
     get_employee_profile_or_create_new_user, update_invite_employee_body
@@ -20,7 +21,8 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
     OrganizationSerializer, OrganizationInviteSerializer, OrganizationInviteUpdateSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    organization_circle_query_filter_checks, organization_circle_query_filter
+    organization_circle_query_filter
+from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
@@ -28,6 +30,9 @@ from open_schools_platform.query_management.queries.serializers import QueryStat
     OrganizationQuerySerializer, StudentProfileQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.filters import StudentFilter
+from open_schools_platform.student_management.students.models import Student
+from open_schools_platform.student_management.students.selectors import get_students
+from open_schools_platform.student_management.students.serializers import StudentSerializer
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
@@ -145,7 +150,6 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
                              "circle": UUIDFilter(lookup_expr=["exact"])}
 
     queryset = Query.objects.all()
-    pagination_class = ApiListPagination
     swagger_filter_fields = \
         FilterProperties.query_fields | \
         FilterProperties.student_fields | \
@@ -159,8 +163,42 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     def get(self, request):
         filters = request.GET.dict()
 
-        organization, circle = organization_circle_query_filter_checks(filters, request)
+        organization, circle = get_object_by_id_in_field_with_checks(
+            filters,
+            request,
+            {"organization": get_organization, "circle": get_circle}
+        )
+        if not organization and not circle:
+            raise NotAcceptable("You should define organization or circle")
 
         queries = organization_circle_query_filter(self, filters, organization, circle)
 
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+
+
+class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
+    class FilterProperties:
+        student_fields = StudentFilter.get_swagger_filters()
+
+    queryset = Student.objects.all()
+    swagger_filter_fields = FilterProperties.student_fields
+
+    @swagger_auto_schema(
+        operation_description="Get students in this circle",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
+    )
+    def get(self, request):
+        filters = request.GET.dict()
+
+        organization, circle = get_object_by_id_in_field_with_checks(
+            filters,
+            request,
+            {"circle__organization": get_organization, "circle": get_circle}
+        )
+        if not organization and not circle:
+            raise NotAcceptable("You should define organization or circle")
+
+        students = get_students(filters=filters)
+
+        return Response({"results": StudentSerializer(students, many=True).data}, status=200)
