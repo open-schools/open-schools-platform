@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Callable
 
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 
@@ -67,3 +67,27 @@ class BaseQueryHandler:
             raise ValidationError(detail="Identical statuses")
         if query.recipient is None or query.sender is None or query.body is None:
             raise MethodNotAllowed("put", detail="Query is corrupted")
+
+
+def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Callable[..., Any]])\
+        -> List[Any]:
+    """
+    Get objects by theirs ids with permission check and not found exception
+    If filters don't have some keys from fields it will put None values in list in fields order
+
+    fields should contain pairs of field name in filters and selector with selector_wrapper decorator
+    """
+    result = []
+
+    for key, selector in fields.items():
+        if key in filters:
+            result.append(selector(
+                filters={"id": filters[key]},
+                user=request.user,
+                empty_exception=True,
+                empty_message="There is no such {key}.".format(key=key)
+            ))
+        else:
+            result.append(None)
+
+    return result

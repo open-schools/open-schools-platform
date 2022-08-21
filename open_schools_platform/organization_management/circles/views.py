@@ -1,13 +1,12 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
-from rest_framework.views import APIView
 
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 
 from .models import Circle
-from .selectors import get_circles, get_circle
+from .selectors import get_circles
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -18,7 +17,6 @@ from .filters import CircleFilter
 from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import swagger_dict_response
-from ...student_management.students.serializers import StudentSerializer
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -58,15 +56,3 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
             view=self
         )
         return response
-
-
-class CirclesStudentsListApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        operation_description="Get students in this circle",
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
-    )
-    def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)}, user=request.user)
-        qs = circle.students.all()
-        return Response({"results": StudentSerializer(qs, many=True).data}, status=200)

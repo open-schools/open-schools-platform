@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Type
 
 import django_filters
 from django.db.models import Q
@@ -88,7 +88,7 @@ class BaseFilterSet(django_filters.FilterSet):
         return base_queryset.filter(query)
 
     @staticmethod
-    def get_dict_filters(filter_class: django_filters.FilterSet, prefix: str = "", include: List[str] = []):
+    def get_dict_filters(filter_class: Type[django_filters.FilterSet], prefix: str = "", include: List[str] = []):
         response = {}
 
         for key, value in filter_class.get_filters().items():

@@ -1,14 +1,10 @@
-from typing import Tuple, Union
-
 from rest_framework.exceptions import ValidationError, MethodNotAllowed, NotAcceptable
 
 from open_schools_platform.common.filters import BaseFilterSet
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields
 from open_schools_platform.organization_management.circles.models import Circle
-from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.organizations.models import Organization
-from open_schools_platform.organization_management.organizations.selectors import get_organization
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.query_management.queries.services import query_update
@@ -61,31 +57,6 @@ class OrganizationQueryHandler(BaseQueryHandler):
         return query
 
     Organization.query_handler = query_handler
-
-
-def organization_circle_query_filter_checks(filters, request) \
-        -> Tuple[Union[Organization, None], Union[Circle, None]]:
-    organization = None
-    circle = None
-
-    if "organization" in filters:
-        organization = get_organization(
-            filters={"id": filters["organization"]},
-            user=request.user,
-            empty_exception=True,
-            empty_message="There is no such organization."
-        )
-    if "circle" in filters:
-        circle = get_circle(
-            filters={"id": filters["circle"]},
-            user=request.user,
-            empty_exception=True,
-            empty_message="There is no such circle."
-        )
-    if organization is None and circle is None:
-        raise NotAcceptable("You should define organization or circle")
-
-    return organization, circle
 
 
 def organization_circle_query_filter(view, filters, organization: Organization, circle: Circle):
