@@ -19,10 +19,20 @@ class StudentJoinCircleQuery(TestCase):
         query = create_test_student_join_circle_query(user=user)
         data = {
             "id": query.id,
-            "status": "test_status"
+            "status": "TEST_STATUS"
         }
         response = self.client.put(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
+
+    def test_set_invalid_status(self):
+        user = create_logged_in_user(instance=self)
+        query = create_test_student_join_circle_query(user=user)
+        data = {
+            "id": query.id,
+            "status": "invalid_status"
+        }
+        response = self.client.put(self.query_status_change_url, data)
+        self.assertEqual(400, response.status_code)
 
     def test_user_set_not_canceled_status(self):
         user = create_logged_in_user(instance=self)
@@ -51,7 +61,7 @@ class StudentJoinCircleQuery(TestCase):
         query = create_test_student_join_circle_query(circle=circle)
         data = {
             "id": query.id,
-            "status": "test_status"
+            "status": "TEST_STATUS"
         }
         response = self.client.put(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)

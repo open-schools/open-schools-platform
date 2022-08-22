@@ -1,4 +1,4 @@
-
+from phonenumber_field.phonenumber import PhoneNumber, to_python
 from rest_framework import serializers
 
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
@@ -12,6 +12,10 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
         try:
             response = super().validate(data)
         except serializers.ValidationError:
+            if PhoneNumber.is_valid(to_python(data.get(self.username_field))):
+                msg = _('Invalid phone.')
+                raise serializers.ValidationError(msg)
+
             user = get_user(filters={"phone": data.get(self.username_field)})
 
             if not user:
@@ -26,7 +30,8 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
 class UserUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(
         allow_null=False,
-        allow_blank=False
+        allow_blank=False,
+        required=False
     )
 
 

@@ -8,6 +8,8 @@ class CreateOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("name", "inn")
+        extra_kwargs = {"name": {'required': True},
+                        "inn": {'required': True}}
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

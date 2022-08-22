@@ -14,6 +14,7 @@ class Query(BaseModel):
         IN_PROGRESS = "IN_PROGRESS"
         DECLINED = "DECLINED"
         CANCELED = "CANCELED"
+        TEST_STATUS = "TEST_STATUS"
 
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
 
