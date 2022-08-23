@@ -27,7 +27,7 @@ class AddressFilter(InputFilter):
 
 
 class CircleAdmin(admin.ModelAdmin):
-    list_display = ("name", "organization", "address", "capacity", "id")
+    list_display = ("name", "organization", "address", "capacity", "location", "id")
     search_fields = ("name",)
     list_filter = (OrganizationFilter, AddressFilter)
 

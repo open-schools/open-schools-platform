@@ -2,13 +2,14 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
+from django.contrib.gis.measure import D
+from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 
 from .models import Circle
-from .selectors import get_circles, get_circle
-
+from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, CircleSerializer
@@ -50,16 +51,37 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
     @swagger_auto_schema(
         operation_description="Get all circles",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        manual_parameters=[
+            Parameter('user_location', IN_QUERY, required=False, type=TYPE_STRING),  # type:ignore
+        ],
     )
     def get(self, request, *args, **kwargs):
+        queryset = Circle.objects.all()
+        if 'user_location' in request.GET.dict():
+            queryset = queryset.filter(location__distance_lte=(
+                request.GET.dict()['user_location'], D(km=CommonConstants.SEARCH_RADIUS))
+            )
         response = get_paginated_response(
             pagination_class=ApiListPagination,
             serializer_class=CircleSerializer,
-            queryset=get_circles(filters=request.GET.dict()),
+            queryset=CircleFilter(request.GET.dict(), queryset).qs,
             request=request,
             view=self
         )
         return response
+
+
+class GetCircleApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get circle with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: swagger_dict_response({"circle": CircleSerializer()}), 404: "There is no such circle"}
+    )
+    def get(self, request, pk):
+        circle = get_circle(filters={"id": str(pk)})
+        if not circle:
+            raise NotFound("There is no such circle")
+        return Response({"circle": CircleSerializer(circle).data}, status=200)
 
 
 class CirclesQueriesListApi(ApiAuthMixin, APIView):

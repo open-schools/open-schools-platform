@@ -13,6 +13,7 @@ class CommonConstants:
     SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
     SMS_API_KEY = os.environ.get("SMS_API_KEY")
     SCHOOLS_AI_URL = os.environ.get("SCHOOLS_AI_URL")
+    SEARCH_RADIUS = 10
 
     if not GOOGLE_API_KEY or not is_google_api_key_valid(FIREBASE_URL_TO_GET_SESSION, GOOGLE_API_KEY):
         warnings.warn("google api key is not valid or is not defined")

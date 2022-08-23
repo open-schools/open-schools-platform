@@ -1,3 +1,5 @@
+from django.contrib.gis.geos import Point
+
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.services import create_circle, add_student_to_circle
 from open_schools_platform.organization_management.employees.services import create_employee
