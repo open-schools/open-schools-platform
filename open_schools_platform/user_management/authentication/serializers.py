@@ -12,7 +12,7 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
         try:
             response = super().validate(data)
         except serializers.ValidationError:
-            if PhoneNumber.is_valid(to_python(data.get(self.username_field))):
+            if not PhoneNumber.is_valid(to_python(data.get(self.username_field))):
                 msg = _('Invalid phone.')
                 raise serializers.ValidationError(msg)
 

@@ -27,9 +27,6 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
         if not query:
             raise NotFound("There is no such query")
 
-        if query_status_serializer.validated_data["status"] not in Query.Status:
-            raise ValidationError("Invalid status")
-
         query = run_sender_handler(query, query_status_serializer.validated_data["status"], request.user)
 
         return Response({"detail": "Status was changed", "query": QueryStatusSerializer(query).data}, status=200)
