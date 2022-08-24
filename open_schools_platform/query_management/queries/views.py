@@ -1,12 +1,11 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import swagger_dict_response
-from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_query
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
 from open_schools_platform.query_management.queries.services import run_sender_handler
