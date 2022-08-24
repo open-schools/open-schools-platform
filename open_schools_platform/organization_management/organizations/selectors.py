@@ -1,12 +1,14 @@
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
+from open_schools_platform.common.selectors import selector_wrapper
 from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
 
+@selector_wrapper
 def get_organization(*, filters=None, user: User = None) -> Organization:
     filters = filters or {}
 

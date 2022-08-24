@@ -28,5 +28,3 @@ class GetCoordinatesFromAddressTests(TestCase):
                 description='description',
                 name='test_circle')
             )
-
-

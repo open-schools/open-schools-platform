@@ -10,6 +10,7 @@ from rest_framework.response import Response
 
 from .models import Circle
 from open_schools_platform.common.constants import CommonConstants
+
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, CircleSerializer
