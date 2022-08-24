@@ -7,12 +7,14 @@ from open_schools_platform.organization_management.organizations.models import O
 from open_schools_platform.student_management.students.models import Student
 
 
-def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str) -> Circle:
-    geolocator = Nominatim(user_agent="circles")
-    coordinates = geolocator.geocode(address)
-    if coordinates is None:
-        raise NotAcceptable("Address is incorrect")
-    location = Point(coordinates.latitude, coordinates.longitude)
+def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
+                  location: Point = None) -> Circle:
+    if location is None:
+        geolocator = Nominatim(user_agent="circles")
+        coordinates = geolocator.geocode(address)
+        if coordinates is None:
+            raise NotAcceptable("Address is incorrect")
+        location = Point(coordinates.latitude, coordinates.longitude)
     circle = Circle.objects.create_circle(
         name=name,
         organization=organization,

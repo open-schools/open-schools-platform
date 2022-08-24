@@ -16,6 +16,7 @@ from open_schools_platform.organization_management.circles.serializers import Cr
 from open_schools_platform.organization_management.circles.services import create_circle
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
+from .selectors import get_circle
 from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import swagger_dict_response

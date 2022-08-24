@@ -47,3 +47,7 @@ def create_test_organizations():
         organizations.append(organization)
 
     return organizations
+
+
+def create_test_organization():
+    return create_organization(inn='1', name='test_org')

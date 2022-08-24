@@ -22,27 +22,12 @@ pip install -r requirements/local.txt
 ```
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 ```
-6. Migrate
-```
-python manage.py migrate
-```
-7. Run django server
-```
-python manage.py runserver [port]
-```
-8. Install pre-commit hooks
-```
-pre-commit install
-```
-9. Install pre-push hooks
-```
-pre-commit install --hook-type pre-push
-```
-10. Install GeoDjango packages
+6. Install GeoDjango packages
 
-> GeoDjango packages installation for windows
+# GeoDjango packages installation for windows
 
 1. Download GDAL‑3.2.3‑cp39‑cp39‑win_amd64.whl from https://www.lfd.uci.edu/~gohlke/pythonlibs/
+
 2. Install GDAL
 ```
 pip install <path-to-GDAL‑3.2.3‑cp39‑cp39‑win_amd64.whl>
@@ -58,20 +43,26 @@ psql postgres://postgres:postgres@localhost:5432/local_db
 ```
 CREATE EXTENSION postgis;
 ```
-> If creating extension results in some kind of error, you can do 6 and 7 steps and retry creating extension
+> If creating extension resulted in some kind of error, you can do 6 and 7 steps, then retry creating extension
 
-6. In CLI run
-```
-apt-get update
-```
+6. In CLI run `apt-get update` (if you didn't run it before)
+
 7. Install postgis
 ```
 apt install postgis postgresql-14-postgis-scripts
 ```
+> If django has troubles with finding GDAL or geos, you need to write below line in .env file
+```
+GEO_DJANGO_CUSTOM_PATHS=True
+```
 
-> GeoDjango packages installation for linux
+# GeoDjango packages installation for linux
 
-1. Install geos
+1. Run `apt-get update`
+
+2. Run `[sudo] apt-get install binutils libproj-dev gdal-bin`
+
+3. Install geos
 ```
 [sudo] apt-get install libgeos++
 ```
@@ -83,9 +74,9 @@ apt install postgis postgresql-14-postgis-scripts
 ```
 [sudo] apt install gdal-bin
 ```
-4. Do steps 3-7 from GeoDjango windows installation 
+4. Do steps 3-5 from GeoDjango windows installation
 
-> GeoDjango packages installation for macOS
+# GeoDjango packages installation for macOS
 
 1. Install Homebrew. If you already have it, you can skip this step
 ```
@@ -99,9 +90,9 @@ brew install gdal
 ```
 brew install geos
 ```
-4. Do steps 3-7 from GeoDjango windows installation
+4. Do steps 3-5 from GeoDjango windows installation
 
-> If django has troubles with finding GDAL or geos, you can specify path to them in .env file (works for macOS)
+> If django has troubles with finding GDAL or geos, you can specify path to them in .env file
 
 1. Run below command to find GDAL path
 ```
@@ -113,8 +104,25 @@ find / -name "libgeos.dylib" -print 2>/dev/null
 ```
 3. In .env file write
 ```
+GEO_DJANGO_CUSTOM_PATHS=True
 GDAL_LIBRARY_PATH=<path-to-file>
 GEOS_LIBRARY_PATH=<path-to-file>
-GEO_DJANGO_CUSTOM_PATHS=True
 ```
-> You can also specify OSGEO4W_ROOT, GDAL_DATA and PROJ_LIB paths in .env file
+> You can also specify custom OSGEO4W_ROOT, GDAL_DATA and PROJ_LIB paths in .env file. To do so, you need to write GEO_DJANGO_CUSTOM_OSGEO_PATHS=True
+
+7. Migrate
+```
+python manage.py migrate
+```
+8. Run django server
+```
+python manage.py runserver [port]
+```
+9. Install pre-commit hooks
+```
+pre-commit install
+```
+10. Install pre-push hooks
+```
+pre-commit install --hook-type pre-push
+```

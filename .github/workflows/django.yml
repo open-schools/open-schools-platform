@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:latest
+        image: postgis/postgis:14-3.2
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
@@ -47,6 +47,11 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements/local.txt
+        sudo apt-get update
+        sudo apt-get install binutils libproj-dev gdal-bin
+        sudo apt-get install libgeos++
+        sudo apt-get install proj-bin
+        sudo apt install gdal-bin
     - name: Type check
       run: mypy open_schools_platform/
     - name: Run migrations
