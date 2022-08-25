@@ -77,5 +77,5 @@ def create_test_organizations():
     return organizations
 
 
-def create_test_employee(user):
-    return create_employee(name="test_employee", position="test", user=user)
+def create_test_employee(user: User, organization: Organization = None):
+    return create_employee(name="test_employee", position="test", user=user, organization=organization)

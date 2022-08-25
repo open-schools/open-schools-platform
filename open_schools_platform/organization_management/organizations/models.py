@@ -22,7 +22,7 @@ class OrganizationManager(models.Manager):
 class Organization(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
-    inn = models.CharField(max_length=255)
+    inn = models.CharField(max_length=255, blank=True, default="")
 
     objects = OrganizationManager()
 

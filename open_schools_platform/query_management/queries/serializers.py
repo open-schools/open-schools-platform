@@ -9,10 +9,12 @@ from open_schools_platform.student_management.students.serializers import QueryS
 
 class QueryStatusSerializer(serializers.Serializer):
     id = serializers.UUIDField(default=uuid.uuid4())
-    status = serializers.CharField(max_length=200)
+    status = serializers.ChoiceField(choices=Query.Status.choices)
 
 
 class QuerySerializer(serializers.ModelSerializer):
+    status = serializers.ChoiceField(choices=Query.Status.choices)
+
     class Meta:
         model = Query
         fields = ('id', 'sender_id', 'recipient_id', 'status', 'body')

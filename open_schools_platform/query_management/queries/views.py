@@ -1,5 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import views
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -21,6 +22,9 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
         query_status_serializer = QueryStatusSerializer(data=request.data)
         query_status_serializer.is_valid(raise_exception=True)
         query = get_query(filters={"id": query_status_serializer.validated_data["id"]}, user=request.user)
+
+        if not query:
+            raise NotFound("There is no such query")
 
         query = run_sender_handler(query, query_status_serializer.validated_data["status"], request.user)
 

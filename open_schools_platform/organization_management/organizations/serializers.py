@@ -7,7 +7,8 @@ from open_schools_platform.organization_management.organizations.models import O
 class CreateOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
-        fields = ("name", "inn")
+        fields = ("name", 'inn')
+        extra_kwargs = {"name": {'required': True}}
 
 
 class OrganizationSerializer(serializers.ModelSerializer):

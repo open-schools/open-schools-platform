@@ -44,7 +44,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         org_serializer = CreateOrganizationSerializer(data=request.data)
-        org_serializer.is_valid()
+        org_serializer.is_valid(raise_exception=True)
 
         org = create_organization(**org_serializer.validated_data)
 
@@ -86,7 +86,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
     )
     def post(self, request, pk) -> Response:
         invite_serializer = OrganizationInviteSerializer(data=request.data)
-        invite_serializer.is_valid()
+        invite_serializer.is_valid(raise_exception=True)
 
         phone = invite_serializer.validated_data["phone"]
 

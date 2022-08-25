@@ -99,4 +99,4 @@ class ResendSerializer(serializers.Serializer):
 
 class PasswordResetSerializer(serializers.Serializer):
     token = serializers.UUIDField(required=True)
-    password = serializers.CharField(min_length=6, max_length=40)
+    password = serializers.CharField(min_length=6, max_length=40, required=True)

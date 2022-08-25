@@ -7,7 +7,7 @@ from open_schools_platform.student_management.students.models import StudentProf
 
 
 class StudentProfileCreateSerializer(serializers.ModelSerializer):
-    family = serializers.UUIDField(default=uuid.uuid4)
+    family = serializers.UUIDField(required=True)
 
     class Meta:
         model = StudentProfile
