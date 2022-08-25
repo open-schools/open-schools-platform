@@ -1,11 +1,13 @@
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
+from open_schools_platform.common.selectors import selector_wrapper
 from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
 
 
+@selector_wrapper
 def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
     filters = filters or {}
 
@@ -18,6 +20,7 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
     return student_profile
 
 
+@selector_wrapper
 def get_student(*, filters=None, user: User = None) -> Student:
     filters = filters or {}
 
@@ -30,6 +33,7 @@ def get_student(*, filters=None, user: User = None) -> Student:
     return student
 
 
+@selector_wrapper
 def get_students(*, filters=None) -> QuerySet:
     filters = filters or {}
 

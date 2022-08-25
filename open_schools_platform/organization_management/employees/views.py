@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import ListAPIView
-from rest_framework.exceptions import NotFound, NotAcceptable
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -59,16 +59,16 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})}
     )
     def get(self, request):
-        employee_profile = get_employee_profile(filters={'id': str(request.user.employee_profile.id)},
-                                                user=request.user)
-        if employee_profile is None:
-            raise NotFound('There is no such employee profile')
+        employee_profile = get_employee_profile(
+            filters={'id': str(request.user.employee_profile.id)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such employee profile"
+        )
+
         queries = get_queries(
             filters={'recipient_id': str(employee_profile.id),
                      'sender_ct': ContentType.objects.get(model="organization")})
-
-        if not queries:
-            raise NotFound('There are no queries with such content type')
 
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
 
@@ -83,9 +83,11 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
     def put(self, request, pk):
         employee_update_serializer = EmployeeUpdateSerializer(data=request.data)
         employee_update_serializer.is_valid()
-        employee = get_employee(filters={"id": str(pk)})
-        if not employee:
-            raise NotFound("There is no such employee")
+        employee = get_employee(
+            filters={"id": str(pk)},
+            empty_exception=True,
+            empty_message="There is no such employee"
+        )
         get_employee_profile(filters={"id": str(employee.employee_profile.id)}, user=request.user)
         update_employee(employee=employee, data=employee_update_serializer.validated_data)
         return Response({"employee": EmployeeSerializer(employee).data}, status=200)

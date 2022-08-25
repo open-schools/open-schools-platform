@@ -1,5 +1,4 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
 
 from open_schools_platform.api.pagination import get_paginated_response
@@ -29,9 +28,11 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     def post(self, request):
         create_circle_serializer = CreateCircleSerializer(data=request.data)
         create_circle_serializer.is_valid(raise_exception=True)
-        organization = get_organization(filters={"id": create_circle_serializer.validated_data['organization']})
-        if not organization:
-            raise NotFound("There is no such organization")
+        organization = get_organization(
+            filters={"id": create_circle_serializer.validated_data['organization']},
+            empty_exception=True,
+            empty_message="There is no such organization"
+        )
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
                                organization=organization)
         return Response({"circle": CircleSerializer(circle).data}, status=201)
