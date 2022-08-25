@@ -1,18 +1,19 @@
 import uuid
+from typing import Any
 
+from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.contrib.gis.db import models
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.organizations.models import Organization
 
 
 class CircleManager(models.Manager):
-    def create_circle(self, name: str, organization: Organization):
+    def create_circle(self, *args: Any, **kwargs: Any):
         circle = self.model(
-            name=name,
-            organization=organization,
+            *args,
+            **kwargs,
         )
-
         circle.full_clean()
         circle.save(using=self._db)
 
@@ -27,6 +28,15 @@ class Circle(BaseModel):
     capacity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
+    location = models.PointField(geography=True, default=Point(0.0, 0.0))
+
+    @property
+    def latitude(self):
+        return self.location.x
+
+    @property
+    def longitude(self):
+        return self.location.y
 
     def __str__(self):
         return self.name
