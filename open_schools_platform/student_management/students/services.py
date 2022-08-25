@@ -90,4 +90,4 @@ class StudentProfileQueryHandler(BaseQueryHandler):
 
         return query
 
-    StudentProfile.query_handler = query_handler
+    setattr(StudentProfile, "query_handler", query_handler)
