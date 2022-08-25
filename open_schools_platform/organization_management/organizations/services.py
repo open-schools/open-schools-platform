@@ -62,9 +62,12 @@ class OrganizationQueryHandler(BaseQueryHandler):
 def organization_circle_query_filter(view, filters, organization: Organization, circle: Circle):
     queries = Query.objects.all()
     if organization:
-        queries &= get_queries(
-            filters={"recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
-        )
+        if organization.circles.values():
+            queries &= get_queries(
+                filters={"recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
+            )
+        else:
+            return Query.objects.none()
     if circle:
         queries &= get_queries(filters={"recipient_id": circle.id})
 
@@ -83,6 +86,6 @@ def organization_circle_query_filter(view, filters, organization: Organization, 
     if students:
         queries &= get_queries(filters={"body_ids": form_ids_string_from_queryset(students)})
     else:
-        queries &= Query.objects.none()
+        return Query.objects.none()
 
     return queries
