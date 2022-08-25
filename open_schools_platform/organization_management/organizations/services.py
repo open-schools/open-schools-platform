@@ -56,7 +56,7 @@ class OrganizationQueryHandler(BaseQueryHandler):
 
         return query
 
-    Organization.query_handler = query_handler
+    setattr(Organization, "query_handler", query_handler)
 
 
 def organization_circle_query_filter(view, filters, organization: Organization, circle: Circle):
