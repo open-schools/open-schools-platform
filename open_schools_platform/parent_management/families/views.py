@@ -1,5 +1,4 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -35,9 +34,12 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request, pk):
-        family = get_family(filters={'id': str(pk)}, user=request.user)
-        if not family:
-            raise NotFound("There is no such family")
+        family = get_family(
+            filters={'id': str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such family",
+        )
         return Response({"results": StudentProfileSerializer(family.student_profiles, many=True).data}, status=200)
 
 
@@ -48,7 +50,9 @@ class FamiliesListApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request):
-        families = get_families(filters={"parent_profiles": str(request.user.parent_profile.id)})
-        if not families:
-            raise NotFound("User has no families")
+        families = get_families(
+            filters={"parent_profiles": str(request.user.parent_profile.id)},
+            empty_exception=True,
+            empty_message="There is no such family",
+        )
         return Response({"results": FamilySerializer(families, many=True).data}, status=200)

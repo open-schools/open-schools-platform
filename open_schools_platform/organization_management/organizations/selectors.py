@@ -21,6 +21,7 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
     return organization
 
 
+@selector_wrapper
 def get_organizations(*, filters=None) -> QuerySet:
     filters = filters or {}
 

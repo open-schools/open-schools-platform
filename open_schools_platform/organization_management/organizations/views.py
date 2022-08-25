@@ -1,6 +1,6 @@
 from django_filters import UUIDFilter
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound, NotAcceptable
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -133,12 +133,17 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):
-        organization = get_organization(filters={'id': str(pk)}, user=request.user)
-        if not organization:
-            raise NotFound('There is no such organization')
-        queries = get_queries(filters={'sender_id': organization.id})
-        if not queries:
-            raise NotFound('There are no queries with such sender')
+        organization = get_organization(
+            filters={'id': str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such organization"
+        )
+        queries = get_queries(
+            filters={'sender_id': organization.id},
+            empty_exception=True,
+            empty_message="There are no queries with such sender"
+        )
         return Response({"results": OrganizationQuerySerializer(queries, many=True).data}, status=200)
 
 
