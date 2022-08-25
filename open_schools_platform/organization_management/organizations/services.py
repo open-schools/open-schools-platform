@@ -12,7 +12,7 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.user_management.users.models import User
 
 
-def create_organization(name: str, inn: str) -> Organization:
+def create_organization(name: str, inn: str = "") -> Organization:
     organization = Organization.objects.create(
         name=name,
         inn=inn,

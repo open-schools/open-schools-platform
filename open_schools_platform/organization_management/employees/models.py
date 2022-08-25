@@ -52,7 +52,7 @@ class Employee(BaseModel):
     organization = models.ForeignKey(Organization, related_name='employees',
                                      null=True, default=None, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
-    position = models.CharField(max_length=255)
+    position = models.CharField(max_length=255, blank=True, default="")
 
     objects = EmployeeManager()
 

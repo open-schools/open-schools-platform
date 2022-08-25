@@ -5,7 +5,7 @@ from rest_framework.test import APIClient
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle_with_user_in_org
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.tests.utils import create_test_student_join_circle_query, \
-    change_test_query_status
+    change_test_query_status, create_test_employee_invite_organization_query
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
@@ -16,10 +16,11 @@ class StudentJoinCircleQuery(TestCase):
 
     def test_user_set_status_not_from_allowed_statuses(self):
         user = create_logged_in_user(instance=self)
-        query = create_test_student_join_circle_query(user=user)
+
+        query = create_test_employee_invite_organization_query(user=user)
         data = {
             "id": query.id,
-            "status": "TEST_STATUS"
+            "status": Query.Status.IN_PROGRESS
         }
         response = self.client.put(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
@@ -51,17 +52,6 @@ class StudentJoinCircleQuery(TestCase):
         data = {
             "id": query.id,
             "status": Query.Status.CANCELED
-        }
-        response = self.client.put(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
-
-    def test_circle_set_status_not_from_allowed_statuses(self):
-        user = create_logged_in_user(instance=self)
-        circle = create_test_circle_with_user_in_org(user=user)
-        query = create_test_student_join_circle_query(circle=circle)
-        data = {
-            "id": query.id,
-            "status": "TEST_STATUS"
         }
         response = self.client.put(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
