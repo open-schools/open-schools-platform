@@ -151,8 +151,8 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
 
     queryset = Query.objects.all()
     swagger_filter_fields = \
-        FilterProperties.query_fields or \
-        FilterProperties.student_fields or \
+        FilterProperties.query_fields | \
+        FilterProperties.student_fields | \
         FilterProperties.additional_fields
 
     @swagger_auto_schema(

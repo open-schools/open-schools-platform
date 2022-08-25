@@ -3,11 +3,12 @@ from pathlib import Path
 
 from config.env import env
 
+if env("GEO_DJANGO_CUSTOM_ENV_VARIABLES", default=False):
+    os.environ["OSGEO4W_ROOT"] = env("OSGEO4W_ROOT", default=None)
+    os.environ["GDAL_DATA"] = env("GDAL_DATA", default=None)
+    os.environ["PROJ_LIB"] = env("PROJ_LIB", default=None)
+
 if env("GEO_DJANGO_CUSTOM_PATHS", default=False):
-    if env("GEO_DJANGO_CUSTOM_OSGEO_PATHS", default=False):
-        os.environ["OSGEO4W_ROOT"] = env("OSGEO4W_ROOT", default=None)
-        os.environ["GDAL_DATA"] = env("GDAL_DATA", default=None)
-        os.environ["PROJ_LIB"] = env("PROJ_LIB", default=None)
     GEOS_LIBRARY_PATH = env("GEOS_LIBRARY_PATH", default=None)
     GDAL_LIBRARY_PATH = env("GDAL_LIBRARY_PATH", default=None)
 
