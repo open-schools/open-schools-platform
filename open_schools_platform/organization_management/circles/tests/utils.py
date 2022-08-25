@@ -12,15 +12,16 @@ from open_schools_platform.student_management.students.services import create_st
 
 
 def create_test_circle(organization: Organization = None, address: str = "address",
-                       location: Any = Point(0.0, 0.0)) -> Circle:
+                       location: Any = Point(0.0, 0.0), name: str = "test_circle",
+                       capacity: int = 10, description: str = "description") -> Circle:
     if not organization:
         organization = create_test_organization()
     circle = create_circle(
         organization=organization,  # type: ignore
-        name="test_circle",
+        name=name,
         address=address,
-        capacity=0,
-        description="alalal",
+        capacity=capacity,
+        description=description,
         location=location
     )
     return circle
