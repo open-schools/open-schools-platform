@@ -1,4 +1,3 @@
-from phonenumber_field.phonenumber import PhoneNumber, to_python
 from rest_framework import serializers
 
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
