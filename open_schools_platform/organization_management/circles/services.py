@@ -22,7 +22,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
     """
     if location is None:
         geolocator = Nominatim(user_agent="circles")
-        coordinates = geolocator.geocode(address)
+        coordinates = geolocator.geocode(address, timeout=None)
         # If address is not recognized by Nominatim, then the following exception will appear
         if coordinates is None:
             raise NotAcceptable("Address is incorrect")
