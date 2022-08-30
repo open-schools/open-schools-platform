@@ -69,9 +69,11 @@ class GetCircleApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"circle": CircleSerializer()}), 404: "There is no such circle"}
     )
     def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)})
-        if not circle:
-            raise NotFound("There is no such circle")
+        circle = get_circle(
+            filters={"id": str(pk)},
+            empty_exception=True,
+            empty_message="There is no such circle",
+        )
         return Response({"circle": CircleSerializer(circle).data}, status=200)
 
 
@@ -82,12 +84,17 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"results": StudentProfileQuerySerializer(many=True)})}
     )
     def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)}, user=request.user)
-        if not circle:
-            raise NotFound("There is no such circle.")
-        queries = get_queries(filters={"recipient_id": str(pk)})
-        if not queries:
-            raise NotFound("There are no queries with such recipient.")
+        get_circle(
+            filters={"id": str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such circle."
+        )
+        queries = get_queries(
+            filters={"recipient_id": str(pk)},
+            empty_exception=True,
+            empty_message="There are no queries with such recipient."
+        )
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
