@@ -1,3 +1,5 @@
+from typing import Dict
+
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
 
@@ -120,7 +122,7 @@ class StudentProfileQueryHandler(BaseQueryHandler):
     setattr(StudentProfile, "query_handler", query_handler)
 
 
-def autogenerate_family_logic(fields: AutoStudentJoinCircleQuerySerializer.fields, user: User) -> StudentProfile:
+def autogenerate_family_logic(fields: Dict, user: User) -> StudentProfile:
     student_profile = create_student_profile(
         **fields["student_profile"]
     )
@@ -129,7 +131,7 @@ def autogenerate_family_logic(fields: AutoStudentJoinCircleQuerySerializer.field
     return student_profile
 
 
-def query_creation_logic(fields: AutoStudentJoinCircleQuerySerializer.fields, circle: Circle,
+def query_creation_logic(fields: Dict, circle: Circle,
                          student_profile: StudentProfile, parent_user: User = None) -> Query:
     student = create_student(name=student_profile.name)
     query = create_query(

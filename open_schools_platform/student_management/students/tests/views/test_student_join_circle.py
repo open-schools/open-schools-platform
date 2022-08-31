@@ -33,7 +33,8 @@ class StudentJoinCirclesTests(TestCase):
         self.assertTrue(get_student_profile(filters={"name": data["student_profile"]["name"]}))
         family = get_family(filters={"parent_profiles": str(user.parent_profile.id)})
         self.assertTrue(family)
-        self.assertTrue(get_student_profile(filters={"name": data["student_profile"]["name"]}) in family.student_profiles.all())
+        self.assertTrue(get_student_profile(
+            filters={"name": data["student_profile"]["name"]}) in family.student_profiles.all())
         self.assertTrue(user.parent_profile in family.parent_profiles.all())
         self.assertEqual(1, Student.objects.count())
         self.assertEqual(1, Query.objects.count())
