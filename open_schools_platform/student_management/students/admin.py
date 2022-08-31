@@ -29,8 +29,8 @@ class StudentProfileFilter(InputFilter):
 
 
 class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'age', 'user', 'id')
-    search_fields = ('name', 'age', "user__phone")
+    list_display = ('name', 'age', 'user', 'id', 'phone')
+    search_fields = ('name', 'age', "user__phone", 'phone')
 
 
 class StudentAdmin(admin.ModelAdmin):

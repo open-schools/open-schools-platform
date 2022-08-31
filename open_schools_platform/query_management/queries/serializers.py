@@ -4,7 +4,8 @@ from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.serializers import QueryEmployeeBodySerializer
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.students.serializers import QueryStudentBodySerializer
+from open_schools_platform.student_management.students.serializers import QueryStudentBodySerializer, \
+    QueryStudentProfileAdditionalSerializer
 
 
 class QueryStatusSerializer(serializers.Serializer):
@@ -17,11 +18,7 @@ class QuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Query
-        fields = ('id', 'sender_id', 'recipient_id', 'status', 'body')
-
-
-class OrganizationQuerySerializer(QuerySerializer):
-    body = QueryEmployeeBodySerializer()
+        fields = ('id', 'sender_id', 'recipient_id', 'status', 'body', 'additional')
 
 
 class EmployeeProfileQuerySerializer(QuerySerializer):
@@ -30,3 +27,4 @@ class EmployeeProfileQuerySerializer(QuerySerializer):
 
 class StudentProfileQuerySerializer(QuerySerializer):
     body = QueryStudentBodySerializer()
+    additional = QueryStudentProfileAdditionalSerializer()

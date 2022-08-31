@@ -39,12 +39,14 @@ class UserManager(BUM):
 
         return user
 
-    def create_superuser(self, phone, is_active=True, is_admin=True, password=None):
-        user = self.create_user(
+    def create_superuser(self, name, phone, is_active=True, is_admin=True, password=None):
+        from open_schools_platform.user_management.users.services import create_user
+        user = create_user(
             phone=phone,
-            is_active=True,
-            is_admin=True,
+            name=name,
             password=password,
+            is_active=is_active,
+            is_admin=is_admin,
         )
 
         user.is_superuser = True
@@ -89,6 +91,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = ['name']
 
     def __str__(self):
         return self.phone.__str__()
@@ -116,8 +119,6 @@ class CreationToken(BaseModel):
     is_verified = models.BooleanField(default=False)
 
     objects = CreationTokenManager()
-
-    USERNAME_FIELD = 'key'
 
     def __str__(self):
         return self.key.__str__()
