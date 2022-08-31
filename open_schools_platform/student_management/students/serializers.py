@@ -20,6 +20,12 @@ class QueryStudentBodySerializer(serializers.ModelSerializer):
         fields = ('id', 'name')
 
 
+class QueryStudentProfileSenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentProfile
+        fields = ('id', )
+
+
 class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
