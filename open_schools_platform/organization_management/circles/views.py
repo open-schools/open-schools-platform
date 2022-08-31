@@ -12,8 +12,8 @@ from open_schools_platform.organization_management.circles.serializers import Cr
 from open_schools_platform.organization_management.circles.services import create_circle
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
+from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
-from ...api.pagination import ApiListPagination
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import swagger_dict_response
 from ...query_management.queries.selectors import get_queries
@@ -44,7 +44,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
 class GetCirclesApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
-    pagination_class = ApiListPagination
+    pagination_class = ApiCircleListPagination
     serializer_class = CircleSerializer
 
     @swagger_auto_schema(
@@ -53,7 +53,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(
-            pagination_class=ApiListPagination,
+            pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
             queryset=get_circles(filters=request.GET.dict()),
             request=request,
