@@ -12,7 +12,6 @@ from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update, create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
-from open_schools_platform.student_management.students.serializers import AutoStudentJoinCircleQuerySerializer
 from open_schools_platform.user_management.users.models import User
 
 
