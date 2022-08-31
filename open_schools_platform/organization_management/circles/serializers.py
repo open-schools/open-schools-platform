@@ -18,3 +18,9 @@ class CircleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
         fields = ('id', 'name', 'organization', 'address', 'capacity', 'description', 'latitude', 'longitude')
+
+
+class QueryCircleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Circle
+        fields = ('id', 'name', )
