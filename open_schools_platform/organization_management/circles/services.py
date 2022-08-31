@@ -28,7 +28,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:
                 raise NotAcceptable("Address is incorrect.")
-            location = Point(coordinates.latitude, coordinates.longitude)
+            location = Point(coordinates.longitude, coordinates.latitude)
         except GeocoderUnavailable or GeocoderTimedOut:
             raise NotAcceptable("Geopy error appeared. Probably address is incorrect.")
     circle = Circle.objects.create_circle(
