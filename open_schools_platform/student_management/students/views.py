@@ -10,16 +10,16 @@ from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
 from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
+from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import StudentProfileQuerySerializer
-from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
     StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
 from open_schools_platform.student_management.students.services import \
-    create_student_profile, update_student_profile, create_student, update_student_join_circle_body
+    create_student_profile, update_student_profile, update_student_join_circle_body,\
+    autogenerate_family_logic, query_creation_logic
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -93,21 +93,17 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         if get_family(filters={"parent_profiles": str(request.user.parent_profile.id)}, user=request.user):
             raise NotAcceptable("Please choose already created family")
-        student_profile = create_student_profile(name=student_join_circle_req_serializer.validated_data["name"],
-                                                 age=student_join_circle_req_serializer.validated_data["age"])
-        family = create_family(parent=request.user.parent_profile)
-        add_student_profile_to_family(family=family, student_profile=student_profile)
-        student = create_student(name=student_profile.name)
+
+        student_profile = autogenerate_family_logic(student_join_circle_req_serializer.validated_data, request.user)
+
         circle = get_circle(
             filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
             empty_exception=True,
-            empty_message='There is no such circle'
+            empty_message="There is no such circle"
         )
-        query = create_query(
-            sender_model_name="studentprofile", sender_id=student_profile.id,
-            recipient_model_name="circle", recipient_id=circle.id,
-            body_model_name="student", body_id=student.id
-        )
+
+        query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
+                                     student_profile, request.user)
 
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
@@ -129,17 +125,15 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
             empty_exception=True,
             empty_message="There is no such student profile"
         )
-        student = create_student(name=student_profile.name)
+
         circle = get_circle(
             filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
             empty_exception=True,
-            empty_message="There is no such student profile"
+            empty_message="There is no such circle"
         )
-        query = create_query(
-            sender_model_name="studentprofile", sender_id=student_profile.id,
-            recipient_model_name="circle", recipient_id=circle.id,
-            body_model_name="student", body_id=student.id
-        )
+
+        query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
+                                     student_profile, request.user)
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
 
@@ -163,7 +157,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         )
         update_student_join_circle_body(
             query=query,
-            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+            data=query_update_serializer.validated_data["body"],
         )
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=200)
 

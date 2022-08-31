@@ -90,10 +90,15 @@ class StudentProfileExceptionsTests(TestCase):
         create_family(name="test_family", parent=user.parent_profile)
         circle = create_test_circle()
         student_join_circle_query_data = {
-            "name": 'test_name',
-            "age": 15,
+            "student_profile": {
+                "name": "test_name",
+                "age": 15,
+            },
+            "additional": {
+                "text": "Please, let me in!",
+            },
             "circle": circle.id,
         }
         student_join_circle_query_response = self.client.post(self.student_join_circle_query_url,
-                                                              student_join_circle_query_data)
+                                                              student_join_circle_query_data, format="json")
         self.assertEqual(406, student_join_circle_query_response.status_code)

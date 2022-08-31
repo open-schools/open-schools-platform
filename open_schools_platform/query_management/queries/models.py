@@ -32,14 +32,17 @@ class Query(BaseModel):
 
     body = GenericForeignKey("body_ct", "body_id")
 
+    additional_ct = models.ForeignKey(ContentType, related_name="additional_ct", on_delete=models.CASCADE,
+                                      null=True)
+    additional_id = models.UUIDField(default=uuid.uuid4)
+
+    additional = GenericForeignKey("additional_ct", "additional_id")
+
     status = models.CharField(
         max_length=200,
         choices=Status.choices,
         default=Status.SENT,
     )
-
-    class Meta:
-        unique_together = ('recipient_ct', 'recipient_id', 'sender_ct', 'sender_id')
 
     def __str__(self):
         return self.id.__str__()
