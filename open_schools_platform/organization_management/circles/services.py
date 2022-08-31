@@ -1,5 +1,5 @@
 from django.contrib.gis.geos import Point
-from geopy.geocoders import Nominatim
+from geopy.geocoders import GoogleV3
 from rest_framework.exceptions import NotAcceptable
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 
@@ -23,7 +23,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
     location has None value.
     """
     if location is None:
-        geolocator = Nominatim(user_agent="circles")
+        geolocator = GoogleV3(api_key=CommonConstants.GOOGLE_MAPS_API_KEY)
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:

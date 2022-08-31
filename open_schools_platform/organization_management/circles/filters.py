@@ -17,7 +17,8 @@ class CircleFilter(BaseFilterSet):
     address = CharFilter(field_name="address", lookup_expr="icontains")
     organization_name = CharFilter(field_name="organization__name", lookup_expr="icontains")
     user_location = CharFilter(method=circle_radius_filter)
+    name = CharFilter(field_name="name", lookup_expr="icontains")
 
     class Meta:
         model = Circle
-        fields = ("id", "organization", "name", "capacity", "description")
+        fields = ("id", "organization", "capacity", "description")
