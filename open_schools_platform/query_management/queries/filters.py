@@ -22,7 +22,7 @@ class QueryFilter(BaseFilterSet):
     @staticmethod
     def get_swagger_filters(prefix: str = "", include: List[str] = []):
         if not include:
-            include = ["status"]
+            include = ["status", "id"]
         return BaseFilterSet.get_dict_filters(QueryFilter, prefix, include)
 
     class Meta:
