@@ -10,6 +10,15 @@ def reverse_circles_location(apps, schema_editor):
         circle.save()
 
 
+def backwards(apps, schema_editor):
+    circles = apps.get_model('circles', 'Circle')
+    for circle in circles.objects.all():
+        y = circle.location.y
+        circle.location.y = circle.location.x
+        circle.location.x = y
+        circle.save()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,5 +26,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(reverse_circles_location)
+        migrations.RunPython(reverse_circles_location, backwards)
     ]
