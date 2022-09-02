@@ -1,5 +1,3 @@
-import uuid
-
 from django.core.validators import MinValueValidator
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
@@ -62,7 +60,6 @@ class StudentProfileCreateSerializerForQuery(serializers.ModelSerializer):
 
 
 class StudentProfileUpdateSerializer(serializers.Serializer):
-    student_profile = serializers.UUIDField(default=uuid.uuid4)
     family = serializers.UUIDField(default=None, required=False)
     name = serializers.CharField(max_length=200, required=False, default=None)
     age = serializers.IntegerField(validators=[MinValueValidator(0)], required=False, default=None)
