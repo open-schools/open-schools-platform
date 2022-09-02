@@ -49,7 +49,7 @@ def can_user_interact_with_student_profile_check(family: Family, user: User) -> 
 
 
 def update_student_profile(*, student_profile: StudentProfile, data) -> StudentProfile:
-    non_side_effect_fields = ['age', 'name']
+    non_side_effect_fields = ['age', 'name', 'phone']
     filtered_data = filter_dict_from_none_values(data)
     student_profile, has_updated = model_update(
         instance=student_profile,

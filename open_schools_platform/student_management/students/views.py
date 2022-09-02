@@ -41,8 +41,8 @@ class StudentProfileApi(ApiAuthMixin, APIView):
             empty_exception=True,
             empty_message="There is no such family"
         )
-        student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
-                                                 age=student_profile_serializer.validated_data['age'])
+        student_profile = create_student_profile(
+            **get_dict_excluding_fields(student_profile_serializer.validated_data, ["family"]))
         add_student_profile_to_family(student_profile=student_profile, family=family)
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
@@ -74,8 +74,7 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
                 empty_message="There is no such student_profile"
             )
         update_student_profile(student_profile=student_profile,
-                               data=get_dict_excluding_fields(student_profile_update_serializer.validated_data,
-                                                              ['student_profile', 'family']))
+                               data=get_dict_excluding_fields(student_profile_update_serializer.validated_data, []))
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=200)
 
 
