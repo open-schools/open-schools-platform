@@ -32,11 +32,11 @@ class Circle(BaseModel):
 
     @property
     def latitude(self):
-        return self.location.x
+        return self.location.y
 
     @property
     def longitude(self):
-        return self.location.y
+        return self.location.x
 
     def __str__(self):
         return self.name

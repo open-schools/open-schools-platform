@@ -57,6 +57,7 @@ THIRD_PARTY_APPS = [
     'django_celery_results',
     'django_celery_beat',
     'django_filters',
+    'leaflet',
     'corsheaders',
     'django_extensions',
     'rest_framework_jwt',
