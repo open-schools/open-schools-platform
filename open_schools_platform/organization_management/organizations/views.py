@@ -89,11 +89,15 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         invite_serializer.is_valid()
 
         phone = invite_serializer.validated_data["phone"]
+        email = invite_serializer.validated_data["email"]
+        name = invite_serializer.validated_data["name"]
+        organization = get_organization(filters={"id": pk})
 
-        employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__())
+        employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__(), email=str(email),
+                                                                   organization_name=organization.name, name=name)
 
         employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
-                                                               fields=['phone']))
+                                                               fields=['phone', 'email']))
 
         query = create_query(sender_model_name="organization", sender_id=pk,
                              recipient_model_name="employeeprofile", recipient_id=employee_profile.id,

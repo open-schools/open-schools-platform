@@ -16,3 +16,10 @@ class CommonConstants:
 
     if not GOOGLE_API_KEY or not is_google_api_key_valid(FIREBASE_URL_TO_GET_SESSION, GOOGLE_API_KEY):
         warnings.warn("google api key is not valid or is not defined")
+
+    # Email settings
+    EMAIL_ID = os.environ.get("EMAIL_ID")
+    EMAIL_DOMAIN = 'openschools.education'
+    DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
+    EMAIL_PRIVATE_API_KEY = os.environ.get("EMAIL_PRIVATE_API_KEY")
+    TEST_EMAIL = 'test.openschools.education@mail.ru'
