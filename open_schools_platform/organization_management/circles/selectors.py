@@ -12,6 +12,7 @@ def get_circles(*, filters=None) -> QuerySet:
     filters = filters or {}
 
     qs = Circle.objects.all()
+    CircleFilter.ORDER_FIELD = None  # type: ignore
     circles = CircleFilter(filters, qs).qs
 
     return circles
