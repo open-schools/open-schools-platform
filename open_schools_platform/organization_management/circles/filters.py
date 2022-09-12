@@ -4,14 +4,10 @@ from django_filters import CharFilter
 from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
 from open_schools_platform.organization_management.circles.models import Circle
-from django.contrib.gis.db.models.functions import GeometryDistance
-
-from open_schools_platform.organization_management.circles.services import convert_str_to_point
 
 
 def circle_radius_filter(queryset, name, value):
-    qs = queryset.filter(location__distance_lte=(value, D(km=CirclesConstants.SEARCH_RADIUS)))
-    return qs.order_by(GeometryDistance("location", convert_str_to_point(value)))
+    return queryset.filter(location__distance_lte=(value, D(km=CirclesConstants.SEARCH_RADIUS)))
 
 
 class CircleFilter(BaseFilterSet):
