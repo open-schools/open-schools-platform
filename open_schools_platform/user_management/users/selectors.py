@@ -1,10 +1,12 @@
-from rest_framework.exceptions import NotFound, NotAuthenticated, AuthenticationFailed, PermissionDenied
+from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed, PermissionDenied
 
+from open_schools_platform.common.selectors import selector_wrapper
 from open_schools_platform.user_management.users.models import User, CreationToken
 from open_schools_platform.user_management.users.filters import UserFilter, CreationTokenFilter
 from open_schools_platform.user_management.users.services import is_token_alive
 
 
+@selector_wrapper
 def get_user(*, filters=None, user: User = None) -> User:
     filters = filters or {}
 
@@ -17,6 +19,7 @@ def get_user(*, filters=None, user: User = None) -> User:
     return retrieving_user
 
 
+@selector_wrapper
 def get_token(*, filters=None, user: User = None) -> CreationToken:
     filters = filters or {}
 
@@ -30,9 +33,11 @@ def get_token(*, filters=None, user: User = None) -> CreationToken:
 
 
 def get_token_with_checks(key: str, verify_check: bool = True, is_alive_check: bool = True) -> CreationToken:
-    token = get_token(filters={"key": key})
-    if not token:
-        raise NotFound(detail="No such token.")
+    token = get_token(
+        filters={"key": key},
+        empty_exception=True,
+        empty_message="No such token"
+    )
     if verify_check and not token.is_verified:
         raise NotAuthenticated(detail="Token is not verified.")
     if is_alive_check and not is_token_alive(token):

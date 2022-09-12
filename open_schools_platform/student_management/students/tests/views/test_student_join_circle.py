@@ -19,16 +19,22 @@ class StudentJoinCirclesTests(TestCase):
         user = create_logged_in_user(instance=self)
         circle = create_test_circle()
         data = {
-            "name": "test_name",
-            "age": 15,
+            "student_profile": {
+                "name": "test_name",
+                "age": 15,
+            },
+            "additional": {
+                "text": "Please, let me in!",
+            },
             "circle": circle.id,
         }
-        response = self.client.post(self.student_join_circle_query_url, data)
+        response = self.client.post(self.student_join_circle_query_url, data, format="json")
         self.assertEqual(201, response.status_code)
-        self.assertTrue(get_student_profile(filters={"name": data["name"]}))
+        self.assertTrue(get_student_profile(filters={"name": data["student_profile"]["name"]}))
         family = get_family(filters={"parent_profiles": str(user.parent_profile.id)})
         self.assertTrue(family)
-        self.assertTrue(get_student_profile(filters={"name": data["name"]}) in family.student_profiles.all())
+        self.assertTrue(get_student_profile(
+            filters={"name": data["student_profile"]["name"]}) in family.student_profiles.all())
         self.assertTrue(user.parent_profile in family.parent_profiles.all())
         self.assertEqual(1, Student.objects.count())
         self.assertEqual(1, Query.objects.count())

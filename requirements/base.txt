@@ -15,8 +15,12 @@ whitenoise==6.2.0
 django-filter==21.1
 django-cors-headers==3.11.0
 django-extensions==3.1.5
-
+django-leaflet==0.28.3
 
 django-phonenumber-field[phonenumbers]==6.1.0
 drf-jwt==1.19.2
 rules==3.3.0
+geopy==2.2.0
+geos==0.2.3
+djangorestframework-gis==1.0
+numpy==1.23.2

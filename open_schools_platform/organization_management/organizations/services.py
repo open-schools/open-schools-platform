@@ -12,7 +12,7 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.user_management.users.models import User
 
 
-def create_organization(name: str, inn: str) -> Organization:
+def create_organization(name: str, inn: str = "") -> Organization:
     organization = Organization.objects.create(
         name=name,
         inn=inn,
@@ -56,15 +56,18 @@ class OrganizationQueryHandler(BaseQueryHandler):
 
         return query
 
-    Organization.query_handler = query_handler
+    setattr(Organization, "query_handler", query_handler)
 
 
 def organization_circle_query_filter(view, filters, organization: Organization, circle: Circle):
     queries = Query.objects.all()
     if organization:
-        queries &= get_queries(
-            filters={"recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
-        )
+        if organization.circles.values():
+            queries &= get_queries(
+                filters={"recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
+            )
+        else:
+            return Query.objects.none()
     if circle:
         queries &= get_queries(filters={"recipient_id": circle.id})
 
@@ -83,6 +86,6 @@ def organization_circle_query_filter(view, filters, organization: Organization, 
     if students:
         queries &= get_queries(filters={"body_ids": form_ids_string_from_queryset(students)})
     else:
-        queries &= Query.objects.none()
+        return Query.objects.none()
 
     return queries

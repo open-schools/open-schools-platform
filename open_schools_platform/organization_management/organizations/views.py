@@ -1,6 +1,6 @@
 from django_filters import UUIDFilter
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound, NotAcceptable
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -8,10 +8,10 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.circles.selectors import get_circle
-from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer
+from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
+    OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
     get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -19,7 +19,7 @@ from open_schools_platform.organization_management.organizations.paginators impo
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
     get_organization
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    OrganizationSerializer, OrganizationInviteSerializer, OrganizationInviteUpdateSerializer
+    OrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
@@ -27,7 +27,7 @@ from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
-    OrganizationQuerySerializer, StudentProfileQuerySerializer
+    EmployeeProfileQuerySerializer, StudentProfileQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
@@ -44,7 +44,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     )
     def post(self, request, *args, **kwargs):
         org_serializer = CreateOrganizationSerializer(data=request.data)
-        org_serializer.is_valid()
+        org_serializer.is_valid(raise_exception=True)
 
         org = create_organization(**org_serializer.validated_data)
 
@@ -80,13 +80,13 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
 class InviteEmployeeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        request_body=OrganizationInviteSerializer,
+        request_body=OrganizationEmployeeInviteSerializer,
         responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
         operation_description="Creates invite employee query.",
     )
     def post(self, request, pk) -> Response:
-        invite_serializer = OrganizationInviteSerializer(data=request.data)
-        invite_serializer.is_valid()
+        invite_serializer = OrganizationEmployeeInviteSerializer(data=request.data)
+        invite_serializer.is_valid(raise_exception=True)
 
         phone = invite_serializer.validated_data["phone"]
         email = invite_serializer.validated_data["email"]
@@ -96,8 +96,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__(), email=str(email),
                                                                    organization_name=organization.name, name=name)
 
-        employee = create_employee(**get_dict_excluding_fields(dictionary=invite_serializer.validated_data,
-                                                               fields=['phone', 'email']))
+        employee = create_employee(**invite_serializer.validated_data["body"])
 
         query = create_query(sender_model_name="organization", sender_id=pk,
                              recipient_model_name="employeeprofile", recipient_id=employee_profile.id,
@@ -110,13 +109,14 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        request_body=OrganizationInviteUpdateSerializer,
-        responses={200: swagger_dict_response({"query": OrganizationQuerySerializer()}), 404: "There is no such query",
+        request_body=OrganizationEmployeeInviteUpdateSerializer,
+        responses={200: swagger_dict_response({"query": EmployeeProfileQuerySerializer()}),
+                   404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
     def put(self, request):
-        query_update_serializer = OrganizationInviteUpdateSerializer(data=request.data)
+        query_update_serializer = OrganizationEmployeeInviteUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
         query = get_query_with_checks(
             pk=str(query_update_serializer.validated_data["query"]),
@@ -125,31 +125,36 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         )
         update_invite_employee_body(
             query=query,
-            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+            data=query_update_serializer["body"]
         )
-        return Response({"query": OrganizationQuerySerializer(query).data}, status=200)
+        return Response({"query": EmployeeProfileQuerySerializer(query).data}, status=200)
 
 
 class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": OrganizationQuerySerializer(many=True)})},
+        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):
-        organization = get_organization(filters={'id': str(pk)}, user=request.user)
-        if not organization:
-            raise NotFound('There is no such organization')
-        queries = get_queries(filters={'sender_id': organization.id})
-        if not queries:
-            raise NotFound('There are no queries with such sender')
-        return Response({"results": OrganizationQuerySerializer(queries, many=True).data}, status=200)
+        organization = get_organization(
+            filters={'id': str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such organization"
+        )
+        queries = get_queries(
+            filters={'sender_id': organization.id},
+            empty_exception=True,
+            empty_message="There are no queries with such sender"
+        )
+        return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
 class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     class FilterProperties:
         query_fields = QueryFilter.get_swagger_filters(prefix="query")
-        student_fields = StudentFilter.get_swagger_filters(prefix="student", include=["name"])
+        student_fields = StudentFilter.get_swagger_filters(prefix="student", include=["name", "student_profile__phone"])
         additional_fields = {"organization": UUIDFilter(lookup_expr=["exact"]),
                              "circle": UUIDFilter(lookup_expr=["exact"])}
 

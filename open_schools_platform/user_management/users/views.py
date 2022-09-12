@@ -1,6 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -62,9 +61,11 @@ class RetrieveCreationTokenApi(APIView):
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def get(self, request, pk):
-        token = get_token(filters={"key": pk})
-        if not token:
-            raise NotFound(detail="No such token.")
+        token = get_token(
+            filters={"key": pk},
+            empty_exception=True,
+            empty_message="No such token"
+        )
 
         return Response({"token": RetrieveCreationTokenSerializer(token).data}, status=200)
 
@@ -159,9 +160,11 @@ class UserResetPasswordApi(APIView):
 
         token = get_token_with_checks(key=user_serializer.validated_data['token'])
 
-        user = get_user(filters={"phone": token.phone})
-        if not user:
-            raise NotFound(detail="No such user.")
+        user = get_user(
+            filters={"phone": token.phone},
+            empty_exception=True,
+            empty_message="No such user"
+        )
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
         return Response({"detail": "Password was successfully reset."}, status=200)

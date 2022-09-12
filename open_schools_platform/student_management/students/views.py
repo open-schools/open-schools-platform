@@ -1,5 +1,5 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotFound, NotAcceptable
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -10,16 +10,16 @@ from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
 from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
+from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import StudentProfileQuerySerializer
-from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
     StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
 from open_schools_platform.student_management.students.services import \
-    create_student_profile, update_student_profile, create_student, update_student_join_circle_body
+    create_student_profile, update_student_profile, update_student_join_circle_body,\
+    autogenerate_family_logic, query_creation_logic
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -35,11 +35,14 @@ class StudentProfileApi(ApiAuthMixin, APIView):
     def post(self, request):
         student_profile_serializer = StudentProfileCreateSerializer(data=request.data)
         student_profile_serializer.is_valid(raise_exception=True)
-        family = get_family(filters={"id": str(student_profile_serializer.validated_data['family'])}, user=request.user)
-        if not family:
-            raise NotFound("There is no such family")
-        student_profile = create_student_profile(name=student_profile_serializer.validated_data['name'],
-                                                 age=student_profile_serializer.validated_data['age'])
+        family = get_family(
+            filters={"id": str(student_profile_serializer.validated_data['family'])},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such family"
+        )
+        student_profile = create_student_profile(
+            **get_dict_excluding_fields(student_profile_serializer.validated_data, ["family"]))
         add_student_profile_to_family(student_profile=student_profile, family=family)
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
@@ -59,18 +62,19 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
         student_profile = get_student_profile(
             filters={'id': str(pk)},
             user=request.user,
+            empty_exception=True,
+            empty_message="There is no such student_profile"
         )
-        if not student_profile:
-            raise NotFound("There is no such student_profile")
 
         if student_profile_update_serializer.validated_data['family']:
-            family = get_family(filters={"id": student_profile_update_serializer.validated_data['family']},
-                                user=request.user)
-            if not family:
-                raise NotFound('There is no such family')
+            get_family(
+                filters={"id": student_profile_update_serializer.validated_data['family']},
+                user=request.user,
+                empty_exception=True,
+                empty_message="There is no such student_profile"
+            )
         update_student_profile(student_profile=student_profile,
-                               data=get_dict_excluding_fields(student_profile_update_serializer.validated_data,
-                                                              ['student_profile', 'family']))
+                               data=get_dict_excluding_fields(student_profile_update_serializer.validated_data, []))
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=200)
 
 
@@ -88,19 +92,17 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         if get_family(filters={"parent_profiles": str(request.user.parent_profile.id)}, user=request.user):
             raise NotAcceptable("Please choose already created family")
-        student_profile = create_student_profile(name=student_join_circle_req_serializer.validated_data["name"],
-                                                 age=student_join_circle_req_serializer.validated_data["age"])
-        family = create_family(parent=request.user.parent_profile)
-        add_student_profile_to_family(family=family, student_profile=student_profile)
-        student = create_student(name=student_profile.name)
-        circle = get_circle(filters={'id': student_join_circle_req_serializer.validated_data["circle"]})
-        if not circle:
-            raise NotFound('There is no such circle')
-        query = create_query(
-            sender_model_name="studentprofile", sender_id=student_profile.id,
-            recipient_model_name="circle", recipient_id=circle.id,
-            body_model_name="student", body_id=student.id
+
+        student_profile = autogenerate_family_logic(student_join_circle_req_serializer.validated_data, request.user)
+
+        circle = get_circle(
+            filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
+            empty_exception=True,
+            empty_message="There is no such circle"
         )
+
+        query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
+                                     student_profile, request.user)
 
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
@@ -116,18 +118,21 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
     def post(self, request, pk):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
-        student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user)
-        if not student_profile:
-            raise NotFound("There is no such student profile")
-        student = create_student(name=student_profile.name)
-        circle = get_circle(filters={'id': student_join_circle_req_serializer.validated_data["circle"]})
-        if not circle:
-            raise NotFound('There is no such circle')
-        query = create_query(
-            sender_model_name="studentprofile", sender_id=student_profile.id,
-            recipient_model_name="circle", recipient_id=circle.id,
-            body_model_name="student", body_id=student.id
+        student_profile = get_student_profile(
+            filters={"id": str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message="There is no such student profile"
         )
+
+        circle = get_circle(
+            filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
+            empty_exception=True,
+            empty_message="There is no such circle"
+        )
+
+        query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
+                                     student_profile, request.user)
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=201)
 
 
@@ -151,7 +156,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         )
         update_student_join_circle_body(
             query=query,
-            data=get_dict_excluding_fields(query_update_serializer.validated_data, ["query"])
+            data=query_update_serializer.validated_data["body"],
         )
         return Response({"query": StudentProfileQuerySerializer(query).data}, status=200)
 
@@ -163,12 +168,18 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
         operation_description="Get all queries for provided student profile",
     )
     def get(self, request, pk):
-        if not get_student_profile(filters={'id': str(pk)}):
-            raise NotFound('There is no such student profile')
+        get_student_profile(
+            filters={'id': str(pk)},
+            empty_exception=True,
+            empty_message='There is no such student profile'
+        )
+
         student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user)
-        queries = get_queries(filters={'sender_id': str(student_profile.id)})
-        if not queries:
-            raise NotFound('There are no queries with such sender')
+        queries = get_queries(
+            filters={'sender_id': str(student_profile.id)},
+            empty_exception=True,
+            empty_message='There are no queries with such sender'
+        )
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
@@ -179,13 +190,14 @@ class StudentCirclesListApi(ApiAuthMixin, APIView):
         operation_description="Get all circles for provided student profile",
     )
     def get(self, request, pk):
-        if not get_student_profile(filters={'id': str(pk)}):
-            raise NotFound('There is no such student profile')
-        student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user)
-        students = get_students(filters={'student_profile': str(student_profile.id)})
+        student_profile = get_student_profile(
+            filters={"id": str(pk)},
+            user=request.user,
+            empty_exception=True,
+            empty_message='There is no such student profile'
+        )
+        students = get_students(
+            filters={'student_profile': str(student_profile.id)},
+        )
         circles = get_circles_by_students(students=students)
-        if not students:
-            raise NotFound('There are no students with such student_profile')
-        if not circles:
-            raise NotFound('Such student profile does not have any circles')
         return Response({"results": CircleSerializer(circles, many=True).data}, status=200)

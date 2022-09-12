@@ -52,9 +52,12 @@ LOCAL_APPS = [
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework_gis',
+    'django.contrib.gis',
     'django_celery_results',
     'django_celery_beat',
     'django_filters',
+    'leaflet',
     'corsheaders',
     'django_extensions',
     'rest_framework_jwt',
@@ -115,11 +118,12 @@ DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres:///open_schools_platform'),
 }
 DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
 if os.environ.get('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'github_actions',
             'USER': 'postgres',
             'PASSWORD': 'postgres',
@@ -200,3 +204,4 @@ from config.settings.jwt import *  # noqa
 from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
+from config.settings.geo_django import * # noqa

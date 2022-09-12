@@ -49,5 +49,5 @@ def create_test_organizations():
     return organizations
 
 
-def create_test_organization(name: str = "LamArt", inn: str = "1") -> Organization:
-    return create_organization(name=name, inn=inn)
+def create_test_organization(inn: str = "1111111111", name: str = "test_org"):
+    return create_organization(inn=inn, name=name)

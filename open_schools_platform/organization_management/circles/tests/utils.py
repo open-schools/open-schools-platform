@@ -1,23 +1,37 @@
+from typing import Any
+
+from django.contrib.gis.geos import Point
+
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.services import create_circle, add_student_to_circle
-from open_schools_platform.organization_management.employees.services import create_employee
-from open_schools_platform.organization_management.organizations.services import create_organization
+from open_schools_platform.organization_management.employees.tests.utils import create_test_employee
+from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.student_management.students.services import create_student
 
 
-def create_test_circle() -> Circle:
-    organization = create_organization(name="test_org", inn="1111111111")
-    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal")
+def create_test_circle(organization: Organization = None, address: str = "address",
+                       location: Any = Point(0.0, 0.0), name: str = "test_circle",
+                       capacity: int = 10, description: str = "description") -> Circle:
+    if not organization:
+        organization = create_test_organization()
+    circle = create_circle(
+        organization=organization,  # type: ignore
+        name=name,
+        address=address,
+        capacity=capacity,
+        description=description,
+        location=location
+    )
     return circle
 
 
 def create_test_circle_with_user_in_org(user: User) -> Circle:
-    organization = create_organization(name="test_org", inn="1111111111")
-    employee = create_employee(name="test_employee", position="test", user=user)
-    employee.organization = organization
+    employee = create_test_employee(user)
+    employee.organization = create_test_organization()
     employee.save()
-    circle = create_circle(organization=organization, name="test_circle", address="d", capacity=0, description="alalal")
+    circle = create_test_circle(employee.organization)
     return circle
 
 

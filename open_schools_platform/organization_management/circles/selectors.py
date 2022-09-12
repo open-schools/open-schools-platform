@@ -7,6 +7,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.user_management.users.models import User
 
 
+@selector_wrapper
 def get_circles(*, filters=None) -> QuerySet:
     filters = filters or {}
 

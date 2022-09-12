@@ -6,6 +6,13 @@ FROM python:3.10
 ADD requirements/ requirements/
 RUN pip install -r requirements/production.txt
 
+# GeoDjango dependencies
+RUN apt-get update -y \
+    && apt-get install binutils libproj-dev gdal-bin -y \
+    && apt-get install libgeos++ -y \
+    && apt-get install proj-bin -y \
+    && apt install gdal-bin -y
+
 # Get the django project into the docker container
 RUN mkdir /app
 WORKDIR /app
