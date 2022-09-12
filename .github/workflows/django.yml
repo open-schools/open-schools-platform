@@ -41,6 +41,8 @@ jobs:
         touch .env
         echo GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} >> .env
         echo SMS_API_KEY=${{secrets.SMS_API_KEY}} >> .env
+        echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
+        echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
     - name: Fetch history, because Heroku deploy fails otherwise.
       uses: actions/setup-python@v2
       with:
