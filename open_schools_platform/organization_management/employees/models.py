@@ -39,7 +39,7 @@ class EmployeeProfile(BaseModel):
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     objects = EmployeeProfileManager()
-    email = models.EmailField(max_length=30, blank=True)
+    email = models.EmailField(max_length=255, blank=True)
 
     def __str__(self):
         return self.user.__str__()
