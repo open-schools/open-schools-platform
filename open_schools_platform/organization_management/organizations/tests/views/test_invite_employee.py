@@ -18,14 +18,14 @@ class InviteEmployeeTests(TestCase):
         create_logged_in_user(instance=self)
         organization = create_test_organization()
         data = {
-            "phone": user.phone.__str__(),
+            "email": "example_email@fds.ru",
+            "phone": "+79020000000",
             "body": {
                 "name": "test_user",
                 "position": "test_position",
-                "email": "example_email@fds.ru",
             }
         }
-        response = self.client.post(self.invite_employee_url(str(user.employee_profile.id)), data, format="json")
+        response = self.client.post(self.invite_employee_url(str(organization.id)), data, format="json")
         self.assertEqual(201, response.status_code)
         employee_profile = get_employee_profile(filters={"name": data["body"]["name"]})
         self.assertTrue(employee_profile)
