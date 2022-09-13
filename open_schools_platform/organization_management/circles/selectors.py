@@ -16,7 +16,6 @@ def get_circles(*, filters=None) -> QuerySet:
     qs = Circle.objects.all()
     circles = CircleFilter(filters, qs).qs
     if 'user_location' in filters:
-        CircleFilter.ORDER_FIELD = None  # type: ignore
         circles = circles.order_by(GeometryDistance("location", convert_str_to_point(filters['user_location'])))
     return circles
 
