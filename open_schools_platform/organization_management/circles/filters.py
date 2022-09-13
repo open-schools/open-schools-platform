@@ -7,9 +7,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 
 
 def circle_radius_filter(queryset, name, value):
-    return queryset.filter(location__distance_lte=(
-        value, D(km=CirclesConstants.SEARCH_RADIUS))
-    )
+    return queryset.filter(location__distance_lte=(value, D(km=CirclesConstants.SEARCH_RADIUS)))
 
 
 class CircleFilter(BaseFilterSet):

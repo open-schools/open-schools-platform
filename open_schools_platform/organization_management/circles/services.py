@@ -2,6 +2,7 @@ from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
 from rest_framework.exceptions import NotAcceptable
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
+import re
 
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -46,3 +47,8 @@ def create_circle(name: str, organization: Organization, description: str, capac
 def add_student_to_circle(student: Student, circle: Circle):
     student.circle = circle
     student.save()
+
+
+def convert_str_to_point(string: str):
+    res = re.findall(r"\d+\.\d+", string)
+    return Point(float(res[0]), float(res[1]), srid=4326)

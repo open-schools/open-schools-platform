@@ -1,9 +1,11 @@
+from django.contrib.gis.db.models.functions import GeometryDistance
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import selector_wrapper
 from open_schools_platform.organization_management.circles.filters import CircleFilter
 from open_schools_platform.organization_management.circles.models import Circle
+from open_schools_platform.organization_management.circles.services import convert_str_to_point
 from open_schools_platform.user_management.users.models import User
 
 
@@ -13,7 +15,8 @@ def get_circles(*, filters=None) -> QuerySet:
 
     qs = Circle.objects.all()
     circles = CircleFilter(filters, qs).qs
-
+    if 'user_location' in filters:
+        circles = circles.order_by(GeometryDistance("location", convert_str_to_point(filters['user_location'])))
     return circles
 
 
