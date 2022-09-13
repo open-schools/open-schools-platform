@@ -89,8 +89,12 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         invite_serializer.is_valid(raise_exception=True)
 
         phone = invite_serializer.validated_data["phone"]
+        email = invite_serializer.validated_data["email"]
+        name = invite_serializer.validated_data["body"]["name"]
+        organization = get_organization(filters={"id": pk})
 
-        employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__())
+        employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__(), email=str(email),
+                                                                   organization_name=organization.name, name=name)
 
         employee = create_employee(**invite_serializer.validated_data["body"])
 

@@ -1,15 +1,14 @@
-from rest_framework.exceptions import APIException, NotAcceptable
-
+from rest_framework.exceptions import NotAcceptable
+from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
-from open_schools_platform.organization_management.organizations.constants import OrganizationConstants
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.tasks.tasks import send_mail_to_new_user_with_celery
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import create_user, generate_user_password
-from open_schools_platform.utils.sms_provider_requests import send_sms
 
 
 def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
@@ -35,19 +34,18 @@ def update_invite_employee_body(*, query: Query, data) -> Query:
     return query
 
 
-def get_employee_profile_or_create_new_user(phone: str) -> EmployeeProfile:
+def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
+                                            organization_name: str) -> EmployeeProfile:
     user = get_user(filters={"phone": phone})
 
     if not user:
         pwd = generate_user_password()
-        msg = OrganizationConstants.get_invite_message(phone=phone, pwd=pwd)
-        response = send_sms(to=[phone], msg=msg)
-
-        if response[str(phone)] != 100:
-            raise APIException(detail="Something wrong! Please, contact the administrator"
-                                      "and tell him the error number.")
-
-        user = create_user(phone=phone, password=pwd, name="Alex Nevsky")
+        send_mail_to_new_user_with_celery.delay('Приглашение в организацию',
+                                                {'login': phone, 'password': pwd, 'organization': organization_name,
+                                                 'name': name},
+                                                CommonConstants.DEFAULT_FROM_EMAIL,
+                                                email)
+        user = create_user(phone=phone, password=pwd, name=name, email=email)
 
     return user.employee_profile
 

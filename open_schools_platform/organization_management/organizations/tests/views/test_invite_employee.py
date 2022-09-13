@@ -3,6 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.organization_management.employees.selectors import get_employee_profile, get_employee
+from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
@@ -14,15 +15,17 @@ class InviteEmployeeTests(TestCase):
             lambda pk: reverse("api:organization-management:organizations:invite-employee", args=[pk])
 
     def test_invite_employee_query_successfully_formed(self):
-        user = create_logged_in_user(instance=self)
+        create_logged_in_user(instance=self)
+        organization = create_test_organization()
         data = {
-            "phone": user.phone.__str__(),
+            "email": "example_email@fds.ru",
+            "phone": "+79020000000",
             "body": {
                 "name": "test_user",
                 "position": "test_position",
             }
         }
-        response = self.client.post(self.invite_employee_url(str(user.employee_profile.id)), data, format="json")
+        response = self.client.post(self.invite_employee_url(str(organization.id)), data, format="json")
         self.assertEqual(201, response.status_code)
         employee_profile = get_employee_profile(filters={"name": data["body"]["name"]})
         self.assertTrue(employee_profile)
