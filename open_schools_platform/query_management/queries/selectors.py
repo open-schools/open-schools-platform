@@ -20,7 +20,6 @@ def get_query(*, filters=None, user: User = None) -> Query:
     return query
 
 
-@selector_wrapper
 def get_query_with_checks(pk: str, user: User, update_query_check: bool = False) -> Query:
     query = get_query(
         filters={"id": pk},
