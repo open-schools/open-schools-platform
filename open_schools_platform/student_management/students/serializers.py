@@ -47,7 +47,7 @@ class StudentProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ("age", "name", "family", "phone")
+        fields = ("age", "name", "family", "phone", "photo")
         extra_kwargs = {"phone": {'required': False}}
 
 
@@ -64,6 +64,7 @@ class StudentProfileUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200, required=False, default=None)
     age = serializers.IntegerField(validators=[MinValueValidator(0)], required=False, default=None)
     phone = PhoneNumberField(max_length=17, required=False)
+    photo = serializers.FileField(required=False)
 
 
 class AutoStudentJoinCircleQuerySerializer(serializers.Serializer):
@@ -80,7 +81,7 @@ class StudentJoinCircleQuerySerializer(serializers.Serializer):
 class StudentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile
-        fields = ("name", "age", "id", "phone")
+        fields = ("name", "age", "id", "phone", "photo")
 
 
 class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):

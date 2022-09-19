@@ -64,6 +64,7 @@ THIRD_PARTY_APPS = [
     'drf_yasg',
     'phonenumber_field',
     'rules.apps.AutodiscoverRulesConfig',
+    'storages',
 ]
 
 INSTALLED_APPS = [
@@ -205,3 +206,4 @@ from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
 from config.settings.geo_django import * # noqa
+from config.settings.object_storage import * # noqa
