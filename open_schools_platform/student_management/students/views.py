@@ -2,6 +2,7 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -23,6 +24,8 @@ from open_schools_platform.student_management.students.services import \
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
+    parser_classes = [MultiPartParser]
+
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
@@ -48,6 +51,8 @@ class StudentProfileApi(ApiAuthMixin, APIView):
 
 
 class StudentProfileUpdateApi(ApiAuthMixin, APIView):
+    parser_classes = [MultiPartParser]
+
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],

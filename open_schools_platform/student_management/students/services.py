@@ -15,11 +15,12 @@ from open_schools_platform.student_management.students.models import StudentProf
 from open_schools_platform.user_management.users.models import User
 
 
-def create_student_profile(name: str, age: int, phone: PhoneNumber = None) -> StudentProfile:
+def create_student_profile(name: str, age: int, phone: PhoneNumber = None, photo: bytes = None) -> StudentProfile:
     student_profile = StudentProfile.objects.create_student_profile(
         name=name,
         age=age,
         phone=phone,
+        photo=photo
     )
     return student_profile
 
@@ -49,7 +50,7 @@ def can_user_interact_with_student_profile_check(family: Family, user: User) -> 
 
 
 def update_student_profile(*, student_profile: StudentProfile, data) -> StudentProfile:
-    non_side_effect_fields = ['age', 'name', 'phone']
+    non_side_effect_fields = ['age', 'name', 'phone', 'photo']
     filtered_data = filter_dict_from_none_values(data)
     student_profile, has_updated = model_update(
         instance=student_profile,

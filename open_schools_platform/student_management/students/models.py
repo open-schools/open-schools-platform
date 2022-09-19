@@ -5,18 +5,21 @@ from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
 
+from config.settings.object_storage import ClientDocsStorage
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(models.Manager):
-    def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None):
+    def create_student_profile(
+            self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None, photo: bytes = None):
         student_profile = self.model(
             name=name,
             age=age,
             user=user,
             phone=phone,
+            photo=photo
         )
         student_profile.full_clean()
         student_profile.save(using=self.db)
@@ -34,6 +37,7 @@ class StudentProfile(BaseModel):
         blank=True,
         null=True,
     )
+    photo = models.ImageField(storage=ClientDocsStorage(), default=None, blank=True, null=True)
 
     objects = StudentProfileManager()
 
