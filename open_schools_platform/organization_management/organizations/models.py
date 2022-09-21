@@ -2,11 +2,14 @@ import uuid
 
 from typing import Any
 
+import safedelete.models
+from safedelete.managers import SafeDeleteManager
+
 from open_schools_platform.common.models import BaseModel
 from django.db import models
 
 
-class OrganizationManager(models.Manager):
+class OrganizationManager(SafeDeleteManager):
     def create(self, *args: Any, **kwargs: Any):
         organization = self.model(
             *args,
@@ -20,6 +23,7 @@ class OrganizationManager(models.Manager):
 
 
 class Organization(BaseModel):
+    _safedelete_policy = safedelete.models.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     inn = models.CharField(max_length=255, blank=True, default="")

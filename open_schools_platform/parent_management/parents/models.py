@@ -1,12 +1,13 @@
 import uuid
 
 from django.db import models
+from safedelete.managers import SafeDeleteManager
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.user_management.users.models import User
 
 
-class ParentProfileManager(models.Manager):
+class ParentProfileManager(SafeDeleteManager):
     def create_parent_profile(self, user: User, name: str):
         parent_profile = self.model(
             name=name,

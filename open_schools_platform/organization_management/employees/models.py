@@ -1,14 +1,17 @@
 from typing import Any
 
 import uuid
+
+import safedelete.models
 from django.db import models
+from safedelete.managers import SafeDeleteManager
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
 
-class EmployeeManager(models.Manager):
+class EmployeeManager(SafeDeleteManager):
     def create(self, *args: Any, **kwargs: Any):
         employee = self.model(
             *args,
@@ -21,7 +24,7 @@ class EmployeeManager(models.Manager):
         return employee
 
 
-class EmployeeProfileManager(models.Manager):
+class EmployeeProfileManager(SafeDeleteManager):
     def create(self, *args: Any, **kwargs: Any):
         employee_profile = self.model(
             *args,
@@ -46,6 +49,7 @@ class EmployeeProfile(BaseModel):
 
 
 class Employee(BaseModel):
+    _safedelete_policy = safedelete.models.SOFT_DELETE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees',
                                          null=True, default=None, blank=True, on_delete=models.CASCADE)

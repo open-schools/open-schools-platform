@@ -4,6 +4,7 @@ from open_schools_platform.organization_management.employees.models import Emplo
 from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.organization_management.employees.selectors import get_employees
+from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 
 class EmployeeProfileAdmin(admin.ModelAdmin):
@@ -43,10 +44,16 @@ class PositionFilter(InputFilter):
             return get_employees(filters={"position": position})
 
 
-class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ("name", "position", "employee_profile", "organization", "id")
+class EmployeeAdmin(SafeDeleteAdmin):
+    list_display = ("highlight_deleted_field", "position", "employee_profile", "organization",
+                    "id") + SafeDeleteAdmin.list_display
     search_fields = ("name",)
-    list_filter = (OrganizationFilter, EmployeeProfileFilter, PositionFilter)
+    list_filter = (OrganizationFilter, EmployeeProfileFilter, PositionFilter,
+                   SafeDeleteAdminFilter) + SafeDeleteAdmin.list_filter
+    field_to_highlight = "name"
+
+
+EmployeeAdmin.highlight_deleted_field.short_description = EmployeeAdmin.field_to_highlight
 
 
 admin.site.register(Employee, EmployeeAdmin)

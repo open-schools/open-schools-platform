@@ -1,5 +1,6 @@
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
+from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 from .models import Circle
 from .selectors import get_circles
@@ -28,10 +29,14 @@ class AddressFilter(InputFilter):
             return get_circles(filters={"address": address})
 
 
-class CircleAdmin(LeafletGeoAdmin):
-    list_display = ("name", "organization", "address", "capacity", "location", "id")
+class CircleAdmin(SafeDeleteAdmin, LeafletGeoAdmin):
+    list_display = ("highlight_deleted_field", "organization", "address", "capacity",
+                    "location", "id") + SafeDeleteAdmin.list_display
     search_fields = ("name",)
-    list_filter = (OrganizationFilter, AddressFilter)
+    list_filter = (OrganizationFilter, AddressFilter, SafeDeleteAdminFilter) + SafeDeleteAdmin.list_filter
+
+    field_to_highlight = "name"
 
 
+CircleAdmin.highlight_deleted_field.short_description = CircleAdmin.field_to_highlight
 admin.site.register(Circle, CircleAdmin)

@@ -1,14 +1,17 @@
 import uuid
 from typing import Any
 
+import safedelete.models
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models
+from safedelete.managers import SafeDeleteManager
+
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.organizations.models import Organization
 
 
-class CircleManager(models.Manager):
+class CircleManager(SafeDeleteManager):
     def create_circle(self, *args: Any, **kwargs: Any):
         circle = self.model(
             *args,
@@ -21,6 +24,7 @@ class CircleManager(models.Manager):
 
 
 class Circle(BaseModel):
+    _safedelete_policy = safedelete.models.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     organization = models.ForeignKey(Organization, related_name="circles", on_delete=models.CASCADE)

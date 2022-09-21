@@ -4,6 +4,7 @@ from open_schools_platform.organization_management.organizations.models import O
 from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.organization_management.organizations.selectors import get_organizations
+from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 
 class INNFilter(InputFilter):
@@ -17,10 +18,14 @@ class INNFilter(InputFilter):
             return get_organizations(filters={"inn": inn})
 
 
-class OrganizationAdmin(admin.ModelAdmin):
-    list_display = ("name", "inn", "id")
+class OrganizationAdmin(SafeDeleteAdmin):
+    list_display = ("highlight_deleted_field", "inn", "id") + SafeDeleteAdmin.list_display
     search_fields = ("name",)
-    list_filter = (INNFilter,)
+    list_filter = (INNFilter, SafeDeleteAdminFilter) + SafeDeleteAdmin.list_filter
 
+    field_to_highlight = "name"
+
+
+OrganizationAdmin.highlight_deleted_field.short_description = OrganizationAdmin.field_to_highlight
 
 admin.site.register(Organization, OrganizationAdmin)

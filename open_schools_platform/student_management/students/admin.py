@@ -1,4 +1,6 @@
 from django.contrib import admin
+from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
+
 from open_schools_platform.common.admin import InputFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from django.utils.translation import gettext_lazy as _
@@ -28,16 +30,27 @@ class StudentProfileFilter(InputFilter):
             return get_students(filters={'student_profile_name': student_profile})
 
 
-class StudentProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'age', 'user', 'id', 'phone')
+class StudentProfileAdmin(SafeDeleteAdmin):
+    list_display = ('highlight_deleted_field', 'age', 'user', 'id', 'phone')
     search_fields = ('name', 'age', "user__phone", 'phone')
+    list_filter = (SafeDeleteAdminFilter,) + SafeDeleteAdmin.list_filter
+
+    field_to_highlight = "name"
 
 
-class StudentAdmin(admin.ModelAdmin):
-    list_display = ('name', 'student_profile', 'circle', 'id')
+StudentProfileAdmin.highlight_deleted_field.short_description = StudentProfileAdmin.field_to_highlight
+
+
+class StudentAdmin(SafeDeleteAdmin):
+    list_display = ('highlight_deleted_field', 'student_profile', 'circle', 'id') + SafeDeleteAdmin.list_display
     search_fields = ("name",)
-    list_filter = (CircleFilter, StudentProfileFilter)
+    list_filter = (CircleFilter, StudentProfileFilter, StudentProfileFilter,
+                   SafeDeleteAdminFilter) + SafeDeleteAdmin.list_filter
 
+    field_to_highlight = "name"
+
+
+StudentAdmin.highlight_deleted_field.short_description = StudentAdmin.field_to_highlight
 
 admin.site.register(StudentProfile, StudentProfileAdmin)
 admin.site.register(Student, StudentAdmin)
