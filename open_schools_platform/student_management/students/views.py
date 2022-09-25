@@ -155,6 +155,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         query_update_serializer.is_valid(raise_exception=True)
 
         query = get_query_with_checks(
+            update_query_check=True,
             pk=str(query_update_serializer.validated_data["query"]),
             user=request.user,
         )
