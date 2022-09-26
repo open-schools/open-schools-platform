@@ -209,7 +209,7 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such student"}
     )
     def delete(self, request, pk):
-        student = get_students(filters={'id': pk}, empty_exception=True)
+        student = get_students(filters={'id': pk}, empty_exception=True, user=request.user)
         student.delete()
         return Response("Success deletion", status=200)
 
@@ -221,6 +221,6 @@ class StudentProfileDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such student-profile"}
     )
     def delete(self, request, pk):
-        student_profile = get_student_profile(filters={'id': pk}, empty_exception=True)
+        student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
         student_profile.delete()
         return Response("Success deletion", status=200)

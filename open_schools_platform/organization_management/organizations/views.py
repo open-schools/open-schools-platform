@@ -220,6 +220,6 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such organization"}
     )
     def delete(self, request, pk):
-        organization = get_organization(filters={'id': pk}, empty_exception=True)
+        organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
         organization.delete()
         return Response("Success deletion", status=200)

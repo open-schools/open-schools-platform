@@ -100,7 +100,7 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such employee"}
     )
     def delete(self, request, pk):
-        employee = get_employee(filters={'id': pk}, empty_exception=True)
+        employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)
         employee.delete()
         return Response("Success deletion", status=200)
 

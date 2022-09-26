@@ -7,6 +7,8 @@ from .selectors import get_circles
 from ...common.admin import InputFilter
 from django.utils.translation import gettext_lazy as _
 
+from ...common.models import DeleteAdmin
+
 
 class OrganizationFilter(InputFilter):
     parameter_name = 'organization_name'
@@ -29,14 +31,13 @@ class AddressFilter(InputFilter):
             return get_circles(filters={"address": address})
 
 
-class CircleAdmin(SafeDeleteAdmin, LeafletGeoAdmin):
-    list_display = ("highlight_deleted_field", "organization", "address", "capacity",
-                    "location", "id") + SafeDeleteAdmin.list_display
+class CircleAdmin(DeleteAdmin, LeafletGeoAdmin):
+    list_display = DeleteAdmin.list_display + ("organization", "address", "capacity",
+                                               "location", "id")
     search_fields = ("name",)
-    list_filter = (OrganizationFilter, AddressFilter, SafeDeleteAdminFilter) + SafeDeleteAdmin.list_filter
-
-    field_to_highlight = "name"
+    list_filter = DeleteAdmin.list_filter + (OrganizationFilter, AddressFilter)
 
 
-CircleAdmin.highlight_deleted_field.short_description = CircleAdmin.field_to_highlight
+DeleteAdmin.init_model(CircleAdmin)
+
 admin.site.register(Circle, CircleAdmin)
