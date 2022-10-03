@@ -15,3 +15,9 @@ class OrganizationSerializer(serializers.ModelSerializer):
         model = Organization
         fields = ("id", "name", "inn")
         read_only_fields = fields
+
+
+class CircleOrganizationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ("id", "name")
