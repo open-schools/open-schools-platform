@@ -60,12 +60,15 @@ class BaseQueryHandler:
         raise NotImplementedError
 
     @staticmethod
-    def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User):
+    def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User, without_body: bool = None):
         if new_status not in query_handler_class.allowed_statuses:
             raise NotAcceptable("Not allowed status")
         if query.status == new_status:
             raise ValidationError(detail="Identical statuses")
-        if query.recipient is None or query.sender is None or query.body is None:
+        if query.recipient is None or query.sender is None:
+            if not without_body:
+                if query.body is None:
+                    raise MethodNotAllowed("put", detail="Query is corrupted")
             raise MethodNotAllowed("put", detail="Query is corrupted")
 
 
