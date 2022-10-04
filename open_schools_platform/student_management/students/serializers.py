@@ -9,7 +9,7 @@ from open_schools_platform.student_management.students.models import StudentProf
 class QueryStudentBodySerializerUpdate(serializers.ModelSerializer):
     class Meta:
         model = Student
-        fields = ('name', )
+        fields = ('name',)
 
 
 class QueryStudentBodySerializer(serializers.ModelSerializer):
@@ -21,13 +21,21 @@ class QueryStudentBodySerializer(serializers.ModelSerializer):
 class QueryStudentProfileSenderSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile
-        fields = ('id', )
+        fields = ('id', 'photo')
+
+
+class StudentProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentProfile
+        fields = ("name", "age", "id", "phone", "photo")
 
 
 class StudentSerializer(serializers.ModelSerializer):
+    profile = StudentProfileSerializer()
+
     class Meta:
         model = Student
-        fields = ("id", "name", "circle", "student_profile")
+        fields = ("id", "name", "circle", "profile")
 
 
 class QueryStudentProfileAdditionalSerializer(serializers.ModelSerializer):
@@ -39,7 +47,7 @@ class QueryStudentProfileAdditionalSerializer(serializers.ModelSerializer):
 class CreateQueryStudentProfileAdditionalSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentProfileCircleAdditional
-        fields = ("text", )
+        fields = ("text",)
 
 
 class StudentProfileCreateSerializer(serializers.ModelSerializer):
@@ -52,7 +60,6 @@ class StudentProfileCreateSerializer(serializers.ModelSerializer):
 
 
 class StudentProfileCreateSerializerForQuery(serializers.ModelSerializer):
-
     class Meta:
         model = StudentProfile
         fields = ("age", "name", "phone")
@@ -76,12 +83,6 @@ class AutoStudentJoinCircleQuerySerializer(serializers.Serializer):
 class StudentJoinCircleQuerySerializer(serializers.Serializer):
     circle = serializers.UUIDField(required=True)
     additional = CreateQueryStudentProfileAdditionalSerializer(required=True)
-
-
-class StudentProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = StudentProfile
-        fields = ("name", "age", "id", "phone", "photo")
 
 
 class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
