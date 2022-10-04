@@ -24,6 +24,8 @@ class CircleSerializer(serializers.ModelSerializer):
 
 
 class QueryCircleRecipientSerializer(serializers.ModelSerializer):
+    organization = CircleOrganizationSerializer()
+
     class Meta:
         model = Circle
-        fields = ('id', 'name', )
+        fields = ('id', 'name', 'organization')
