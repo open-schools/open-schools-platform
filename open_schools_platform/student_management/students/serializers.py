@@ -31,11 +31,11 @@ class StudentProfileSerializer(serializers.ModelSerializer):
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    profile = StudentProfileSerializer()
+    student_profile = StudentProfileSerializer()
 
     class Meta:
         model = Student
-        fields = ("id", "name", "circle", "profile")
+        fields = ("id", "name", "circle", "student_profile")
 
 
 class QueryStudentProfileAdditionalSerializer(serializers.ModelSerializer):
