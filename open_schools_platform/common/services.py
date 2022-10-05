@@ -65,10 +65,7 @@ class BaseQueryHandler:
             raise NotAcceptable("Not allowed status")
         if query.status == new_status:
             raise ValidationError(detail="Identical statuses")
-        if query.recipient is None or query.sender is None:
-            if not without_body:
-                if query.body is None:
-                    raise MethodNotAllowed("put", detail="Query is corrupted")
+        if query.recipient is None or query.sender is None or without_body is None and query.body is None:
             raise MethodNotAllowed("put", detail="Query is corrupted")
 
 
