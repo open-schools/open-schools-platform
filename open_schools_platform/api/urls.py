@@ -7,6 +7,7 @@ query_management_urls = [
 
 parent_management_urls = [
     path('families/', include(('open_schools_platform.parent_management.families.urls', 'families'))),
+    path('parents/', include(("open_schools_platform.parent_management.parents.urls", 'parents'))),
 ]
 
 user_management_urls = [
