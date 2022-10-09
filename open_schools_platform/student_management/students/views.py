@@ -17,15 +17,13 @@ from open_schools_platform.query_management.queries.serializers import StudentPr
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
-    StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
+    StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer, StudentProfileAddPhotoSerializer
 from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, update_student_join_circle_body,\
     autogenerate_family_logic, query_creation_logic
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
-    parser_classes = [MultiPartParser]
-
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
@@ -50,9 +48,28 @@ class StudentProfileApi(ApiAuthMixin, APIView):
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
 
-class StudentProfileUpdateApi(ApiAuthMixin, APIView):
+class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
     parser_classes = [MultiPartParser]
 
+    @swagger_auto_schema(
+        operation_description="Adds photo to provided student profile",
+        request_body=StudentProfileAddPhotoSerializer,
+        responses={200: swagger_dict_response({"student_profile": StudentProfileSerializer()}),
+                   404: "There is no such student profile",
+                   403: "Current user do not have permission to perform this action"},
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
+    )
+    def post(self, request, pk):
+        add_photo_serializer = StudentProfileAddPhotoSerializer(data=request.data)
+        add_photo_serializer.is_valid(raise_exception=True)
+        student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user,
+                                              empty_exception=True, empty_message="There is no such student profile")
+        update_student_profile(student_profile=student_profile,
+                               data=add_photo_serializer.validated_data)
+        return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
+
+
+class StudentProfileUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
