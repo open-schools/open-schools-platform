@@ -29,11 +29,16 @@ students_management_urls = [
     path('students/', include(('open_schools_platform.student_management.students.urls', 'students')))
 ]
 
+photos_management_urls = [
+    path('photos/', include(('open_schools_platform.photo_management.photos.urls', 'photos')))
+]
+
 urlpatterns = [
     path('user-management/', include((user_management_urls, "user-management"))),
     path('organization-management/', include((organization_management_urls, "organization-management"))),
     path('query-management/', include((query_management_urls, 'query-management'))),
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
     path('parent-management/', include((parent_management_urls, "parent-management"))),
-    path('students-management/', include((students_management_urls, 'students-management')))
+    path('students-management/', include((students_management_urls, 'students-management'))),
+    path('photos-management/', include((photos_management_urls, 'photos-management')))
 ]
