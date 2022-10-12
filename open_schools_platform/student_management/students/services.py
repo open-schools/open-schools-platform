@@ -17,8 +17,8 @@ from open_schools_platform.student_management.students.models import StudentProf
 from open_schools_platform.user_management.users.models import User
 
 
-def create_student_profile(name: str, age: int, user: User = None, phone: PhoneNumber = None, photo: uuid = None) -> \
-        StudentProfile:
+def create_student_profile(name: str, age: int, user: User = None,
+                           phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
     if not photo:
         photo = Photo.objects.create_photo()
     student_profile = StudentProfile.objects.create_student_profile(
