@@ -55,7 +55,7 @@ class StudentProfileCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ("age", "name", "family", "phone", "photo")
+        fields = ("age", "name", "family", "phone")
         extra_kwargs = {"phone": {'required': False}}
 
 
