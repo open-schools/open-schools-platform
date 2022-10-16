@@ -40,5 +40,5 @@ urlpatterns = [
     path('errors/', include(('open_schools_platform.errors.urls', 'errors'))),
     path('parent-management/', include((parent_management_urls, "parent-management"))),
     path('students-management/', include((students_management_urls, 'students-management'))),
-    path('photos-management/', include((photos_management_urls, 'photos-management')))
+    path('photos-management/', include((photos_management_urls, 'photo-management')))
 ]

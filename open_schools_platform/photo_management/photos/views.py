@@ -17,14 +17,14 @@ class PhotoApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Create photo",
         request_body=PhotoSerializer,
-        responses={201: swagger_dict_response({"photo": PhotoSerializer()}), },
+        responses={200: swagger_dict_response({"photo": PhotoSerializer()}), },
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
     def put(self, request, pk):
         photo_serializer = PhotoSerializer(data=request.data)
         photo_serializer.is_valid(raise_exception=True)
 
-        photo = get_photo(filters={"id": str(pk)}, empty_exception=True, empty_message="photo doesn't exist")
-        update_photo(photo=photo, data=photo_serializer.validated_data)
+        photo = get_photo(filters={"id": str(pk)}, empty_exception=True, empty_message="this photo does not exist")
+        update_photo(photo=photo, data=photo_serializer.validated_data, user=request.user)
 
-        return Response({"photo": PhotoSerializer(photo).data}, status=201)
+        return Response({"photo": PhotoSerializer(photo).data}, status=200)
