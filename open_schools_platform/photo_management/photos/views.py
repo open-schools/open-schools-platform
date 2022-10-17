@@ -15,7 +15,7 @@ class PhotoApi(ApiAuthMixin, APIView):
     parser_classes = [MultiPartParser]
 
     @swagger_auto_schema(
-        operation_description="Create photo",
+        operation_description="Update photo",
         request_body=PhotoSerializer,
         responses={200: swagger_dict_response({"photo": PhotoSerializer()}), },
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
@@ -24,7 +24,8 @@ class PhotoApi(ApiAuthMixin, APIView):
         photo_serializer = PhotoSerializer(data=request.data)
         photo_serializer.is_valid(raise_exception=True)
 
-        photo = get_photo(filters={"id": str(pk)}, empty_exception=True, empty_message="this photo does not exist")
-        update_photo(photo=photo, data=photo_serializer.validated_data, user=request.user)
+        photo = get_photo(filters={"id": str(pk)},  empty_exception=True,
+                          user=request.user, empty_message="this photo does not exist")
+        update_photo(photo=photo, data=photo_serializer.validated_data)
 
         return Response({"photo": PhotoSerializer(photo).data}, status=200)
