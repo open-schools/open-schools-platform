@@ -25,7 +25,7 @@ class PhotoApi(ApiAuthMixin, APIView):
         photo_serializer.is_valid(raise_exception=True)
 
         photo = get_photo(filters={"id": str(pk)},  empty_exception=True,
-                          user=request.user, empty_message="this photo does not exist")
+                          user=request.user, empty_message="This photo does not exist")
         update_photo(photo=photo, data=photo_serializer.validated_data)
 
         return Response({"photo": PhotoSerializer(photo).data}, status=200)
