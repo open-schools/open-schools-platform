@@ -2,6 +2,7 @@ from django.core.validators import MinValueValidator
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
+from open_schools_platform.photo_management.photos.serializers import PhotoSerializer
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
 
@@ -19,12 +20,16 @@ class QueryStudentBodySerializer(serializers.ModelSerializer):
 
 
 class QueryStudentProfileSenderSerializer(serializers.ModelSerializer):
+    photo = PhotoSerializer()
+
     class Meta:
-        model = StudentProfile
+        model = StudentProfile()
         fields = ('id', 'photo')
 
 
 class StudentProfileSerializer(serializers.ModelSerializer):
+    photo = PhotoSerializer()
+
     class Meta:
         model = StudentProfile
         fields = ("name", "age", "id", "phone", "photo")
