@@ -27,13 +27,13 @@ class Query(BaseModel):
 
     sender = GenericForeignKey("sender_ct", "sender_id")
 
-    body_ct = models.ForeignKey(ContentType, related_name="body_ct", null=True, on_delete=models.CASCADE)
+    body_ct = models.ForeignKey(ContentType, related_name="body_ct", null=True, blank=True, on_delete=models.CASCADE)
     body_id = models.UUIDField(default=uuid.uuid4)
 
     body = GenericForeignKey("body_ct", "body_id")
 
     additional_ct = models.ForeignKey(ContentType, related_name="additional_ct", on_delete=models.CASCADE,
-                                      null=True)
+                                      null=True, blank=True)
     additional_id = models.UUIDField(default=uuid.uuid4)
 
     additional = GenericForeignKey("additional_ct", "additional_id")
