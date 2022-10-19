@@ -9,3 +9,4 @@ class SwaggerTags:
     PARENT_MANAGEMENT_PARENTS = "Parent management. Parents"
     STUDENT_MANAGEMENT_STUDENTS = "Student management. Students"
     QUERY_MANAGEMENT_QUERIES = "Query management. Queries"
+    PHOTO_MANAGEMENT_PHOTOS = "Photos management. Photos"
