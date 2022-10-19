@@ -23,7 +23,7 @@ class QueryStudentProfileSenderSerializer(serializers.ModelSerializer):
     photo = PhotoSerializer()
 
     class Meta:
-        model = StudentProfile()
+        model = StudentProfile
         fields = ('id', 'photo')
 
 
