@@ -4,6 +4,24 @@ from django.db import migrations, models
 import django.db.models.deletion
 
 
+def create_photo_for_student_profiles(apps, schema_editor):
+    Photo = apps.get_model("photos", "photo")
+    StudentProfile = apps.get_model("students", "studentprofile")
+    db_alias = schema_editor.connection.alias
+    qs = StudentProfile.objects.using(db_alias).filter(photo__isnull=True).all()
+    for student_profile in qs:
+        photo = Photo()
+        photo.save(using=db_alias)
+        student_profile.photo = photo
+        student_profile.save(using=db_alias)
+
+
+def delete_photo(apps, schema_editor):
+    Photo = apps.get_model("photos", "photo")
+    db_alias = schema_editor.connection.alias
+    Photo.objects.using(db_alias).all().delete()
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -17,4 +35,6 @@ class Migration(migrations.Migration):
             name='photo',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='photo', to='photos.photo'),
         ),
+
+        migrations.RunPython(create_photo_for_student_profiles, delete_photo)
     ]
