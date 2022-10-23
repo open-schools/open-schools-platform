@@ -116,3 +116,9 @@ def set_new_password_for_user(user: User, password: str) -> User:
     user.set_password(password)
     user.save()
     return user
+
+
+def add_firebase_token_to_user(user: User, token: str) -> User:
+    user.firebase_token = token
+    user.save()
+    return user

@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
+from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.errors.services import InvalidArgumentException
@@ -16,10 +17,10 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
     RetrieveCreationTokenSerializer, ResendSerializer, \
-    PasswordResetSerializer
+    PasswordResetSerializer, FirebaseTokenSerializer
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
-    get_jwt_token, update_token_session, set_new_password_for_user
+    get_jwt_token, update_token_session, set_new_password_for_user, add_firebase_token_to_user
 from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase, \
     firebase_error_dict_with_additional_info
 
@@ -168,3 +169,17 @@ class UserResetPasswordApi(APIView):
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
         return Response({"detail": "Password was successfully reset."}, status=200)
+
+
+class AddFirebaseTokenApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Add firebase token to user.",
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
+        request_body=FirebaseTokenSerializer,
+        responses={200: "token was successfully added."},
+    )
+    def post(self, request):
+        token_serializer = FirebaseTokenSerializer(data=request.data)
+        token_serializer.is_valid(raise_exception=True)
+        add_firebase_token_to_user(request.user, token_serializer.validated_data["token"])
+        return Response({"detail": "token was successfully added."}, status=200)

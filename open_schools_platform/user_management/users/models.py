@@ -87,6 +87,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
+    firebase_token = models.CharField(max_length=200, null=True, blank=True)
 
     objects = UserManager()
 

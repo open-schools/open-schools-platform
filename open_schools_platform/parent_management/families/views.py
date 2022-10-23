@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.firebase.utils import notify_user
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
@@ -84,4 +85,6 @@ class InviteParentApi(ApiAuthMixin, APIView):
             raise NotAcceptable("Parent is already in this family")
         query = create_query(sender_model_name="family", sender_id=family.id,
                              recipient_model_name="parentprofile", recipient_id=parent.id)
+        notify_user(user=parent.user, title='Вы были приглашены в семью!',
+                    body=f'семья {family.name} пригласила вас к себе!')
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
