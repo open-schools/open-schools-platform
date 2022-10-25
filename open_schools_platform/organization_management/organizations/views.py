@@ -115,7 +115,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
-    def put(self, request):
+    def patch(self, request):
         query_update_serializer = OrganizationEmployeeInviteUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
         query = get_query_with_checks(

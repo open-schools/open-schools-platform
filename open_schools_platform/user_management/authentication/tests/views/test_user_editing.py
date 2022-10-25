@@ -19,7 +19,7 @@ class UserEditingTests(TestCase):
             "name": "test_user_changed_name"
         }
 
-        response = self.client.put(self.user_change_name_url, data)
+        response = self.client.patch(self.user_change_name_url, data)
         self.assertEqual(200, response.status_code)
         user = get_user(filters={"phone": "+79025456481"})
         self.assertEqual("test_user_changed_name", user.name)
@@ -31,7 +31,7 @@ class UserEditingTests(TestCase):
             "new_password": "654321"
         }
 
-        response = self.client.put(self.user_update_password_url, data)
+        response = self.client.patch(self.user_update_password_url, data)
         self.assertEqual(200, response.status_code)
         user = get_user(filters={"phone": "+79025456481"})
         self.assertTrue(user.check_password("654321"))
@@ -43,7 +43,7 @@ class UserEditingTests(TestCase):
             "new_password": "123456"
         }
 
-        response = self.client.put(self.user_update_password_url, data)
+        response = self.client.patch(self.user_update_password_url, data)
         self.assertEqual(401, response.status_code)
 
     def test_old_password_match_with_new_one(self):
@@ -53,7 +53,7 @@ class UserEditingTests(TestCase):
             "new_password": "654321"
         }
 
-        response = self.client.put(self.user_update_password_url, data)
+        response = self.client.patch(self.user_update_password_url, data)
         self.assertEqual(401, response.status_code)
 
     def test_request_user_is_not_logged_in(self):
@@ -65,7 +65,7 @@ class UserEditingTests(TestCase):
             "old_password": "111111",
             "new_password": "222222"
         }
-        name_change_response = self.client.put(self.user_change_name_url, name_change_data)
+        name_change_response = self.client.patch(self.user_change_name_url, name_change_data)
         self.assertEqual(401, name_change_response.status_code)
-        password_update_response = self.client.put(self.user_update_password_url, password_update_data)
+        password_update_response = self.client.patch(self.user_update_password_url, password_update_data)
         self.assertEqual(401, password_update_response.status_code)

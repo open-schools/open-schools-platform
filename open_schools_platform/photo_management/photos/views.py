@@ -20,7 +20,7 @@ class PhotoApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"photo": PhotoSerializer()}), },
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
-    def put(self, request, pk):
+    def patch(self, request, pk):
         photo_serializer = PhotoSerializer(data=request.data)
         photo_serializer.is_valid(raise_exception=True)
 

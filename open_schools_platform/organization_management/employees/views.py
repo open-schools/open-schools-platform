@@ -80,7 +80,7 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         operation_description="Update data of provided employee.",
         responses={200: swagger_dict_response({"employee": EmployeeSerializer()}), 404: "There is no such employee"}
     )
-    def put(self, request, pk):
+    def patch(self, request, pk):
         employee_update_serializer = EmployeeUpdateSerializer(data=request.data)
         employee_update_serializer.is_valid()
         employee = get_employee(

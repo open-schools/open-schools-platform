@@ -33,8 +33,8 @@ class UserExceptionsTests(TestCase):
         token_verification_data = {
             "otp": "123456"
         }
-        token_verification_response = self.client.put(self.token_verification_url(token.key),
-                                                      token_verification_data)
+        token_verification_response = self.client.patch(self.token_verification_url(token.key),
+                                                        token_verification_data)
         self.assertEqual(422, token_verification_response.status_code)
 
     def test_token_does_not_exist(self):
@@ -50,8 +50,8 @@ class UserExceptionsTests(TestCase):
             "otp": "123456"
         }
         token = "99999999-9999-9999-9999-999999999999"
-        token_verification_response = self.client.put(self.token_verification_url(token),
-                                                      token_verification_data)
+        token_verification_response = self.client.patch(self.token_verification_url(token),
+                                                        token_verification_data)
         self.assertEqual(404, token_verification_response.status_code)
 
         sms_resend_data = {
@@ -87,8 +87,8 @@ class UserExceptionsTests(TestCase):
         token_verification_data = {
             "otp": "123456"
         }
-        token_verification_response = self.client.put(self.token_verification_url(token.key),
-                                                      token_verification_data)
+        token_verification_response = self.client.patch(self.token_verification_url(token.key),
+                                                        token_verification_data)
         self.assertEqual(401, token_verification_response.status_code)
 
         sms_resend_data = {

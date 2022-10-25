@@ -11,5 +11,5 @@ class PhotoTests(TestCase):
 
     def test_update_new_user_photo(self):
         user = create_logged_in_user(self)
-        response = self.client.put(self.query_photo_update_url(user.student_profile.photo.id))
+        response = self.client.patch(self.query_photo_update_url(user.student_profile.photo.id))
         self.assertEqual(200, response.status_code)

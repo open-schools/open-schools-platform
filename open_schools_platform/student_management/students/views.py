@@ -78,7 +78,7 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
                    404: "There is no such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
-    def put(self, request, pk):
+    def patch(self, request, pk):
         student_profile_update_serializer = StudentProfileUpdateSerializer(data=request.data)
         student_profile_update_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(
@@ -167,7 +167,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
                    404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"}
     )
-    def put(self, request):
+    def patch(self, request):
         query_update_serializer = StudentJoinCircleQueryUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
 
