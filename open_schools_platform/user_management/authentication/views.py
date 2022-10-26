@@ -16,8 +16,9 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer, UserProfilesSerializer
-from ..users.services import set_new_password_for_user, user_update
+from ..users.selectors import get_firebase_token_entity
+from ..users.serializers import UserSerializer, UserProfilesSerializer, FirebaseTokenSerializer
+from ..users.services import set_new_password_for_user, user_update, update_firebase_token_entity
 from ...common.views import swagger_dict_response
 
 
@@ -98,3 +99,18 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
 
         set_new_password_for_user(user=user, password=new_password)
         return Response({"detail": "Password was successfully updated"}, status=200)
+
+
+class AddFirebaseTokenApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Add firebase token to request user.",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=FirebaseTokenSerializer,
+        responses={200: "token was successfully added."},
+    )
+    def patch(self, request):
+        token_serializer = FirebaseTokenSerializer(data=request.data)
+        token_serializer.is_valid(raise_exception=True)
+        token = get_firebase_token_entity(filters={"user": str(request.user.id)})
+        update_firebase_token_entity(token=token, data=token_serializer.validated_data)
+        return Response({"detail": "token was successfully added."}, status=200)

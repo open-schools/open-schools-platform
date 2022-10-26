@@ -1,15 +1,13 @@
 from django.contrib import admin, messages
 from django.core.exceptions import ValidationError
 
-from open_schools_platform.user_management.users.models import User, CreationToken
+from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseToken
 from open_schools_platform.user_management.users.services import create_user
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('phone', 'is_admin', 'name', 'is_superuser', 'is_active', 'created_at', 'updated_at', 'id',
-                    'firebase_token')
-
+    list_display = ('phone', 'is_admin', 'name', 'is_superuser', 'is_active', 'created_at', 'updated_at', 'id')
     search_fields = ('phone', 'name')
 
     list_filter = ('is_active', 'is_admin')
@@ -44,4 +42,10 @@ class CreationTokenAdmin(admin.ModelAdmin):
     list_filter = ("is_verified",)
 
 
+class FirebaseTokenAdmin(admin.ModelAdmin):
+    list_display = ("id", "token", "created_at", "updated_at")
+    search_fields = ("id", "token")
+
+
 admin.site.register(CreationToken, CreationTokenAdmin)
+admin.site.register(FirebaseToken, FirebaseTokenAdmin)

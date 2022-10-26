@@ -87,7 +87,6 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
-    firebase_token = models.CharField(max_length=200, null=True, blank=True)
 
     objects = UserManager()
 
@@ -102,6 +101,25 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def is_staff(self):
         return self.is_admin
+
+
+class FirebaseTokenCreationManager(models.Manager):
+    def create_token(self, user: User, token: str = None):
+        firebase_token = self.model(
+            user=user,
+            token=token
+        )
+        firebase_token.full_clean()
+        firebase_token.save(using=self.db)
+        return firebase_token
+
+
+class FirebaseToken(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='firebase_token')
+    token = models.CharField(max_length=200, null=True, blank=True)
+
+    objects = FirebaseTokenCreationManager()
 
 
 class CreationToken(BaseModel):

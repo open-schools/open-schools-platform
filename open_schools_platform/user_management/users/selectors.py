@@ -1,8 +1,8 @@
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed, PermissionDenied
 
 from open_schools_platform.common.selectors import selector_wrapper
-from open_schools_platform.user_management.users.models import User, CreationToken
-from open_schools_platform.user_management.users.filters import UserFilter, CreationTokenFilter
+from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseToken
+from open_schools_platform.user_management.users.filters import UserFilter, CreationTokenFilter, FirebaseTokenFilter
 from open_schools_platform.user_management.users.services import is_token_alive
 
 
@@ -42,4 +42,13 @@ def get_token_with_checks(key: str, verify_check: bool = True, is_alive_check: b
         raise NotAuthenticated(detail="Token is not verified.")
     if is_alive_check and not is_token_alive(token):
         raise AuthenticationFailed(detail="Token is overdue.")
+    return token
+
+
+def get_firebase_token_entity(*, filters=None) -> FirebaseToken:
+    filters = filters or {}
+
+    qs = FirebaseToken.objects.all().order_by('created_at')
+    token = FirebaseTokenFilter(filters, qs).qs.last()
+
     return token

@@ -86,5 +86,5 @@ class InviteParentApi(ApiAuthMixin, APIView):
         query = create_query(sender_model_name="family", sender_id=family.id,
                              recipient_model_name="parentprofile", recipient_id=parent.id)
         notify_user(user=parent.user, title='Вы были приглашены в семью!',
-                    body=f'семья {family.name} пригласила вас к себе!')
+                    body=f'{family.name} пригласила вас к себе!', data={"query": str(query.id)})
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
