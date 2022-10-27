@@ -10,7 +10,7 @@ from open_schools_platform.student_management.students.models import StudentProf
 class StudentProfileFilter(BaseFilterSet):
     class Meta:
         model = StudentProfile
-        fields = ('id', 'user', 'name', 'age', 'phone')
+        fields = ('id', 'user', 'name', 'age', 'phone', 'photo')
 
 
 class StudentFilter(BaseFilterSet):

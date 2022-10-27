@@ -5,13 +5,12 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
 from open_schools_platform.common.services import model_update
-from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.services import create_student_profile
 from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
 
-from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseToken
+from open_schools_platform.user_management.users.models import User, CreationToken
 from datetime import timezone, datetime
 
 
@@ -45,13 +44,7 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True,
         name=name,
         user=user
     )
-    StudentProfile.objects.create_student_profile(
-        name=name,
-        user=user
-    )
-    FirebaseToken.objects.create_token(
-        user=user,
-    )
+    create_student_profile(name=name, user=user, age=0)
     return user
 
 
@@ -107,17 +100,6 @@ def get_jwt_token(username_field: str, username: str, password: str, request=Non
 def update_token_session(token: CreationToken, new_session: str) -> CreationToken:
     token.session = new_session
     token.save()
-    return token
-
-
-def update_firebase_token_entity(*, token: FirebaseToken, data) -> FirebaseToken:
-    non_side_effect_fields = ['token']
-    filtered_data = filter_dict_from_none_values(data)
-    token, has_updated = model_update(
-        instance=token,
-        fields=non_side_effect_fields,
-        data=filtered_data
-    )
     return token
 
 
