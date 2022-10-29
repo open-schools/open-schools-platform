@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('students', '0004_auto_20220712_1510'),
+        ('students', '0003_studentprofile_photo'),
         ('parents', '0001_initial'),
         ('families', '0001_initial'),
     ]

@@ -8,17 +8,19 @@ from phonenumber_field.phonenumber import PhoneNumber
 from safedelete.managers import SafeDeleteManager
 
 from open_schools_platform.common.models import BaseModel
+from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(SafeDeleteManager):
-    def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None):
+    def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None, photo: uuid.UUID = None):
         student_profile = self.model(
             name=name,
             age=age,
             user=user,
             phone=phone,
+            photo=photo
         )
         student_profile.full_clean()
         student_profile.save(using=self.db)
@@ -37,6 +39,7 @@ class StudentProfile(BaseModel):
         blank=True,
         null=True,
     )
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, related_name="photo", blank=True)
 
     objects = StudentProfileManager()
 

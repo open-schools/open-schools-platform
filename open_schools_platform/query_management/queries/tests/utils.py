@@ -3,6 +3,8 @@ from open_schools_platform.organization_management.circles.tests.utils import cr
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.services import create_organization
+from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.families.tests.utils import create_test_family
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.services import create_student, \
@@ -44,6 +46,16 @@ def create_test_employee_invite_organization_query(user: User = None,
         recipient_model_name="employeeprofile", recipient_id=user.employee_profile.id,
         body_model_name="student", body_id=employee.id
     )
+    return query
+
+
+def create_test_family_invite_parent_query(i: int = 0, family: Family = None, user: User = None) -> Query:
+    if user is None:
+        user = create_test_user(phone="+79021111111")
+    if family is None:
+        family = create_test_family(i=1, parent=create_test_user(phone="+79022222222").parent_profile)
+    query = create_query(sender_model_name="family", sender_id=family.id,
+                         recipient_model_name="parentprofile", recipient_id=user.parent_profile.id)
     return query
 
 

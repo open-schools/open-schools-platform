@@ -13,6 +13,9 @@ jobs:
         echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
         echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
         echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
+        echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
+        echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
+        echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
     - name: Build docker
       run: docker-compose build
     - name: Type check
@@ -45,6 +48,9 @@ jobs:
         echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
         echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
         echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
+        echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
+        echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
+        echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
     - name: Fetch history, because Heroku deploy fails otherwise.
       uses: actions/setup-python@v2
       with:

@@ -22,23 +22,32 @@ pip install -r requirements/local.txt
 ```
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 ```
-6. Migrate
+6. In created .env file define next variables:
+- firebase api key ```GOOGLE_API_KEY=<key>```
+- google maps api key ```GOOGLE_MAPS_API_KEY=<key>```
+- object storage access key ```AWS_ACCESS_KEY=<key>```
+- object storage secret access key ```AWS_SECRET_ACCESS_KEY=<key>```
+- object storage bucket name ```YANDEX_CLIENT_DOCS_BUCKET_NAME=<key>```
+- email id ```EMAIL_ID=<key>```
+- mail.ru api key ```EMAIL_PRIVATE_API_KEY=<key>```
+
+7. Migrate
 ```
 python manage.py migrate
 ```
-7. Run django server
+8. Run django server
 ```
 python manage.py runserver [port]
 ```
-8. Install pre-commit hooks
+9. Install pre-commit hooks
 ```
 pre-commit install
 ```
-9. Install pre-push hooks
+10. Install pre-push hooks
 ```
 pre-commit install --hook-type pre-push
 ```
-10. Install GeoDjango packages
+11. Install GeoDjango packages
 
 > You can specify custom paths to GeoDjango packages in .env file like this.
 > Special instructions for specifying these paths are provided for each system.

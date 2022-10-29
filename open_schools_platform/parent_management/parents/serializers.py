@@ -7,3 +7,9 @@ class ParentProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = ParentProfile
         fields = ('id', 'name', 'user')
+
+
+class QueryParentProfileRecipientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ParentProfile
+        fields = ('id',)

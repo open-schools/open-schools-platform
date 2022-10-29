@@ -1,3 +1,4 @@
+import uuid
 from typing import Dict
 
 from phonenumber_field.phonenumber import PhoneNumber
@@ -8,6 +9,7 @@ from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
+from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update, create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
@@ -15,11 +17,16 @@ from open_schools_platform.student_management.students.models import StudentProf
 from open_schools_platform.user_management.users.models import User
 
 
-def create_student_profile(name: str, age: int, phone: PhoneNumber = None) -> StudentProfile:
+def create_student_profile(name: str, age: int, user: User = None,
+                           phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
+    if not photo:
+        photo = Photo.objects.create_photo()
     student_profile = StudentProfile.objects.create_student_profile(
         name=name,
         age=age,
         phone=phone,
+        photo=photo,
+        user=user
     )
     return student_profile
 
@@ -49,7 +56,7 @@ def can_user_interact_with_student_profile_check(family: Family, user: User) -> 
 
 
 def update_student_profile(*, student_profile: StudentProfile, data) -> StudentProfile:
-    non_side_effect_fields = ['age', 'name', 'phone']
+    non_side_effect_fields = ['age', 'name', 'phone', 'photo']
     filtered_data = filter_dict_from_none_values(data)
     student_profile, has_updated = model_update(
         instance=student_profile,

@@ -1,14 +1,19 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
-from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer
+from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
+    FamilyInviteParentSerializer
 from open_schools_platform.parent_management.families.services import create_family
 from rest_framework.response import Response
 
+from open_schools_platform.parent_management.parents.selectors import get_parent_profile
+from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
 
 
@@ -56,6 +61,30 @@ class FamiliesListApi(ApiAuthMixin, APIView):
             empty_message="There is no such family",
         )
         return Response({"results": FamilySerializer(families, many=True).data}, status=200)
+
+
+class InviteParentApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+        request_body=FamilyInviteParentSerializer,
+        responses={201: swagger_dict_response({"query": QueryStatusSerializer()}),
+                   404: "There is no such family",
+                   406: "Parent is already in this family"},
+        operation_description="Creates invite parent query.",
+    )
+    def post(self, request):
+        invite_parent_serializer = FamilyInviteParentSerializer(data=request.data)
+        invite_parent_serializer.is_valid(raise_exception=True)
+        family = get_family(filters={"id": str(invite_parent_serializer.validated_data["family"])}, user=request.user,
+                            empty_exception=True, empty_message="There is no such family")
+        parent = get_parent_profile(filters={"phone": str(invite_parent_serializer.validated_data["phone"])},
+                                    empty_exception=True,
+                                    empty_message="There is no parent_profile with such phone")
+        if parent in family.parent_profiles.all():
+            raise NotAcceptable("Parent is already in this family")
+        query = create_query(sender_model_name="family", sender_id=family.id,
+                             recipient_model_name="parentprofile", recipient_id=parent.id)
+        return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 
 class FamilyDeleteApi(ApiAuthMixin, APIView):

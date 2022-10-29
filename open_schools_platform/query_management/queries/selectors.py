@@ -28,7 +28,6 @@ def get_query_with_checks(pk: str, user: User, update_query_check: bool = False)
         empty_message="No such query"
     )
     if update_query_check:
-        print(query.status)
         if query.status != Query.Status.SENT:
             raise NotAcceptable(f"Cant change query. It already has {query.status} status")
     return query
