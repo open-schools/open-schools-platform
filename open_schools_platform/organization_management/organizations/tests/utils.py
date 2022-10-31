@@ -51,3 +51,8 @@ def create_test_organizations():
 
 def create_test_organization(inn: str = "1111111111", name: str = "test_org"):
     return create_organization(inn=inn, name=name)
+
+
+def get_deleted_organizations():
+    organizations = Organization.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    return organizations

@@ -1,5 +1,6 @@
 from typing import Any, Dict, List
 
+from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.services import create_employee
 
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -79,3 +80,8 @@ def create_test_organizations():
 
 def create_test_employee(user: User, organization: Organization = None):
     return create_employee(name="test_employee", position="test", user=user, organization=organization)
+
+
+def get_deleted_employees():
+    employees = Employee.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    return employees

@@ -14,7 +14,8 @@ from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(SafeDeleteManager):
-    def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None, photo: uuid.UUID = None):
+    def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None,
+                               user: User = None, photo: uuid.UUID = None):
         student_profile = self.model(
             name=name,
             age=age,

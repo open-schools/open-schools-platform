@@ -1,5 +1,4 @@
 from django.contrib import admin
-from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 from open_schools_platform.common.models import DeleteAdmin
 from open_schools_platform.parent_management.families.models import Family

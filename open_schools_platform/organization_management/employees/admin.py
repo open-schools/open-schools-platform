@@ -5,7 +5,6 @@ from open_schools_platform.organization_management.employees.models import Emplo
 from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.organization_management.employees.selectors import get_employees
-from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 
 class EmployeeProfileAdmin(admin.ModelAdmin):

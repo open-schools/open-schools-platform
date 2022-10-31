@@ -1,3 +1,4 @@
+from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.student_management.students.services import create_student_profile
 
@@ -18,3 +19,8 @@ def create_student_profile_in_family(i, family):
 
 def create_test_family(i, parent):
     return create_family(parent=parent, name=f"test_family{i}")
+
+
+def get_deleted_families():
+    families = Family.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    return families

@@ -11,7 +11,7 @@ class GettingEmployeesTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.update_employee_url = lambda pk:\
-            reverse("api:organization-management:employees:update_employee", args=[pk])
+            reverse("api:organization-management:employees:edit-employee", args=[pk])
 
     def test_successfully_update_employee(self):
         user = create_logged_in_user(instance=self)

@@ -5,7 +5,6 @@ from open_schools_platform.organization_management.organizations.models import O
 from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.organization_management.organizations.selectors import get_organizations
-from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 
 class INNFilter(InputFilter):

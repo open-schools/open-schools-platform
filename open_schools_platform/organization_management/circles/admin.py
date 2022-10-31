@@ -1,6 +1,5 @@
 from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
-from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
 
 from .models import Circle
 from .selectors import get_circles

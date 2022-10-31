@@ -40,3 +40,8 @@ def create_student_and_add_to_the_circle(i, circle):
     add_student_to_circle(student=student, circle=circle)
 
     return student
+
+
+def get_deleted_circles():
+    circles = Circle.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    return circles
