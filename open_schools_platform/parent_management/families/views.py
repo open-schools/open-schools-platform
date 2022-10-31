@@ -87,6 +87,18 @@ class InviteParentApi(ApiAuthMixin, APIView):
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 
+class ParentDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        operation_description="Delete student.",
+        responses={200: "Success deletion", 404: "There is no such student"}
+    )
+    def delete(self, request, pk):
+        student = get_parent(filters={'id': pk}, empty_exception=True, user=request.user)
+        student.delete()
+        return Response("Success deletion", status=200)
+
+
 class FamilyDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],

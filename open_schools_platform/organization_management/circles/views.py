@@ -117,6 +117,6 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such circle"}
     )
     def delete(self, request, pk):
-        circle = get_circle(filters={'id': pk}, empty_exception=True, user=request.user)
+        circle = get_circle(filters={'id': str(pk)}, empty_exception=True, user=request.user)
         circle.delete()
         return Response("Success deletion", status=200)

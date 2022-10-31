@@ -14,7 +14,7 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import StudentProfileQuerySerializer
-from open_schools_platform.student_management.students.selectors import get_student_profile, get_students
+from open_schools_platform.student_management.students.selectors import get_student_profile, get_students, get_student
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
     StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer, StudentProfileAddPhotoSerializer
@@ -69,7 +69,7 @@ class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
 
-class StudentProfileUpdateApi(ApiAuthMixin, APIView):
+class StudentProfileEditApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -98,6 +98,16 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
         update_student_profile(student_profile=student_profile,
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data, []))
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=200)
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        operation_description="Delete student-profile.",
+        responses={200: "Success deletion", 404: "There is no such student-profile"}
+    )
+    def delete(self, request, pk):
+        student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
+        student_profile.delete()
+        return Response("Success deletion", status=200)
 
 
 class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
@@ -232,18 +242,6 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
         responses={200: "Success deletion", 404: "There is no such student"}
     )
     def delete(self, request, pk):
-        student = get_students(filters={'id': pk}, empty_exception=True, user=request.user)
+        student = get_student(filters={'id': pk}, empty_exception=True, user=request.user)
         student.delete()
-        return Response("Success deletion", status=200)
-
-
-class StudentProfileDeleteApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        operation_description="Delete student-profile.",
-        responses={200: "Success deletion", 404: "There is no such student-profile"}
-    )
-    def delete(self, request, pk):
-        student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
-        student_profile.delete()
         return Response("Success deletion", status=200)

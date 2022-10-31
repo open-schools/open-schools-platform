@@ -73,7 +73,7 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
-class EmployeeUpdateApi(ApiAuthMixin, APIView):
+class EmployeeEditApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         request_body=EmployeeUpdateSerializer,
@@ -92,8 +92,6 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         update_employee(employee=employee, data=employee_update_serializer.validated_data)
         return Response({"employee": EmployeeSerializer(employee).data}, status=200)
 
-
-class EmployeeDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Delete employee.",
@@ -103,4 +101,3 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
         employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)
         employee.delete()
         return Response("Success deletion", status=200)
-
