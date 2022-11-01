@@ -13,8 +13,9 @@ def get_parent_profile_or_create_new_user(phone: str, email: str, circle_name: s
 
     if not user:
         pwd = generate_user_password()
+        subject = 'Приглашение в кружок'
         name = 'Родитель'
-        send_mail_to_new_user_with_celery.delay('Приглашение в кружок',
+        send_mail_to_new_user_with_celery.delay(subject,
                                                 {'login': phone, 'password': pwd, 'circle': circle_name,
                                                  'name': name},
                                                 CommonConstants.DEFAULT_FROM_EMAIL,

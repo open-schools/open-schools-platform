@@ -77,7 +77,7 @@ class CircleQueryHandler(BaseQueryHandler):
             if query.body is None:
                 raise MethodNotAllowed("put", detail="Query is corrupted")
             query.body.circle = query.sender
-            query.body.family = query.recipient
+            query.body.student_profile = query.additional
             query.body.save()
 
         return query

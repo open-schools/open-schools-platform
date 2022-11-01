@@ -3,11 +3,13 @@ from typing import List
 import django_filters
 from django.db.models import CharField
 
-from open_schools_platform.common.filters import BaseFilterSet
+from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 
 
 class StudentProfileFilter(BaseFilterSet):
+    families = UUIDInFilter(field_name="families", lookup_expr="in")
+
     class Meta:
         model = StudentProfile
         fields = ('id', 'user', 'name', 'age', 'phone', 'photo')

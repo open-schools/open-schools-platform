@@ -15,7 +15,7 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
-from ...common.utils import get_dict_excluding_fields
+from ...common.utils import get_dict_excluding_fields, form_ids_string_from_queryset
 from ...common.views import swagger_dict_response
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
@@ -23,7 +23,7 @@ from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
 from ...query_management.queries.services import create_query
 from ...student_management.students.serializers import StudentSerializer
-from ...student_management.students.services import create_student, get_student_profile_or_create_new
+from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -126,21 +126,24 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         invite_serializer = CircleStudentInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk})
+        circle = get_circle(filters={"id": pk}, user=request.user)
         parent_phone = invite_serializer.validated_data["parent_phone"]
         student_phone = invite_serializer.validated_data["student_phone"]
         email = invite_serializer.validated_data["email"]
         name = invite_serializer.validated_data["body"]["name"]
 
-        parent_profile = get_parent_profile_or_create_new_user(phone=parent_phone.__str__(), email=str(email),
+        parent_profile = get_parent_profile_or_create_new_user(phone=str(parent_phone), email=str(email),
                                                                circle_name=circle.name)
         family = get_parent_family_or_create_new(parent_profile=parent_profile)
-        student_profile = get_student_profile_or_create_new(student_phone=student_phone, student_name=name)
-        student = create_student(**invite_serializer.validated_data["body"], student_profile=student_profile)
+        student_profile = get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
+                                                                      families=form_ids_string_from_queryset(
+                                                                          parent_profile.families.all()))
+        student = create_student(**invite_serializer.validated_data["body"])
 
         query = create_query(sender_model_name="circle", sender_id=pk,
                              recipient_model_name="family", recipient_id=family.id,
-                             body_model_name="student", body_id=student.id)
+                             body_model_name="student", body_id=student.id,
+                             additional_model_name="studentprofile", additional_id=student_profile.id)
 
         return Response({"query": QueryStatusSerializer(query).data},
                         status=201)

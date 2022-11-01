@@ -92,8 +92,8 @@ def create_studentprofileicrcle_additional(text: str = None, parent_phone: Phone
     return additional
 
 
-def get_student_profile_or_create_new(student_phone: str, student_name: str):
-    student_profile = get_student_profile(filters={"phone": student_phone})
+def get_student_profile_by_family_or_create_new(student_phone: str, student_name: str, families: list[Family]):
+    student_profile = get_student_profile(filters={"phone": student_phone, "families": families})
 
     if not student_profile:
         student_profile = create_student_profile(name=student_name, age=0, phone=student_phone)
