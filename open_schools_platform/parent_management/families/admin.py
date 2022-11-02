@@ -5,7 +5,7 @@ from open_schools_platform.parent_management.families.models import Family
 
 
 class FamilyAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ('id',)
+    list_display = DeleteAdmin.list_display + ('id',)  # type: ignore[assignment]
     search_fields = ("name",)
     list_filter = DeleteAdmin.list_filter
 

@@ -31,7 +31,7 @@ class AddressFilter(InputFilter):
 
 
 class CircleAdmin(DeleteAdmin, LeafletGeoAdmin):
-    list_display = DeleteAdmin.list_display + ("organization", "address", "capacity",
+    list_display = DeleteAdmin.list_display + ("organization", "address", "capacity",  # type: ignore[assignment]
                                                "location", "id")
     search_fields = ("name",)
     list_filter = DeleteAdmin.list_filter + (OrganizationFilter, AddressFilter)

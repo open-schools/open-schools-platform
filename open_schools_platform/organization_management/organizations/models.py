@@ -23,7 +23,7 @@ class OrganizationManager(SafeDeleteManager):
 
 
 class Organization(BaseModel):
-    _safedelete_policy = safedelete.models.SOFT_DELETE_CASCADE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     inn = models.CharField(max_length=255, blank=True, default="")

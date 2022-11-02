@@ -24,7 +24,7 @@ class CircleManager(SafeDeleteManager):
 
 
 class Circle(BaseModel):
-    _safedelete_policy = safedelete.models.SOFT_DELETE_CASCADE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     organization = models.ForeignKey(Organization, related_name="circles", on_delete=models.CASCADE)

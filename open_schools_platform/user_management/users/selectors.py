@@ -10,7 +10,7 @@ from open_schools_platform.user_management.users.services import is_token_alive
 def get_user(*, filters=None, user: User = None) -> User:
     filters = filters or {}
 
-    qs = User.objects.all()
+    qs = User.objects.all()  # type: ignore[assignment,has-type]
     retrieving_user = UserFilter(filters, qs).qs.first()
 
     if user and not user.has_perm('users.user_access', retrieving_user):

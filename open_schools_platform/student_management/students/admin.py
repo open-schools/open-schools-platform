@@ -31,7 +31,7 @@ class StudentProfileFilter(InputFilter):
 
 
 class StudentProfileAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ('age', 'user', 'id', 'phone')
+    list_display = DeleteAdmin.list_display + ('age', 'user', 'id', 'phone')  # type: ignore[assignment]
     search_fields = ('name', 'age', "user__phone", 'phone')
     list_filter = DeleteAdmin.list_filter
 
@@ -40,7 +40,7 @@ DeleteAdmin.init_model(StudentProfileAdmin)
 
 
 class StudentAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ('student_profile', 'circle', 'id')
+    list_display = DeleteAdmin.list_display + ('student_profile', 'circle', 'id')  # type: ignore[assignment]
     search_fields = ("name",)
     list_filter = DeleteAdmin.list_filter + (CircleFilter, StudentProfileFilter, StudentProfileFilter)
 

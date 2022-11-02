@@ -19,7 +19,7 @@ class INNFilter(InputFilter):
 
 
 class OrganizationAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ("inn", "id")
+    list_display = DeleteAdmin.list_display + ("inn", "id")  # type: ignore[assignment]
     search_fields = ("name",)
     list_filter = DeleteAdmin.list_filter + (INNFilter,)
 

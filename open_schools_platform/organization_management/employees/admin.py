@@ -45,7 +45,8 @@ class PositionFilter(InputFilter):
 
 
 class EmployeeAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ("position", "employee_profile", "organization", "id")
+    list_display = DeleteAdmin.list_display + ("position",  # type: ignore[assignment]
+                                               "employee_profile", "organization", "id")
     search_fields = ("name",)
     list_filter = DeleteAdmin.list_filter + (OrganizationFilter, EmployeeProfileFilter, PositionFilter)
 

@@ -88,7 +88,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = UserManager()
+    objects = UserManager()  # type: ignore[assignment]
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name']
@@ -118,7 +118,7 @@ class CreationToken(BaseModel):
     session = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
 
-    objects = CreationTokenManager()
+    objects = CreationTokenManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.key.__str__()
