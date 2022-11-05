@@ -16,7 +16,6 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.selectors import get_firebase_token_entity
 from ..users.serializers import UserSerializer, UserProfilesSerializer, FirebaseTokenSerializer
 from ..users.services import set_new_password_for_user, user_update, update_firebase_token_entity
 from ...common.views import swagger_dict_response
@@ -111,6 +110,5 @@ class AddFirebaseTokenApi(ApiAuthMixin, APIView):
     def patch(self, request):
         token_serializer = FirebaseTokenSerializer(data=request.data)
         token_serializer.is_valid(raise_exception=True)
-        token = get_firebase_token_entity(filters={"user": str(request.user.id)})
-        update_firebase_token_entity(token=token, data=token_serializer.validated_data)
+        update_firebase_token_entity(token=request.user.firebase_token, data=token_serializer.validated_data)
         return Response({"detail": "token was successfully added."}, status=200)

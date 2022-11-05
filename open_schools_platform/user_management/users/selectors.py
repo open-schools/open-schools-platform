@@ -1,7 +1,7 @@
 from rest_framework.exceptions import NotAuthenticated, AuthenticationFailed, PermissionDenied
 
 from open_schools_platform.common.selectors import selector_wrapper
-from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseToken
+from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseNotificationToken
 from open_schools_platform.user_management.users.filters import UserFilter, CreationTokenFilter, FirebaseTokenFilter
 from open_schools_platform.user_management.users.services import is_token_alive
 
@@ -45,10 +45,10 @@ def get_token_with_checks(key: str, verify_check: bool = True, is_alive_check: b
     return token
 
 
-def get_firebase_token_entity(*, filters=None) -> FirebaseToken:
+def get_firebase_token_entity(*, filters=None) -> FirebaseNotificationToken:
     filters = filters or {}
 
-    qs = FirebaseToken.objects.all().order_by('created_at')
+    qs = FirebaseNotificationToken.objects.all().order_by('created_at')
     token = FirebaseTokenFilter(filters, qs).qs.last()
 
     return token
