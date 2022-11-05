@@ -13,7 +13,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 
 class StudentProfileManager(models.Manager):
     def create_student_profile(
-            self, name: str, age: int = 0, phone: PhoneNumber = None, user: User = None, photo: uuid.UUID = None):
+            self, name: str, age: int = None, phone: PhoneNumber = None, user: User = None, photo: uuid.UUID = None):
         student_profile = self.model(
             name=name,
             age=age,
@@ -30,7 +30,7 @@ class StudentProfile(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
     name = models.CharField(max_length=200)
-    age = models.IntegerField(validators=[MinValueValidator(0)])
+    age = models.IntegerField(validators=[MinValueValidator(0)], blank=True, null=True)
     phone = PhoneNumberField(
         verbose_name='telephone number',
         max_length=17,
