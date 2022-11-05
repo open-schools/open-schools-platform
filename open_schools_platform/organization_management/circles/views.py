@@ -15,8 +15,9 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
-from ...common.utils import get_dict_excluding_fields, form_ids_string_from_queryset
+from ...common.utils import get_dict_excluding_fields
 from ...common.views import swagger_dict_response
+from ...parent_management.families.selectors import get_families
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
 from ...query_management.queries.selectors import get_queries
@@ -133,12 +134,12 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         name = invite_serializer.validated_data["body"]["name"]
 
         parent_profile = get_parent_profile_or_create_new_user(phone=str(parent_phone), email=str(email),
-                                                               circle_name=circle.name)
+                                                               circle=circle)
         family = get_parent_family_or_create_new(parent_profile=parent_profile)
         student_profile = get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
-                                                                      families=form_ids_string_from_queryset(
-                                                                          parent_profile.families.all()))
+                                                                      families=parent_profile.families.all())
         student = create_student(**invite_serializer.validated_data["body"])
+        get_families()
 
         query = create_query(sender_model_name="circle", sender_id=pk,
                              recipient_model_name="family", recipient_id=family.id,
