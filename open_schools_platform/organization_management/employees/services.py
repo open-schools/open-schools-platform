@@ -40,11 +40,12 @@ def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
 
     if not user:
         pwd = generate_user_password()
-        send_mail_to_new_user_with_celery.delay('Приглашение в организацию',
+        subject = 'Приглашение в организацию'
+        send_mail_to_new_user_with_celery.delay(subject,
                                                 {'login': phone, 'password': pwd, 'organization': organization_name,
                                                  'name': name},
                                                 CommonConstants.DEFAULT_FROM_EMAIL,
-                                                email)
+                                                email, 'new_user_invite_mail_form.html')
         user = create_user(phone=phone, password=pwd, name=name, email=email)
 
     return user.employee_profile
