@@ -207,4 +207,4 @@ GitHub.sublime-settings
 !.vscode/extensions.json
 .history
 
-firebase_admin_config.json
+.firebase_admin_config

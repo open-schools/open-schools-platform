@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 frame = sys._getframe()
 
-FIREBASE_ADMIN_CONFIG = os.path.join(os.path.dirname(frame.f_back.f_code.co_filename), 'firebase_admin_config.json')
+FIREBASE_ADMIN_CONFIG = os.path.join(os.path.dirname(frame.f_back.f_code.co_filename), '.firebase_admin_config')
 
 if not os.path.exists(FIREBASE_ADMIN_CONFIG):
     raise FileNotFoundError("Create firebase_key file")
