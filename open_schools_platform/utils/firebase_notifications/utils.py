@@ -1,7 +1,7 @@
 from firebase_admin import messaging
 from firebase_admin.exceptions import FirebaseError
 
-from open_schools_platform.utils.firebase_notifications.settings import app
+from config.settings.push_notifications import app
 from open_schools_platform.user_management.users.models import User
 
 
