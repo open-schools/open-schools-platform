@@ -11,6 +11,7 @@ def convert_config_to_secret(config):
 
     return s
 
+
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent.absolute()
 
 frame = sys._getframe()
