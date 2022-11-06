@@ -1,18 +1,20 @@
 from django.db import models
 from typing import Any, Dict, Optional, Tuple, Iterable, Type
 
+from safedelete.managers import SafeDeleteAllManager, SafeDeleteDeletedManager, SafeDeleteManager
+from safedelete.queryset import SafeDeleteQueryset
+
 
 def is_safedelete_cls(cls): ...
-# type: ignore[name-defined]
 
 
 def is_safedelete(related): ...
 
 
 class SafeDeleteModel(models.Model):
-    objects: Any
-    all_objects: Any
-    deleted_objects: Any
+    objects: Type[SafeDeleteManager]  # type: ignore[assignment]
+    all_objects: SafeDeleteAllManager
+    deleted_objects: SafeDeleteDeletedManager
 
     class Meta:
         abstract: bool

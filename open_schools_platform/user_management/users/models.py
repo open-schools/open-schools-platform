@@ -6,7 +6,7 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     AbstractBaseUser
 )
-from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
+from phonenumber_field.modelfields import PhoneNumberField
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 
@@ -16,7 +16,7 @@ from open_schools_platform.common.models import BaseModel, BaseManager
 # With some modifications
 
 
-class UserManager(BUM):
+class UserManager(BaseManager, BUM):
     def create_user(self, phone, name="", is_active=True, is_admin=False, password=None):
         if not phone:
             raise ValueError('Users must have a phone number')
@@ -87,7 +87,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = UserManager()  # type: ignore[assignment] #TODO:
+    objects = UserManager()  # type: ignore[assignment] #TODO
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name']
