@@ -103,6 +103,25 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
+class FirebaseNotificationTokenCreationManager(models.Manager):
+    def create_token(self, user: User, token: str = None):
+        firebase_token = self.model(
+            user=user,
+            token=token
+        )
+        firebase_token.full_clean()
+        firebase_token.save(using=self.db)
+        return firebase_token
+
+
+class FirebaseNotificationToken(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='firebase_token')
+    token = models.CharField(max_length=200, null=True, blank=True)
+
+    objects = FirebaseNotificationTokenCreationManager()
+
+
 class CreationToken(BaseModel):
     key = models.UUIDField(
         default=uuid.uuid4,
