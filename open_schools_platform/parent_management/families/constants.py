@@ -3,6 +3,4 @@ class FamilyConstants:
 
     @staticmethod
     def get_invite_parent_message(family):
-        INVITE_PARENT_BODY = "{family} пригласила вас к себе!"
-
-        return INVITE_PARENT_BODY.format(family=family)
+        return "{family} пригласила вас к себе!".format(family=family)

@@ -1,9 +1,14 @@
+import requests
 from django.contrib.auth import authenticate
 from django.db import transaction
+from firebase_admin import messaging
+from firebase_admin.exceptions import FirebaseError
 from rest_framework import serializers
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
+from config.settings.push_notifications import app
+from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
@@ -117,7 +122,7 @@ def set_new_password_for_user(user: User, password: str) -> User:
     return user
 
 
-def update_firebase_token_entity(*, token: FirebaseNotificationToken, data: dict) -> FirebaseNotificationToken:
+def update_fcm_notification_token_entity(*, token: FirebaseNotificationToken, data: dict) -> FirebaseNotificationToken:
     non_side_effect_fields = ['token']
     filtered_data = filter_dict_from_none_values(data)
     token, has_updated = model_update(
@@ -126,3 +131,38 @@ def update_firebase_token_entity(*, token: FirebaseNotificationToken, data: dict
         data=filtered_data
     )
     return token
+
+
+def notify_user(user: User, title: str, body: str, data: dict = None) -> int:
+
+    """
+    notify_user returns numeric values:
+        0 - User has no firebase registration token
+        1 - Error occurred while sending push notification
+        2 - notification was sent successfully
+    """
+
+    if user.firebase_token.token is None:
+        return 0
+    message = messaging.Message(
+        android=messaging.AndroidConfig(
+            notification=messaging.AndroidNotification(title=title, body=body)),
+        data=data,
+        token=user.firebase_token.token,
+    )
+    try:
+        messaging.send(message, app=app)
+    except FirebaseError or ValueError:
+        return 1
+    return 2
+
+
+def is_fcm_notification_token_valid(token: str, ):
+    url = CommonConstants.FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN.format(token=token)
+    headers = {
+        'Authorization': f'key={CommonConstants.FCM_SERVER_KEY}'
+    }
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        return False
+    return True

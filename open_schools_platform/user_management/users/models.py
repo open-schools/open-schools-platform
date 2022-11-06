@@ -8,10 +8,8 @@ from django.contrib.auth.models import (
 )
 from django.db.models import Manager
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
-from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.models import BaseModel
-from open_schools_platform.utils.firebase_notifications.validators import is_firebase_token_valid
 
 
 # Taken from here:
@@ -122,15 +120,6 @@ class FirebaseNotificationToken(BaseModel):
     token = models.CharField(max_length=200, null=True, blank=True)
 
     objects = FirebaseNotificationTokenCreationManager()
-
-    def save(self, *args, **kwargs):
-        if self.token is None:
-            super(FirebaseNotificationToken, self).save(*args, **kwargs)
-            return
-        result = is_firebase_token_valid(token=self.token)
-        if result is False:
-            raise NotAcceptable('firebase token is invalid')
-        super(FirebaseNotificationToken, self).save(*args, **kwargs)
 
 
 class CreationToken(BaseModel):

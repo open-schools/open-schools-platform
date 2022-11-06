@@ -102,5 +102,5 @@ class PasswordResetSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6, max_length=40, required=True)
 
 
-class FirebaseTokenSerializer(serializers.Serializer):
+class FCMNotificationToken(serializers.Serializer):
     token = serializers.CharField(required=True)

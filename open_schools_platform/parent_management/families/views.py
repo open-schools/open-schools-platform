@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.parent_management.families.constants import FamilyConstants
-from open_schools_platform.utils.firebase_notifications.utils import notify_user
+from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
