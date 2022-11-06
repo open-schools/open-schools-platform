@@ -1,5 +1,7 @@
 from django.contrib import admin
-from typing import Any
+from typing import Any, Sequence, Union, Callable, Type
+
+from django.contrib.admin import SimpleListFilter
 
 text_type = str
 
@@ -18,8 +20,8 @@ class SafeDeleteAdminFilter(admin.SimpleListFilter):
 
 class SafeDeleteAdmin(admin.ModelAdmin):
     undelete_selected_confirmation_template: str
-    list_display: Any
-    list_filter: Any
+    list_display: Sequence[Union[str, Callable[[Any], Any]]]
+    list_filter: Sequence[Union[str, Type[SimpleListFilter]]]
     actions: Any
 
     class Meta:

@@ -16,7 +16,7 @@ class StudentProfileExceptionsTests(TestCase):
         self.client = APIClient()
         self.student_profile_url = reverse("api:students-management:students:create-student-profile")
         self.student_profile_edit_url = lambda pk: \
-            reverse("api:students-management:students:edit-student-profile", args=[pk])
+            reverse("api:students-management:students:student-profile", args=[pk])
         self.student_join_circle_query_url = reverse("api:students-management:students:auto-student-join-circle-query")
 
     def test_family_does_not_exist(self):

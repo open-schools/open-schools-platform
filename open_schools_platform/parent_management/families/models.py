@@ -2,14 +2,13 @@ import uuid
 
 import safedelete.models
 from django.db import models
-from safedelete.managers import SafeDeleteManager
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.students.models import StudentProfile
 
 
-class FamilyManager(SafeDeleteManager):
+class FamilyManager(BaseManager):
     def create_family(self, name: str):
         family = self.model(
             name=name

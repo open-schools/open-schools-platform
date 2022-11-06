@@ -12,12 +12,12 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class CircleDeleteApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.edit_employee_url = lambda pk: reverse("api:organization-management:employees:edit-employee", args=[pk])
+        self.edit_employee_url = lambda pk: reverse("api:organization-management:employees:employee", args=[pk])
 
     def test_successfully_delete_employee(self):
         user = create_logged_in_user(self)
         employee = create_test_employee(user=user, organization=create_test_organization())
         response = self.client.delete(self.edit_employee_url(pk=str(employee.id)))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_employees()))
         self.assertEqual(1, len(get_deleted_employees()))

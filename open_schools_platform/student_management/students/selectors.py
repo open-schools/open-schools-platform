@@ -20,10 +20,10 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
     return student_profile
 
 
-def get_student_profiles(*, filters=None) -> QuerySet:
+def get_student_profiles(*, filters=None, force_visibility=None) -> QuerySet:
     filters = filters or {}
 
-    qs = StudentProfile.objects.all()
+    qs = StudentProfile.objects.all(force_visibility=force_visibility)
     student_profiles = StudentProfileFilter(filters, qs).qs
 
     return student_profiles
@@ -43,10 +43,10 @@ def get_student(*, filters=None, user: User = None) -> Student:
 
 
 @selector_wrapper
-def get_students(*, filters=None) -> QuerySet:
+def get_students(*, filters=None, force_visibility=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Student.objects.all()
+    qs = Student.objects.all(force_visibility=force_visibility)
     students = StudentFilter(filters, qs).qs
 
     return students

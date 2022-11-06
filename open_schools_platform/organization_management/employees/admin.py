@@ -1,6 +1,5 @@
 from django.contrib import admin
-from open_schools_platform.common.admin import InputFilter
-from open_schools_platform.common.models import DeleteAdmin
+from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from django.utils.translation import gettext_lazy as _
 
@@ -44,14 +43,12 @@ class PositionFilter(InputFilter):
             return get_employees(filters={"position": position})
 
 
-class EmployeeAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ("position",  # type: ignore[assignment]
-                                               "employee_profile", "organization", "id")
+@admin_wrapper
+class EmployeeAdmin(BaseAdmin):
+    list_display = ("position", "employee_profile", "organization", "id")
     search_fields = ("name",)
-    list_filter = DeleteAdmin.list_filter + (OrganizationFilter, EmployeeProfileFilter, PositionFilter)
+    list_filter = (OrganizationFilter, EmployeeProfileFilter, PositionFilter)
 
-
-DeleteAdmin.init_model(EmployeeAdmin)
 
 admin.site.register(Employee, EmployeeAdmin)
 admin.site.register(EmployeeProfile, EmployeeProfileAdmin)

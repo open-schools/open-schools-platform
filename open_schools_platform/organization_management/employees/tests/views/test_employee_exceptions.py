@@ -13,7 +13,7 @@ class EmployeeExceptions(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.edit_employee_url = lambda pk: \
-            reverse("api:organization-management:employees:edit-employee", args=[pk])
+            reverse("api:organization-management:employees:employee", args=[pk])
 
     def test_update_employee_does_not_exist(self):
         create_logged_in_user(instance=self)

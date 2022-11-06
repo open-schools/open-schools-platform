@@ -3,13 +3,12 @@ import uuid
 from typing import Any
 
 import safedelete.models
-from safedelete.managers import SafeDeleteManager
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from django.db import models
 
 
-class OrganizationManager(SafeDeleteManager):
+class OrganizationManager(BaseManager):
     def create(self, *args: Any, **kwargs: Any):
         organization = self.model(
             *args,

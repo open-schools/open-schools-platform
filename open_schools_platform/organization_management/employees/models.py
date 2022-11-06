@@ -4,14 +4,13 @@ import uuid
 
 import safedelete.models
 from django.db import models
-from safedelete.managers import SafeDeleteManager
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
 
-class EmployeeManager(SafeDeleteManager):
+class EmployeeManager(BaseManager):
     def create(self, *args: Any, **kwargs: Any):
         employee = self.model(
             *args,
@@ -24,7 +23,7 @@ class EmployeeManager(SafeDeleteManager):
         return employee
 
 
-class EmployeeProfileManager(SafeDeleteManager):
+class EmployeeProfileManager(BaseManager):
     def create(self, *args: Any, **kwargs: Any):
         employee_profile = self.model(
             *args,

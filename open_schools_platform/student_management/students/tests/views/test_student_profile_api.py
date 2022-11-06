@@ -13,7 +13,7 @@ class StudentProfileUpdateTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.student_profile_edit_url = lambda pk: \
-            reverse("api:students-management:students:edit-student-profile", args=[pk])
+            reverse("api:students-management:students:student-profile", args=[pk])
 
     def test_successful_student_profile_update(self):
         user = create_logged_in_user(instance=self)
@@ -66,6 +66,6 @@ class StudentProfileUpdateTests(TestCase):
     def test_successful_student_profile_delete(self):
         user = create_logged_in_user(self)
         response = self.client.delete(self.student_profile_edit_url(user.student_profile.id))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_student_profiles()))
         self.assertEqual(1, len(get_deleted_student_profiles()))

@@ -6,10 +6,9 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     AbstractBaseUser
 )
-from django.db.models import Manager
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 
 
 # Taken from here:
@@ -55,7 +54,7 @@ class UserManager(BUM):
         return user
 
 
-class CreationTokenManager(Manager):
+class CreationTokenManager(BaseManager):
     def create_token(self, phone, session):
         if not phone:
             raise ValueError('Users must have a phone')
@@ -88,7 +87,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = UserManager()  # type: ignore[assignment]
+    objects = UserManager()  # type: ignore[assignment] #TODO:
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name']
@@ -118,7 +117,7 @@ class CreationToken(BaseModel):
     session = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
 
-    objects = CreationTokenManager()  # type: ignore[assignment]
+    objects = CreationTokenManager()
 
     def __str__(self):
         return self.key.__str__()

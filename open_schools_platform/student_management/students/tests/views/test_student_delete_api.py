@@ -17,13 +17,13 @@ class StudentExceptionsTests(TestCase):
     def test_successful_student_delete_by_employee(self):
         student = create_test_student_with_user_in_organization(self.user)
         response = self.client.delete(self.delete_student_url(student.id))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_students()))
         self.assertEqual(1, len(get_deleted_students()))
 
     def test_successful_student_delete_by_parent(self):
         student = create_test_student_with_user_in_parental_status(self.user)
         response = self.client.delete(self.delete_student_url(student.id))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_students()))
         self.assertEqual(1, len(get_deleted_students()))

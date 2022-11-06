@@ -17,6 +17,6 @@ class CircleDeleteApiTests(TestCase):
         user = create_logged_in_user(self)
         circle = create_test_circle_with_user_in_org(user)
         response = self.client.delete(self.circle_url(pk=str(circle.id)))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_circles()))
         self.assertEqual(1, len(get_deleted_circles()))

@@ -21,10 +21,10 @@ def get_employee(*, filters=None, user: User = None) -> Employee:
 
 
 @selector_wrapper
-def get_employees(*, filters=None) -> QuerySet:
+def get_employees(*, filters=None, force_visibility=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Employee.objects.all()
+    qs = Employee.objects.all(force_visibility=force_visibility)
     employees = EmployeeFilter(filters, qs).qs
 
     return employees

@@ -5,15 +5,14 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
 from phonenumber_field.phonenumber import PhoneNumber
-from safedelete.managers import SafeDeleteManager
 
-from open_schools_platform.common.models import BaseModel
-from open_schools_platform.photo_management.photos.models import Photo  # type: ignore[name-defined,misc]
-from open_schools_platform.user_management.users.models import User
+from open_schools_platform.common.models import BaseModel, BaseManager
+from open_schools_platform.photo_management.photos.models import Photo
+from open_schools_platform.user_management.users.models import User  # type: ignore[name-defined,misc]
 from open_schools_platform.organization_management.circles.models import Circle
 
 
-class StudentProfileManager(SafeDeleteManager):
+class StudentProfileManager(BaseManager):
     def create_student_profile(self, name: str, age: int = 0, phone: PhoneNumber = None,
                                user: User = None, photo: uuid.UUID = None):
         student_profile = self.model(
@@ -48,7 +47,7 @@ class StudentProfile(BaseModel):
         return self.name.__str__()
 
 
-class StudentManager(SafeDeleteManager):
+class StudentManager(BaseManager):
     def create_student(self, name: str, circle: Circle = None, student_profile: StudentProfile = None):
         student = self.model(
             name=name,

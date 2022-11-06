@@ -28,7 +28,7 @@ def create_token(phone: str, session: str) -> CreationToken:
 
 def create_user(phone: str, password: str, name: str, is_active: bool = True,
                 is_admin: bool = False, email: str = '') -> User:
-    user = User.objects.create_user(  # type: ignore[assignment,has-type]
+    user = User.objects.create_user(  # type: ignore[assignment,has-type] #TODO
         phone=phone,
         password=password,
         name=name,

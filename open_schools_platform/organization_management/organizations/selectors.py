@@ -22,10 +22,10 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
 
 
 @selector_wrapper
-def get_organizations(*, filters=None) -> QuerySet:
+def get_organizations(*, filters=None, force_visibility=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Organization.objects.all()
+    qs = Organization.objects.all(force_visibility=force_visibility)
     organizations = OrganizationFilter(filters, qs).qs
 
     return organizations

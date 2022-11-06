@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.models import User
 
 @rules.predicate
 def has_circle_in_his_organizations(user: User, circle: Circle):
-    return not circle or (user and circle.organization in get_organizations_by_user(user))
+    return circle.organization in get_organizations_by_user(user)
 
 
 rules.add_perm("circles.circle_access", has_circle_in_his_organizations)

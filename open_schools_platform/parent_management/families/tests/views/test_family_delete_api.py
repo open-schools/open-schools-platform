@@ -16,6 +16,6 @@ class FamilyDeleteApiTests(TestCase):
         user = create_logged_in_user(self)
         family = create_test_family(1, user.parent_profile)
         response = self.client.delete(self.delete_family_url(pk=str(family.pk)))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
         self.assertEqual(0, len(get_families()))
         self.assertEqual(1, len(get_deleted_families()))

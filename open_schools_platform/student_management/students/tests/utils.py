@@ -1,18 +1,19 @@
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle_with_user_in_org
 from open_schools_platform.parent_management.families.services import create_family, add_student_profile_to_family
-from open_schools_platform.student_management.students.models import StudentProfile, Student
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.selectors import get_student_profiles, get_students
 from open_schools_platform.student_management.students.services import create_student, create_student_profile
 from open_schools_platform.user_management.users.models import User
 
 
 def get_deleted_student_profiles():
-    student_profiles = StudentProfile.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    student_profiles = get_student_profiles(filters={'not_deleted': False}, force_visibility=True)
     return student_profiles
 
 
 def get_deleted_students():
-    students = Student.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    students = get_students(filters={'not_deleted': False}, force_visibility=True)
     return students
 
 

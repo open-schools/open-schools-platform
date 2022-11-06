@@ -69,7 +69,7 @@ class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
 
-class StudentProfileEditApi(ApiAuthMixin, APIView):
+class StudentProfileUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -99,15 +99,17 @@ class StudentProfileEditApi(ApiAuthMixin, APIView):
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data, []))
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=200)
 
+
+class StudentProfileDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student-profile.",
-        responses={200: "Success deletion", 404: "There is no such student-profile"}
+        responses={204: None, 404: "There is no such student-profile"}
     )
     def delete(self, request, pk):
         student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
         student_profile.delete()
-        return Response("Success deletion", status=200)
+        return Response(status=204)
 
 
 class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
@@ -239,9 +241,9 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student.",
-        responses={200: "Success deletion", 404: "There is no such student"}
+        responses={204: None, 404: "There is no such student"}
     )
     def delete(self, request, pk):
         student = get_student(filters={'id': pk}, empty_exception=True, user=request.user)
         student.delete()
-        return Response("Success deletion", status=200)
+        return Response(status=204)

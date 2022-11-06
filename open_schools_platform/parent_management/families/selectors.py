@@ -21,10 +21,10 @@ def get_family(*, filters=None, user: User = None) -> Family:
 
 
 @selector_wrapper
-def get_families(*, filters=None) -> QuerySet:
+def get_families(*, filters=None, force_visibility=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Family.objects.all()
+    qs = Family.objects.all(force_visibility=force_visibility)
     family = FamilyFilter(filters, qs).qs
 
     return family

@@ -1,6 +1,5 @@
 from django.contrib import admin
-from open_schools_platform.common.admin import InputFilter
-from open_schools_platform.common.models import DeleteAdmin
+from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.organization_management.organizations.models import Organization
 from django.utils.translation import gettext_lazy as _
 
@@ -18,12 +17,11 @@ class INNFilter(InputFilter):
             return get_organizations(filters={"inn": inn})
 
 
-class OrganizationAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ("inn", "id")  # type: ignore[assignment]
+@admin_wrapper
+class OrganizationAdmin(BaseAdmin):
+    list_display = ("inn", "id")
     search_fields = ("name",)
-    list_filter = DeleteAdmin.list_filter + (INNFilter,)
+    list_filter = (INNFilter,)
 
-
-DeleteAdmin.init_model(OrganizationAdmin)
 
 admin.site.register(Organization, OrganizationAdmin)

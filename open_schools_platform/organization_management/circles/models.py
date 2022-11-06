@@ -5,13 +5,12 @@ import safedelete.models
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models
-from safedelete.managers import SafeDeleteManager
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.organization_management.organizations.models import Organization
 
 
-class CircleManager(SafeDeleteManager):
+class CircleManager(BaseManager):
     def create_circle(self, *args: Any, **kwargs: Any):
         circle = self.model(
             *args,

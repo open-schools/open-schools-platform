@@ -1,5 +1,5 @@
 from django.contrib.gis.measure import D
-from django_filters import CharFilter
+from django_filters import CharFilter, BooleanFilter
 
 from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
@@ -16,6 +16,7 @@ class CircleFilter(BaseFilterSet):
     organization_name = CharFilter(field_name="organization__name", lookup_expr="icontains")
     user_location = CharFilter(method=circle_radius_filter)
     name = CharFilter(field_name="name", lookup_expr="icontains")
+    not_deleted = BooleanFilter(field_name="deleted", lookup_expr="isnull")
 
     class Meta:
         model = Circle

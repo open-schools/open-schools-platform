@@ -91,9 +91,9 @@ class FamilyDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
         operation_description="Delete family.",
-        responses={200: "Success deletion", 404: "There is no such family"}
+        responses={204: None, 404: "There is no such family"}
     )
     def delete(self, request, pk):
         family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)
         family.delete()
-        return Response("Success deletion", status=200)
+        return Response(status=204)

@@ -3,6 +3,7 @@ from typing import Any
 from django.contrib.gis.geos import Point
 
 from open_schools_platform.organization_management.circles.models import Circle
+from open_schools_platform.organization_management.circles.selectors import get_circles
 from open_schools_platform.organization_management.circles.services import create_circle, add_student_to_circle
 from open_schools_platform.organization_management.employees.tests.utils import create_test_employee
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -43,5 +44,5 @@ def create_student_and_add_to_the_circle(i, circle):
 
 
 def get_deleted_circles():
-    circles = Circle.objects.all(force_visibility=True).filter(deleted__isnull=False)
+    circles = get_circles(force_visibility=True, filters={'not_deleted': False})
     return circles

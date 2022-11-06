@@ -1,7 +1,6 @@
 from django.contrib import admin
 
-from open_schools_platform.common.admin import InputFilter
-from open_schools_platform.common.models import DeleteAdmin
+from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from django.utils.translation import gettext_lazy as _
 
@@ -30,22 +29,17 @@ class StudentProfileFilter(InputFilter):
             return get_students(filters={'student_profile_name': student_profile})
 
 
-class StudentProfileAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ('age', 'user', 'id', 'phone')  # type: ignore[assignment]
+@admin_wrapper
+class StudentProfileAdmin(BaseAdmin):
+    list_display = ('age', 'user', 'id', 'phone')
     search_fields = ('name', 'age', "user__phone", 'phone')
-    list_filter = DeleteAdmin.list_filter
 
 
-DeleteAdmin.init_model(StudentProfileAdmin)
-
-
-class StudentAdmin(DeleteAdmin):
-    list_display = DeleteAdmin.list_display + ('student_profile', 'circle', 'id')  # type: ignore[assignment]
+@admin_wrapper
+class StudentAdmin(BaseAdmin):
+    list_display = ('student_profile', 'circle', 'id')
     search_fields = ("name",)
-    list_filter = DeleteAdmin.list_filter + (CircleFilter, StudentProfileFilter, StudentProfileFilter)
-
-
-DeleteAdmin.init_model(StudentAdmin)
+    list_filter = (CircleFilter, StudentProfileFilter, StudentProfileFilter)
 
 
 admin.site.register(StudentProfile, StudentProfileAdmin)

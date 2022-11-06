@@ -10,10 +10,10 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_wrapper
-def get_circles(*, filters=None) -> QuerySet:
+def get_circles(*, force_visibility=None, filters=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Circle.objects.all()
+    qs = Circle.objects.all(force_visibility=force_visibility)
     circles = CircleFilter(filters, qs).qs
     if 'user_location' in filters:
         circles = circles.order_by(GeometryDistance("location", convert_str_to_point(filters['user_location'])))
@@ -27,7 +27,7 @@ def get_circle(*, filters=None, user: User = None) -> Circle:
     qs = Circle.objects.all()
     circle = CircleFilter(filters, qs).qs.first()
 
-    if user and not user.has_perm("circles.circle_access", circle):
+    if user and circle and not user.has_perm("circles.circle_access", circle):
         raise PermissionDenied
 
     return circle

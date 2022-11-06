@@ -217,9 +217,9 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Delete organization.",
-        responses={200: "Success deletion", 404: "There is no such organization"}
+        responses={204: None, 404: "There is no such organization"}
     )
     def delete(self, request, pk):
         organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
         organization.delete()
-        return Response("Success deletion", status=200)
+        return Response(status=204)
