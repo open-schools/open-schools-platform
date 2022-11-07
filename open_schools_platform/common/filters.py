@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import List, Type, Optional
+from typing import List, Type
 
 import django_filters
 from django.db.models import Q, QuerySet

@@ -1,5 +1,5 @@
 from django.contrib.gis.measure import D
-from django_filters import CharFilter, BooleanFilter
+from django_filters import CharFilter
 
 from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
