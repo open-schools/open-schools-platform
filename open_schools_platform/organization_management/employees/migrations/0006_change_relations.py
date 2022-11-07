@@ -3,6 +3,7 @@
 
 from django.conf import settings
 from django.db import migrations
+from safedelete.config import DELETED_VISIBLE
 
 
 def change_relations(apps, schema_editor):
@@ -11,7 +12,7 @@ def change_relations(apps, schema_editor):
     EmployeeProfile = apps.get_model("employees", "employeeprofile")
 
     db_alias = schema_editor.connection.alias
-    qs = User.objects.using(db_alias).all()
+    qs = User.objects.using(db_alias).all(force_visibility=DELETED_VISIBLE)
     for i in qs:
         try:
             employee_profile = EmployeeProfile.objects.using(db_alias).get(user=i)
@@ -26,7 +27,7 @@ def revert_relations(apps, schema_editor):
     Employee = apps.get_model("employees", "employee")
 
     db_alias = schema_editor.connection.alias
-    qs = Employee.objects.using(db_alias).all()
+    qs = Employee.objects.using(db_alias).all(force_visibility=DELETED_VISIBLE)
     for i in qs:
         i.user = i.employee_profile.user
         i.employee_profile = None
