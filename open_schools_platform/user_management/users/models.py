@@ -91,7 +91,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     history = HistoricalRecords()
 
-    last_login_ip_address = models.GenericIPAddressField(null=True)
+    last_login_ip_address = models.GenericIPAddressField(null=True, blank=True)
 
     objects = UserManager()
 
