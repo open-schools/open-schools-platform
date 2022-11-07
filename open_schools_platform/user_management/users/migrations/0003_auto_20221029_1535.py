@@ -6,37 +6,27 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('students', '0004_alter_studentprofile_photo'),
+        ('users', '0002_firebasenotificationtoken'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='student',
+            model_name='creationtoken',
             name='deleted',
             field=models.DateTimeField(db_index=True, editable=False, null=True),
         ),
         migrations.AddField(
-            model_name='student',
+            model_name='creationtoken',
             name='deleted_by_cascade',
             field=models.BooleanField(default=False, editable=False),
         ),
         migrations.AddField(
-            model_name='studentprofile',
+            model_name='user',
             name='deleted',
             field=models.DateTimeField(db_index=True, editable=False, null=True),
         ),
         migrations.AddField(
-            model_name='studentprofile',
-            name='deleted_by_cascade',
-            field=models.BooleanField(default=False, editable=False),
-        ),
-        migrations.AddField(
-            model_name='studentprofilecircleadditional',
-            name='deleted',
-            field=models.DateTimeField(db_index=True, editable=False, null=True),
-        ),
-        migrations.AddField(
-            model_name='studentprofilecircleadditional',
+            model_name='user',
             name='deleted_by_cascade',
             field=models.BooleanField(default=False, editable=False),
         ),

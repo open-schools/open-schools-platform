@@ -6,27 +6,37 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0001_initial'),
+        ('students', '0005_alter_studentprofile_age'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='creationtoken',
+            model_name='student',
             name='deleted',
             field=models.DateTimeField(db_index=True, editable=False, null=True),
         ),
         migrations.AddField(
-            model_name='creationtoken',
+            model_name='student',
             name='deleted_by_cascade',
             field=models.BooleanField(default=False, editable=False),
         ),
         migrations.AddField(
-            model_name='user',
+            model_name='studentprofile',
             name='deleted',
             field=models.DateTimeField(db_index=True, editable=False, null=True),
         ),
         migrations.AddField(
-            model_name='user',
+            model_name='studentprofile',
+            name='deleted_by_cascade',
+            field=models.BooleanField(default=False, editable=False),
+        ),
+        migrations.AddField(
+            model_name='studentprofilecircleadditional',
+            name='deleted',
+            field=models.DateTimeField(db_index=True, editable=False, null=True),
+        ),
+        migrations.AddField(
+            model_name='studentprofilecircleadditional',
             name='deleted_by_cascade',
             field=models.BooleanField(default=False, editable=False),
         ),
