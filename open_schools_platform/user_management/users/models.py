@@ -102,7 +102,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
-class FirebaseNotificationTokenCreationManager(models.Manager):
+class FirebaseNotificationTokenCreationManager(BaseManager):
     def create_token(self, user: User, token: str = None):
         firebase_token = self.model(
             user=user,

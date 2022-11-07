@@ -3,12 +3,12 @@ import uuid
 import safedelete.models
 from django.core.validators import MinValueValidator
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
+from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
 from phonenumber_field.phonenumber import PhoneNumber
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.photo_management.photos.models import Photo
-from open_schools_platform.user_management.users.models import User
+from open_schools_platform.user_management.users.models import User  # type: ignore[misc,name-defined]
 from open_schools_platform.organization_management.circles.models import Circle
 
 
