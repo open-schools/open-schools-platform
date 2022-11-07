@@ -91,6 +91,8 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     history = HistoricalRecords()
 
+    last_login_ip_address = models.GenericIPAddressField(null=True)
+
     objects = UserManager()
 
     USERNAME_FIELD = 'phone'

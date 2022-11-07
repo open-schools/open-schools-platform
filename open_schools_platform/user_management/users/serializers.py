@@ -63,8 +63,8 @@ class HistoryRecordsField(serializers.ListField):
     child = serializers.DictField()
 
     def to_representation(self, data):
-        return super().to_representation(data.values("history_id", "history_date", "phone",
-                                                     "name", "history_type", "history_user_id"))
+        return super().to_representation(data.values("history_id", "history_user_id", "history_date", "history_type",
+                                                     "phone", "name", "last_login", "last_login_ip_address"))
 
 
 class UserSerializer(serializers.ModelSerializer):
