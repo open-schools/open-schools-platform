@@ -7,9 +7,9 @@ def selector_wrapper(selector):
     def wrapper(*, filters=None, user: User = None, empty_exception: bool = False,
                 empty_message: str = "There is no such object.", **kwargs):
         if user:
-            qs = selector(filters=filters, user=user, **kwargs)
+            qs = selector(filters=filters, user=user)
         else:
-            qs = selector(filters=filters, **kwargs)
+            qs = selector(filters=filters)
 
         if empty_exception and not qs:
             raise NotFound(empty_message)
