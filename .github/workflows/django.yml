@@ -16,6 +16,9 @@ jobs:
         echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
         echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
         echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
+        echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
+        touch .firebase_admin_config
+        echo ${{ secrets.FIREBASE_ADMIN_CONFIG }} >> .firebase_admin_config
     - name: Build docker
       run: docker-compose build
     - name: Type check
@@ -51,6 +54,9 @@ jobs:
         echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
         echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
         echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
+        echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
+        touch .firebase_admin_config
+        echo ${{ secrets.FIREBASE_ADMIN_CONFIG }} >> .firebase_admin_config
     - name: Fetch history, because Heroku deploy fails otherwise.
       uses: actions/setup-python@v2
       with:

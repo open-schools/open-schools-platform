@@ -1,11 +1,13 @@
 import uuid
 from typing import Dict
 
+from django.core.exceptions import BadRequest
+from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
 
 from open_schools_platform.common.services import model_update, BaseQueryHandler
-from open_schools_platform.common.utils import filter_dict_from_none_values
+from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
@@ -14,10 +16,11 @@ from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update, create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
+from open_schools_platform.student_management.students.selectors import get_student_profile
 from open_schools_platform.user_management.users.models import User
 
 
-def create_student_profile(name: str, age: int, user: User = None,
+def create_student_profile(name: str, age: int = None, user: User = None,
                            phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
     if not photo:
         photo = Photo.objects.create_photo()
@@ -89,6 +92,23 @@ def create_studentprofileicrcle_additional(text: str = None, parent_phone: Phone
         student_phone=student_phone,
     )
     return additional
+
+
+def get_student_profile_by_family_or_create_new(student_phone: PhoneNumber, student_name: str,
+                                                families: QuerySet[Family]):
+    student_profile = get_student_profile(
+        filters={"phone": student_phone,
+                 "families": form_ids_string_from_queryset(families)}
+    )
+
+    if not student_profile:
+        student_profile = create_student_profile(name=student_name, phone=student_phone)
+        first_family = families.first()
+        if first_family is None:
+            raise BadRequest
+        add_student_profile_to_family(family=first_family, student_profile=student_profile)
+
+    return student_profile
 
 
 class StudentProfileQueryHandler(BaseQueryHandler):

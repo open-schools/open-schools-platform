@@ -2,14 +2,13 @@ from typing import List
 
 import django_filters
 from django.db.models import CharField
-from django_filters import BooleanFilter
 
-from open_schools_platform.common.filters import BaseFilterSet
+from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 
 
 class StudentProfileFilter(BaseFilterSet):
-    not_deleted = BooleanFilter(field_name="deleted", lookup_expr="isnull")
+    families = UUIDInFilter(field_name="families", lookup_expr="in")
 
     class Meta:
         model = StudentProfile
@@ -17,8 +16,6 @@ class StudentProfileFilter(BaseFilterSet):
 
 
 class StudentFilter(BaseFilterSet):
-    not_deleted = BooleanFilter(field_name="deleted", lookup_expr="isnull")
-
     @staticmethod
     def get_swagger_filters(prefix: str = "", include: List[str] = None):
         if include is None:

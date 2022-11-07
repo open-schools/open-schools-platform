@@ -1,6 +1,6 @@
 from django.conf import settings
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, NotAcceptable
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,8 +16,9 @@ from open_schools_platform.user_management.authentication.services import auth_l
 
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer, UserProfilesSerializer
-from ..users.services import set_new_password_for_user, user_update
+from ..users.serializers import UserSerializer, UserProfilesSerializer, FCMNotificationToken
+from ..users.services import set_new_password_for_user, user_update, update_fcm_notification_token_entity, \
+    is_fcm_notification_token_valid
 from ...common.views import swagger_dict_response
 
 
@@ -98,3 +99,20 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
 
         set_new_password_for_user(user=user, password=new_password)
         return Response({"detail": "Password was successfully updated"}, status=200)
+
+
+class AddFCMNotificationTokenApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Add FCM notification token to request user.",
+        tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
+        request_body=FCMNotificationToken,
+        responses={200: "FCM notification token was successfully added.",
+                   406: "FCM notification token is invalid."},
+    )
+    def patch(self, request):
+        token_serializer = FCMNotificationToken(data=request.data)
+        token_serializer.is_valid(raise_exception=True)
+        if is_fcm_notification_token_valid(token=token_serializer.validated_data["token"]) is False:
+            raise NotAcceptable("FCM notification token is invalid.")
+        update_fcm_notification_token_entity(token=request.user.firebase_token, data=token_serializer.validated_data)
+        return Response({"detail": "FCM notification token was successfully added."}, status=200)
