@@ -1,10 +1,22 @@
-from typing import List, Type
+from enum import Enum
+from typing import List, Type, Optional
 
 import django_filters
-from django.db.models import Q
+from django.db.models import Q, QuerySet
 from django_filters import CharFilter, BaseInFilter, UUIDFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
+from safedelete.config import DELETED_ONLY_VISIBLE, DELETED_VISIBLE
+
+
+class SoftCondition(Enum):
+    """
+    This Enum determines which objects will be filtered regarding their soft deleting state
+    * it is used in SafeDeleteManager.all
+    """
+    NOT_DELETED = None
+    DELETED_ONLY = DELETED_ONLY_VISIBLE
+    ALL = DELETED_VISIBLE
 
 
 class CustomDjangoFilterBackend(DjangoFilterBackend):
@@ -46,6 +58,7 @@ class BaseFilterSet(django_filters.FilterSet):
 
     1. Opportunity to use special field OR_SEARCH_FIELD that will search
     for all char fields and combine results
+        * Your filter should contain this attribute: 'search = CharFilter(field_name="search", method="OR")'
         * This feature works only if your input dictionary has  pair [OR_SEARCH_FIELD: some_value]
     2. Will raise ValidationError when filter get not valid data
     3. Will order result by "-created_at" field
@@ -53,13 +66,18 @@ class BaseFilterSet(django_filters.FilterSet):
         otherwise you can redefine ORDER_FIELD
         * To disable this feature write ORDER_FIELD=None
         * Note: symbol '-' is the reverse trigger
+    4. SoftCondition by default is NOT_DELETED
     """
     OR_SEARCH_FIELD = "search"
     ORDER_FIELD = "-created_at"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, data: dict = None, queryset: QuerySet = None, **kwargs):
         self.search_value = None
-        super().__init__(*args, **kwargs)
+        self.force_visibility = SoftCondition.NOT_DELETED
+        if data is not None:
+            self.force_visibility = data.get('DELETED', SoftCondition.NOT_DELETED)
+
+        super().__init__(data, queryset, **kwargs)
         if not self.is_valid():
             raise ValidationError(self.errors)
 
@@ -72,7 +90,8 @@ class BaseFilterSet(django_filters.FilterSet):
 
     @property
     def qs(self):
-        base_queryset = super().qs
+        base_queryset = super().qs.all(force_visibility=self.force_visibility.value)
+
         if self.ORDER_FIELD:
             base_queryset = base_queryset.order_by(self.ORDER_FIELD)
 
@@ -122,4 +141,5 @@ def filter_by_object_ids(object_name: str):
     def func(queryset, name, value):
         values = value.split(',')
         return queryset.filter(**{"{object_name}__in".format(object_name=object_name): values})
+
     return func

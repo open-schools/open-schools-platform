@@ -10,10 +10,10 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_wrapper
-def get_circles(*, force_visibility=None, filters=None) -> QuerySet:
+def get_circles(*, filters=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Circle.objects.all(force_visibility=force_visibility)
+    qs = Circle.objects.get_queryset()
     circles = CircleFilter(filters, qs).qs
     if 'user_location' in filters:
         circles = circles.order_by(GeometryDistance("location", convert_str_to_point(filters['user_location'])))

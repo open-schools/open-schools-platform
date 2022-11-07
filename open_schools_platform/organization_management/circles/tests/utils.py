@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.gis.geos import Point
 
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.selectors import get_circles
 from open_schools_platform.organization_management.circles.services import create_circle, add_student_to_circle
@@ -44,5 +45,5 @@ def create_student_and_add_to_the_circle(i, circle):
 
 
 def get_deleted_circles():
-    circles = get_circles(force_visibility=True, filters={'not_deleted': False})
+    circles = get_circles(filters={'DELETED': SoftCondition.DELETED_ONLY})
     return circles

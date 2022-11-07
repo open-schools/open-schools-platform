@@ -1,3 +1,4 @@
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle_with_user_in_org
 from open_schools_platform.parent_management.families.services import create_family, add_student_profile_to_family
@@ -8,12 +9,12 @@ from open_schools_platform.user_management.users.models import User
 
 
 def get_deleted_student_profiles():
-    student_profiles = get_student_profiles(filters={'not_deleted': False}, force_visibility=True)
+    student_profiles = get_student_profiles(filters={'DELETED': SoftCondition.DELETED_ONLY})
     return student_profiles
 
 
 def get_deleted_students():
-    students = get_students(filters={'not_deleted': False}, force_visibility=True)
+    students = get_students(filters={'DELETED': SoftCondition.DELETED_ONLY})
     return students
 
 

@@ -1,5 +1,6 @@
 from typing import List
 
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.selectors import get_organizations
@@ -55,5 +56,5 @@ def create_test_organization(inn: str = "1111111111", name: str = "test_org"):
 
 
 def get_deleted_organizations():
-    organizations = get_organizations(filters={'not_deleted': False}, force_visibility=True)
+    organizations = get_organizations(filters={'DELETED': SoftCondition.DELETED_ONLY})
     return organizations
