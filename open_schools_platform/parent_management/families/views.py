@@ -90,3 +90,15 @@ class InviteParentApi(ApiAuthMixin, APIView):
                     body=FamilyConstants.get_invite_parent_message(family),
                     data={"query": str(query.id), "type": "invite-parent-query"})
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
+
+
+class FamilyDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+        operation_description="Delete family.",
+        responses={204: "Successful deletion", 404: "There is no such family"}
+    )
+    def delete(self, request, pk):
+        family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)
+        family.delete()
+        return Response(status=204)

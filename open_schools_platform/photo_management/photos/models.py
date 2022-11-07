@@ -1,10 +1,10 @@
 import uuid
 from django.db import models
 from config.settings.object_storage import ClientDocsStorage
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 
 
-class PhotoManager(models.Manager):
+class PhotoManager(BaseManager):
     def create_photo(self, image: bytes = None):
         photo = self.model(
             image=image

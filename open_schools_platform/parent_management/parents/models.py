@@ -2,11 +2,11 @@ import uuid
 
 from django.db import models
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.user_management.users.models import User
 
 
-class ParentProfileManager(models.Manager):
+class ParentProfileManager(BaseManager):
     def create_parent_profile(self, user: User, name: str):
         parent_profile = self.model(
             name=name,
