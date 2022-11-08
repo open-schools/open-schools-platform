@@ -40,3 +40,15 @@ def create_student_and_add_to_the_circle(i, circle):
     add_student_to_circle(student=student, circle=circle)
 
     return student
+
+
+def create_data_circle_invite_student(name: str, student_phone: str, parent_phone: str):
+    data = {
+        "body": {
+            "name": name
+        },
+        "student_phone": student_phone,
+        "parent_phone": parent_phone,
+        "email": "user@example.com"
+    }
+    return data
