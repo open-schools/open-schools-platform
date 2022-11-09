@@ -20,12 +20,11 @@ class PhotoApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"photo": PhotoSerializer()}), },
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
-
     def patch(self, request, pk):
         photo_update_serializer = PhotoUpdateSerializer(data=request.data)
         photo_update_serializer.is_valid(raise_exception=True)
 
-        photo = get_photo(filters={"id": str(pk)},  empty_exception=True,
+        photo = get_photo(filters={"id": str(pk)}, empty_exception=True,
                           user=request.user, empty_message="This photo does not exist")
         update_photo(photo=photo, data=photo_update_serializer.validated_data)
 
