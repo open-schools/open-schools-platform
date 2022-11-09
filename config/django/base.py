@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
     'phonenumber_field',
     'rules.apps.AutodiscoverRulesConfig',
     'storages',
+    'safedelete'
 ]
 
 INSTALLED_APPS = [
@@ -181,7 +182,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
-       'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
@@ -206,5 +207,5 @@ from config.settings.jwt import *  # noqa
 from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
-from config.settings.geo_django import * # noqa
-from config.settings.object_storage import * # noqa
+from config.settings.geo_django import *  # noqa
+from config.settings.object_storage import *  # noqa

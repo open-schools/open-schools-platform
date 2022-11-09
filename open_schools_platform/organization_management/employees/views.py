@@ -91,3 +91,15 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         get_employee_profile(filters={"id": str(employee.employee_profile.id)}, user=request.user)
         update_employee(employee=employee, data=employee_update_serializer.validated_data)
         return Response({"employee": EmployeeSerializer(employee).data}, status=200)
+
+
+class EmployeeDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
+        operation_description="Delete employee.",
+        responses={204: "Successful deletion", 404: "There is no such employee"}
+    )
+    def delete(self, request, pk):
+        employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)
+        employee.delete()
+        return Response(status=204)

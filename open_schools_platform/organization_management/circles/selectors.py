@@ -27,7 +27,7 @@ def get_circle(*, filters=None, user: User = None) -> Circle:
     qs = Circle.objects.all()
     circle = CircleFilter(filters, qs).qs.first()
 
-    if user and not user.has_perm("circles.circle_access", circle):
+    if user and circle and not user.has_perm("circles.circle_access", circle):
         raise PermissionDenied
 
     return circle

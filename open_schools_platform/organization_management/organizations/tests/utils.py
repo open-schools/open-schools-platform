@@ -1,7 +1,9 @@
 from typing import List
 
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.organization_management.employees.services import create_employee
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.selectors import get_organizations
 from open_schools_platform.organization_management.organizations.services import create_organization
 from open_schools_platform.user_management.users.models import User
 
@@ -51,3 +53,8 @@ def create_test_organizations():
 
 def create_test_organization(inn: str = "1111111111", name: str = "test_org"):
     return create_organization(inn=inn, name=name)
+
+
+def get_deleted_organizations():
+    organizations = get_organizations(filters={'DELETED': SoftCondition.DELETED_ONLY})
+    return organizations
