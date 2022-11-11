@@ -1,13 +1,13 @@
 from django.utils.deprecation import MiddlewareMixin
 
-from open_schools_platform.user_management.users.models import User
+from open_schools_platform.user_management.users.selectors import get_user
 
 
 class LastLoginIPMiddleware(MiddlewareMixin):
     def __call__(self, request):
         response = self.get_response(request)
         if request.user.is_authenticated:
-            user = User.objects.get(id=request.user.id)
+            user = get_user(filters={'id': request.user.id})
             current_ip = LastLoginIPMiddleware._get_ip(request=request)
             if current_ip != user.last_login_ip_address:
                 user.last_login_ip_address = current_ip
