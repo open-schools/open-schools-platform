@@ -30,3 +30,4 @@ geos==0.2.3
 djangorestframework-gis==1.0
 numpy==1.23.2
 firebase_admin==4.3.0
+django_simple_history==3.2.0
