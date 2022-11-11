@@ -3,12 +3,12 @@ import uuid
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-
+#  type: ignore[name-defined]
 from open_schools_platform.common.models import BaseModel
 
 
 class Query(BaseModel):
-    class Status(models.TextChoices):
+    class Status(models.TextChoices):  # type: ignore[misc,name-defined]
         ACCEPTED = "ACCEPTED"
         SENT = "SENT"
         IN_PROGRESS = "IN_PROGRESS"

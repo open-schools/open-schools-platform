@@ -211,3 +211,15 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
         students = get_students(filters=filters)
 
         return Response({"results": StudentSerializer(students, many=True).data}, status=200)
+
+
+class OrganizationDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Delete organization.",
+        responses={204: "Successful deletion", 404: "There is no such organization"}
+    )
+    def delete(self, request, pk):
+        organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
+        organization.delete()
+        return Response(status=204)

@@ -11,8 +11,10 @@ class CommonConstants:
                                   r"/v3/relyingparty/sendVerificationCode?key="
     FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3" \
                                 r"/relyingparty/verifyPhoneNumber?key="
+    FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN = r"https://iid.googleapis.com/iid/info/{token}"
     SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
     SMS_API_KEY = os.environ.get("SMS_API_KEY")
+    FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY")
     SCHOOLS_AI_URL = os.environ.get("SCHOOLS_AI_URL")
     GEOPY_GEOCODE_TIMEOUT = 10
 

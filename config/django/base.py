@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
     'phonenumber_field',
     'rules.apps.AutodiscoverRulesConfig',
     'storages',
+    'safedelete'
 ]
 
 INSTALLED_APPS = [

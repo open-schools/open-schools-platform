@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.parent_management.families.constants import FamilyConstants
+from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
@@ -84,4 +86,19 @@ class InviteParentApi(ApiAuthMixin, APIView):
             raise NotAcceptable("Parent is already in this family")
         query = create_query(sender_model_name="family", sender_id=family.id,
                              recipient_model_name="parentprofile", recipient_id=parent.id)
+        notify_user(user=parent.user, title=FamilyConstants.INVITE_PARENT_TITLE,
+                    body=FamilyConstants.get_invite_parent_message(family),
+                    data={"query": str(query.id), "type": "invite-parent-query"})
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
+
+
+class FamilyDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+        operation_description="Delete family.",
+        responses={204: "Successful deletion", 404: "There is no such family"}
+    )
+    def delete(self, request, pk):
+        family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)
+        family.delete()
+        return Response(status=204)

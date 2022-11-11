@@ -14,4 +14,5 @@ def selector_wrapper(selector):
         if empty_exception and not qs:
             raise NotFound(empty_message)
         return qs
+
     return wrapper
