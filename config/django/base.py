@@ -82,6 +82,14 @@ INSTALLED_APPS = [
     *LOCAL_APPS,
 ]
 
+LOCAL_MIDDLEWARES = [
+    'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware'
+]
+
+THIRD_PARTY_MIDDLEWARES = [
+    'simple_history.middleware.HistoryRequestMiddleware',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -92,6 +100,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    *THIRD_PARTY_MIDDLEWARES,
+    *LOCAL_MIDDLEWARES
 ]
 
 ROOT_URLCONF = 'config.urls'
