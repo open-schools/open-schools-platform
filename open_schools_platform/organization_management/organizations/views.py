@@ -143,11 +143,7 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
             empty_exception=True,
             empty_message="There is no such organization"
         )
-        queries = get_queries(
-            filters={'sender_id': organization.id},
-            empty_exception=True,
-            empty_message="There are no queries with such sender"
-        )
+        queries = get_queries(filters={'sender_id': str(organization.id)})
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
