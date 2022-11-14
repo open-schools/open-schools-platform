@@ -34,5 +34,13 @@ def parent_profile_or_family_access(user: User, query: Query):
     return False
 
 
+@rules.predicate
+def circle_or_family_access(user: User, query: Query):
+    if type(query.sender) == Circle and type(query.recipient) == Family:
+        return user.has_perm("families.family_access", query.recipient) or \
+               user.has_perm("circles.circle_access", query.sender)
+    return False
+
+
 rules.add_perm("queries.query_access", employee_profile_or_organization_access | student_profile_or_circle_access |
-               parent_profile_or_family_access)
+               parent_profile_or_family_access | circle_or_family_access)
