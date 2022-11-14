@@ -3,7 +3,7 @@ from leaflet.admin import LeafletGeoAdmin
 
 from .models import Circle
 from .selectors import get_circles
-from ...common.admin import InputFilter
+from ...common.admin import InputFilter, BaseAdmin, admin_wrapper
 from django.utils.translation import gettext_lazy as _
 
 
@@ -28,8 +28,9 @@ class AddressFilter(InputFilter):
             return get_circles(filters={"address": address})
 
 
-class CircleAdmin(LeafletGeoAdmin):
-    list_display = ("name", "organization", "address", "capacity", "location", "id")
+@admin_wrapper
+class CircleAdmin(BaseAdmin, LeafletGeoAdmin):
+    list_display = ("organization", "address", "capacity", "location", "id")
     search_fields = ("name",)
     list_filter = (OrganizationFilter, AddressFilter)
 

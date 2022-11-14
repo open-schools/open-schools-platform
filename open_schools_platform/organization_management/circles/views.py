@@ -116,6 +116,18 @@ class CirclesStudentsListApi(ApiAuthMixin, APIView):
         return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
 
 
+class CircleDeleteApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        operation_description="Delete circle.",
+        responses={204: "Successful deletion", 404: "There is no such circle"}
+    )
+    def delete(self, request, pk):
+        circle = get_circle(filters={'id': str(pk)}, empty_exception=True, user=request.user)
+        circle.delete()
+        return Response(status=204)
+
+
 class InviteStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],

@@ -6,10 +6,10 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     AbstractBaseUser
 )
-from django.db.models import Manager
-from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
+from phonenumber_field.modelfields import PhoneNumberField
+from simple_history.models import HistoricalRecords
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 
 
 # Taken from here:
@@ -17,7 +17,7 @@ from open_schools_platform.common.models import BaseModel
 # With some modifications
 
 
-class UserManager(BUM):
+class UserManager(BaseManager, BUM):
     def create_user(self, phone, name="", is_active=True, is_admin=False, password=None):
         if not phone:
             raise ValueError('Users must have a phone number')
@@ -55,7 +55,7 @@ class UserManager(BUM):
         return user
 
 
-class CreationTokenManager(Manager):
+class CreationTokenManager(BaseManager):
     def create_token(self, phone, session):
         if not phone:
             raise ValueError('Users must have a phone')
@@ -88,7 +88,11 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = UserManager()
+    history = HistoricalRecords()
+
+    last_login_ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    objects = UserManager()  # type: ignore[assignment] #TODO
 
     USERNAME_FIELD = 'phone'
     REQUIRED_FIELDS = ['name']
@@ -103,7 +107,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
         return self.is_admin
 
 
-class FirebaseNotificationTokenCreationManager(models.Manager):
+class FirebaseNotificationTokenCreationManager(BaseManager):
     def create_token(self, user: User, token: str = None):
         firebase_token = self.model(
             user=user,

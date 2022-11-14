@@ -8,10 +8,10 @@ from open_schools_platform.user_management.users.tests.utils import create_logge
 class CirclesStudentsListApiTests(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.get_circle_url = lambda pk: reverse("api:organization-management:circles:get-circle", args=[pk])
+        self.circle_url = lambda pk: reverse("api:organization-management:circles:circle", args=[pk])
 
     def test_successfully_get_circle(self):
         create_logged_in_user(instance=self)
         circle = create_test_circle()
-        response = self.client.get(self.get_circle_url(pk=str(circle.id)))
+        response = self.client.get(self.circle_url(pk=str(circle.id)))
         self.assertEqual(200, response.status_code)

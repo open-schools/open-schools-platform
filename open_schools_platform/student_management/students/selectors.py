@@ -20,6 +20,15 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
     return student_profile
 
 
+def get_student_profiles(*, filters=None) -> QuerySet:
+    filters = filters or {}
+
+    qs = StudentProfile.objects.all()
+    student_profiles = StudentProfileFilter(filters, qs).qs
+
+    return student_profiles
+
+
 @selector_wrapper
 def get_student(*, filters=None, user: User = None) -> Student:
     filters = filters or {}
@@ -27,7 +36,7 @@ def get_student(*, filters=None, user: User = None) -> Student:
     qs = Student.objects.all()
     student = StudentFilter(filters, qs).qs.first()
 
-    if user and student and not user.has_perm('students.student_profile_access', student.student_profile):
+    if user and student and not user.has_perm('students.student_access', student):
         raise PermissionDenied
 
     return student

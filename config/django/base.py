@@ -66,6 +66,7 @@ THIRD_PARTY_APPS = [
     'phonenumber_field',
     'rules.apps.AutodiscoverRulesConfig',
     'storages',
+    'safedelete'
 ]
 
 INSTALLED_APPS = [
@@ -81,6 +82,14 @@ INSTALLED_APPS = [
     *LOCAL_APPS,
 ]
 
+LOCAL_MIDDLEWARES = [
+    'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware'
+]
+
+THIRD_PARTY_MIDDLEWARES = [
+    'simple_history.middleware.HistoryRequestMiddleware',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -91,6 +100,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    *THIRD_PARTY_MIDDLEWARES,
+    *LOCAL_MIDDLEWARES
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -181,7 +192,7 @@ REST_FRAMEWORK = {
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
-       'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
 }
@@ -206,5 +217,5 @@ from config.settings.jwt import *  # noqa
 from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
-from config.settings.geo_django import * # noqa
-from config.settings.object_storage import * # noqa
+from config.settings.geo_django import *  # noqa
+from config.settings.object_storage import *  # noqa
