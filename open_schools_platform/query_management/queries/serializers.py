@@ -3,7 +3,9 @@ import uuid
 from rest_framework import serializers
 
 from open_schools_platform.organization_management.circles.serializers import QueryCircleRecipientSerializer
-from open_schools_platform.organization_management.employees.serializers import QueryEmployeeBodySerializer
+from open_schools_platform.organization_management.employees.serializers import QueryEmployeeBodySerializer, \
+    EmployeeProfileSerializer
+from open_schools_platform.organization_management.organizations.serializers import OrganizationSerializer
 from open_schools_platform.parent_management.families.serializers import FamilySerializer
 from open_schools_platform.parent_management.parents.serializers import QueryParentProfileRecipientSerializer
 from open_schools_platform.query_management.queries.models import Query
@@ -25,6 +27,8 @@ class QuerySerializer(serializers.ModelSerializer):
 
 
 class EmployeeProfileQuerySerializer(QuerySerializer):
+    sender = OrganizationSerializer()
+    recipient = EmployeeProfileSerializer()
     body = QueryEmployeeBodySerializer()
 
 
