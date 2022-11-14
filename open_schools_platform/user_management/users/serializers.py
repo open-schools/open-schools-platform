@@ -59,14 +59,6 @@ class UserRegisterSerializer(serializers.Serializer):
         pass
 
 
-class HistoryRecordsField(serializers.ListField):
-    child = serializers.DictField()
-
-    def to_representation(self, data):
-        return super().to_representation(data.values("history_id", "history_user_id", "history_date", "history_type",
-                                                     "phone", "name", "last_login", "last_login_ip_address"))
-
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -77,11 +69,10 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     parent_profile = ParentProfileSerializer()
     employee_profile = EmployeeProfileSerializer()
     student_profile = StudentProfileSerializer()
-    history = HistoryRecordsField(read_only=True)
 
     class Meta:
         model = User
-        fields = ("id", "phone", "name", "parent_profile", "employee_profile", "student_profile", "history")
+        fields = ("id", "phone", "name", "parent_profile", "employee_profile", "student_profile")
 
 
 class PasswordUserSerializer(serializers.ModelSerializer):
