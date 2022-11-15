@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.history_management.organization.serializers import OrganizationHistorySerializer
+from open_schools_platform.history_management.organization_history.serializers import OrganizationHistorySerializer
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from open_schools_platform.common.views import swagger_dict_response
 
