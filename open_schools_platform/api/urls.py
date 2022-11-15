@@ -41,6 +41,8 @@ history_management_urls = [
          include(('open_schools_platform.history_management.organization_history.urls', 'organization_history'))),
     path('employee/',
          include(('open_schools_platform.history_management.employee_history.urls', 'employee_history'))),
+    path('circle/',
+         include(('open_schools_platform.history_management.circle_history.urls', 'circle_history'))),
 ]
 
 urlpatterns = [

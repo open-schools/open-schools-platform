@@ -52,6 +52,7 @@ LOCAL_APPS = [
     'open_schools_platform.history_management.user_history.apps.UserConfig',
     'open_schools_platform.history_management.organization_history.apps.OrganizationConfig',
     'open_schools_platform.history_management.employee_history.apps.EmployeeHistoryConfig',
+    'open_schools_platform.history_management.circle_history.apps.CircleHistoryConfig',
 ]
 
 THIRD_PARTY_APPS = [
