@@ -19,6 +19,6 @@ class GettingEmployeesTests(TestCase):
         data = {
             "name": "new_name"
         }
-        response = self.client.put(self.update_employee_url(pk=str(employee.id)), data)
+        response = self.client.patch(self.update_employee_url(pk=str(employee.id)), data)
         self.assertEqual(200, response.status_code)
         self.assertEqual("new_name", get_employee(filters={"id": str(employee.id)}).name)

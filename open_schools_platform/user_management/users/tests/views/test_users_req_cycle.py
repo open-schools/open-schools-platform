@@ -29,7 +29,7 @@ class UserRequestsCycleTests(TestCase):
             "otp": "123456"
         }
         token = create_valid_test_token()
-        response = self.client.put(self.token_verification_url(token.key), data)
+        response = self.client.patch(self.token_verification_url(token.key), data)
         self.assertEqual(200, response.status_code)
 
     def test_user_creation(self):

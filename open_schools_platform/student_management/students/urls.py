@@ -9,7 +9,7 @@ urlpatterns = [
     path('<uuid:pk>', StudentDeleteApi.as_view(), name='delete-student'),
     path('student-profile', StudentProfileApi.as_view(), name='create-student-profile'),
     path('student-profile/<uuid:pk>',
-         MultipleViewManager({'put': StudentProfileUpdateApi, 'delete': StudentProfileDeleteApi}).as_view(),
+         MultipleViewManager({'patch': StudentProfileUpdateApi, 'delete': StudentProfileDeleteApi}).as_view(),
          name='student-profile'),
     path('student-profile-generate/student-join-cricle-query', AutoStudentJoinCircleQueryApi.as_view(),
          name='auto-student-join-circle-query'),

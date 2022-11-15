@@ -69,7 +69,7 @@ class UserMeApi(ApiAuthMixin, APIView):
         request_body=UserUpdateSerializer,
         responses={200: swagger_dict_response({"user": UserSerializer()})}
     )
-    def put(self, request):
+    def patch(self, request):
         user = request.user
         user_serializer = UserUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
@@ -84,7 +84,7 @@ class UpdatePasswordApi(ApiAuthMixin, APIView):
         request_body=PasswordUpdateSerializer,
         responses={200: "Password was successfully updated."},
     )
-    def put(self, request):
+    def patch(self, request):
         user_serializer = PasswordUpdateSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user = request.user
