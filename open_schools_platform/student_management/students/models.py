@@ -8,7 +8,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
-from open_schools_platform.photo_management.photos.models import Photo
+from open_schools_platform.photo_management.photos.models import Photo  # type: ignore
 from open_schools_platform.user_management.users.models import User  # type: ignore[misc,name-defined]
 from open_schools_platform.organization_management.circles.models import Circle
 
