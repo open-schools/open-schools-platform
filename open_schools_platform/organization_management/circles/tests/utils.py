@@ -48,7 +48,6 @@ def create_student_and_add_to_the_circle(i, circle):
     return student
 
 
-
 def create_data_circle_invite_student(name: str, student_phone: str, parent_phone: str):
     data = {
         "body": {
@@ -69,7 +68,7 @@ def create_test_query_circle_invite_student(circle: Circle, family: Family, stud
                          additional_model_name="studentprofile", additional_id=student_profile.id)
     return query
 
+
 def get_deleted_circles():
     circles = get_circles(filters={'DELETED': SoftCondition.DELETED_ONLY})
     return circles
-  
