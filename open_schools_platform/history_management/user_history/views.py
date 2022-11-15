@@ -4,7 +4,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import swagger_dict_response
-from open_schools_platform.history_management.user.serializers import UserHistorySerializer
+from open_schools_platform.history_management.user_history.serializers import UserHistorySerializer
 from open_schools_platform.user_management.users.selectors import get_user
 
 
