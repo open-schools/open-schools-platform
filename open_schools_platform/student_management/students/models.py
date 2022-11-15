@@ -5,6 +5,7 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
 from phonenumber_field.phonenumber import PhoneNumber
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.photo_management.photos.models import Photo
@@ -66,6 +67,8 @@ class Student(BaseModel):
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)
     student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students",
                                         blank=True)
+    history = HistoricalRecords()
+
     objects = StudentManager()
 
     def __str__(self):

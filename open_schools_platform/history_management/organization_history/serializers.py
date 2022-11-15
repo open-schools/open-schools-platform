@@ -8,7 +8,7 @@ class HistoryRecordsField(serializers.ListField):
 
     def to_representation(self, data):
         return super().to_representation(data.values("history_id", "history_user_id", "history_date", "history_type",
-                                                     "name", "inn",))
+                                                     "id", "name", "inn",))
 
 
 class OrganizationHistorySerializer(serializers.ModelSerializer):

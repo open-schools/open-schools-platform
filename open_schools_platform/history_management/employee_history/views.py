@@ -16,7 +16,7 @@ class HistoryApi(APIView):
                    404: "There is no such employee"},
     )
     def get(self, request, pk):
-        organization = get_employee(filters={"id": pk},
-                                    empty_exception=True,
-                                    empty_message="There is no such employee")
-        return Response({"results": EmployeeHistorySerializer(organization).data}, status=200)
+        employee = get_employee(filters={"id": pk},
+                                empty_exception=True,
+                                empty_message="There is no such employee")
+        return Response({"results": EmployeeHistorySerializer(employee).data}, status=200)

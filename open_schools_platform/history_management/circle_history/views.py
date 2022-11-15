@@ -16,7 +16,7 @@ class HistoryApi(APIView):
                    404: "There is no such circle"},
     )
     def get(self, request, pk):
-        organization = get_circle(filters={"id": pk},
-                                  empty_exception=True,
-                                  empty_message="There is no such circle")
-        return Response({"results": CircleHistorySerializer(organization).data}, status=200)
+        circle = get_circle(filters={"id": pk},
+                            empty_exception=True,
+                            empty_message="There is no such circle")
+        return Response({"results": CircleHistorySerializer(circle).data}, status=200)

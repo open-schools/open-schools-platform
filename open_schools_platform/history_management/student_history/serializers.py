@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from open_schools_platform.user_management.users.models import User
+from open_schools_platform.student_management.students.models import Student
 
 
 class HistoryRecordsField(serializers.ListField):
@@ -8,12 +8,12 @@ class HistoryRecordsField(serializers.ListField):
 
     def to_representation(self, data):
         return super().to_representation(data.values("history_id", "history_user_id", "history_date", "history_type",
-                                                     "id", "phone", "name", "last_login", "last_login_ip_address"))
+                                                     "id", "name", "circle_id", "student_profile_id",))
 
 
-class UserHistorySerializer(serializers.ModelSerializer):
+class StudentHistorySerializer(serializers.ModelSerializer):
     history = HistoryRecordsField(read_only=True)
 
     class Meta:
-        model = User
+        model = Student
         fields = ("history",)
