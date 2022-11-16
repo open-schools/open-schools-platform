@@ -20,6 +20,7 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
     return student_profile
 
 
+@selector_wrapper
 def get_student_profiles(*, filters=None) -> QuerySet:
     filters = filters or {}
 

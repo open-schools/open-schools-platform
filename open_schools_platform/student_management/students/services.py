@@ -9,6 +9,7 @@ from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
 from open_schools_platform.organization_management.circles.models import Circle
+from open_schools_platform.student_management.students.exports import StudentExport
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
 from open_schools_platform.photo_management.photos.models import Photo
@@ -83,7 +84,7 @@ def update_student_join_circle_body(*, query: Query, data) -> Query:
 
 
 def create_studentprofileicrcle_additional(text: str = None, parent_phone: PhoneNumber = None,
-                                           parent_name: str = None, student_phone: PhoneNumber = None)\
+                                           parent_name: str = None, student_phone: PhoneNumber = None) \
         -> StudentProfileCircleAdditional:
     additional = StudentProfileCircleAdditional.objects.create(
         text=text,
@@ -179,3 +180,9 @@ def query_creation_logic(fields: Dict, circle: Circle,
 
     query.save()
     return query
+
+
+def export_students(students: QuerySet, export_format: str):
+    data = StudentExport().export(students)
+    file = data.export(export_format)
+    return file

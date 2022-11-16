@@ -29,9 +29,9 @@ def create_test_circle(organization: Organization = None, address: str = "addres
     return circle
 
 
-def create_test_circle_with_user_in_org(user: User) -> Circle:
+def create_test_circle_with_user_in_org(user: User, organization: Organization = None) -> Circle:
     employee = create_test_employee(user)
-    employee.organization = create_test_organization()
+    employee.organization = organization or create_test_organization()
     employee.save()
     circle = create_test_circle(employee.organization)
     return circle

@@ -1,3 +1,4 @@
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
@@ -6,7 +7,7 @@ from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 from .models import Circle
 
-from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
     CircleSerializer, CircleStudentInviteSerializer
@@ -23,8 +24,10 @@ from ...parent_management.parents.services import get_parent_profile_or_create_n
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
 from ...query_management.queries.services import create_query
+from ...student_management.students.selectors import get_students
 from ...student_management.students.serializers import StudentSerializer
-from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new
+from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
+    export_students
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -160,3 +163,18 @@ class InviteStudentApi(ApiAuthMixin, APIView):
 
         return Response({"query": QueryStatusSerializer(query).data},
                         status=201)
+
+
+class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
+    filename = 'circle_students.xlsx'
+
+    @swagger_auto_schema(
+        operation_description="Export students from this circle",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
+    )
+    def get(self, request, pk):
+        get_circle(filters={'id': str(pk)}, user=request.user)
+        students = get_students(filters={'circle': str(pk)})
+        file = export_students(students, export_format='xlsx')
+        return Response(file, status=200)
