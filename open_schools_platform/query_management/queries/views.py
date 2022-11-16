@@ -17,7 +17,7 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
         responses={200: swagger_dict_response({"query": QueryStatusSerializer()})},
         tags=[SwaggerTags.QUERY_MANAGEMENT_QUERIES],
     )
-    def put(self, request):
+    def patch(self, request):
         query_status_serializer = QueryStatusSerializer(data=request.data)
         query_status_serializer.is_valid(raise_exception=True)
         query = get_query(

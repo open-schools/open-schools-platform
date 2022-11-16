@@ -20,7 +20,7 @@ class EmployeeExceptions(TestCase):
         data = {
             "name": "new_name"
         }
-        response = self.client.put(self.edit_employee_url(pk="99999999-9999-9999-9999-999999999999"), data)
+        response = self.client.patch(self.edit_employee_url(pk="99999999-9999-9999-9999-999999999999"), data)
         self.assertEqual(404, response.status_code)
 
     def test_delete_employee_does_not_exist(self):
