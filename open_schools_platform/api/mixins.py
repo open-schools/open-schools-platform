@@ -92,10 +92,7 @@ class XLSXMixin(object):
         response = super().finalize_response(
             request, response, *args, **kwargs
         )
-        if (
-                isinstance(response, Response)
-                and isinstance(response.data, bytes)
-        ):
+        if isinstance(response, Response) and isinstance(response.data, bytes):
             file = response.data
             response = HttpResponse(file,
                                     content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',

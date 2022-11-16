@@ -174,7 +174,8 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
     def get(self, request, pk):
-        get_circle(filters={'id': str(pk)}, user=request.user)
+        get_circle(filters={'id': str(pk)}, user=request.user, empty_exception=True,
+                   empty_message="This circle doesn't exist")
         students = get_students(filters={'circle': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)

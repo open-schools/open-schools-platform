@@ -232,7 +232,8 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
     def get(self, request, pk):
-        get_organization(filters={'id': str(pk)}, user=request.user)
+        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True,
+                         empty_message="This organization doesn't exist")
         students = get_students(filters={'circle__organization': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)
