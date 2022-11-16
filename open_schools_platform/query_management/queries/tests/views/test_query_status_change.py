@@ -23,7 +23,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.CANCELED)
 
@@ -35,7 +35,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.IN_PROGRESS
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.IN_PROGRESS)
 
@@ -47,7 +47,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.ACCEPTED)
         self.assertTrue(query.body.student_profile == query.sender)
@@ -67,7 +67,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.CANCELED)
 
@@ -78,7 +78,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.DECLINED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.DECLINED)
 
@@ -89,7 +89,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(200, response.status_code)
         self.assertTrue(get_query(filters={"id": str(query.id)}).status == Query.Status.ACCEPTED)
         self.assertTrue(query.recipient in query.sender.parent_profiles.all())

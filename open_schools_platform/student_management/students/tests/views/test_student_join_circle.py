@@ -51,7 +51,7 @@ class StudentJoinCirclesTests(TestCase):
                 "name": "new-test-name"
               }
         }
-        response = self.client.put(self.student_join_circle_query_update_url, data, format="json")
+        response = self.client.patch(self.student_join_circle_query_update_url, data, format="json")
         print(response.content)
         self.assertEqual(200, response.status_code)
         self.assertTrue(query.body.name == "new-test-name")

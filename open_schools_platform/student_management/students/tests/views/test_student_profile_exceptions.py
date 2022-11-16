@@ -40,8 +40,8 @@ class StudentProfileExceptionsTests(TestCase):
             "age": 15,
             "name": "test_student_profile"
         }
-        student_profile_update_response = self.client.put(self.student_profile_edit_url(student_profile.id),
-                                                          student_profile_update_data)
+        student_profile_update_response = self.client.patch(self.student_profile_edit_url(student_profile.id),
+                                                            student_profile_update_data)
         self.assertEqual(404, student_profile_update_response.status_code)
 
     def test_current_user_cannot_interact_with_student_profile(self):
@@ -63,17 +63,16 @@ class StudentProfileExceptionsTests(TestCase):
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_with_family_response = \
-            self.client.put(self.student_profile_edit_url(student_profile.id),
-                            student_profile_update_with_family_data)
+        student_profile_update_with_family_response = self.client.patch(
+            self.student_profile_edit_url(student_profile.id), student_profile_update_with_family_data)
         self.assertEqual(403, student_profile_update_with_family_response.status_code)
 
         student_profile_update_data = {
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_response = self.client.put(self.student_profile_edit_url(student_profile.id),
-                                                          student_profile_update_data)
+        student_profile_update_response = self.client.patch(self.student_profile_edit_url(student_profile.id),
+                                                            student_profile_update_data)
         self.assertEqual(403, student_profile_update_response.status_code)
 
     def test_student_profile_does_not_exist(self):
@@ -82,9 +81,8 @@ class StudentProfileExceptionsTests(TestCase):
             "age": 15,
             "name": "test_name"
         }
-        student_profile_update_response = self.client.put(self.student_profile_edit_url
-                                                          ("99999999-9999-9999-9999-999999999999"),
-                                                          student_profile_update_data)
+        student_profile_update_response = self.client.patch(
+            self.student_profile_edit_url("99999999-9999-9999-9999-999999999999"), student_profile_update_data)
         self.assertEqual(404, student_profile_update_response.status_code)
 
     def test_family_already_exists(self):

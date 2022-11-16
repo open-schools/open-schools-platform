@@ -107,7 +107,7 @@ class VerificationApi(APIView):
                    401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
-    def put(self, request, pk):
+    def patch(self, request, pk):
         otp_serializer = OtpSerializer(data=request.data)
         otp_serializer.is_valid(raise_exception=True)
 
