@@ -28,8 +28,6 @@ class Organization(BaseModel):
     name = models.CharField(max_length=255)
     inn = models.CharField(max_length=255, blank=True, default="")
 
-    history = HistoricalRecords()
-
     objects = OrganizationManager()
 
     def __str__(self):

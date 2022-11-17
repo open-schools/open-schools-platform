@@ -58,8 +58,6 @@ class Employee(BaseModel):
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255, blank=True, default="")
 
-    history = HistoricalRecords()
-
     objects = EmployeeManager()
 
     def __str__(self):

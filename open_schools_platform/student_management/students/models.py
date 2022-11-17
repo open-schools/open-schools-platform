@@ -67,7 +67,6 @@ class Student(BaseModel):
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)
     student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students",
                                         blank=True)
-    history = HistoricalRecords()
 
     objects = StudentManager()
 

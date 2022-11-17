@@ -33,7 +33,6 @@ class Circle(BaseModel):
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
     location = models.PointField(geography=True, default=Point(0.0, 0.0))
-    history = HistoricalRecords()
 
     @property
     def latitude(self):
