@@ -35,16 +35,7 @@ photos_management_urls = [
 ]
 
 history_management_urls = [
-    path('user/',
-         include(('open_schools_platform.history_management.user_history.urls', 'user_history'))),
-    path('organization/',
-         include(('open_schools_platform.history_management.organization_history.urls', 'organization_history'))),
-    path('employee/',
-         include(('open_schools_platform.history_management.employee_history.urls', 'employee_history'))),
-    path('circle/',
-         include(('open_schools_platform.history_management.circle_history.urls', 'circle_history'))),
-    path('student/',
-         include(('open_schools_platform.history_management.student_history.urls', 'student_history'))),
+    path('history/', include(('open_schools_platform.history_management.urls', 'history'))),
 ]
 
 urlpatterns = [

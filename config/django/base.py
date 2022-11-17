@@ -49,11 +49,7 @@ LOCAL_APPS = [
     'open_schools_platform.query_management.queries.apps.QueriesConfig',
     'open_schools_platform.organization_management.circles.apps.CirclesConfig',
     'open_schools_platform.photo_management.photos.apps.PhotosConfig',
-    'open_schools_platform.history_management.user_history.apps.UserConfig',
-    'open_schools_platform.history_management.organization_history.apps.OrganizationConfig',
-    'open_schools_platform.history_management.employee_history.apps.EmployeeHistoryConfig',
-    'open_schools_platform.history_management.circle_history.apps.CircleHistoryConfig',
-    'open_schools_platform.history_management.student_history.apps.StudentHistoryConfig'
+    'open_schools_platform.history_management.apps.HistoryConfig',
 ]
 
 THIRD_PARTY_APPS = [
