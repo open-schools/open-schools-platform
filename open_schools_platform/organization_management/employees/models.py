@@ -4,7 +4,6 @@ import uuid
 
 import safedelete.models
 from django.db import models
-from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.organization_management.organizations.models import Organization

@@ -3,7 +3,6 @@ import uuid
 from typing import Any
 
 import safedelete.models
-from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from django.db import models

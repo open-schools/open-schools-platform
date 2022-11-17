@@ -7,7 +7,12 @@ from open_schools_platform.common.views import swagger_dict_response
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from open_schools_platform.organization_management.employees.selectors import get_employee
-from .serializers import *
+from .serializers.user_serializer import UserHistorySerializer
+from .serializers.organization_serializer import OrganizationHistorySerializer
+from .serializers.employee_serializer import EmployeeHistorySerializer
+from .serializers.circle_serializer import CircleHistorySerializer
+from .serializers.student_serializer import StudentHistorySerializer
+
 from ..organization_management.circles.selectors import get_circle
 from ..student_management.students.selectors import get_student
 

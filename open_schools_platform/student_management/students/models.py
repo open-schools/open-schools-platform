@@ -5,7 +5,6 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
 from phonenumber_field.phonenumber import PhoneNumber
-from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.photo_management.photos.models import Photo  # type: ignore

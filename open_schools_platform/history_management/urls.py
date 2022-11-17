@@ -1,6 +1,7 @@
 from django.urls import path
 
-from open_schools_platform.history_management.views import *
+from open_schools_platform.history_management.views import UserHistoryApi, OrganizationHistoryApi, EmployeeHistoryApi,\
+    CircleHistoryApi, StudentHistoryApi
 
 urlpatterns = [
     path('user/<uuid:pk>', UserHistoryApi.as_view(), name='user_history'),

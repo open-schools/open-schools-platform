@@ -8,8 +8,8 @@ class HistoryRecordsField(serializers.ListField):
 
     def to_representation(self, data):
         return super().to_representation(data.values("history_id", "history_user_id", "history_date", "history_type",
-                                                     "id", "name", "employee_profile", "employee_profile", "organization_id",
-                                                     "organization", "position",))
+                                                     "id", "name", "employee_profile", "employee_profile",
+                                                     "organization_id", "organization", "position",))
 
 
 class EmployeeHistorySerializer(serializers.ModelSerializer):
