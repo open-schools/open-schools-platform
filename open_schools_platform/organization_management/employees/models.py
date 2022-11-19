@@ -2,7 +2,6 @@ from typing import Any
 
 import uuid
 
-import safedelete.models
 from django.db import models
 
 from open_schools_platform.common.models import BaseModel, BaseManager
@@ -48,7 +47,6 @@ class EmployeeProfile(BaseModel):
 
 
 class Employee(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees',
                                          null=True, default=None, blank=True, on_delete=models.CASCADE)

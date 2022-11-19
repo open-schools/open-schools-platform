@@ -1,6 +1,4 @@
 import uuid
-
-import safedelete.models
 from django.db import models
 
 from open_schools_platform.common.models import BaseModel, BaseManager
@@ -19,7 +17,6 @@ class FamilyManager(BaseManager):
 
 
 class Family(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     parent_profiles = models.ManyToManyField(ParentProfile, related_name="families")
     student_profiles = models.ManyToManyField(StudentProfile, related_name="families")
