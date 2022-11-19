@@ -12,11 +12,6 @@ class PhotoExceptionsTests(TestCase):
         self.client = APIClient()
         self.query_photo_update_url = lambda pk: reverse("api:photo-management:photos:create-photo", args=[pk])
 
-    def test_unauthorized(self):
-        photo = create_test_photo()
-        without_credentials_response = self.client.patch(self.query_photo_update_url(photo.id))
-        self.assertEqual(401, without_credentials_response.status_code)
-
     def test_update_photo_with_wrong_permissions(self):
         create_logged_in_user(self)
         photo = create_test_photo()
