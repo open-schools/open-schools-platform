@@ -6,6 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from open_schools_platform.organization_management.employees.selectors import get_employees
 
 
+@admin_wrapper(EmployeeProfile)
 class EmployeeProfileAdmin(admin.ModelAdmin):
     list_display = ("name", "user", "id")
 
@@ -43,12 +44,8 @@ class PositionFilter(InputFilter):
             return get_employees(filters={"position": position})
 
 
-@admin_wrapper
+@admin_wrapper(Employee)
 class EmployeeAdmin(BaseAdmin):
     list_display = ("position", "employee_profile", "organization", "id")
     search_fields = ("name",)
     list_filter = (OrganizationFilter, EmployeeProfileFilter, PositionFilter)
-
-
-admin.site.register(Employee, EmployeeAdmin)
-admin.site.register(EmployeeProfile, EmployeeProfileAdmin)

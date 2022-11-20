@@ -7,11 +7,12 @@ from safedelete.models import SafeDeleteModel
 
 
 class BaseManager(SafeDeleteManager):
-    pass
+    def update_or_create(self, defaults=None, **kwargs):
+        super().update_or_create(defaults=defaults, **kwargs)
 
 
 class BaseModel(RulesModelMixin, SafeDeleteModel, metaclass=RulesModelBase):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
+    _safedelete_policy = safedelete.config.NO_DELETE
     created_at = models.DateTimeField(db_index=True, default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

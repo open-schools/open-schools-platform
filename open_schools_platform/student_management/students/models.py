@@ -1,14 +1,15 @@
 import uuid
 
+import safedelete
 from django.core.validators import MinValueValidator
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField
-from phonenumber_field.phonenumber import PhoneNumber  # type: ignore[name-defined]
+from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
+from phonenumber_field.phonenumber import PhoneNumber
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.photo_management.photos.models import Photo
-from open_schools_platform.user_management.users.models import User
-from open_schools_platform.organization_management.circles.models import Circle  # type: ignore[misc,name-defined]
+from open_schools_platform.user_management.users.models import User  # type: ignore[misc,name-defined]
+from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(BaseManager):
@@ -27,6 +28,7 @@ class StudentProfileManager(BaseManager):
 
 
 class StudentProfile(BaseModel):
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
     name = models.CharField(max_length=200)
@@ -58,6 +60,7 @@ class StudentManager(BaseManager):
 
 
 class Student(BaseModel):
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)
