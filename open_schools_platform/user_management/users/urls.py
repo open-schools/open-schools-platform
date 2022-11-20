@@ -1,8 +1,7 @@
 from django.urls import path
 
 from .views import UserApi, CreationTokenApi, VerificationApi, CodeResendApi, RetrieveCreationTokenApi, \
-    UserResetPasswordApi
-from ..authentication.views import AddFCMNotificationTokenApi
+    UserResetPasswordApi, AddFCMNotificationTokenApi
 
 urlpatterns = [
     path('token', CreationTokenApi.as_view(), name='create-token'),
