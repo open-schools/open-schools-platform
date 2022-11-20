@@ -7,8 +7,7 @@ from safedelete.models import SafeDeleteModel
 
 
 class BaseManager(SafeDeleteManager):
-    def update_or_create(self, defaults=None, **kwargs):
-        super().update_or_create(defaults=defaults, **kwargs)
+    pass
 
 
 class BaseModel(RulesModelMixin, SafeDeleteModel, metaclass=RulesModelBase):

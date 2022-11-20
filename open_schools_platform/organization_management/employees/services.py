@@ -1,8 +1,12 @@
 from rest_framework.exceptions import NotAcceptable
+from safedelete import HARD_DELETE_NOCASCADE
+
 from open_schools_platform.common.constants import CommonConstants
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
+from open_schools_platform.organization_management.employees.selectors import get_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.tasks.tasks import send_mail_to_new_user_with_celery
@@ -12,9 +16,17 @@ from open_schools_platform.user_management.users.services import create_user, ge
 
 
 def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
+    employee_prof = user.employee_profile if user is not None else None
+    deleted_employee = get_employee(
+        filters={'DELETED': SoftCondition.DELETED_ONLY, 'employee_profile': employee_prof,
+                 'organization': organization})
+
+    if deleted_employee:
+        deleted_employee.delete(force_policy=HARD_DELETE_NOCASCADE)
+
     employee = Employee.objects.create(
         name=name,
-        employee_profile=user.employee_profile if user is not None else None,
+        employee_profile=employee_prof,
         organization=organization,
         position=position,
     )
