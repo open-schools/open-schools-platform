@@ -32,8 +32,8 @@ from open_schools_platform.query_management.queries.serializers import QueryStat
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
-from open_schools_platform.student_management.students.selectors import get_students
-from open_schools_platform.student_management.students.serializers import StudentSerializer
+from open_schools_platform.student_management.students.selectors import get_students, get_student
+from open_schools_platform.student_management.students.serializers import StudentSerializer, StudentGetSerializer
 from open_schools_platform.student_management.students.services import export_students
 
 
@@ -221,6 +221,21 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
         organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
         organization.delete()
         return Response(status=204)
+
+
+class GetStudentApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get student with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: swagger_dict_response({"student": StudentGetSerializer()}), 404: "There is no such student"}
+    )
+    def get(self, request, pk):
+        student = get_student(
+            filters={"id": str(pk)}, user=request.user,
+            empty_exception=True,
+            empty_message="There is no such student",
+        )
+        return Response({"student": StudentGetSerializer(student).data}, status=200)
 
 
 class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
