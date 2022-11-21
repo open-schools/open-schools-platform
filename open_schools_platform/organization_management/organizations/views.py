@@ -233,7 +233,7 @@ class GetStudentApi(ApiAuthMixin, APIView):
     )
     def get(self, request, pk):
         student = get_student(
-            filters={"id": str(pk)},
+            filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
             empty_message="There is no such student",
         )
