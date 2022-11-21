@@ -157,12 +157,17 @@ def notify_user(user: User, title: str, body: str, data: dict = None) -> int:
     return 2
 
 
-def is_fcm_notification_token_valid(token: str, ):
-    url = CommonConstants.FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN.format(token=token)
+def is_firebase_token_valid(token: str):
+    url = CommonConstants.FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN
     headers = {
-        'Authorization': f'key={CommonConstants.FCM_SERVER_KEY}'
+        'Authorization': f'key={CommonConstants.FCM_SERVER_KEY}',
+        'Content-Type': "application/json"
     }
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
+    payload = {
+        "registration_ids": [token],
+        "dry_run": True
+    }
+    response = requests.post(url=url, json=payload, headers=headers)
+    if {"error": "InvalidRegistration"} in response.json()["results"]:
         return False
     return True

@@ -23,7 +23,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.IN_PROGRESS
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_set_invalid_status(self):
@@ -33,7 +33,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": "invalid_status"
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(400, response.status_code)
 
     def test_user_set_not_canceled_status(self):
@@ -43,7 +43,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_user_can_no_longer_change_query(self):
@@ -54,7 +54,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_circle_set_canceled_status(self):
@@ -65,7 +65,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_circle_can_no_longer_change_query(self):
@@ -77,7 +77,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
 
@@ -93,7 +93,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": "invalid_status"
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(400, response.status_code)
 
     def test_family_set_not_canceled_status(self):
@@ -104,7 +104,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_parent_can_no_longer_change_query(self):
@@ -115,7 +115,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_parent_set_canceled_status(self):
@@ -125,7 +125,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)
 
     def test_family_can_no_longer_change_query(self):
@@ -137,5 +137,5 @@ class FamilyInviteParentQueryTests(TestCase):
             "id": query.id,
             "status": Query.Status.CANCELED
         }
-        response = self.client.put(self.query_status_change_url, data)
+        response = self.client.patch(self.query_status_change_url, data)
         self.assertEqual(406, response.status_code)

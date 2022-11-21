@@ -1,11 +1,12 @@
 from django_filters import UUIDFilter
+from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import swagger_dict_response
@@ -33,6 +34,7 @@ from open_schools_platform.student_management.students.filters import StudentFil
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.student_management.students.selectors import get_students, get_student
 from open_schools_platform.student_management.students.serializers import StudentSerializer, StudentGetSerializer
+from open_schools_platform.student_management.students.services import export_students
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
@@ -115,7 +117,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
-    def put(self, request):
+    def patch(self, request):
         query_update_serializer = OrganizationEmployeeInviteUpdateSerializer(data=request.data)
         query_update_serializer.is_valid(raise_exception=True)
         query = get_query_with_checks(
@@ -143,11 +145,7 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
             empty_exception=True,
             empty_message="There is no such organization"
         )
-        queries = get_queries(
-            filters={'sender_id': organization.id},
-            empty_exception=True,
-            empty_message="There are no queries with such sender"
-        )
+        queries = get_queries(filters={'sender_id': str(organization.id)})
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
 
 
@@ -238,3 +236,19 @@ class GetStudentApi(ApiAuthMixin, APIView):
             empty_message="There is no such student",
         )
         return Response({"student": StudentGetSerializer(student).data}, status=200)
+
+
+class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
+    filename = 'organization_students.xlsx'
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Export students from this organization",
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
+    )
+    def get(self, request, pk):
+        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True,
+                         empty_message="This organization doesn't exist")
+        students = get_students(filters={'circle__organization': str(pk)})
+        file = export_students(students, export_format='xlsx')
+        return Response(file, status=200)

@@ -3,8 +3,10 @@ from typing import Sequence, Type, TYPE_CHECKING
 from importlib import import_module
 
 from django.conf import settings
-
+from django.utils.encoding import escape_uri_path
+from rest_framework.response import Response
 from django.contrib import auth
+from django.http import HttpResponse
 
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.authentication import SessionAuthentication, BaseAuthentication
@@ -32,6 +34,7 @@ class SessionAsHeaderAuthentication(BaseAuthentication):
 
     Run the standard Django auth & try obtaining user.
     """
+
     def authenticate(self, request):
         auth_header = get_auth_header(request.headers)
 
@@ -58,6 +61,7 @@ class CsrfExemptedSessionAuthentication(SessionAuthentication):
     DRF SessionAuthentication is enforcing CSRF, which may be problematic.
     That's why we want to make sure we are exempting any kind of CSRF checks for APIs.
     """
+
     def enforce_csrf(self, request):
         return
 
@@ -78,4 +82,20 @@ class ApiAuthMixin:
         SessionAsHeaderAuthentication,
         JSONWebTokenAuthentication
     ]
-    permission_classes: PermissionClassesType = (IsAuthenticated, )
+    permission_classes: PermissionClassesType = (IsAuthenticated,)
+
+
+class XLSXMixin(object):
+    filename = "file"
+
+    def finalize_response(self, request, response, *args, **kwargs):
+        response = super().finalize_response(
+            request, response, *args, **kwargs
+        )
+        if isinstance(response, Response) and isinstance(response.data, bytes):
+            file = response.data
+            response = HttpResponse(file,
+                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                    status=200)
+            response['Content-Disposition'] = 'attachment; filename={}'.format(escape_uri_path(self.filename), )
+        return response

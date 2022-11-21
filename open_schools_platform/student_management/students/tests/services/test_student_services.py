@@ -1,5 +1,4 @@
 from django.test import TestCase
-
 from open_schools_platform.parent_management.families.services import create_family
 from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.student_management.students.services import create_student_profile, \
