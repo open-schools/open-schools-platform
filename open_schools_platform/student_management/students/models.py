@@ -7,7 +7,7 @@ from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-
 from phonenumber_field.phonenumber import PhoneNumber
 
 from open_schools_platform.common.models import BaseModel, BaseManager
-from open_schools_platform.photo_management.photos.models import Photo
+from open_schools_platform.photo_management.photos.models import Photo  # type: ignore
 from open_schools_platform.user_management.users.models import User  # type: ignore[misc,name-defined]
 from open_schools_platform.organization_management.circles.models import Circle
 
@@ -66,6 +66,7 @@ class Student(BaseModel):
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)
     student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students",
                                         blank=True)
+
     objects = StudentManager()
 
     def __str__(self):

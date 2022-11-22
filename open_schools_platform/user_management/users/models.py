@@ -7,7 +7,6 @@ from django.contrib.auth.models import (
     AbstractBaseUser
 )
 from phonenumber_field.modelfields import PhoneNumberField
-from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 
@@ -87,8 +86,6 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
-
-    history = HistoricalRecords()
 
     last_login_ip_address = models.GenericIPAddressField(null=True, blank=True)
 
