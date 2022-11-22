@@ -12,10 +12,11 @@ from open_schools_platform.history_management.serializers.user_serializer import
 from open_schools_platform.history_management.serializers.organization_serializer import OrganizationHistorySerializer
 from open_schools_platform.history_management.serializers.employee_serializer import EmployeeHistorySerializer
 from open_schools_platform.history_management.serializers.circle_serializer import CircleHistorySerializer
-from open_schools_platform.history_management.serializers.student_serializer import StudentHistorySerializer
+from open_schools_platform.history_management.serializers.student_serializer import StudentHistorySerializer, \
+    StudentProfileHistorySerializer
 
 from ..organization_management.circles.selectors import get_circle
-from ..student_management.students.selectors import get_student
+from ..student_management.students.selectors import get_student, get_student_profile
 
 
 class UserHistoryApi(ApiAuthMixin, APIView):
@@ -91,3 +92,18 @@ class StudentHistoryApi(ApiAuthMixin, APIView):
                               empty_exception=True,
                               empty_message="There is no such student")
         return Response({"results": StudentHistorySerializer(student).data}, status=200)
+
+
+class StudentProfileHistoryApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get student-profile history",
+        tags=[SwaggerTags.HISTORY_MANAGEMENT],
+        responses={200: swagger_dict_response({'results': StudentProfileHistorySerializer(many=True)}),
+                   404: "There is no such student-profile"},
+    )
+    def get(self, request, pk):
+        student_profile = get_student_profile(filters={"id": pk},
+                                              user=request.user,
+                                              empty_exception=True,
+                                              empty_message="There is no such student-profile")
+        return Response({"results": StudentProfileHistorySerializer(student_profile).data}, status=200)
