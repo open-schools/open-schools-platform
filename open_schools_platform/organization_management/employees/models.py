@@ -61,6 +61,3 @@ class Employee(BaseModel):
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        unique_together = ('organization', 'employee_profile')
