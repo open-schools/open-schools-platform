@@ -5,6 +5,8 @@ from drf_yasg.utils import swagger_auto_schema
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.history_management.serializers.parent_serializer import ParentProfileHistorySerializer
+from open_schools_platform.parent_management.parents.selectors import get_parent_profile
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from open_schools_platform.organization_management.employees.selectors import get_employee, get_employee_profile
@@ -122,3 +124,18 @@ class EmployeeProfileHistory(ApiAuthMixin, APIView):
                                                 empty_exception=True,
                                                 empty_message="There is no such employee-profile")
         return Response({"results": EmployeeProfileHistorySerializer(employee_profile).data}, status=200)
+
+
+class ParentProfileHistory(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get parent-profile history",
+        tags=[SwaggerTags.HISTORY_MANAGEMENT],
+        responses={200: swagger_dict_response({'results': ParentProfileHistorySerializer(many=True)}),
+                   404: "There is no such parent-profile"},
+    )
+    def get(self, request, pk):
+        parent_profile = get_parent_profile(filters={"id": pk},
+                                            user=request.user,
+                                            empty_exception=True,
+                                            empty_message="There is no such parent-profile")
+        return Response({"results": ParentProfileHistorySerializer(parent_profile).data}, status=200)
