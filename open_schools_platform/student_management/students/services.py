@@ -5,9 +5,7 @@ from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
-from safedelete import HARD_DELETE_NOCASCADE
 
-from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
 from open_schools_platform.organization_management.circles.models import Circle
@@ -19,7 +17,7 @@ from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update, create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
-from open_schools_platform.student_management.students.selectors import get_student_profile, get_student
+from open_schools_platform.student_management.students.selectors import get_student_profile
 from open_schools_platform.user_management.users.models import User
 
 
@@ -48,12 +46,6 @@ def create_student_profile_circle_query(student_profile: StudentProfile, circle:
 
 
 def create_student(name: str, circle: Circle = None, student_profile: StudentProfile = None) -> Student:
-    deleted_student = get_student(
-        filters={'DELETED': SoftCondition.DELETED_ONLY, 'circle': circle, 'student_profile': student_profile})
-
-    if deleted_student:
-        deleted_student.delete(force_policy=HARD_DELETE_NOCASCADE)
-
     student = Student.objects.create_student(
         name=name,
         circle=circle,
