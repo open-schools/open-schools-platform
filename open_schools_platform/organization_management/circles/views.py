@@ -114,7 +114,8 @@ class CirclesStudentsListApi(ApiAuthMixin, APIView):
         responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
     )
     def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)}, user=request.user)
+        circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True,
+                            empty_message="There is no such circle.")
         qs = circle.students.all()
         return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
 
