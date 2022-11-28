@@ -113,7 +113,7 @@ class StudentProfileHistoryApi(ApiAuthMixin, APIView):
         return Response({"results": StudentProfileHistorySerializer(student_profile).data}, status=200)
 
 
-class EmployeeProfileHistory(ApiAuthMixin, APIView):
+class EmployeeProfileHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get employee-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
@@ -128,7 +128,7 @@ class EmployeeProfileHistory(ApiAuthMixin, APIView):
         return Response({"results": EmployeeProfileHistorySerializer(employee_profile).data}, status=200)
 
 
-class ParentProfileHistory(ApiAuthMixin, APIView):
+class ParentProfileHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get parent-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
@@ -143,7 +143,7 @@ class ParentProfileHistory(ApiAuthMixin, APIView):
         return Response({"results": ParentProfileHistorySerializer(parent_profile).data}, status=200)
 
 
-class FamilyHistory(ApiAuthMixin, APIView):
+class FamilyHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get family history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],

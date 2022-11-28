@@ -4,6 +4,7 @@ import uuid
 
 import safedelete.models
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -42,6 +43,7 @@ class EmployeeProfile(BaseModel):
     name = models.CharField(max_length=200)
     objects = EmployeeProfileManager()
     email = models.EmailField(max_length=255, blank=True)
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.user.__str__()
@@ -56,6 +58,7 @@ class Employee(BaseModel):
                                      null=True, default=None, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255, blank=True, default="")
+    history = HistoricalRecords()
 
     objects = EmployeeManager()
 

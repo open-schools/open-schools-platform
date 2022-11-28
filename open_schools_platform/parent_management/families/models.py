@@ -2,6 +2,7 @@ import uuid
 
 import safedelete.models
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.parent_management.parents.models import ParentProfile
@@ -24,6 +25,8 @@ class Family(BaseModel):
     parent_profiles = models.ManyToManyField(ParentProfile, related_name="families")
     student_profiles = models.ManyToManyField(StudentProfile, related_name="families")
     name = models.CharField(max_length=200)
+    history = HistoricalRecords(m2m_fields=[parent_profiles, student_profiles])
+
     objects = FamilyManager()
 
     def __str__(self):
