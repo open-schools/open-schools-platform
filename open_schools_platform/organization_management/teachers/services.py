@@ -9,7 +9,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.photo_management.photos.services import create_photo
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
-from open_schools_platform.teacher_management.teachers.models import TeacherProfile, Teacher
+from open_schools_platform.organization_management.teachers.models import TeacherProfile, Teacher
 from open_schools_platform.user_management.users.models import User
 
 

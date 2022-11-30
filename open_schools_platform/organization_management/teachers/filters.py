@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 
 from open_schools_platform.common.filters import BaseFilterSet
-from open_schools_platform.teacher_management.teachers.models import Teacher
+from open_schools_platform.organization_management.teachers.models import Teacher
 
 
 class TeacherFilter(BaseFilterSet):

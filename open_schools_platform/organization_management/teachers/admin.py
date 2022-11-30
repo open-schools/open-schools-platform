@@ -2,8 +2,8 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.student_management.students.admin import CircleFilter
-from open_schools_platform.teacher_management.teachers.models import TeacherProfile, Teacher
-from open_schools_platform.teacher_management.teachers.selectors import get_teachers
+from open_schools_platform.organization_management.teachers.models import TeacherProfile, Teacher
+from open_schools_platform.organization_management.teachers.selectors import get_teachers
 
 
 class TeacherProfileFilter(InputFilter):

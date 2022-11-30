@@ -1,6 +1,6 @@
 import rules
 
-from open_schools_platform.teacher_management.teachers.models import TeacherProfile
+from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.user_management.users.models import User
 
 

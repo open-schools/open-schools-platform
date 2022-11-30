@@ -1,8 +1,8 @@
 from django.db.models import QuerySet
 
 from open_schools_platform.common.selectors import selector_wrapper
-from open_schools_platform.teacher_management.teachers.filters import TeacherFilter
-from open_schools_platform.teacher_management.teachers.models import Teacher
+from open_schools_platform.organization_management.teachers.filters import TeacherFilter
+from open_schools_platform.organization_management.teachers.models import Teacher
 
 
 @selector_wrapper
