@@ -4,7 +4,6 @@ from django.utils import timezone
 from rules.contrib.models import RulesModelMixin, RulesModelBase
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
-from simple_history.models import HistoricalRecords
 
 
 class BaseManager(SafeDeleteManager):
