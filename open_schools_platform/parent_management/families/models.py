@@ -25,7 +25,7 @@ class Family(BaseModel):
     parent_profiles = models.ManyToManyField(ParentProfile, related_name="families")
     student_profiles = models.ManyToManyField(StudentProfile, related_name="families")
     name = models.CharField(max_length=200)
-    history = HistoricalRecords(m2m_fields=[parent_profiles, student_profiles])
+    history = HistoricalRecords()
 
     objects = FamilyManager()
 
