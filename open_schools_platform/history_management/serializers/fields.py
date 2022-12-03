@@ -1,16 +1,16 @@
 from rest_framework import serializers
 
 
-class HistoryFields:
-    HISTORY_USER_FIELDS = ["id", "phone", "name", "last_login", "last_login_ip_address"]
+class HistorySerializerFields:
+    HISTORY_USER_FIELDS = ["id", "name", "phone", "last_login", "last_login_ip_address"]
     HISTORY_FAMILY_FIELDS = ["id", "name"]
     HISTORY_CIRCLE_FIELDS = ['id', 'name', 'organization', 'address', 'capacity', 'description']
     HISTORY_EMPLOYEE_FIELDS = ["id", "name", "organization", "position"]
     HISTORY_EMPLOYEE_PROFILE_FIELDS = ["id", "name", "user"]
     HISTORY_ORGANIZATION_FIELDS = ["id", "name", "inn"]
-    HISTORY_PARENT_FIELDS = ["id", "name", "user"]
+    HISTORY_PARENT_PROFILES_FIELDS = ["id", "name", "user"]
     HISTORY_STUDENT_FIELDS = ["id", "name", "circle", "student_profile"]
-    HISTORY_STUDENT_PROFILES_FIELDS = ["id", "name", "age", "phone", "photo"]
+    HISTORY_STUDENT_PROFILES_FIELDS = ["id", "name", "phone", "age", "photo"]
 
     @staticmethod
     def get_history_records_field(fields: list):
