@@ -1,9 +1,19 @@
 from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
-from open_schools_platform.student_management.students.admin import CircleFilter
 from open_schools_platform.organization_management.teachers.models import TeacherProfile, Teacher
 from open_schools_platform.organization_management.teachers.selectors import get_teachers
+
+
+class CircleFilter(InputFilter):
+    parameter_name = 'circle_name'
+    title = _('circle name')
+
+    def queryset(self, request, queryset):
+        if self.value() is not None:
+            circle = self.value()
+
+            return get_teachers(filters={'circle_name': circle})
 
 
 class TeacherProfileFilter(InputFilter):

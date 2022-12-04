@@ -14,16 +14,16 @@ from open_schools_platform.user_management.users.models import User
 class TeacherProfileManager(BaseManager):
     def create_teacher_profile(self, name: str, age: int = None, phone: PhoneNumber = None, user: User = None,
                                photo: uuid.UUID = None):
-        student_profile = self.model(
+        teacher_profile = self.model(
             name=name,
             age=age,
             user=user,
             phone=phone,
             photo=photo
         )
-        student_profile.full_clean()
-        student_profile.save(using=self.db)
-        return student_profile
+        teacher_profile.full_clean()
+        teacher_profile.save(using=self.db)
+        return teacher_profile
 
 
 class TeacherProfile(BaseModel):
@@ -43,19 +43,19 @@ class TeacherProfile(BaseModel):
     objects = TeacherProfileManager()
 
     def __str__(self):
-        return self.name.__str__()
+        return self.name
 
 
 class TeacherManager(BaseManager):
     def create_teacher(self, name: str, circle: Circle = None, teacher_profile: TeacherProfile = None):
-        student = self.model(
+        teacher = self.model(
             name=name,
             circle=circle,
             teacher_profile=teacher_profile
         )
-        student.full_clean()
-        student.save(using=self.db)
-        return student
+        teacher.full_clean()
+        teacher.save(using=self.db)
+        return teacher
 
 
 class Teacher(BaseModel):
