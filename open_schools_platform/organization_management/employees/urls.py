@@ -6,7 +6,7 @@ from open_schools_platform.organization_management.employees.views import Employ
 
 urlpatterns = [
     path('', EmployeeListApi.as_view(), name='employees'),
-    path('<uuid:pk>',
+    path('/<uuid:pk>',
          MultipleViewManager({'patch': EmployeeUpdateApi, 'delete': EmployeeDeleteApi}).as_view(), name='employee'),
-    path('employee-profile/get-invitations', EmployeeQueriesListApi.as_view(), name='employee_query-list'),
+    path('/employee-profile/get-invitations', EmployeeQueriesListApi.as_view(), name='employee_query-list'),
 ]
