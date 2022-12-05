@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-import safedelete.models
+import safedelete
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models

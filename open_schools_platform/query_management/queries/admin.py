@@ -1,5 +1,5 @@
 from django.contrib import admin
-from open_schools_platform.common.admin import InputFilter
+from open_schools_platform.common.admin import InputFilter, admin_wrapper
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_query, get_queries
 from open_schools_platform.query_management.queries.services import run_sender_handler
@@ -50,6 +50,7 @@ class RecipientUUIDFilter(InputFilter):
             return get_queries(filters={'recipient_id': recipient_uuid})
 
 
+@admin_wrapper(Query)
 class QueryAdmin(admin.ModelAdmin):
     list_display = ("id", "sender_ct", "recipient_ct", "status", "created_at")
     list_filter = ("status", SenderCTFilter, SenderUUIDFilter, RecipientCTFilter, RecipientUUIDFilter)
@@ -59,6 +60,3 @@ class QueryAdmin(admin.ModelAdmin):
         if "status" in form.changed_data:
             run_sender_handler(query=old_query, new_status=obj.status, user=request.user)
         return super().save_model(request, obj, form, change)
-
-
-admin.site.register(Query, QueryAdmin)

@@ -1,12 +1,17 @@
-from typing import Type, Sequence, Union, Callable, Any
+from typing import Type, Sequence, Union, Callable, Any, Tuple
 
 from django.contrib import admin
+from django.contrib.admin import register
+from safedelete import HARD_DELETE, SOFT_DELETE, SOFT_DELETE_CASCADE, NO_DELETE
 from safedelete.admin import SafeDeleteAdmin, SafeDeleteAdminFilter
+
+from open_schools_platform.common.models import BaseModel
 
 
 class BaseAdmin(SafeDeleteAdmin):
     list_display = ("highlight_deleted_field",)  # type: Sequence[Union[str, Callable[[Any], Any]]]
     list_filter = (SafeDeleteAdminFilter,) + SafeDeleteAdmin.list_filter  # type: ignore[operator]
+    actions: Tuple = ()
     field_to_highlight = "name"
 
     class Meta:
@@ -29,17 +34,30 @@ class InputFilter(admin.SimpleListFilter):
         yield all_choice
 
 
-def admin_wrapper(admin_model: Type[BaseAdmin]):
-    admin_model.highlight_deleted_field.short_description = admin_model.field_to_highlight  # type: ignore[attr-defined]
+def hard_delete_queryset(self, request, queryset):
+    queryset.delete(force_policy=HARD_DELETE)
 
-    if admin_model.list_display:
-        admin_model.list_display = BaseAdmin.list_display + admin_model.list_display  # type: ignore[operator]
-    else:
-        admin_model.list_display = BaseAdmin.list_display
 
-    if admin_model.list_filter:
-        admin_model.list_filter = BaseAdmin.list_filter + admin_model.list_filter
-    else:
-        admin_model.list_filter = BaseAdmin.list_filter
+def admin_wrapper(model: Type[BaseModel]):
+    def wrap_admin_model(admin_model: Type[BaseAdmin]):
+        delete_policy = model._safedelete_policy
+        if delete_policy:
+            if delete_policy == SOFT_DELETE or delete_policy == SOFT_DELETE_CASCADE:
+                admin_model.actions = ('undelete_selected',)
+                admin_model.highlight_deleted_field.short_description = admin_model.field_to_highlight  # type: ignore[attr-defined] # noqa
 
-    return admin_model
+                if admin_model.list_display:
+                    admin_model.list_display = BaseAdmin.list_display + admin_model.list_display  # type: ignore[operator] # noqa
+                else:
+                    admin_model.list_display = BaseAdmin.list_display
+                if admin_model.list_filter:
+                    admin_model.list_filter = BaseAdmin.list_filter + admin_model.list_filter
+                else:
+                    admin_model.list_filter = BaseAdmin.list_filter
+
+            if delete_policy == NO_DELETE:
+                admin_model.delete_queryset = hard_delete_queryset  # type: ignore[assignment]
+
+        return register(model)(admin_model)
+
+    return wrap_admin_model
