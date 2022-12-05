@@ -1,6 +1,6 @@
 import uuid
 
-import safedelete.models
+import safedelete
 from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
@@ -62,7 +62,7 @@ class StudentManager(BaseManager):
 
 
 class Student(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)

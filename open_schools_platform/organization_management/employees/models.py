@@ -2,7 +2,7 @@ from typing import Any
 
 import uuid
 
-import safedelete.models
+import safedelete
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -50,7 +50,7 @@ class EmployeeProfile(BaseModel):
 
 
 class Employee(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees',
                                          null=True, default=None, blank=True, on_delete=models.CASCADE)
@@ -64,6 +64,3 @@ class Employee(BaseModel):
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        unique_together = ('organization', 'employee_profile')
