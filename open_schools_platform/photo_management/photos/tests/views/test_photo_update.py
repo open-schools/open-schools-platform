@@ -9,7 +9,7 @@ class PhotoTests(TestCase):
         self.client = APIClient()
         self.query_photo_update_url = lambda pk: reverse("api:photo-management:photos:create-photo", args=[pk])
 
-    def test_update_new_user_photo(self):
+    def test_get_204_when_photo_is_not_attached(self):
         user = create_logged_in_user(self)
         response = self.client.patch(self.query_photo_update_url(user.student_profile.photo.id))
-        self.assertEqual(200, response.status_code)
+        self.assertEqual(204, response.status_code)
