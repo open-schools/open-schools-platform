@@ -85,16 +85,16 @@ class CircleQueryHandler(BaseQueryHandler):
 
             if teacher_profile_access and circle_access:
                 pass
-            elif teacher_profile_access:
+            elif circle_access:
                 if query.status != Query.Status.SENT:
                     raise NotAcceptable("Сan no longer change the query")
                 if new_status != Query.Status.CANCELED:
-                    raise NotAcceptable("User can only set canceled status")
-            elif circle_access:
-                if new_status == Query.Status.CANCELED:
-                    raise NotAcceptable("Circle cannot cancel query, it can only decline it")
+                    raise NotAcceptable("Circle can only set canceled status")
+            elif teacher_profile_access:
                 if query.status == Query.Status.CANCELED:
                     raise NotAcceptable("Сan no longer change the query")
+                if new_status == Query.Status.CANCELED:
+                    raise NotAcceptable("Teacher cannot cancel query, it can only decline it")
 
             query_update(query=query, data={"status": new_status})
             if query.status == Query.Status.ACCEPTED:
