@@ -13,4 +13,5 @@ class UserHistorySerializer(serializers.ModelSerializer):
         model = User
         fields = ('history',)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_USER_FIELDS,
-                                                               object_title='UserHistory').generate_schemas()
+                                                               object_title='UserHistory',
+                                                               model=User).generate_schemas()

@@ -13,4 +13,5 @@ class FamilyHistorySerializer(serializers.ModelSerializer):
         model = Family
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_FAMILY_FIELDS,
-                                                               object_title='FamilyHistory').generate_schemas()
+                                                               object_title='FamilyHistory',
+                                                               model=Family).generate_schemas()

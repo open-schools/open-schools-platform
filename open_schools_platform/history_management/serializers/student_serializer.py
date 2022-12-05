@@ -13,7 +13,8 @@ class StudentHistorySerializer(serializers.ModelSerializer):
         model = Student
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_STUDENT_FIELDS,
-                                                               object_title='StudentHistory').generate_schemas()
+                                                               object_title='StudentHistory',
+                                                               model=Student).generate_schemas()
 
 
 class StudentProfileHistorySerializer(serializers.ModelSerializer):
@@ -25,4 +26,5 @@ class StudentProfileHistorySerializer(serializers.ModelSerializer):
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
             fields=HistorySerializerFields().HISTORY_STUDENT_PROFILES_FIELDS,
-            object_title='StudentProfileHistory').generate_schemas()
+            object_title='StudentProfileHistory',
+            model=StudentProfile).generate_schemas()

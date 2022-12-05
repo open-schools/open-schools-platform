@@ -14,4 +14,5 @@ class ParentProfileHistorySerializer(serializers.ModelSerializer):
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
             fields=HistorySerializerFields().HISTORY_PARENT_PROFILES_FIELDS,
-            object_title='ParentProfileHistory').generate_schemas()
+            object_title='ParentProfileHistory',
+            model=ParentProfile).generate_schemas()

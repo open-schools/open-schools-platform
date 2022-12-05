@@ -13,7 +13,8 @@ class EmployeeHistorySerializer(serializers.ModelSerializer):
         model = Employee
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_EMPLOYEE_FIELDS,
-                                                               object_title='EmployeeHistory').generate_schemas()
+                                                               object_title='EmployeeHistory',
+                                                               model=Employee).generate_schemas()
 
 
 class EmployeeProfileHistorySerializer(serializers.ModelSerializer):
@@ -25,4 +26,5 @@ class EmployeeProfileHistorySerializer(serializers.ModelSerializer):
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
             fields=HistorySerializerFields().HISTORY_EMPLOYEE_PROFILE_FIELDS,
-            object_title='EmployeeProfileHistory').generate_schemas()
+            object_title='EmployeeProfileHistory',
+            model=EmployeeProfile).generate_schemas()

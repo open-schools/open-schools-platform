@@ -14,4 +14,5 @@ class OrganizationHistorySerializer(serializers.ModelSerializer):
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
             fields=HistorySerializerFields().HISTORY_ORGANIZATION_FIELDS,
-            object_title='OrganizationHistory').generate_schemas()
+            object_title='OrganizationHistory',
+            model=Organization).generate_schemas()

@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+HISTORY_BASE_FIELDS = ["history_id", "history_user_id", "history_date", "history_type"]
+
 
 class HistorySerializerFields:
     HISTORY_USER_FIELDS = ["id", "name", "phone", "last_login", "last_login_ip_address"]
@@ -24,4 +26,4 @@ class HistorySerializerFields:
         return HistoryRecordsField
 
     def __getattribute__(self, item):
-        return ["history_id", "history_user_id", "history_date", "history_type"] + object.__getattribute__(self, item)
+        return HISTORY_BASE_FIELDS + object.__getattribute__(self, item)

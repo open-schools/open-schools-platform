@@ -13,4 +13,5 @@ class CircleHistorySerializer(serializers.ModelSerializer):
         model = Circle
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_CIRCLE_FIELDS,
-                                                               object_title='CircleHistory').generate_schemas()
+                                                               object_title='CircleHistory',
+                                                               model=Circle).generate_schemas()
