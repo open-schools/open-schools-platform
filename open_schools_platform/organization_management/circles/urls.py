@@ -7,9 +7,9 @@ from open_schools_platform.organization_management.circles.views import CreateCi
 
 urlpatterns = [
     path('', MultipleViewManager({'get': GetCirclesApi, 'post': CreateCircleApi}).as_view(), name='circles'),
-    path('<uuid:pk>', MultipleViewManager({'get': GetCircleApi, 'delete': CircleDeleteApi}).as_view(), name='circle'),
-    path('<uuid:pk>/queries', CirclesQueriesListApi.as_view(), name='queries-list'),
-    path('<uuid:pk>/students', CirclesStudentsListApi.as_view(), name='students-list'),
-    path('<uuid:pk>/invite-student', InviteStudentApi.as_view(), name='invite-student'),
-    path('<uuid:pk>/students/export', CirclesStudentProfilesExportApi.as_view(), name='students-export'),
+    path('/<uuid:pk>', MultipleViewManager({'get': GetCircleApi, 'delete': CircleDeleteApi}).as_view(), name='circle'),
+    path('/<uuid:pk>/queries', CirclesQueriesListApi.as_view(), name='queries-list'),
+    path('/<uuid:pk>/students', CirclesStudentsListApi.as_view(), name='students-list'),
+    path('/<uuid:pk>/invite-student', InviteStudentApi.as_view(), name='invite-student'),
+    path('/<uuid:pk>/students/export', CirclesStudentProfilesExportApi.as_view(), name='students-export'),
 ]

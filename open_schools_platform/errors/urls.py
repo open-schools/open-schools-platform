@@ -4,5 +4,5 @@ from .apis import TriggerApiException
 
 
 urlpatterns = [
-    path("exceptions/", TriggerApiException.as_view())
+    path("exceptions", TriggerApiException.as_view())
 ]

@@ -2,40 +2,40 @@ from django.urls import path, include
 
 
 query_management_urls = [
-    path('queries/', include(('open_schools_platform.query_management.queries.urls', 'queries'))),
+    path('queries', include(('open_schools_platform.query_management.queries.urls', 'queries'))),
 ]
 
 parent_management_urls = [
-    path('families/', include(('open_schools_platform.parent_management.families.urls', 'families'))),
-    path('parents/', include(("open_schools_platform.parent_management.parents.urls", 'parents'))),
+    path('families', include(('open_schools_platform.parent_management.families.urls', 'families'))),
+    path('parents', include(("open_schools_platform.parent_management.parents.urls", 'parents'))),
 ]
 
 user_management_urls = [
-    path('users/', include(('open_schools_platform.user_management.users.urls', 'users'))),
+    path('users', include(('open_schools_platform.user_management.users.urls', 'users'))),
     path(
-        'auth/', include(('open_schools_platform.user_management.authentication.urls', 'authentication'))
+        'auth', include(('open_schools_platform.user_management.authentication.urls', 'authentication'))
     ),
 ]
 
 organization_management_urls = [
-    path('organizations/',
+    path('organizations',
          include(('open_schools_platform.organization_management.organizations.urls', 'organizations'))),
-    path('employees/',
+    path('employees',
          include(('open_schools_platform.organization_management.employees.urls', 'employees'))),
-    path('circles/',
+    path('circles',
          include(('open_schools_platform.organization_management.circles.urls', 'circles'))),
 ]
 
 students_management_urls = [
-    path('students/', include(('open_schools_platform.student_management.students.urls', 'students')))
+    path('students', include(('open_schools_platform.student_management.students.urls', 'students')))
 ]
 
 photos_management_urls = [
-    path('photos/', include(('open_schools_platform.photo_management.photos.urls', 'photos')))
+    path('photos', include(('open_schools_platform.photo_management.photos.urls', 'photos')))
 ]
 
 history_management_urls = [
-    path('history/', include(('open_schools_platform.history_management.urls', 'history'))),
+    path('history', include(('open_schools_platform.history_management.urls', 'history'))),
 ]
 
 urlpatterns = [
