@@ -1,10 +1,11 @@
 import uuid
 from typing import Any
 
-import safedelete.models
+import safedelete
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -32,6 +33,7 @@ class Circle(BaseModel):
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
     location = models.PointField(geography=True, default=Point(0.0, 0.0))
+    history = HistoricalRecords()
 
     @property
     def latitude(self):

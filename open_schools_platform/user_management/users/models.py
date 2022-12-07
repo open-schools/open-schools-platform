@@ -7,6 +7,7 @@ from django.contrib.auth.models import (
     AbstractBaseUser
 )
 from phonenumber_field.modelfields import PhoneNumberField
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 
@@ -88,6 +89,8 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
     last_login_ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    history = HistoricalRecords()
 
     objects = UserManager()  # type: ignore[assignment] #TODO
 

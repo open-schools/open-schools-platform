@@ -1,10 +1,11 @@
 import uuid
 
-import safedelete.models
+import safedelete
 from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
 from phonenumber_field.phonenumber import PhoneNumber
+from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from open_schools_platform.photo_management.photos.models import Photo  # type: ignore
@@ -40,6 +41,7 @@ class StudentProfile(BaseModel):
         null=True,
     )
     photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, related_name="photo", blank=True)
+    history = HistoricalRecords()
 
     objects = StudentProfileManager()
 
@@ -60,7 +62,7 @@ class StudentManager(BaseManager):
 
 
 class Student(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="students", blank=True)

@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from django.utils.translation import gettext_lazy as _
@@ -29,18 +27,14 @@ class StudentProfileFilter(InputFilter):
             return get_students(filters={'student_profile_name': student_profile})
 
 
-@admin_wrapper
+@admin_wrapper(StudentProfile)
 class StudentProfileAdmin(BaseAdmin):
     list_display = ('age', 'user', 'id', 'phone')
     search_fields = ('name', 'age', "user__phone", 'phone')
 
 
-@admin_wrapper
+@admin_wrapper(Student)
 class StudentAdmin(BaseAdmin):
     list_display = ('student_profile', 'circle', 'id')
     search_fields = ("name",)
     list_filter = (CircleFilter, StudentProfileFilter, StudentProfileFilter)
-
-
-admin.site.register(StudentProfile, StudentProfileAdmin)
-admin.site.register(Student, StudentAdmin)
