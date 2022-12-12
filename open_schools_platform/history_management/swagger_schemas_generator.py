@@ -1,4 +1,4 @@
-import types
+from typing import Generator, Dict, Any
 
 from drf_yasg import openapi
 from drf_yasg.inspectors.field import get_basic_type_info
@@ -19,7 +19,7 @@ class SwaggerSchemasHistoryGenerator:
             return {"type": openapi.TYPE_STRING, "title": str(model_field)}
         return field
 
-    def _properties_dict_generator(self) -> types.GeneratorType:
+    def _properties_dict_generator(self) -> Generator:
         for field in self.fields:
             if field not in HISTORY_BASE_FIELDS:
                 info = self._get_field_type_info(field_name=field)
@@ -28,7 +28,7 @@ class SwaggerSchemasHistoryGenerator:
                 yield {field: openapi.Schema(type=openapi.TYPE_STRING)}
 
     def _get_properties_dict(self) -> dict:
-        properties = dict()
+        properties: Dict[Any, Any] = dict()
         for property_dict in self._properties_dict_generator():
             properties |= property_dict
         return properties

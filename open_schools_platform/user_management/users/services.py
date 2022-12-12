@@ -13,7 +13,7 @@ from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.student_management.students.services import create_student_profile
+from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
 
 from open_schools_platform.user_management.users.models import User, CreationToken, FirebaseNotificationToken
@@ -41,7 +41,7 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True,
         is_active=is_active,
         is_admin=is_admin,
     )
-    EmployeeProfile.objects.create(
+    EmployeeProfile.objects.create_employee_profile(
         user=user,
         name=name,
         email=email
@@ -50,7 +50,7 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True,
         name=name,
         user=user
     )
-    create_student_profile(name=name, user=user, age=0)
+    StudentProfile.objects.create_student_profile(name=name, user=user)
     FirebaseNotificationToken.objects.create_token(user=user)
     return user
 

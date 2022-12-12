@@ -1,5 +1,6 @@
 import uuid
 
+import safedelete
 from django.db import models
 from django.contrib.auth.models import (
     UserManager as BUM,
@@ -22,12 +23,9 @@ class UserManager(BaseManager, BUM):
         if not phone:
             raise ValueError('Users must have a phone number')
 
-        user = self.model(
-            phone=phone,
-            is_active=is_active,
-            is_admin=is_admin,
-            name=name,
-        )
+        user: User
+        user, created = self.update_or_create(phone=phone,
+                                              defaults={'is_active': is_active, 'is_admin': is_admin, 'name': name})
 
         if password is not None:
             user.set_password(password)
@@ -72,6 +70,7 @@ class CreationTokenManager(BaseManager):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     phone = PhoneNumberField(
         verbose_name='telephone number',
@@ -109,10 +108,9 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
 class FirebaseNotificationTokenCreationManager(BaseManager):
     def create_token(self, user: User, token: str = None):
-        firebase_token = self.model(
-            user=user,
-            token=token
-        )
+        firebase_token: FirebaseNotificationToken
+        firebase_token, created = self.update_or_create(user=user, defaults={'token': token})  # type:ignore[assignment]
+
         firebase_token.full_clean()
         firebase_token.save(using=self.db)
         return firebase_token
@@ -127,6 +125,7 @@ class FirebaseNotificationToken(BaseModel):
 
 
 class CreationToken(BaseModel):
+    _safedelete_policy = safedelete.config.NO_DELETE
     key = models.UUIDField(
         default=uuid.uuid4,
         primary_key=True,

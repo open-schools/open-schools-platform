@@ -11,7 +11,7 @@ class BaseManager(SafeDeleteManager):
 
 
 class BaseModel(RulesModelMixin, SafeDeleteModel, metaclass=RulesModelBase):
-    _safedelete_policy = safedelete.config.NO_DELETE
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     created_at = models.DateTimeField(db_index=True, default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

@@ -9,10 +9,9 @@ from open_schools_platform.user_management.users.models import User
 
 class ParentProfileManager(BaseManager):
     def create_parent_profile(self, user: User, name: str):
-        parent_profile = self.model(
-            name=name,
-            user=user
-        )
+        parent_profile: ParentProfile
+        parent_profile, created = self.update_or_create(user=user, defaults={'name': name})  # type:ignore[assignment]
+
         parent_profile.full_clean()
         parent_profile.save(using=self.db)
         return parent_profile

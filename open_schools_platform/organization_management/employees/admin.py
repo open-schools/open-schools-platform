@@ -1,4 +1,3 @@
-from django.contrib import admin
 from open_schools_platform.common.admin import InputFilter, BaseAdmin, admin_wrapper
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from django.utils.translation import gettext_lazy as _
@@ -7,7 +6,7 @@ from open_schools_platform.organization_management.employees.selectors import ge
 
 
 @admin_wrapper(EmployeeProfile)
-class EmployeeProfileAdmin(admin.ModelAdmin):
+class EmployeeProfileAdmin(BaseAdmin):
     list_display = ("name", "user", "id")
 
 

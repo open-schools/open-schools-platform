@@ -14,15 +14,16 @@ from open_schools_platform.organization_management.circles.models import Circle
 
 
 class StudentProfileManager(BaseManager):
-    def create_student_profile(self, name: str, age: int = None, phone: PhoneNumber = None,
-                               user: User = None, photo: uuid.UUID = None):
-        student_profile = self.model(
-            name=name,
-            age=age,
-            user=user,
-            phone=phone,
-            photo=photo
-        )
+    def create_student_profile(self, name: str, age: int = None, phone: PhoneNumber = None, user: User = None,
+                               photo: uuid.UUID = None):
+        if not photo:
+            photo = Photo.objects.create_photo()
+
+        student_profile: StudentProfile
+        student_profile, created = self.update_or_create(user=user,  # type:ignore[assignment]
+                                                         defaults={'name': name, 'age': age, 'phone': phone,
+                                                                   'photo': photo})
+
         student_profile.full_clean()
         student_profile.save(using=self.db)
         return student_profile

@@ -45,6 +45,7 @@ class CreationTokenAdmin(admin.ModelAdmin):
 
 
 @admin_wrapper(FirebaseNotificationToken)
-class FirebaseTokenAdmin(admin.ModelAdmin):
+class FirebaseTokenAdmin(BaseAdmin):
     list_display = ("id", "token", "user")
     search_fields = ("id", "token")
+    field_to_highlight = 'token'

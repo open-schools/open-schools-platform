@@ -25,11 +25,10 @@ class EmployeeManager(BaseManager):
 
 
 class EmployeeProfileManager(BaseManager):
-    def create(self, *args: Any, **kwargs: Any):
-        employee_profile = self.model(
-            *args,
-            **kwargs,
-        )
+    def create_employee_profile(self, user: User, name: str, email: str = None):
+        employee_profile: EmployeeProfile
+        employee_profile, created = self.update_or_create(user=user, defaults={'name': name,  # type:ignore[assignment]
+                                                                               'email': email})
 
         employee_profile.full_clean()
         employee_profile.save(using=self._db)
