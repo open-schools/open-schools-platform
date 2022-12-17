@@ -23,17 +23,9 @@ class UserManager(BaseManager, BUM):
         if not phone:
             raise ValueError('Users must have a phone number')
 
-        user: User
-        user, created = self.update_or_create(phone=phone,
-                                              defaults={'is_active': is_active, 'is_admin': is_admin, 'name': name})
-
-        if password is not None:
-            user.set_password(password)
-        else:
-            user.set_unusable_password()
-
-        user.full_clean()
-        user.save(using=self._db)
+        user = self.update_or_create_with_check(phone=phone,
+                                                defaults={'is_active': is_active, 'is_admin': is_admin,
+                                                          'name': name}, password=password)
 
         return user
 
@@ -108,11 +100,7 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
 class FirebaseNotificationTokenCreationManager(BaseManager):
     def create_token(self, user: User, token: str = None):
-        firebase_token: FirebaseNotificationToken
-        firebase_token, created = self.update_or_create(user=user, defaults={'token': token})  # type:ignore[assignment]
-
-        firebase_token.full_clean()
-        firebase_token.save(using=self.db)
+        firebase_token = self.update_or_create_with_check(user=user, defaults={'token': token})
         return firebase_token
 
 
@@ -121,7 +109,7 @@ class FirebaseNotificationToken(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='firebase_token')
     token = models.CharField(max_length=200, null=True, blank=True)
 
-    objects = FirebaseNotificationTokenCreationManager()
+    objects = FirebaseNotificationTokenCreationManager()  # type: ignore[assignment]
 
 
 class CreationToken(BaseModel):
@@ -140,7 +128,7 @@ class CreationToken(BaseModel):
     session = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
 
-    objects = CreationTokenManager()
+    objects = CreationTokenManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.key.__str__()

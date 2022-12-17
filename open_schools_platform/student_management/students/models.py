@@ -1,15 +1,17 @@
+from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
+from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 import uuid
 
 import safedelete
 from django.core.validators import MinValueValidator
 from django.db import models
-from phonenumber_field.modelfields import PhoneNumberField  # type: ignore[name-defined]
+from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
-from open_schools_platform.photo_management.photos.models import Photo  # type: ignore
-from open_schools_platform.user_management.users.models import User  # type: ignore[misc,name-defined]
+from open_schools_platform.photo_management.photos.models import Photo
+from open_schools_platform.user_management.users.models import User
 from open_schools_platform.organization_management.circles.models import Circle
 
 
@@ -19,13 +21,9 @@ class StudentProfileManager(BaseManager):
         if not photo:
             photo = Photo.objects.create_photo()
 
-        student_profile: StudentProfile
-        student_profile, created = self.update_or_create(user=user,  # type:ignore[assignment]
-                                                         defaults={'name': name, 'age': age, 'phone': phone,
-                                                                   'photo': photo})
-
-        student_profile.full_clean()
-        student_profile.save(using=self.db)
+        student_profile = self.update_or_create_with_check(user=user,
+                                                           defaults={'name': name, 'age': age, 'phone': phone,
+                                                                     'photo': photo})
         return student_profile
 
 
@@ -44,7 +42,7 @@ class StudentProfile(BaseModel):
     photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, related_name="photo", blank=True)
     history = HistoricalRecords()
 
-    objects = StudentProfileManager()
+    objects = StudentProfileManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name.__str__()
@@ -70,7 +68,7 @@ class Student(BaseModel):
     student_profile = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, null=True, related_name="students",
                                         blank=True)
 
-    objects = StudentManager()
+    objects = StudentManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name

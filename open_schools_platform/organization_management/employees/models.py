@@ -26,13 +26,7 @@ class EmployeeManager(BaseManager):
 
 class EmployeeProfileManager(BaseManager):
     def create_employee_profile(self, user: User, name: str, email: str = None):
-        employee_profile: EmployeeProfile
-        employee_profile, created = self.update_or_create(user=user, defaults={'name': name,  # type:ignore[assignment]
-                                                                               'email': email})
-
-        employee_profile.full_clean()
-        employee_profile.save(using=self._db)
-
+        employee_profile = self.update_or_create_with_check(user=user, defaults={'name': name, 'email': email})
         return employee_profile
 
 
@@ -40,7 +34,7 @@ class EmployeeProfile(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    objects = EmployeeProfileManager()
+    objects = EmployeeProfileManager()  # type: ignore[assignment]
     email = models.EmailField(max_length=255, blank=True)
     history = HistoricalRecords()
 
@@ -59,7 +53,7 @@ class Employee(BaseModel):
     position = models.CharField(max_length=255, blank=True, default="")
     history = HistoricalRecords()
 
-    objects = EmployeeManager()
+    objects = EmployeeManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name

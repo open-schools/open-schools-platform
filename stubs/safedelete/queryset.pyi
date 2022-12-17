@@ -1,7 +1,7 @@
 from .query import SafeDeleteQuery
 from django.db import models as models
 from django.db.models import query
-from typing import Any, Dict, Optional, Tuple, Type, TypeVar
+from typing import Any, Dict, Optional, Tuple, Type, TypeVar, Union
 
 _QS = TypeVar('_QS', bound='SafeDeleteQueryset')
 
@@ -18,6 +18,6 @@ class SafeDeleteQueryset(query.QuerySet):
 
     def undelete(self, force_policy: Optional[int] = ...) -> Tuple[int, Dict[str, int]]: ...
 
-    def all(self, force_visibility: Any | None = ...) -> _QS: ...
+    def all(self, force_visibility: Union[Any, None] = ...) -> _QS: ...
 
     def filter(self, *args, **kwargs): ...

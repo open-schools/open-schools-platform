@@ -9,11 +9,7 @@ from open_schools_platform.user_management.users.models import User
 
 class ParentProfileManager(BaseManager):
     def create_parent_profile(self, user: User, name: str):
-        parent_profile: ParentProfile
-        parent_profile, created = self.update_or_create(user=user, defaults={'name': name})  # type:ignore[assignment]
-
-        parent_profile.full_clean()
-        parent_profile.save(using=self.db)
+        parent_profile = self.update_or_create_with_check(user=user, defaults={'name': name})
         return parent_profile
 
 
@@ -23,7 +19,7 @@ class ParentProfile(BaseModel):
     name = models.CharField(max_length=200)
     history = HistoricalRecords()
 
-    objects = ParentProfileManager()
+    objects = ParentProfileManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name.__str__()

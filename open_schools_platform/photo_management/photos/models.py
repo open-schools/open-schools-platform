@@ -18,7 +18,7 @@ class Photo(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     image = models.ImageField(storage=ClientDocsStorage(), default=None, blank=True, null=True)
 
-    objects = PhotoManager()
+    objects = PhotoManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.id.__str__()
