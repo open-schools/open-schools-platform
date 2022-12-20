@@ -1,4 +1,3 @@
-from django.contrib import admin
 from leaflet.admin import LeafletGeoAdmin
 
 from .models import Circle
@@ -28,11 +27,8 @@ class AddressFilter(InputFilter):
             return get_circles(filters={"address": address})
 
 
-@admin_wrapper
+@admin_wrapper(Circle)
 class CircleAdmin(BaseAdmin, LeafletGeoAdmin):
     list_display = ("organization", "address", "capacity", "location", "id")
     search_fields = ("name",)
     list_filter = (OrganizationFilter, AddressFilter)
-
-
-admin.site.register(Circle, CircleAdmin)

@@ -27,7 +27,7 @@ SECRET_KEY = '=ug_ucl@yi6^mrcjyz%(u0%&g2adt#bz3@yos%#@*t#t!ypx=a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+APPEND_SLASH = False
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -86,7 +86,8 @@ INSTALLED_APPS = [
 ]
 
 LOCAL_MIDDLEWARES = [
-    'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware'
+    'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware',
+    'open_schools_platform.middleware.RemoveTrailingSlash.RemoveTrailingSlashMiddleware',
 ]
 
 THIRD_PARTY_MIDDLEWARES = [
