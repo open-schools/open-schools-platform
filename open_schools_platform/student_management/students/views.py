@@ -29,7 +29,7 @@ class StudentProfileApi(ApiAuthMixin, APIView):
                               "Returns Student profile data",
         request_body=StudentProfileCreateSerializer,
         responses={201: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
-                   404: "There is no such family",
+                   404: "No such family",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
@@ -40,7 +40,6 @@ class StudentProfileApi(ApiAuthMixin, APIView):
             filters={"id": str(student_profile_serializer.validated_data['family'])},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such family"
         )
         student_profile = create_student_profile(
             **get_dict_excluding_fields(student_profile_serializer.validated_data, ["family"]))
@@ -55,7 +54,7 @@ class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
         operation_description="Adds photo to provided student profile",
         request_body=StudentProfileAddPhotoSerializer,
         responses={200: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
-                   404: "There is no such student profile",
+                   404: "No such student profile",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
@@ -63,7 +62,7 @@ class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
         add_photo_serializer = StudentProfileAddPhotoSerializer(data=request.data)
         add_photo_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user,
-                                              empty_exception=True, empty_message="There is no such student profile")
+                                              empty_exception=True)
         update_student_profile(student_profile=student_profile,
                                data=add_photo_serializer.validated_data)
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
@@ -75,7 +74,7 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentProfileUpdateSerializer(),
         responses={200: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
-                   404: "There is no such student profile or family",
+                   404: "No such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
     def patch(self, request, pk):
@@ -85,7 +84,6 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
             filters={'id': str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such student_profile"
         )
 
         if student_profile_update_serializer.validated_data['family']:
@@ -93,7 +91,6 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
                 filters={"id": student_profile_update_serializer.validated_data['family']},
                 user=request.user,
                 empty_exception=True,
-                empty_message="There is no such student_profile"
             )
         update_student_profile(student_profile=student_profile,
                                data=get_dict_excluding_fields(student_profile_update_serializer.validated_data, []))
@@ -104,7 +101,7 @@ class StudentProfileDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student-profile.",
-        responses={204: "Successful deletion", 404: "There is no such student-profile"}
+        responses={204: "Successful deletion", 404: "No such student-profile"}
     )
     def delete(self, request, pk):
         student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
@@ -132,7 +129,6 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         circle = get_circle(
             filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
             empty_exception=True,
-            empty_message="There is no such circle"
         )
 
         query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
@@ -147,7 +143,7 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQuerySerializer(),
         responses={201: convert_dict_to_serializer({"query": StudentProfileQuerySerializer()}),
-                   404: "There is no such student profile"}
+                   404: "No such student profile"}
     )
     def post(self, request, pk):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
@@ -156,13 +152,11 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
             filters={"id": str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such student profile"
         )
 
         circle = get_circle(
             filters={'id': student_join_circle_req_serializer.validated_data["circle"]},
             empty_exception=True,
-            empty_message="There is no such circle"
         )
 
         query = query_creation_logic(student_join_circle_req_serializer.validated_data, circle,
@@ -176,7 +170,7 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQueryUpdateSerializer(),
         responses={201: convert_dict_to_serializer({"query": StudentProfileQuerySerializer()}),
-                   404: "There is no such query",
+                   404: "No such query",
                    406: "Cant update query because it's status is not SENT"}
     )
     def patch(self, request):
@@ -228,7 +222,6 @@ class StudentCirclesListApi(ApiAuthMixin, APIView):
             filters={"id": str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message='There is no such student profile'
         )
         students = get_students(
             filters={'student_profile': str(student_profile.id)},
@@ -241,7 +234,7 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student.",
-        responses={204: "Successful deletion", 404: "There is no such student"}
+        responses={204: "Successful deletion", 404: "No such student"}
     )
     def delete(self, request, pk):
         student = get_student(filters={'id': pk}, empty_exception=True, user=request.user)

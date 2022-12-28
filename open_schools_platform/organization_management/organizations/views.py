@@ -113,7 +113,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
         responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
-                   404: "There is no such query",
+                   404: "No such query",
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
@@ -143,7 +143,6 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
             filters={'id': str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such organization"
         )
         queries = get_queries(filters={'sender_id': str(organization.id)})
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
@@ -215,7 +214,7 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Delete organization.",
-        responses={204: "Successful deletion", 404: "There is no such organization"}
+        responses={204: "Successful deletion", 404: "No such organization"}
     )
     def delete(self, request, pk):
         organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
@@ -227,13 +226,12 @@ class GetStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "There is no such student"}
+        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "No such student"}
     )
     def get(self, request, pk):
         student = get_student(
             filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
-            empty_message="There is no such student",
         )
         return Response({"student": StudentGetSerializer(student).data}, status=200)
 
@@ -247,8 +245,7 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
     def get(self, request, pk):
-        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True,
-                         empty_message="This organization doesn't exist")
+        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True)
         students = get_students(filters={'circle__organization': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)

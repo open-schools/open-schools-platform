@@ -25,7 +25,7 @@ class PhotoApi(ApiAuthMixin, APIView):
         photo_update_serializer.is_valid(raise_exception=True)
 
         photo = get_photo(filters={"id": str(pk)}, empty_exception=True,
-                          user=request.user, empty_message="This photo does not exist")
+                          user=request.user)
         if not photo_update_serializer.validated_data.get("image"):
             return Response({"result": "Photo was not provided"}, status=204)
         update_photo(photo=photo, data=photo_update_serializer.validated_data)

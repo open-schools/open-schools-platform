@@ -24,7 +24,6 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
             filters={"id": query_status_serializer.validated_data["id"]},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such query"
         )
 
         query = run_sender_handler(query, query_status_serializer.validated_data["status"], request.user)

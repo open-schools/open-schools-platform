@@ -45,7 +45,6 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
             filters={'id': str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such family",
         )
         return Response({"results": StudentProfileSerializer(family.student_profiles, many=True).data}, status=200)
 
@@ -60,7 +59,6 @@ class FamiliesListApi(ApiAuthMixin, APIView):
         families = get_families(
             filters={"parent_profiles": str(request.user.parent_profile.id)},
             empty_exception=True,
-            empty_message="There is no such family",
         )
         return Response({"results": FamilySerializer(families, many=True).data}, status=200)
 
@@ -70,7 +68,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
         request_body=FamilyInviteParentSerializer,
         responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()}),
-                   404: "There is no such family",
+                   404: "No such family",
                    406: "Parent is already in this family"},
         operation_description="Creates invite parent query.",
     )
@@ -78,7 +76,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
         invite_parent_serializer = FamilyInviteParentSerializer(data=request.data)
         invite_parent_serializer.is_valid(raise_exception=True)
         family = get_family(filters={"id": str(invite_parent_serializer.validated_data["family"])}, user=request.user,
-                            empty_exception=True, empty_message="There is no such family")
+                            empty_exception=True)
         parent = get_parent_profile(filters={"phone": str(invite_parent_serializer.validated_data["phone"])},
                                     empty_exception=True,
                                     empty_message="There is no parent_profile with such phone")
@@ -96,7 +94,7 @@ class FamilyDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
         operation_description="Delete family.",
-        responses={204: "Successful deletion", 404: "There is no such family"}
+        responses={204: "Successful deletion", 404: "No such family"}
     )
     def delete(self, request, pk):
         family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)

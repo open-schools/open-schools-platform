@@ -34,7 +34,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create circle via provided name and organization.",
         request_body=CreateCircleSerializer,
-        responses={201: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "There is no such organization"},
+        responses={201: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "No such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def post(self, request):
@@ -43,7 +43,6 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         organization = get_organization(
             filters={"id": create_circle_serializer.validated_data['organization']},
             empty_exception=True,
-            empty_message="There is no such organization"
         )
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
                                organization=organization)
@@ -75,13 +74,12 @@ class GetCircleApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "There is no such circle"}
+        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "No such circle"}
     )
     def get(self, request, pk):
         circle = get_circle(
             filters={"id": str(pk)},
             empty_exception=True,
-            empty_message="There is no such circle",
         )
         return Response({"circle": CircleSerializer(circle).data}, status=200)
 
@@ -97,12 +95,10 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
             filters={"id": str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such circle."
         )
         queries = get_queries(
             filters={"recipient_id": str(pk)},
             empty_exception=True,
-            empty_message="There are no queries with such recipient."
         )
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
 
@@ -114,8 +110,7 @@ class CirclesStudentsListApi(ApiAuthMixin, APIView):
         responses={200: convert_dict_to_serializer({"results": StudentSerializer(many=True)})}
     )
     def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True,
-                            empty_message="There is no such circle.")
+        circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True)
         qs = circle.students.all()
         return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
 
@@ -124,7 +119,7 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         operation_description="Delete circle.",
-        responses={204: "Successful deletion", 404: "There is no such circle"}
+        responses={204: "Successful deletion", 404: "No such circle"}
     )
     def delete(self, request, pk):
         circle = get_circle(filters={'id': str(pk)}, empty_exception=True, user=request.user)
@@ -175,8 +170,7 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
     def get(self, request, pk):
-        get_circle(filters={'id': str(pk)}, user=request.user, empty_exception=True,
-                   empty_message="This circle doesn't exist")
+        get_circle(filters={'id': str(pk)}, user=request.user, empty_exception=True)
         students = get_students(filters={'circle': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)

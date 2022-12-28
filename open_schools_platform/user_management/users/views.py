@@ -65,7 +65,6 @@ class RetrieveCreationTokenApi(APIView):
         token = get_token(
             filters={"key": pk},
             empty_exception=True,
-            empty_message="No such token"
         )
 
         return Response({"token": RetrieveCreationTokenSerializer(token).data}, status=200)
@@ -164,7 +163,7 @@ class UserResetPasswordApi(APIView):
         user = get_user(
             filters={"phone": token.phone},
             empty_exception=True,
-            empty_message="No such user"
+            empty_message="No user with such phone"
         )
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
