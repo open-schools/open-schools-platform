@@ -95,7 +95,7 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Delete employee.",
-        responses={204: "Successful deletion", 404: "No such employee"}
+        responses={204: "Successfully deleted", 404: "No such employee"}
     )
     def delete(self, request, pk):
         employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)

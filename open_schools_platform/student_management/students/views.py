@@ -101,7 +101,7 @@ class StudentProfileDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student-profile.",
-        responses={204: "Successful deletion", 404: "No such student-profile"}
+        responses={204: "Successfully deleted", 404: "No such student-profile"}
     )
     def delete(self, request, pk):
         student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
@@ -234,7 +234,7 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student.",
-        responses={204: "Successful deletion", 404: "No such student"}
+        responses={204: "Successfully deleted", 404: "No such student"}
     )
     def delete(self, request, pk):
         student = get_student(filters={'id': pk}, empty_exception=True, user=request.user)

@@ -119,7 +119,7 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         operation_description="Delete circle.",
-        responses={204: "Successful deletion", 404: "No such circle"}
+        responses={204: "Successfully deleted", 404: "No such circle"}
     )
     def delete(self, request, pk):
         circle = get_circle(filters={'id': str(pk)}, empty_exception=True, user=request.user)
