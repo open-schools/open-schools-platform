@@ -6,7 +6,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.parent_management.families.constants import FamilyConstants
 from open_schools_platform.user_management.users.services import notify_user
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
     FamilyInviteParentSerializer
@@ -24,7 +24,7 @@ class FamilyApi(ApiAuthMixin, APIView):
         operation_description="Creates Family.\n"
                               "Returns Family data.",
         request_body=FamilyCreateSerializer,
-        responses={201: swagger_dict_response({"family": FamilySerializer()})},
+        responses={201: convert_dict_to_serializer({"family": FamilySerializer()})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def post(self, request):
@@ -37,7 +37,7 @@ class FamilyApi(ApiAuthMixin, APIView):
 class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all student profiles for provided family.",
-        responses={200: swagger_dict_response({"results": StudentProfileSerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": StudentProfileSerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request, pk):
@@ -53,7 +53,7 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
 class FamiliesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all families for currently logged in user",
-        responses={200: swagger_dict_response({"results": FamilySerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": FamilySerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request):
@@ -69,7 +69,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
         request_body=FamilyInviteParentSerializer,
-        responses={201: swagger_dict_response({"query": QueryStatusSerializer()}),
+        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()}),
                    404: "There is no such family",
                    406: "Parent is already in this family"},
         operation_description="Creates invite parent query.",

@@ -23,8 +23,8 @@ class CustomDjangoFilterBackend(DjangoFilterBackend):
     """
         CustomDjangoFilterBackend provide you some useful features:
 
-        1. Generate custom filter fields with swagger_filter_fields field in your view
-            define dict of pairs that contain: field name and filter
+        1. Generate custom filter fields with visible_filter_fields field in your view
+            define dict of pairs that contain: field names and filters
     """
 
     def get_filterset_class(self, view, queryset=None):
@@ -33,15 +33,15 @@ class CustomDjangoFilterBackend(DjangoFilterBackend):
         if response:
             return response
 
-        swagger_filter_fields = getattr(view, 'swagger_filter_fields', None)
+        visible_filter_fields = getattr(view, 'visible_filter_fields', None)
 
-        if swagger_filter_fields is not None:
+        if visible_filter_fields is not None:
             class AutoFilterSet(self.filterset_base):
                 pass
 
             fields = {}
 
-            for key, value in swagger_filter_fields.items():
+            for key, value in visible_filter_fields.items():
                 fields[key] = value
 
             AutoFilterSet.declared_filters = fields

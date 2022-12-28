@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
@@ -41,7 +41,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user.",
         request_body=CreateOrganizationSerializer,
-        responses={201: swagger_dict_response({"creator_employee": EmployeeSerializer()})},
+        responses={201: convert_dict_to_serializer({"creator_employee": EmployeeSerializer()})},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
     )
     def post(self, request, *args, **kwargs):
@@ -83,7 +83,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteSerializer,
-        responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
+        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite employee query.",
     )
     def post(self, request, pk) -> Response:
@@ -112,7 +112,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
-        responses={200: swagger_dict_response({"query": EmployeeProfileQuerySerializer()}),
+        responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
                    404: "There is no such query",
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
@@ -135,7 +135,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
 class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": EmployeeProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):
@@ -157,7 +157,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
                              "circle": UUIDFilter(lookup_expr=["exact"])}
 
     queryset = Query.objects.all()
-    swagger_filter_fields = \
+    visible_filter_fields = \
         FilterProperties.query_fields | \
         FilterProperties.student_fields | \
         FilterProperties.additional_fields
@@ -165,7 +165,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": StudentProfileQuerySerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": StudentProfileQuerySerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()
@@ -188,12 +188,12 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
         student_fields = StudentFilter.get_swagger_filters()
 
     queryset = Student.objects.all()
-    swagger_filter_fields = FilterProperties.student_fields
+    visible_filter_fields = FilterProperties.student_fields
 
     @swagger_auto_schema(
         operation_description="Get students in this circle",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": StudentSerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()
@@ -227,7 +227,7 @@ class GetStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"student": StudentGetSerializer()}), 404: "There is no such student"}
+        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "There is no such student"}
     )
     def get(self, request, pk):
         student = get_student(

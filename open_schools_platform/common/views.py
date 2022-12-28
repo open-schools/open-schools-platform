@@ -30,7 +30,7 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
     return BaseManageView
 
 
-def swagger_dict_response(dict: Dict[str, Union[RestFrameworkSerializer, List[str]]]) -> Type[RestFrameworkSerializer]:
+def convert_dict_to_serializer(dict: Dict[str, Union[RestFrameworkSerializer, List[str]]]) -> Type[RestFrameworkSerializer]:
     class Serializer(RestFrameworkSerializer):  # type: ignore
         pass
 

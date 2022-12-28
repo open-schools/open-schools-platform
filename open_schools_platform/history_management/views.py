@@ -4,7 +4,7 @@ from drf_yasg.utils import swagger_auto_schema
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
 from open_schools_platform.user_management.users.selectors import get_user
@@ -27,7 +27,7 @@ class UserHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get user history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': UserHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': UserHistorySerializer()}),
                    404: "There is no such user"},
     )
     def get(self, request, pk):
@@ -42,7 +42,7 @@ class OrganizationHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get organization history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': OrganizationHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': OrganizationHistorySerializer()}),
                    404: "There is no such organization"},
     )
     def get(self, request, pk):
@@ -57,7 +57,7 @@ class EmployeeHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get employee history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': EmployeeHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': EmployeeHistorySerializer()}),
                    404: "There is no such employee"},
     )
     def get(self, request, pk):
@@ -72,7 +72,7 @@ class CircleHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get circle history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': CircleHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': CircleHistorySerializer()}),
                    404: "There is no such circle"},
     )
     def get(self, request, pk):
@@ -87,7 +87,7 @@ class StudentHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': StudentHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': StudentHistorySerializer()}),
                    404: "There is no such student"},
     )
     def get(self, request, pk):
@@ -102,7 +102,7 @@ class StudentProfileHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': StudentProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': StudentProfileHistorySerializer()}),
                    404: "There is no such student-profile"},
     )
     def get(self, request, pk):
@@ -117,7 +117,7 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get employee-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': EmployeeProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': EmployeeProfileHistorySerializer()}),
                    404: "There is no such employee-profile"},
     )
     def get(self, request, pk):
@@ -132,7 +132,7 @@ class ParentProfileHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get parent-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': ParentProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': ParentProfileHistorySerializer()}),
                    404: "There is no such parent-profile"},
     )
     def get(self, request, pk):
@@ -147,7 +147,7 @@ class FamilyHistoryApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get family history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: swagger_dict_response({'results': FamilyHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': FamilyHistorySerializer()}),
                    404: "There is no such family"},
     )
     def get(self, request, pk):

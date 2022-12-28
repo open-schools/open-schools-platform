@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.photo_management.photos.selectors import get_photo
 from open_schools_platform.photo_management.photos.serializers import PhotoSerializer, PhotoUpdateSerializer
 from open_schools_platform.photo_management.photos.services import update_photo
@@ -17,7 +17,7 @@ class PhotoApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update photo",
         request_body=PhotoUpdateSerializer,
-        responses={200: swagger_dict_response({"photo": PhotoSerializer()}), },
+        responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()}), },
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
     def patch(self, request, pk):
