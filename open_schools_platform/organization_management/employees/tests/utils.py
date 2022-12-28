@@ -85,7 +85,7 @@ def create_test_employee(user: User, organization: Organization = None):
         "position": "Chief director",
         "user": user,
         "organization": organization
-    }
+    }  # type: Dict[Any, Any]
     return create_employee(**employee_data)
 
 
