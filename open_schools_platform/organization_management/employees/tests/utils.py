@@ -80,7 +80,13 @@ def create_test_organizations():
 
 
 def create_test_employee(user: User, organization: Organization = None):
-    return create_employee(name="test_employee", position="test", user=user, organization=organization)
+    employee_data = {
+        "name": "Andrey",
+        "position": "Chief director",
+        "user": user,
+        "organization": organization
+    }
+    return create_employee(**employee_data)
 
 
 def get_deleted_employees():
