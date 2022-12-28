@@ -28,8 +28,8 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - object storage access key ```AWS_ACCESS_KEY=<key>```
 - object storage secret access key ```AWS_SECRET_ACCESS_KEY=<key>```
 - object storage bucket name ```YANDEX_CLIENT_DOCS_BUCKET_NAME=<key>```
-- email id ```EMAIL_ID=<key>```
-- mail.ru api key ```EMAIL_PRIVATE_API_KEY=<key>```
+- ⚠️email id ```EMAIL_ID=<key>```
+- ⚠️mail.ru api key ```EMAIL_PRIVATE_API_KEY=<key>```
 - firebase cloud messaging server key ```FCM_SERVER_KEY=<key>```
 - firebase admin SDK configuration. ```FIREBASE_ADMIN_CONFIG=<key>```
 
