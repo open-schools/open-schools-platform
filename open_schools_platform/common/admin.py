@@ -19,6 +19,17 @@ class BaseAdmin(SafeDeleteAdmin):
 
 
 class InputFilter(admin.SimpleListFilter):
+    """
+    InputFilter allows to create custom filters for django admin.
+    To use it, you need to inherit from it in a class.
+
+    The class should contain:
+    - parameter_name and title attributes.
+    - redefined queryset method.
+
+    You can look for usage examples in this project.
+    """
+
     template = 'templates/input_filter.html'
 
     def lookups(self, request, model_admin):
