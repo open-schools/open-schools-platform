@@ -1,6 +1,9 @@
-from typing import Type, Dict
+from typing import Type, Dict, Union, List, Any
 
 from django.views import View
+from rest_framework.fields import ChoiceField, Field
+from rest_framework.serializers import Serializer as RestFrameworkSerializer
+
 from open_schools_platform.common.types import DjangoViewType
 
 
@@ -25,3 +28,20 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
             return super().dispatch(request, *args, **kwargs)
 
     return BaseManageView
+
+
+def convert_dict_to_serializer(dict: Dict[str, Union[RestFrameworkSerializer, List[str]]])\
+        -> Type[RestFrameworkSerializer]:
+    class Serializer(RestFrameworkSerializer):  # type: ignore
+        pass
+
+    fields = {}  # type: Dict[str, Field[Any, Any, Any, Any]]
+
+    for key, value in dict.items():
+        if isinstance(value, list):
+            fields[key] = ChoiceField(value)
+        else:
+            fields[key] = value
+
+    Serializer._declared_fields = fields
+    return Serializer

@@ -2,7 +2,7 @@ version: "3.9"
 
 services:
   db:
-    image: postgres:14.1
+    image: postgis/postgis:14-3.2
     environment:
       - POSTGRES_DB=local_db
       - POSTGRES_USER=postgres
@@ -12,6 +12,9 @@ services:
 
   rabbitmq:
     image: "rabbitmq:alpine"
+
+    ports:
+      - "5672:5672"
 
     healthcheck:
       test: rabbitmq-diagnostics -q ping
@@ -40,7 +43,8 @@ services:
     build:
       context: .
       dockerfile: docker/local.Dockerfile
-    command: celery -A open_schools_platform.tasks worker -l info --without-gossip --without-mingle --without-heartbeat
+    #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
+    command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
@@ -50,6 +54,14 @@ services:
       - db
       - rabbitmq
     restart: on-failure
+
+  flower:
+    image: mher/flower
+    environment:
+      - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
+      - FLOWER_PORT=5555
+    ports:
+      - "5555:5555"
 
   beats:
     build:

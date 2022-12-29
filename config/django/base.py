@@ -27,7 +27,7 @@ SECRET_KEY = '=ug_ucl@yi6^mrcjyz%(u0%&g2adt#bz3@yos%#@*t#t!ypx=a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+APPEND_SLASH = False
 ALLOWED_HOSTS = ['*']
 
 # Application definition
@@ -42,19 +42,32 @@ LOCAL_APPS = [
     'open_schools_platform.organization_management.organizations.apps.OrganizationsConfig',
     'open_schools_platform.organization_management.employees.apps.EmployeesConfig',
     'open_schools_platform.errors.apps.ErrorsConfig',
-    'open_schools_platform.testing_examples.apps.TestingExamplesConfig',
+    'open_schools_platform.parent_management.families.apps.FamiliesConfig',
+    'open_schools_platform.parent_management.parents.apps.ParentsConfig',
+    'open_schools_platform.student_management.students.apps.StudentConfig',
+    'open_schools_platform.query_management.queries.apps.QueriesConfig',
+    'open_schools_platform.organization_management.circles.apps.CirclesConfig',
+    'open_schools_platform.photo_management.photos.apps.PhotosConfig',
+    'open_schools_platform.history_management.apps.HistoryConfig',
 ]
 
 THIRD_PARTY_APPS = [
     'rest_framework',
+    'rest_framework_gis',
+    'django.contrib.gis',
     'django_celery_results',
     'django_celery_beat',
     'django_filters',
+    'leaflet',
     'corsheaders',
     'django_extensions',
     'rest_framework_jwt',
     'drf_yasg',
     'phonenumber_field',
+    'rules.apps.AutodiscoverRulesConfig',
+    'storages',
+    'safedelete',
+    'import_export',
 ]
 
 INSTALLED_APPS = [
@@ -70,6 +83,15 @@ INSTALLED_APPS = [
     *LOCAL_APPS,
 ]
 
+LOCAL_MIDDLEWARES = [
+    'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware',
+    'open_schools_platform.middleware.RemoveTrailingSlash.RemoveTrailingSlashMiddleware',
+]
+
+THIRD_PARTY_MIDDLEWARES = [
+    'simple_history.middleware.HistoryRequestMiddleware',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
@@ -80,6 +102,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    *THIRD_PARTY_MIDDLEWARES,
+    *LOCAL_MIDDLEWARES
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -87,7 +111,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,11 +133,12 @@ DATABASES = {
     'default': env.db('DATABASE_URL', default='postgres:///open_schools_platform'),
 }
 DATABASES['default']['ATOMIC_REQUESTS'] = True
+DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
 if os.environ.get('GITHUB_WORKFLOW'):
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
+            'ENGINE': 'django.contrib.gis.db.backends.postgis',
             'NAME': 'github_actions',
             'USER': 'postgres',
             'PASSWORD': 'postgres',
@@ -165,13 +190,28 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 REST_FRAMEWORK = {
     'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',  # noqa: E501
     'DEFAULT_FILTER_BACKENDS': (
-        'django_filters.rest_framework.DjangoFilterBackend',
+        'open_schools_platform.common.filters.CustomDjangoFilterBackend',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_PERMISSION_CLASSES': [
-       'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+}
+
+AUTHENTICATION_BACKENDS = (
+    'rules.permissions.ObjectPermissionBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'api_key': {
+            'type': 'apiKey',
+            'in': 'header',
+            'name': 'Authorization'
+        }
+    },
 }
 
 from config.settings.cors import *  # noqa
@@ -179,3 +219,5 @@ from config.settings.jwt import *  # noqa
 from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
+from config.settings.geo_django import *  # noqa
+from config.settings.object_storage import *  # noqa

@@ -1,6 +1,6 @@
 from django.urls import path, include
 
-from .apis import (
+from .views import (
     UserJwtLoginApi,
     UserJwtLogoutApi,
 
@@ -10,25 +10,25 @@ from .apis import (
 
 urlpatterns = [
     path(
-        'jwt/',
+        '/jwt/',
         include(([
             path(
-                "login/",
+                "login",
                 UserJwtLoginApi.as_view(),
                 name="login"
             ),
             path(
-                "logout/",
+                "logout",
                 UserJwtLogoutApi.as_view(),
                 name="logout"
             )
         ], "jwt"))
     ),
     path(
-        'me/',
+        '/me',
         include(([
              path(
-                 "update-password/",
+                 "/update-password",
                  UpdatePasswordApi.as_view(),
                  name="update-password"
              ),

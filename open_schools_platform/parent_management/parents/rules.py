@@ -1,0 +1,12 @@
+import rules
+
+from open_schools_platform.parent_management.parents.models import ParentProfile
+from open_schools_platform.user_management.users.models import User
+
+
+@rules.predicate
+def is_parent_profile_owner(user: User, parent_profile: ParentProfile):
+    return parent_profile.user == user
+
+
+rules.add_perm("parents.parent_profile_access", is_parent_profile_owner)

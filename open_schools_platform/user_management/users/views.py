@@ -1,13 +1,14 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
-from rest_framework.exceptions import NotFound
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
+from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.common.utils import get_dict_from_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.errors.services import InvalidArgumentException
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -16,11 +17,12 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.user_management.users.serializers \
     import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
     RetrieveCreationTokenSerializer, ResendSerializer, \
-    PasswordResetSerializer
+    PasswordResetSerializer, FCMNotificationToken
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
-    get_jwt_token, update_token_session, set_new_password_for_user
-from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase
+    get_jwt_token, update_token_session, set_new_password_for_user, update_fcm_notification_token_entity
+from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase, \
+    firebase_error_dict_with_additional_info
 
 
 class CreationTokenApi(CreateAPIView):
@@ -28,7 +30,8 @@ class CreationTokenApi(CreateAPIView):
         operation_description="Send sms to entered phone number and"
                               "return token for phone verification. Creation token id as a response.",
         request_body=CreationTokenSerializer,
-        responses={200: "Use old sms, it is still alive.", 201: "Token created and SMS was sent.",
+        responses={200: "Use old sms, it is still alive. Creation token id as response.",
+                   201: "Token created and SMS was sent. Creation token id as response.",
                    422: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
                    404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
@@ -44,7 +47,7 @@ class CreationTokenApi(CreateAPIView):
         response = send_firebase_sms(**token_serializer.data)
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
+            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
 
         token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
@@ -54,15 +57,17 @@ class CreationTokenApi(CreateAPIView):
 class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data.",
-        responses={404: "Token with that id was not found.", 200: RetrieveCreationTokenSerializer()},
+        responses={404: "Token with that id was not found.",
+                   200: convert_dict_to_serializer({"token": RetrieveCreationTokenSerializer()})},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def get(self, request, pk):
-        token = get_token(filters={"key": pk})
-        if not token:
-            raise NotFound(detail="No such token.")
+        token = get_token(
+            filters={"key": pk},
+            empty_exception=True,
+        )
 
-        return Response(RetrieveCreationTokenSerializer(token).data)
+        return Response({"token": RetrieveCreationTokenSerializer(token).data}, status=200)
 
 
 class UserApi(CreateAPIView):
@@ -102,7 +107,7 @@ class VerificationApi(APIView):
                    401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
-    def put(self, request, pk):
+    def patch(self, request, pk):
         otp_serializer = OtpSerializer(data=request.data)
         otp_serializer.is_valid(raise_exception=True)
 
@@ -135,7 +140,7 @@ class CodeResendApi(APIView):
         response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="An error occurred. Probably you sent incorrect recaptcha.")
+            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
 
         update_token_session(token, get_dict_from_response(response)["sessionInfo"])
         return Response({"detail": "SMS was resent."}, status=200)
@@ -155,9 +160,25 @@ class UserResetPasswordApi(APIView):
 
         token = get_token_with_checks(key=user_serializer.validated_data['token'])
 
-        user = get_user(filters={"phone": token.phone})
-        if not user:
-            raise NotFound(detail="No such user.")
+        user = get_user(
+            filters={"phone": token.phone},
+            empty_exception=True,
+            empty_message="No user with such phone"
+        )
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])
         return Response({"detail": "Password was successfully reset."}, status=200)
+
+
+class AddFCMNotificationTokenApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Add FCM notification token to request user.",
+        tags=[SwaggerTags.USER_MANAGEMENT_USERS],
+        request_body=FCMNotificationToken,
+        responses={200: "FCM notification token was successfully added."},
+    )
+    def patch(self, request):
+        token_serializer = FCMNotificationToken(data=request.data)
+        token_serializer.is_valid(raise_exception=True)
+        update_fcm_notification_token_entity(token=request.user.firebase_token, data=token_serializer.validated_data)
+        return Response({"detail": "FCM notification token was successfully added."}, status=200)

@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 
 from rest_framework_jwt.serializers import JSONWebTokenSerializer
@@ -26,7 +25,8 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
 class UserUpdateSerializer(serializers.Serializer):
     name = serializers.CharField(
         allow_null=False,
-        allow_blank=False
+        allow_blank=False,
+        required=False
     )
 
 

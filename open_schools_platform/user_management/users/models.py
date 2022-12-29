@@ -6,10 +6,10 @@ from django.contrib.auth.models import (
     PermissionsMixin,
     AbstractBaseUser
 )
-from django.db.models import Manager
-from phonenumber_field.modelfields import PhoneNumberField  # type: ignore
+from phonenumber_field.modelfields import PhoneNumberField
+from simple_history.models import HistoricalRecords
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 
 
 # Taken from here:
@@ -17,7 +17,7 @@ from open_schools_platform.common.models import BaseModel
 # With some modifications
 
 
-class UserManager(BUM):
+class UserManager(BaseManager, BUM):
     def create_user(self, phone, name="", is_active=True, is_admin=False, password=None):
         if not phone:
             raise ValueError('Users must have a phone number')
@@ -39,12 +39,14 @@ class UserManager(BUM):
 
         return user
 
-    def create_superuser(self, phone, is_active=True, is_admin=True, password=None):
-        user = self.create_user(
+    def create_superuser(self, name, phone, is_active=True, is_admin=True, password=None):
+        from open_schools_platform.user_management.users.services import create_user
+        user = create_user(
             phone=phone,
-            is_active=True,
-            is_admin=True,
+            name=name,
             password=password,
+            is_active=is_active,
+            is_admin=is_admin,
         )
 
         user.is_superuser = True
@@ -53,7 +55,7 @@ class UserManager(BUM):
         return user
 
 
-class CreationTokenManager(Manager):
+class CreationTokenManager(BaseManager):
     def create_token(self, phone, session):
         if not phone:
             raise ValueError('Users must have a phone')
@@ -86,9 +88,14 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
     # This should potentially be an encrypted field
     jwt_key = models.UUIDField(default=uuid.uuid4)
 
-    objects = UserManager()
+    last_login_ip_address = models.GenericIPAddressField(null=True, blank=True)
+
+    history = HistoricalRecords()
+
+    objects = UserManager()  # type: ignore[assignment] #TODO
 
     USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = ['name']
 
     def __str__(self):
         return self.phone.__str__()
@@ -98,6 +105,25 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
     def is_staff(self):
         return self.is_admin
+
+
+class FirebaseNotificationTokenCreationManager(BaseManager):
+    def create_token(self, user: User, token: str = None):
+        firebase_token = self.model(
+            user=user,
+            token=token
+        )
+        firebase_token.full_clean()
+        firebase_token.save(using=self.db)
+        return firebase_token
+
+
+class FirebaseNotificationToken(BaseModel):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='firebase_token')
+    token = models.CharField(max_length=200, null=True, blank=True)
+
+    objects = FirebaseNotificationTokenCreationManager()
 
 
 class CreationToken(BaseModel):
@@ -117,4 +143,5 @@ class CreationToken(BaseModel):
 
     objects = CreationTokenManager()
 
-    USERNAME_FIELD = 'key'
+    def __str__(self):
+        return self.key.__str__()

@@ -1,6 +1,10 @@
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Callable
+
+from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 
 from open_schools_platform.common.types import DjangoModelType
+from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.user_management.users.models import User
 
 
 def model_update(
@@ -46,3 +50,49 @@ def model_update(
         instance.save(update_fields=fields)
 
     return instance, has_updated
+
+
+class BaseQueryHandler:
+    """
+    Base class for query handlers. It is meant to be inherited by other query handlers.
+    Contain basic query checks
+    """
+    allowed_statuses: List[str] = []
+
+    @staticmethod
+    def query_handler(query: Query, new_status: str, user: User):
+        raise NotImplementedError
+
+    @staticmethod
+    def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User,
+                             without_body: bool = False):
+        if new_status not in query_handler_class.allowed_statuses:
+            raise NotAcceptable("Not allowed status")
+        if query.status == new_status:
+            raise ValidationError(detail="Identical statuses")
+        if query.recipient is None or query.sender is None or without_body is False and query.body is None:
+            raise MethodNotAllowed("put", detail="Query is corrupted")
+
+
+def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Callable[..., Any]])\
+        -> List[Any]:
+    """
+    Get objects by theirs ids with permission check and not found exception
+    If filters don't have some keys from fields it will put None values in list in fields order
+
+    fields should contain pairs of field name in filters and selector with selector_wrapper decorator
+    """
+    result = []
+
+    for key, selector in fields.items():
+        if key in filters:
+            result.append(selector(
+                filters={"id": filters[key]},
+                user=request.user,
+                empty_exception=True,
+                empty_message="There is no such {key}.".format(key=key)
+            ))
+        else:
+            result.append(None)
+
+    return result
