@@ -33,3 +33,4 @@ class CommonConstants:
     if not EMAIL_PRIVATE_API_KEY:
         warnings.warn("email_private_api_key is not defined")
     TEST_EMAIL = 'test.openschools.education@mail.ru'
+    EMPTY_STRING = ''

@@ -1,6 +1,7 @@
 import uuid
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 from rest_framework.exceptions import MethodNotAllowed
 
 from open_schools_platform.common.services import model_update
@@ -53,3 +54,13 @@ def run_sender_handler(query: Query, new_status: str, user: User):
         raise MethodNotAllowed("put", detail="Query sender no longer exists")
     query = query.sender.query_handler(query, new_status, user)
     return query
+
+
+def count_queries_by_statuses(queries: QuerySet):
+    statuses = [Query.Status.SENT, Query.Status.ACCEPTED, Query.Status.IN_PROGRESS, Query.Status.DECLINED,
+                Query.Status.CANCELED]
+    values = {}
+    for status in statuses:
+        filtered_qs = queries.filter(status=status)
+        values[status] = filtered_qs.count()
+    return values

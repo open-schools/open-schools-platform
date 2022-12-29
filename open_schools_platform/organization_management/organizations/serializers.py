@@ -21,3 +21,11 @@ class CircleOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("id", "name")
+
+
+class AnalyticsSerializer(serializers.Serializer):
+    IN_PROGRESS = serializers.IntegerField()
+    SENT = serializers.IntegerField()
+    ACCEPTED = serializers.IntegerField()
+    DECLINED = serializers.IntegerField()
+    CANCELED = serializers.IntegerField()

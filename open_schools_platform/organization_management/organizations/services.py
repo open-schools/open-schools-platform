@@ -1,3 +1,5 @@
+from dateutil.parser import parse
+from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError, MethodNotAllowed, NotAcceptable
 
 from open_schools_platform.common.filters import BaseFilterSet
@@ -89,3 +91,9 @@ def organization_circle_query_filter(view, filters, organization: Organization, 
         return Query.objects.none()
 
     return queries
+
+
+def filter_organization_circle_queries_by_dates(queries: QuerySet, date_from, date_to):
+    date_from = (parse(date_from, fuzzy=True)).strftime("%Y-%m-%d 00:00:00")
+    date_to = (parse(date_to, fuzzy=True)).strftime("%Y-%m-%d 23:59:59")
+    return queries.filter(created_at__range=[date_from, date_to])
