@@ -1,3 +1,5 @@
+from typing import Optional
+
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
@@ -14,7 +16,7 @@ from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.user_management.users.models import User
 
 
-def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
+def create_circle(name: str, organization: Optional[Organization], description: str, capacity: int, address: str,
                   location: Point = None) -> Circle:
     """
     Geopy library allows to take coordinates from address.

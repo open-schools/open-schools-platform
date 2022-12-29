@@ -12,9 +12,13 @@ from open_schools_platform.user_management.users.services import create_user, ge
 
 
 def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
+    employee_profile = None
+    if user:
+        employee_profile = user.employee_profile
+
     employee = Employee.objects.create(
         name=name,
-        employee_profile=user.employee_profile if user is not None else None,
+        employee_profile=employee_profile,
         organization=organization,
         position=position,
     )

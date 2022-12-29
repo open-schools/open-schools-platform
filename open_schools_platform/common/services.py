@@ -53,6 +53,10 @@ def model_update(
 
 
 class BaseQueryHandler:
+    """
+    Base class for query handlers. It is meant to be inherited by other query handlers.
+    Contain basic query checks
+    """
     allowed_statuses: List[str] = []
 
     @staticmethod

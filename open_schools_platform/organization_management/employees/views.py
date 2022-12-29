@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
@@ -56,14 +56,13 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Get all queries for the provided employee profile",
-        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": EmployeeProfileQuerySerializer(many=True)})}
     )
     def get(self, request):
         employee_profile = get_employee_profile(
             filters={'id': str(request.user.employee_profile.id)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such employee profile"
         )
 
         queries = get_queries(
@@ -78,7 +77,7 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         request_body=EmployeeUpdateSerializer,
         operation_description="Update data of provided employee.",
-        responses={200: swagger_dict_response({"employee": EmployeeSerializer()}), 404: "There is no such employee"}
+        responses={200: convert_dict_to_serializer({"employee": EmployeeSerializer()}), 404: "No such employee"}
     )
     def patch(self, request, pk):
         employee_update_serializer = EmployeeUpdateSerializer(data=request.data)
@@ -86,7 +85,6 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         employee = get_employee(
             filters={"id": str(pk)},
             empty_exception=True,
-            empty_message="There is no such employee"
         )
         get_employee_profile(filters={"id": str(employee.employee_profile.id)}, user=request.user)
         update_employee(employee=employee, data=employee_update_serializer.validated_data)
@@ -97,7 +95,7 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Delete employee.",
-        responses={204: "Successful deletion", 404: "There is no such employee"}
+        responses={204: "Successfully deleted", 404: "No such employee"}
     )
     def delete(self, request, pk):
         employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)
