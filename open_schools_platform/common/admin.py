@@ -50,6 +50,11 @@ def hard_delete_queryset(self, request, queryset):
 
 
 def admin_wrapper(model: Type[BaseModel]):
+    """
+    This function is used to wrap the model with the admin class.
+    Configures the admin panel for soft deletion.
+    """
+
     def wrap_admin_model(admin_model: Type[BaseAdmin]):
         delete_policy = model._safedelete_policy
         if delete_policy:

@@ -86,6 +86,9 @@ class ApiAuthMixin:
 
 
 class XLSXMixin(object):
+    """
+    A mixin that can be used to render a XLSX file
+    """
     filename = "file"
 
     def finalize_response(self, request, response, *args, **kwargs):
