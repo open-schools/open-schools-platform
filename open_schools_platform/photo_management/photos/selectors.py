@@ -1,12 +1,12 @@
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.common.selectors import selector_wrapper
+from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.photo_management.photos.filters import PhotoFilter
 from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.user_management.users.models import User
 
 
-@selector_wrapper
+@selector_factory(Photo)
 def get_photo(*, filters=None, user: User = None) -> Photo:
     filters = filters or {}
 

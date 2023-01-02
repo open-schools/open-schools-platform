@@ -43,6 +43,7 @@ services:
     build:
       context: .
       dockerfile: docker/local.Dockerfile
+    #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
     command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db

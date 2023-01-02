@@ -1,7 +1,9 @@
+import pytest
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from config.env import env
 from open_schools_platform.organization_management.employees.selectors import get_employee_profile, get_employee
 from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
 from open_schools_platform.query_management.queries.models import Query
@@ -14,6 +16,9 @@ class InviteEmployeeTests(TestCase):
         self.invite_employee_url = \
             lambda pk: reverse("api:organization-management:organizations:invite-employee", args=[pk])
 
+    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_ID") is None or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") is None or
+                        env.ENVIRON.get("EMAIL_ID") == "" or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") == "",
+                        reason="EMAIL_ID or EMAIL_PRIVATE_API_KEY is not set")
     def test_invite_employee_query_successfully_formed(self):
         create_logged_in_user(instance=self)
         organization = create_test_organization()
