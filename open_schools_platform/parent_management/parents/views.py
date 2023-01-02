@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from rest_framework.response import Response
 
 from open_schools_platform.query_management.queries.selectors import get_queries
@@ -13,7 +13,7 @@ from open_schools_platform.query_management.queries.serializers import InvitePar
 class InviteParentQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
-        responses={200: swagger_dict_response({"results": InviteParentQuerySerializer(many=True)}),
+        responses={200: convert_dict_to_serializer({"results": InviteParentQuerySerializer(many=True)}),
                    404: "There are no queries with such recipient"},
         operation_description="Get all invite-parent queries for parent_profile of current user",
     )

@@ -1,7 +1,9 @@
+import pytest
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from config.env import env
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.organization_management.circles.tests.utils import \
     create_test_circle_with_user_in_org, create_data_circle_invite_student, \
@@ -23,6 +25,9 @@ class InviteStudentTests(TestCase):
         self.invite_student_url = \
             lambda pk: reverse("api:organization-management:circles:invite-student", args=[pk])
 
+    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_ID") is None or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") is None or
+                        env.ENVIRON.get("EMAIL_ID") == "" or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") == "",
+                        reason="EMAIL_ID or EMAIL_PRIVATE_API_KEY is not set")
     def test_invite_student_query_successfully_formed_1(self):
         user = create_logged_in_user(instance=self)
         circle = create_test_circle_with_user_in_org(user=user)
@@ -112,6 +117,9 @@ class InviteStudentTests(TestCase):
         self.assertTrue(new_student_profile)
         self.assertEqual(student_profile.phone, new_student_profile.phone)
 
+    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_ID") is None or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") is None or
+                        env.ENVIRON.get("EMAIL_ID") == "" or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") == "",
+                        reason="EMAIL_ID or EMAIL_PRIVATE_API_KEY is not set")
     def test_invite_student_query_successfully_formed_6(self):
         user = create_logged_in_user(instance=self)
         circle = create_test_circle_with_user_in_org(user=user)

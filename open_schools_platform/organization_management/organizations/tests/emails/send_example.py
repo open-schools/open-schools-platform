@@ -4,8 +4,7 @@ from open_schools_platform.tasks.tasks import send_mail_to_new_user_with_celery
 
 
 class TestSender(TestCase):
-
-    # run for debug sending mail
+    """run for debug sending mail"""
     def test_SDK_send_with_celery(self):
         send_mail_to_new_user_with_celery.delay("TEST",
                                                 {'login': 'TEST_LOGIN', 'password': 'TEST_PASSWORD',

@@ -10,7 +10,7 @@ def reverse_circles_location(apps, schema_editor):
         circle.save()
 
 
-def backwards(apps, schema_editor):
+def return_location_to_initial(apps, schema_editor):
     circles = apps.get_model('circles', 'Circle')
     for circle in circles.objects.all():
         y = circle.location.y
@@ -26,5 +26,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(reverse_circles_location, backwards)
+        migrations.RunPython(reverse_circles_location, return_location_to_initial)
     ]
