@@ -5,6 +5,8 @@ from django.core.validators import MinValueValidator
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 from phonenumber_field.phonenumber import PhoneNumber
+from simple_history.models import HistoricalRecords
+
 from open_schools_platform.common.models import BaseManager, BaseModel
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.photo_management.photos.models import Photo
@@ -39,6 +41,7 @@ class TeacherProfile(BaseModel):
         null=True,
     )
     photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True)
+    history = HistoricalRecords()
 
     objects = TeacherProfileManager()
 
@@ -65,6 +68,7 @@ class Teacher(BaseModel):
     circle = models.ForeignKey(Circle, on_delete=models.CASCADE, null=True, related_name="teachers", blank=True)
     teacher_profile = models.ForeignKey(TeacherProfile, on_delete=models.CASCADE, null=True, related_name="teachers",
                                         blank=True)
+    history = HistoricalRecords()
 
     objects = TeacherManager()
 

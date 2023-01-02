@@ -19,12 +19,12 @@ class TeacherHistorySerializer(serializers.ModelSerializer):
 
 class TeacherProfileHistorySerializer(serializers.ModelSerializer):
     history = HistorySerializerFields.get_history_records_field(
-        fields=HistorySerializerFields().HISTORY_TEACHER_PROFILES_FIELDS)(read_only=True)
+        fields=HistorySerializerFields().HISTORY_TEACHER_PROFILE_FIELDS)(read_only=True)
 
     class Meta:
         model = TeacherProfile
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
-            fields=HistorySerializerFields().HISTORY_TEACHER_PROFILES_FIELDS,
+            fields=HistorySerializerFields().HISTORY_TEACHER_PROFILE_FIELDS,
             object_title='TeacherProfileHistory',
             model=TeacherProfile).generate_schemas()

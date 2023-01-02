@@ -7,7 +7,6 @@ from config.env import env
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle_with_user_in_org, \
     create_data_circle_invite_teacher, create_test_circle, create_test_query_circle_invite_teacher
 from open_schools_platform.organization_management.teachers.selectors import get_teacher_profile
-from open_schools_platform.organization_management.teachers.services import create_teacher
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_query
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_test_user
@@ -53,8 +52,7 @@ class CircleInviteTeacherQueryTests(TestCase):
         circle = create_test_circle()
         user = create_logged_in_user(self)
         teacher_profile = user.teacher_profile
-        teacher = create_teacher(teacher_profile=teacher_profile, circle=circle, name='test_teacher')
-        query = create_test_query_circle_invite_teacher(circle, teacher, teacher_profile)
+        query = create_test_query_circle_invite_teacher(circle, teacher_profile)
         data = {
             "id": query.id,
             "status": Query.Status.ACCEPTED
@@ -67,8 +65,7 @@ class CircleInviteTeacherQueryTests(TestCase):
         circle = create_test_circle()
         user = create_logged_in_user(self)
         teacher_profile = user.teacher_profile
-        teacher = create_teacher(teacher_profile=teacher_profile, circle=circle, name='test_teacher')
-        query = create_test_query_circle_invite_teacher(circle, teacher, teacher_profile)
+        query = create_test_query_circle_invite_teacher(circle, teacher_profile)
         data = {
             "id": query.id,
             "status": Query.Status.DECLINED
@@ -82,8 +79,7 @@ class CircleInviteTeacherQueryTests(TestCase):
         circle = create_test_circle_with_user_in_org(user=circle_owner)
         user = create_test_user(phone="+79998880008")
         teacher_profile = user.teacher_profile
-        teacher = create_teacher(teacher_profile=teacher_profile, circle=circle, name='test_teacher')
-        query = create_test_query_circle_invite_teacher(circle, teacher, teacher_profile)
+        query = create_test_query_circle_invite_teacher(circle, teacher_profile)
         data = {
             "id": query.id,
             "status": Query.Status.CANCELED
@@ -92,31 +88,29 @@ class CircleInviteTeacherQueryTests(TestCase):
         self.assertEqual(200, response.status_code)
         self.assertEqual(Query.Status.CANCELED, get_query(filters={"id": str(query.id)}).status)
 
-    def test_circle_cannot_change_status_not_to_canceled(self):
+    def test_circle_cannot_change_status_not_on_canceled(self):
         circle_owner = create_logged_in_user(self)
         circle = create_test_circle_with_user_in_org(circle_owner)
         user = create_test_user(phone="+79998880008")
         teacher_profile = user.teacher_profile
-        teacher = create_teacher(teacher_profile=teacher_profile, circle=circle, name='test_teacher')
-        query = create_test_query_circle_invite_teacher(circle, teacher, teacher_profile)
+        query = create_test_query_circle_invite_teacher(circle, teacher_profile)
         data = {
             "id": query.id,
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertNotEqual(200, response.status_code)
-        self.assertNotEqual(Query.Status.ACCEPTED, get_query(filters={"id": str(query.id)}).status)
+        self.assertEqual(406, response.status_code)
+        self.assertEqual(Query.Status.SENT, get_query(filters={"id": str(query.id)}).status)
 
     def test_teacher_cannot_change_status_to_canceled(self):
         user = create_logged_in_user(self)
         circle = create_test_circle()
         teacher_profile = user.teacher_profile
-        teacher = create_teacher(teacher_profile=teacher_profile, circle=circle, name='test_teacher')
-        query = create_test_query_circle_invite_teacher(circle, teacher, teacher_profile)
+        query = create_test_query_circle_invite_teacher(circle, teacher_profile)
         data = {
             "id": query.id,
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertNotEqual(200, response.status_code)
-        self.assertNotEqual(Query.Status.CANCELED, get_query(filters={"id": str(query.id)}).status)
+        self.assertEqual(406, response.status_code)
+        self.assertEqual(Query.Status.SENT, get_query(filters={"id": str(query.id)}).status)

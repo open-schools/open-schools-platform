@@ -140,7 +140,8 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         invite_serializer = CircleStudentInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user)
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True,
+                            empty_message="There is no such circle")
         parent_phone = invite_serializer.validated_data["parent_phone"]
         student_phone = invite_serializer.validated_data["student_phone"]
         email = invite_serializer.validated_data["email"]
@@ -159,8 +160,7 @@ class InviteStudentApi(ApiAuthMixin, APIView):
                              body_model_name="student", body_id=student.id,
                              additional_model_name="studentprofile", additional_id=student_profile.id)
 
-        return Response({"query": QueryStatusSerializer(query).data},
-                        status=201)
+        return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 
 class InviteTeacherApi(ApiAuthMixin, APIView):
@@ -174,7 +174,8 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
         invite_serializer = CircleTeacherInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user)
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True,
+                            empty_message="There is no such circle")
         phone = invite_serializer.validated_data["phone"]
         name = invite_serializer.validated_data["body"]["name"]
         email = invite_serializer.validated_data["email"]
@@ -186,8 +187,7 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
                              recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
                              body_model_name="teacher", body_id=teacher.id)
 
-        return Response({"query": QueryStatusSerializer(query).data},
-                        status=201)
+        return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 
 class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
