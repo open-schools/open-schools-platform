@@ -12,7 +12,7 @@ from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
-from open_schools_platform.organization_management.teachers.services import create_teacher_profile
+from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.students.services import create_student_profile
 from open_schools_platform.user_management.users.constants import RegistrationConstants, GenerateConstants
@@ -52,7 +52,7 @@ def create_user(phone: str, password: str, name: str, is_active: bool = True,
         user=user
     )
     create_student_profile(name=name, user=user, age=0)
-    create_teacher_profile(name=name, user=user)
+    TeacherProfile.objects.create_teacher_profile(name=name, user=user)
     FirebaseNotificationToken.objects.create_token(user=user)
     return user
 

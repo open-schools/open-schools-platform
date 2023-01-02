@@ -16,6 +16,8 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
+from ..teachers.serializers import CircleTeacherInviteSerializer
+from ..teachers.services import get_teacher_profile_or_create_new_user, create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import swagger_dict_response
 from ...parent_management.families.selectors import get_families
@@ -161,6 +163,33 @@ class InviteStudentApi(ApiAuthMixin, APIView):
                              recipient_model_name="family", recipient_id=family.id,
                              body_model_name="student", body_id=student.id,
                              additional_model_name="studentprofile", additional_id=student_profile.id)
+
+        return Response({"query": QueryStatusSerializer(query).data},
+                        status=201)
+
+
+class InviteTeacherApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        request_body=CircleTeacherInviteSerializer,
+        responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
+        operation_description="Creates invite teacher query.",
+    )
+    def post(self, request, pk) -> Response:
+        invite_serializer = CircleTeacherInviteSerializer(data=request.data)
+        invite_serializer.is_valid(raise_exception=True)
+
+        circle = get_circle(filters={"id": pk}, user=request.user)
+        phone = invite_serializer.validated_data["phone"]
+        name = invite_serializer.validated_data["body"]["name"]
+        email = invite_serializer.validated_data["email"]
+
+        teacher_profile = get_teacher_profile_or_create_new_user(str(phone), str(email), circle, name)
+        teacher = create_teacher(**invite_serializer.validated_data["body"])
+
+        query = create_query(sender_model_name="circle", sender_id=pk,
+                             recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
+                             body_model_name="teacher", body_id=teacher.id)
 
         return Response({"query": QueryStatusSerializer(query).data},
                         status=201)

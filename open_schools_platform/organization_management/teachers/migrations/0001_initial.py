@@ -3,12 +3,32 @@
 from django.conf import settings
 import django.core.validators
 from django.db import migrations, models
-import django.db.models.deletion
 import django.utils.timezone
 import phonenumber_field.modelfields
 import rules.contrib.models
 import simple_history.models
 import uuid
+
+from safedelete.config import DELETED_VISIBLE
+
+
+def create_teacher_profile_for_user(apps, schema_editor):
+    TeacherProfile = apps.get_model("teachers", "teacherprofile")
+    User = apps.get_model("users", "user")
+    db_alias = schema_editor.connection.alias
+    qs = User.objects.using(db_alias).all(force_visibility=DELETED_VISIBLE)
+    for user in qs:
+        teacher_profile = TeacherProfile()
+        teacher_profile.name = 'teacher'
+        teacher_profile.user = user
+        teacher_profile.phone = user.phone
+        teacher_profile.save(using=db_alias)
+
+
+def delete_teacher_profile(apps, schema_editor):
+    TeacherProfile = apps.get_model("teachers", "teacherprofile")
+    db_alias = schema_editor.connection.alias
+    TeacherProfile.objects.using(db_alias).all().delete()
 
 
 class Migration(migrations.Migration):
@@ -110,4 +130,5 @@ class Migration(migrations.Migration):
             },
             bases=(simple_history.models.HistoricalChanges, models.Model),
         ),
+        migrations.RunPython(create_teacher_profile_for_user, delete_teacher_profile),
     ]

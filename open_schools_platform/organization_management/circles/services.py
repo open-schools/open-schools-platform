@@ -97,8 +97,8 @@ def query_to_teacher_profile(query: Query, new_status: str, user: User):
     if query.status == Query.Status.ACCEPTED:
         if query.body is None:
             raise MethodNotAllowed("put", detail="Query is corrupted")
-        query.body.circle = query.recipient
-        query.body.teacher_profile = query.sender
+        query.body.circle = query.sender
+        query.body.teacher_profile = query.recipient
         query.body.save()
     return query
 
@@ -113,7 +113,7 @@ class CircleQueryHandler(BaseQueryHandler):
 
         query_function = CircleQueryHandler.query_dict.get(type(query.recipient))
         if query_function:
-            query_function(query, new_status, user)
+            return query_function(query, new_status, user)
         else:
             raise ValidationError(detail="The recipient must be a Family or TeacherProfile if the sender is a circle")
 
