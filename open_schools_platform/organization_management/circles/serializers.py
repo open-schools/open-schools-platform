@@ -12,9 +12,6 @@ class CreateCircleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
         fields = ('name', 'organization', 'address', 'capacity', 'description')
-        extra_kwargs = {'address': {'required': True},
-                        'capacity': {'required': True},
-                        'description': {'required': True}}
 
 
 class CircleSerializer(serializers.ModelSerializer):

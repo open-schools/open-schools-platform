@@ -2,7 +2,7 @@ from django.core.validators import MinValueValidator
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
-from open_schools_platform.common.serializers import DynamicFieldsModelSerializer
+from open_schools_platform.common.serializers import get_serializer_with_fields
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
 from open_schools_platform.photo_management.photos.serializers import PhotoSerializer
@@ -30,7 +30,7 @@ class QueryStudentProfileSenderSerializer(serializers.ModelSerializer):
         fields = ('id', 'photo')
 
 
-class StudentProfileSerializer(DynamicFieldsModelSerializer):
+class StudentProfileSerializer(serializers.ModelSerializer):
     photo = PhotoSerializer()
 
     class Meta:
@@ -102,7 +102,7 @@ class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
 
 
 class StudentGetSerializer(serializers.ModelSerializer):
-    student_profile = StudentProfileSerializer(fields=('phone', 'photo'))
+    student_profile = get_serializer_with_fields(StudentProfileSerializer, fields=('phone', 'photo'))
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)

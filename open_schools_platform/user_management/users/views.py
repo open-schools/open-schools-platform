@@ -8,7 +8,7 @@ from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.common.utils import get_dict_from_response
-from open_schools_platform.common.views import swagger_dict_response
+from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.errors.services import InvalidArgumentException
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -58,14 +58,13 @@ class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data.",
         responses={404: "Token with that id was not found.",
-                   200: swagger_dict_response({"token": RetrieveCreationTokenSerializer()})},
+                   200: convert_dict_to_serializer({"token": RetrieveCreationTokenSerializer()})},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def get(self, request, pk):
         token = get_token(
             filters={"key": pk},
             empty_exception=True,
-            empty_message="No such token"
         )
 
         return Response({"token": RetrieveCreationTokenSerializer(token).data}, status=200)
@@ -164,7 +163,7 @@ class UserResetPasswordApi(APIView):
         user = get_user(
             filters={"phone": token.phone},
             empty_exception=True,
-            empty_message="No such user"
+            empty_message="No user with such phone"
         )
 
         set_new_password_for_user(user=user, password=user_serializer.validated_data['password'])

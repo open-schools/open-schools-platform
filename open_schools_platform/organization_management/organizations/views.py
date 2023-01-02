@@ -3,15 +3,15 @@ from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotAcceptable
-from rest_framework.generics import CreateAPIView, ListAPIView, GenericAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from open_schools_platform.common.views import swagger_dict_response
-from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles
+from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -25,7 +25,7 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
-from open_schools_platform.query_management.queries.filters import QueryFilter, DatePeriodFilter
+from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
@@ -42,7 +42,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user.",
         request_body=CreateOrganizationSerializer,
-        responses={201: swagger_dict_response({"creator_employee": EmployeeSerializer()})},
+        responses={201: convert_dict_to_serializer({"creator_employee": EmployeeSerializer()})},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
     )
     def post(self, request, *args, **kwargs):
@@ -84,7 +84,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteSerializer,
-        responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
+        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite employee query.",
     )
     def post(self, request, pk) -> Response:
@@ -113,8 +113,8 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
-        responses={200: swagger_dict_response({"query": EmployeeProfileQuerySerializer()}),
-                   404: "There is no such query",
+        responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
+                   404: "No such query",
                    406: "Cant update query because it's status is not SENT"},
         operation_description="Update body of invite employee query",
     )
@@ -136,7 +136,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
 class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": EmployeeProfileQuerySerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": EmployeeProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, pk):
@@ -144,7 +144,6 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
             filters={'id': str(pk)},
             user=request.user,
             empty_exception=True,
-            empty_message="There is no such organization"
         )
         queries = get_queries(filters={'sender_id': str(organization.id)})
         return Response({"results": EmployeeProfileQuerySerializer(queries, many=True).data}, status=200)
@@ -158,7 +157,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
                              "circle": UUIDFilter(lookup_expr=["exact"])}
 
     queryset = Query.objects.all()
-    swagger_filter_fields = \
+    visible_filter_fields = \
         FilterProperties.query_fields | \
         FilterProperties.student_fields | \
         FilterProperties.additional_fields
@@ -166,7 +165,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": StudentProfileQuerySerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": StudentProfileQuerySerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()
@@ -189,12 +188,12 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
         student_fields = StudentFilter.get_swagger_filters()
 
     queryset = Student.objects.all()
-    swagger_filter_fields = FilterProperties.student_fields
+    visible_filter_fields = FilterProperties.student_fields
 
     @swagger_auto_schema(
         operation_description="Get students in this circle",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"results": StudentSerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": StudentSerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()
@@ -216,7 +215,7 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Delete organization.",
-        responses={204: "Successful deletion", 404: "There is no such organization"}
+        responses={204: "Successfully deleted", 404: "No such organization"}
     )
     def delete(self, request, pk):
         organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
@@ -228,13 +227,12 @@ class GetStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: swagger_dict_response({"student": StudentGetSerializer()}), 404: "There is no such student"}
+        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "No such student"}
     )
     def get(self, request, pk):
         student = get_student(
             filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
-            empty_message="There is no such student",
         )
         return Response({"student": StudentGetSerializer(student).data}, status=200)
 
@@ -248,8 +246,7 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
     def get(self, request, pk):
-        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True,
-                         empty_message="This organization doesn't exist")
+        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True)
         students = get_students(filters={'circle__organization': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)
@@ -263,14 +260,13 @@ class GetAnalytics(ApiAuthMixin, APIView):
             Parameter('date_from', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
             Parameter('date_to', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
         ],
-        responses={200: swagger_dict_response({"analytics": AnalyticsSerializer()}),
+        responses={200: convert_dict_to_serializer({"analytics": AnalyticsSerializer()}),
                    404: "There is no such organization"}
     )
     def get(self, request, pk):
         dates = request.GET.dict()
         organization = get_organization(filters={"id": str(pk)},
                                         empty_exception=True,
-                                        empty_message="There is no such organization",
                                         user=request.user)
 
         queries = get_organization_circle_queries(organization)

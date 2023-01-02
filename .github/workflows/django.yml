@@ -57,10 +57,6 @@ jobs:
         echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
         touch .firebase_admin_config
         echo ${{ secrets.FIREBASE_ADMIN_CONFIG }} >> .firebase_admin_config
-    - name: Fetch history, because Heroku deploy fails otherwise.
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.10.2
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip

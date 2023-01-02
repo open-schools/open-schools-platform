@@ -23,7 +23,7 @@ def create_test_circle(organization: Organization = None, address: str = "addres
     if not organization:
         organization = create_test_organization()
     circle = create_circle(
-        organization=organization,  # type: ignore
+        organization=organization,
         name=name,
         address=address,
         capacity=capacity,

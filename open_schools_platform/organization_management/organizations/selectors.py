@@ -2,7 +2,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
-from open_schools_platform.common.selectors import selector_wrapper
+from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
@@ -11,7 +11,7 @@ from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.user_management.users.models import User
 
 
-@selector_wrapper
+@selector_factory(Organization)
 def get_organization(*, filters=None, user: User = None) -> Organization:
     filters = filters or {}
 
@@ -24,7 +24,7 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
     return organization
 
 
-@selector_wrapper
+@selector_factory(Organization)
 def get_organizations(*, filters=None) -> QuerySet:
     filters = filters or {}
 
