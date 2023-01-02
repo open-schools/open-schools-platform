@@ -167,7 +167,7 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         request_body=CircleTeacherInviteSerializer,
-        responses={201: swagger_dict_response({"query": QueryStatusSerializer()})},
+        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite teacher query.",
     )
     def post(self, request, pk) -> Response:

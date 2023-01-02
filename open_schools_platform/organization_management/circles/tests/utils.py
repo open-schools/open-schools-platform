@@ -20,7 +20,7 @@ from open_schools_platform.user_management.users.models import User
 def create_test_circle(organization: Organization = None, address: str = "address",
                        location: Any = Point(0.0, 0.0), name: str = "test_circle",
                        capacity: int = 10, description: str = "description") -> Circle:
-    if not organization:
+    if organization is None:
         organization = create_test_organization()
     circle = create_circle(
         organization=organization,
