@@ -6,7 +6,7 @@ from open_schools_platform.user_management.users.models import User
 
 @rules.predicate
 def is_teacher_profile_owner(user: User, teacher_profile: TeacherProfile):
-    return user and teacher_profile.user == user
+    return teacher_profile.user == user
 
 
 rules.add_perm("teachers.teacher_profile_access", is_teacher_profile_owner)

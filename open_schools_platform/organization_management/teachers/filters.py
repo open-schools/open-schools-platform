@@ -1,7 +1,7 @@
 from django_filters import CharFilter
 
 from open_schools_platform.common.filters import BaseFilterSet
-from open_schools_platform.organization_management.teachers.models import Teacher
+from open_schools_platform.organization_management.teachers.models import Teacher, TeacherProfile
 
 
 class TeacherFilter(BaseFilterSet):
@@ -12,3 +12,9 @@ class TeacherFilter(BaseFilterSet):
     class Meta:
         model = Teacher
         fields = ("circle", "teacher_profile", "id")
+
+
+class TeacherProfileFilter(BaseFilterSet):
+    class Meta:
+        model = TeacherProfile
+        fields = ('id', 'user', 'name', 'age', 'phone', 'photo')

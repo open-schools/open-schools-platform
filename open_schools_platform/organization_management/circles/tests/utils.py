@@ -9,6 +9,7 @@ from open_schools_platform.organization_management.circles.services import creat
 from open_schools_platform.organization_management.employees.tests.utils import create_test_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
+from open_schools_platform.organization_management.teachers.models import TeacherProfile, Teacher
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import create_query
@@ -60,12 +61,30 @@ def create_data_circle_invite_student(name: str, student_phone: str, parent_phon
     return data
 
 
+def create_data_circle_invite_teacher(name: str, phone: str):
+    data = {
+        "body": {
+            "name": name
+        },
+        "phone": phone,
+        "email": "user@example.com"
+    }
+    return data
+
+
 def create_test_query_circle_invite_student(circle: Circle, family: Family, student: Student,
                                             student_profile: StudentProfile) -> Query:
     query = create_query(sender_model_name="circle", sender_id=circle.id,
                          recipient_model_name="family", recipient_id=family.id,
                          body_model_name="student", body_id=student.id,
                          additional_model_name="studentprofile", additional_id=student_profile.id)
+    return query
+
+
+def create_test_query_circle_invite_teacher(circle: Circle, teacher: Teacher, teacher_profile: TeacherProfile) -> Query:
+    query = create_query(sender_model_name="circle", sender_id=circle.id,
+                         recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
+                         body_model_name="teacher", body_id=teacher.id)
     return query
 
 
