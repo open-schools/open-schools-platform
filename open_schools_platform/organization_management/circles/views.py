@@ -16,8 +16,9 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
+from ..teachers.selectors import get_teacher_profile
 from ..teachers.serializers import CircleTeacherInviteSerializer
-from ..teachers.services import get_teacher_profile_or_create_new_user, create_teacher
+from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import convert_dict_to_serializer
 from ...parent_management.families.selectors import get_families
@@ -140,8 +141,7 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         invite_serializer = CircleStudentInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True,
-                            empty_message="There is no such circle")
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
         parent_phone = invite_serializer.validated_data["parent_phone"]
         student_phone = invite_serializer.validated_data["student_phone"]
         email = invite_serializer.validated_data["email"]
@@ -174,13 +174,10 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
         invite_serializer = CircleTeacherInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True,
-                            empty_message="There is no such circle")
+        get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
         phone = invite_serializer.validated_data["phone"]
-        name = invite_serializer.validated_data["body"]["name"]
-        email = invite_serializer.validated_data["email"]
 
-        teacher_profile = get_teacher_profile_or_create_new_user(str(phone), str(email), circle, name)
+        teacher_profile = get_teacher_profile(filters={'phone': str(phone)})
         teacher = create_teacher(**invite_serializer.validated_data["body"])
 
         query = create_query(sender_model_name="circle", sender_id=pk,

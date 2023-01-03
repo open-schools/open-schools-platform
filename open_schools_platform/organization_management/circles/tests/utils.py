@@ -17,6 +17,7 @@ from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.models import Student, StudentProfile
 from open_schools_platform.student_management.students.services import create_student
 from open_schools_platform.user_management.users.models import User
+from open_schools_platform.user_management.users.tests.utils import create_test_user
 
 
 def create_test_circle(organization: Organization = None, address: str = "address",
@@ -89,6 +90,13 @@ def create_test_query_circle_invite_teacher(circle: Circle, teacher_profile: Tea
                          recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
                          body_model_name="teacher", body_id=teacher.id)
     return query
+
+
+def create_test_teacher_profile(phone: str = "+79998786648"):
+    teacher_profile = create_test_user(phone).teacher_profile
+    teacher_profile.phone = phone
+    teacher_profile.save()
+    return teacher_profile
 
 
 def get_deleted_circles():

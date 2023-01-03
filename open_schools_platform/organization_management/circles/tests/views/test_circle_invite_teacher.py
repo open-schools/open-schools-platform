@@ -1,12 +1,10 @@
-import pytest
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from config.env import env
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle_with_user_in_org, \
-    create_data_circle_invite_teacher, create_test_circle, create_test_query_circle_invite_teacher
-from open_schools_platform.organization_management.teachers.selectors import get_teacher_profile
+    create_data_circle_invite_teacher, create_test_circle, create_test_query_circle_invite_teacher, \
+    create_test_teacher_profile
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_query
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user, create_test_user
@@ -18,24 +16,11 @@ class InviteTeacherTests(TestCase):
         self.invite_teacher_url = \
             lambda pk: reverse("api:organization-management:circles:invite-teacher", args=[pk])
 
-    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_ID") is None or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") is None or
-                        env.ENVIRON.get("EMAIL_ID") == "" or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") == "",
-                        reason="EMAIL_ID or EMAIL_PRIVATE_API_KEY is not set")
-    def test_invite_teacher_query_successfully_formed_1(self):
-        user = create_logged_in_user(self)
-        circle = create_test_circle_with_user_in_org(user)
-        data = create_data_circle_invite_teacher("TestTeacher", "+79998881177")
-
-        response = self.client.post(self.invite_teacher_url(str(circle.id)), data, format="json")
-        self.assertEqual(201, response.status_code)
-        teacher_profile = get_teacher_profile(filters={"phone": data["phone"]})
-        self.assertTrue(teacher_profile)
-
-    def test_invite_teacher_query_successfully_formed_2(self):
+    def test_invite_teacher_query_successfully_formed(self):
         user = create_logged_in_user(self)
         circle = create_test_circle_with_user_in_org(user)
 
-        teacher_profile = create_test_user("+79998786644").teacher_profile
+        teacher_profile = create_test_teacher_profile("+79998786644")
 
         data = create_data_circle_invite_teacher("TestTeacher", str(teacher_profile.user.phone))
 

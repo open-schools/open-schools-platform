@@ -1,8 +1,7 @@
-from typing import Dict, Callable
+from typing import Dict, Callable, Tuple, Type
 
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
-from mypy.checker import Any
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
@@ -53,19 +52,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
     return circle
 
 
-def query_to_family(query: Query, new_status: str, user: User):
-    circle_access = user.has_perm('circles.circle_access', query.sender)
-    family_access = user.has_perm('families.family_access', query.recipient)
-
-    if not family_access:
-        if new_status != Query.Status.CANCELED:
-            raise NotAcceptable("Circle can only set canceled status")
-    elif not circle_access:
-        if query.status != Query.Status.SENT:
-            raise NotAcceptable("Сan no longer change the query")
-        if new_status == Query.Status.CANCELED:
-            raise NotAcceptable("User cannot cancel query, he can only decline or accept it")
-
+def query_to_family(query: Query, new_status: str):
     query_update(query=query, data={"status": new_status})
     if query.status == Query.Status.ACCEPTED:
         if query.body is None:
@@ -76,23 +63,7 @@ def query_to_family(query: Query, new_status: str, user: User):
     return query
 
 
-def query_to_teacher_profile(query: Query, new_status: str, user: User):
-    circle_access = user.has_perm('circles.circle_access', query.sender)
-    teacher_profile_access = user.has_perm("teachers.teacher_profile_access", query.recipient)
-
-    if teacher_profile_access and circle_access:
-        pass
-    elif circle_access:
-        if query.status != Query.Status.SENT:
-            raise NotAcceptable("Сan no longer change the query")
-        if new_status != Query.Status.CANCELED:
-            raise NotAcceptable("Circle can only set canceled status")
-    elif teacher_profile_access:
-        if query.status == Query.Status.CANCELED:
-            raise NotAcceptable("Сan no longer change the query")
-        if new_status == Query.Status.CANCELED:
-            raise NotAcceptable("Teacher cannot cancel query, it can only decline it")
-
+def query_to_teacher_profile(query: Query, new_status: str):
     query_update(query=query, data={"status": new_status})
     if query.status == Query.Status.ACCEPTED:
         if query.body is None:
@@ -103,21 +74,56 @@ def query_to_teacher_profile(query: Query, new_status: str, user: User):
     return query
 
 
+def query_wrong_recipient(query: Query, new_status: str):
+    raise ValidationError(detail="The recipient must be a Family or TeacherProfile if the sender is a circle")
+
+
 class CircleQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED, Query.Status.DECLINED]
-    query_dict: Dict[Any, Callable] = {Family: query_to_family, TeacherProfile: query_to_teacher_profile}
+    available_statuses: Dict[Tuple[str, frozenset], Tuple] = {
+        (Query.Status.SENT, frozenset({TeacherProfile, Circle})): (
+            Query.Status.DECLINED, Query.Status.CANCELED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, frozenset({TeacherProfile})): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, frozenset({Circle})): (Query.Status.CANCELED,),
+
+        (Query.Status.SENT, frozenset({Family})): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, frozenset({Family, Circle})): (
+            Query.Status.DECLINED, Query.Status.CANCELED, Query.Status.ACCEPTED),
+    }
+    change_query: Dict[Type, Callable[[Query, str], Query]] = {
+        Family: query_to_family,
+        TeacherProfile: query_to_teacher_profile
+    }
 
     @staticmethod
     def query_handler(query: Query, new_status: str, user: User):
         BaseQueryHandler.query_handler_checks(CircleQueryHandler, query, new_status, user)
 
-        query_function = CircleQueryHandler.query_dict.get(type(query.recipient))
-        if query_function:
-            return query_function(query, new_status, user)
+        change_query_function = CircleQueryHandler.change_query.get(type(query.recipient), query_wrong_recipient)
+        user_role = CircleQueryHandler._parse_changer_type(user, query)
+
+        if new_status in CircleQueryHandler.available_statuses[(query.status, user_role)]:
+            return change_query_function(query, new_status)
         else:
-            raise ValidationError(detail="The recipient must be a Family or TeacherProfile if the sender is a circle")
+            raise NotAcceptable(f"Status change [{query.status} => {new_status}] not allowed for {user_role}")
 
     setattr(Circle, "query_handler", query_handler)
+
+    @staticmethod
+    def _parse_changer_type(user: User, query: Query) -> frozenset:
+        circle_access = user.has_perm('circles.circle_access', query.sender)
+        family_access = type(query.recipient) == Family and user.has_perm('families.family_access', query.recipient)
+        teacher_profile_access = type(query.recipient) == TeacherProfile and user.has_perm(
+            "teachers.teacher_profile_access", query.recipient)
+        changer_type = set()
+        if circle_access:
+            changer_type.add(Circle)
+        if family_access:
+            changer_type.add(Family)
+        if teacher_profile_access:
+            changer_type.add(TeacherProfile)
+
+        return frozenset(changer_type)
 
 
 def add_student_to_circle(student: Student, circle: Circle):
