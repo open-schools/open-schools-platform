@@ -265,10 +265,7 @@ class GetAnalytics(ApiAuthMixin, APIView):
     )
     def get(self, request, pk):
         dates = request.GET.dict()
-        organization = get_organization(filters={"id": str(pk)},
-                                        empty_exception=True,
-                                        user=request.user)
-
+        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
         queries = get_organization_circle_queries(organization)
         if all(arg in dates for arg in ("date_from", "date_to")):
             queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])

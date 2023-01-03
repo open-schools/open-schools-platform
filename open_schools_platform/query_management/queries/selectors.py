@@ -40,3 +40,7 @@ def get_queries(*, filters=None) -> QuerySet:
     queries = QueryFilter(filters, qs).qs
 
     return queries
+
+
+def get_all_query_statuses() -> list:
+    return list(Query.Status.__dict__["_member_map_"].keys())

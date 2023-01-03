@@ -1,4 +1,7 @@
 from typing import List, Dict, Any, Tuple, Callable
+from dateutil.parser import parse
+from django.utils.timezone import make_aware
+from datetime import datetime
 
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 
@@ -96,3 +99,12 @@ def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Ca
             result.append(None)
 
     return result
+
+
+def convert_str_date_to_datetime(date: str, time: str):
+    """
+    This function allows to convert any format date-string
+    to datetime object
+    """
+    date = (parse(date, fuzzy=True)).strftime(f"%Y-%m-%d {time}")
+    return make_aware(datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
