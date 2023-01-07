@@ -40,6 +40,7 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
         families = get_families(
             filters={"parent_profiles": str(request.user.parent_profile.id)},
             empty_exception=True,
+            empty_message="There are no families for request user's parent_profile"
         )
         student_profiles = get_student_profiles_by_families(families)
         queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)},
