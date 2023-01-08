@@ -56,3 +56,7 @@ def filter_dict_from_none_values(dictionary: Dict[str, Any]):
 
 def form_ids_string_from_queryset(qs: QuerySet):
     return ",".join(list(map(lambda item: str(item["id"]) if isinstance(item, dict) else str(item.id), qs)))
+
+
+def filter_list_from_empty_strings(lst: list):
+    return list(filter(lambda x: x != "", lst))

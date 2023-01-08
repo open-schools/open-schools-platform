@@ -2,8 +2,7 @@ from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied, NotFound
 
 from open_schools_platform.common.selectors import selector_factory
-from open_schools_platform.common.services import filter_list_from_empty_strings
-from open_schools_platform.common.utils import form_ids_string_from_queryset
+from open_schools_platform.common.utils import form_ids_string_from_queryset, filter_list_from_empty_strings
 from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User

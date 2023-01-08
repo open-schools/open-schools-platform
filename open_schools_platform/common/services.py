@@ -96,7 +96,3 @@ def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Ca
             result.append(None)
 
     return result
-
-
-def filter_list_from_empty_strings(lst: list):
-    return [item for item in lst if item]
