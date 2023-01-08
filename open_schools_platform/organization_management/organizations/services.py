@@ -2,8 +2,9 @@ from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError, MethodNotAllowed, NotAcceptable
 
 from open_schools_platform.common.filters import BaseFilterSet
-from open_schools_platform.common.services import BaseQueryHandler, convert_str_date_to_datetime
-from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields
+from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields, \
+    convert_str_date_to_datetime
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query

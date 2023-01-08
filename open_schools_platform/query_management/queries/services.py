@@ -6,7 +6,6 @@ from rest_framework.exceptions import MethodNotAllowed
 
 from open_schools_platform.common.services import model_update
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.selectors import get_all_query_statuses
 from open_schools_platform.user_management.users.models import User
 
 
@@ -58,7 +57,7 @@ def run_sender_handler(query: Query, new_status: str, user: User):
 
 
 def count_queries_by_statuses(queries: QuerySet):
-    statuses = get_all_query_statuses()
+    statuses = Query.get_all_statuses()
     values = {}
     for status in statuses:
         filtered_qs = queries.filter(status=status)
