@@ -27,7 +27,7 @@ class QueryCircleRecipientSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circle
-        fields = ('id', 'name', 'organization')
+        fields = ('id', 'name', 'organization', 'address')
 
 
 class QueryCircleStudentBodySerializer(serializers.ModelSerializer):
