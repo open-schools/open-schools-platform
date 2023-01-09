@@ -10,7 +10,9 @@ def selector_factory(model=None):
 
     def selector_wrapper(selector):
         def wrapper(*, filters=None, user: User = None, empty_exception: bool = False,
-                    empty_message: str = f"No such {model_name}", **kwargs):
+                    empty_message: str = f"No such {model_name}", empty_filters: bool = False, **kwargs):
+            if empty_filters and any(arg in filters.values() for arg in ("", None)):
+                return selector(filters=filters).none()
             if user:
                 qs = selector(filters=filters, user=user)
             else:

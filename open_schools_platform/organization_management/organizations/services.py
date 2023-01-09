@@ -1,8 +1,10 @@
+from django.db.models import QuerySet
 from rest_framework.exceptions import ValidationError, MethodNotAllowed, NotAcceptable
 
 from open_schools_platform.common.filters import BaseFilterSet
 from open_schools_platform.common.services import BaseQueryHandler
-from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields
+from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields, \
+    convert_str_date_to_datetime
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
@@ -89,3 +91,8 @@ def organization_circle_query_filter(view, filters, organization: Organization, 
         return Query.objects.none()
 
     return queries
+
+
+def filter_organization_circle_queries_by_dates(queries: QuerySet, date_from, date_to):
+    return queries.filter(created_at__range=[convert_str_date_to_datetime(date_from, "00:00:00"),
+                                             convert_str_date_to_datetime(date_to, "23:59:59")])
