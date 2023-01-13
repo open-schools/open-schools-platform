@@ -81,13 +81,14 @@ def query_wrong_recipient(query: Query, new_status: str):
 class CircleQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED, Query.Status.DECLINED]
     available_statuses: Dict[Tuple[str, frozenset], Tuple] = {
-        (Query.Status.SENT, frozenset({TeacherProfile, Circle})): (
+        (Query.Status.SENT, frozenset({'teachers.teacher_profile_access', 'circles.circle_access'})): (
             Query.Status.DECLINED, Query.Status.CANCELED, Query.Status.ACCEPTED),
-        (Query.Status.SENT, frozenset({TeacherProfile})): (Query.Status.DECLINED, Query.Status.ACCEPTED),
-        (Query.Status.SENT, frozenset({Circle})): (Query.Status.CANCELED,),
+        (Query.Status.SENT, frozenset({'teachers.teacher_profile_access'})): (
+            Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, frozenset({'circles.circle_access'})): (Query.Status.CANCELED,),
 
-        (Query.Status.SENT, frozenset({Family})): (Query.Status.DECLINED, Query.Status.ACCEPTED),
-        (Query.Status.SENT, frozenset({Family, Circle})): (
+        (Query.Status.SENT, frozenset({'families.family_access'})): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, frozenset({'families.family_access', 'circles.circle_access'})): (
             Query.Status.DECLINED, Query.Status.CANCELED, Query.Status.ACCEPTED),
     }
     change_query: Dict[Type, Callable[[Query, str], Query]] = {
@@ -100,30 +101,34 @@ class CircleQueryHandler(BaseQueryHandler):
         BaseQueryHandler.query_handler_checks(CircleQueryHandler, query, new_status, user)
 
         change_query_function = CircleQueryHandler.change_query.get(type(query.recipient), query_wrong_recipient)
-        user_role = CircleQueryHandler._parse_changer_type(user, query)
+        access_type = CircleQueryHandler._parse_changer_type(user, query)
 
-        if new_status in CircleQueryHandler.available_statuses[(query.status, user_role)]:
+        if new_status in CircleQueryHandler.available_statuses[(query.status, access_type)]:
             return change_query_function(query, new_status)
         else:
-            raise NotAcceptable(f"Status change [{query.status} => {new_status}] not allowed for {user_role}")
+            raise NotAcceptable(
+                f'Status change [{query.status} => {new_status}] not allowed' +
+                f'{", no access permissions" if len(access_type) == 0 else f"for permission {access_type}"}')
 
     setattr(Circle, "query_handler", query_handler)
 
     @staticmethod
     def _parse_changer_type(user: User, query: Query) -> frozenset:
-        circle_access = user.has_perm('circles.circle_access', query.sender)
-        family_access = type(query.recipient) == Family and user.has_perm('families.family_access', query.recipient)
-        teacher_profile_access = type(query.recipient) == TeacherProfile and user.has_perm(
-            "teachers.teacher_profile_access", query.recipient)
-        changer_type = set()
-        if circle_access:
-            changer_type.add(Circle)
-        if family_access:
-            changer_type.add(Family)
-        if teacher_profile_access:
-            changer_type.add(TeacherProfile)
+        result = set()
+        required_permissions = set([item for key in CircleQueryHandler.available_statuses.keys() for item in key[1]])
+        for required_permission in required_permissions:
+            try:
+                if user.has_perm(required_permission, query.sender):
+                    result.add(required_permission)
+            except AttributeError:
+                pass
+            try:
+                if user.has_perm(required_permission, query.recipient):
+                    result.add(required_permission)
+            except AttributeError:
+                pass
 
-        return frozenset(changer_type)
+        return frozenset(result)
 
 
 def add_student_to_circle(student: Student, circle: Circle):
