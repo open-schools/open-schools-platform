@@ -3,6 +3,7 @@ from typing import Any
 import uuid
 
 import safedelete
+from django.core.exceptions import ValidationError
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -26,6 +27,13 @@ class EmployeeManager(BaseManager):
 
 class EmployeeProfileManager(BaseManager):
     def create_employee_profile(self, user: User, name: str, email: str = None):
+        try:
+            employee_profile = self.get(user=user)
+        except EmployeeProfile.DoesNotExist:
+            employee_profile = None
+        if employee_profile and not employee_profile.deleted:
+            raise ValidationError("EmployeeProfile with this user already exists")
+
         employee_profile = self.update_or_create_with_check(user=user, defaults={'name': name, 'email': email})
         return employee_profile
 

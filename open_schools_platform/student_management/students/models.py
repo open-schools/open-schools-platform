@@ -1,4 +1,6 @@
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
+
+from django.core.exceptions import ValidationError
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 import uuid
 
@@ -20,6 +22,13 @@ class StudentProfileManager(BaseManager):
                                photo: uuid.UUID = None):
         if not photo:
             photo = Photo.objects.create_photo()
+
+        try:
+            student_profile = self.get(user=user)
+        except StudentProfile.DoesNotExist:
+            student_profile = None
+        if student_profile and not student_profile.deleted:
+            raise ValidationError("StudentProfile with this user already exists")
 
         student_profile = self.update_or_create_with_check(user=user,
                                                            defaults={'name': name, 'age': age, 'phone': phone,
