@@ -1,8 +1,9 @@
+import typing
 from typing import Dict, Callable, Tuple, Type
 
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
-from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
@@ -12,10 +13,8 @@ from open_schools_platform.organization_management.organizations.models import O
 from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.common.constants import CommonConstants
-from open_schools_platform.user_management.users.models import User
 
 
 def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
@@ -60,67 +59,31 @@ class CircleQueryHandler(BaseQueryHandler):
         (Query.Status.SENT, 'circles.circle_access'): (Query.Status.CANCELED,),
     }
 
-    @staticmethod
-    def query_to_family(query: Query):
-        query.body.circle = query.sender  # type: ignore[union-attr]
-        query.body.student_profile = query.additional  # type: ignore[union-attr]
-        query.body.save()  # type: ignore[union-attr]
+    @typing.no_type_check
+    def query_to_family(self, query: Query):
+        if query.status == Query.Status.ACCEPTED:
+            if query.body is None:
+                raise MethodNotAllowed("put", detail="Query is corrupted")
+            query.body.circle = query.sender
+            query.body.student_profile = query.additional
+            query.body.save()
 
-    @staticmethod
-    def query_to_teacher_profile(query: Query):
-        query.body.circle = query.sender  # type: ignore[union-attr]
-        query.body.teacher_profile = query.recipient  # type: ignore[union-attr]
-        query.body.save()  # type: ignore[union-attr]
+    @typing.no_type_check
+    def query_to_teacher_profile(self, query: Query):
+        if query.status == Query.Status.ACCEPTED:
+            if query.body is None:
+                raise MethodNotAllowed("put", detail="Query is corrupted")
+            query.body.circle = query.sender
+            query.body.teacher_profile = query.recipient
+            query.body.save()
 
-    change_query: Dict[Type, Callable[[Query], Query]] = {
-        Family: query_to_family.__func__,  # type: ignore[attr-defined]
-        TeacherProfile: query_to_teacher_profile.__func__  # type: ignore[attr-defined]
+    change_query: Dict[Type, Callable[[typing.Any, Query], Query]] = {
+        Family: query_to_family,
+        TeacherProfile: query_to_teacher_profile
     }
 
-    @staticmethod
-    def query_handler(query: Query, new_status: str, user: User):
-        BaseQueryHandler.query_handler_checks(CircleQueryHandler, query, new_status, user)
 
-        change_query = CircleQueryHandler.change_query.get(type(query.recipient),
-                                                           CircleQueryHandler.query_wrong_recipient)
-        access_types = CircleQueryHandler._parse_changer_type(user, query)
-
-        for access_type in access_types:
-            if new_status in CircleQueryHandler.available_statuses[(query.status, access_type)]:
-                query_update(query=query, data={"status": new_status})
-                if query.status == Query.Status.ACCEPTED:
-                    if query.body is None:
-                        raise MethodNotAllowed("put", detail="Query is corrupted")
-                    change_query(query)
-                return query
-
-        raise NotAcceptable(
-            f'Status change [{query.status} => {new_status}] not allowed' +
-            f'{", no access permissions" if len(access_types) == 0 else f"for permission {access_types}"}')
-
-    setattr(Circle, "query_handler", query_handler)
-
-    @staticmethod
-    def query_wrong_recipient(query: Query):
-        raise ValidationError(detail="The recipient must be a Family or TeacherProfile if the sender is a circle")
-
-    @staticmethod
-    def _parse_changer_type(user: User, query: Query) -> set:
-        result = set()
-        required_permissions = set([key[1] for key in CircleQueryHandler.available_statuses.keys()])
-        for required_permission in required_permissions:
-            try:
-                if user.has_perm(required_permission, query.sender):
-                    result.add(required_permission)
-            except AttributeError:
-                pass
-            try:
-                if user.has_perm(required_permission, query.recipient):
-                    result.add(required_permission)
-            except AttributeError:
-                pass
-
-        return result
+setattr(Circle, "query_handler", CircleQueryHandler())
 
 
 def add_student_to_circle(student: Student, circle: Circle):

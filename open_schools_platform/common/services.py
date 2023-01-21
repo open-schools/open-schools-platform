@@ -1,4 +1,4 @@
-from typing import List, Dict, Any, Tuple, Callable
+from typing import List, Dict, Any, Tuple, Callable, Type
 
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 
@@ -58,10 +58,32 @@ class BaseQueryHandler:
     Contain basic query checks
     """
     allowed_statuses: List[str] = []
+    available_statuses: Dict[Tuple[str, str], Tuple] = {}
+    change_query: Dict[Type, Callable[[Any, Query], Query]] = {}
 
-    @staticmethod
-    def query_handler(query: Query, new_status: str, user: User):
-        raise NotImplementedError
+    def query_handler(self, query: Query, new_status: str, user: User):
+        BaseQueryHandler.query_handler_checks(self, query, new_status, user)
+
+        change_query_function = self.change_query.get(type(query.recipient), BaseQueryHandler.query_wrong_recipient)
+        access_types = self._parse_changer_type(user, query)
+        from open_schools_platform.query_management.queries.services import query_update
+        for access_type in access_types:
+            if new_status in self.available_statuses[(query.status, access_type)]:
+                change_query_function(self, query)
+                query_update(query=query, data={"status": new_status})
+                return query
+
+        raise NotAcceptable(
+            f'Status change [{query.status} => {new_status}] not allowed' +
+            f'{", no access permissions" if len(access_types) == 0 else f"for permission {access_types}"}')
+
+    def __call__(self, query: Query, new_status: str, user: User):
+        return self.query_handler(query, new_status, user)
+
+    def query_wrong_recipient(self, query: Query):
+        raise ValidationError(
+            detail=f"The recipient must one of {self.change_query.keys()}, " +
+                   f"but was '{type(query.recipient).__name__}'")
 
     @staticmethod
     def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User,
@@ -73,8 +95,18 @@ class BaseQueryHandler:
         if query.recipient is None or query.sender is None or without_body is False and query.body is None:
             raise MethodNotAllowed("put", detail="Query is corrupted")
 
+    def _parse_changer_type(self, user: User, query: Query) -> set:
+        result = set()
+        required_permissions = set([key[1] for key in self.available_statuses.keys()])
+        for required_permission in required_permissions:
+            if user.has_perm(required_permission, query.sender):
+                result.add(required_permission)
+            if user.has_perm(required_permission, query.recipient):
+                result.add(required_permission)
+        return result
 
-def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Callable[..., Any]])\
+
+def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Callable[..., Any]]) \
         -> List[Any]:
     """
     Get objects by theirs ids with permission check and not found exception
