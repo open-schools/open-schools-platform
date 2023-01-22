@@ -1,5 +1,6 @@
 from django_filters import UUIDFilter
 from drf_yasg import openapi
+from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
@@ -18,18 +19,18 @@ from open_schools_platform.organization_management.employees.services import cre
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
-    get_organization
+    get_organization, get_organization_circle_queries
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    OrganizationSerializer
+    OrganizationSerializer, AnalyticsSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    organization_circle_query_filter
+    organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
     EmployeeProfileQuerySerializer, StudentProfileQuerySerializer
-from open_schools_platform.query_management.queries.services import create_query
+from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.student_management.students.selectors import get_students, get_student
@@ -249,3 +250,23 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         students = get_students(filters={'circle__organization': str(pk)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)
+
+
+class GetAnalytics(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Get analytics for this organization",
+        manual_parameters=[
+            Parameter('date_from', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+            Parameter('date_to', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+        ],
+        responses={200: convert_dict_to_serializer({"analytics": AnalyticsSerializer()}),
+                   404: "There is no such organization"}
+    )
+    def get(self, request, pk):
+        dates = request.GET.dict()
+        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        queries = get_organization_circle_queries(organization)
+        if all(arg in dates for arg in ("date_from", "date_to")):
+            queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
+        return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)

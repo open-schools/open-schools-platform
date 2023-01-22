@@ -46,3 +46,7 @@ class Query(BaseModel):
 
     def __str__(self):
         return self.id.__str__()
+
+    @staticmethod
+    def get_all_statuses() -> list:
+        return list(Query.Status.__dict__["_member_map_"].keys())

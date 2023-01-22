@@ -1,10 +1,13 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import selector_factory
+from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.user_management.users.models import User
 
 
@@ -36,3 +39,11 @@ def get_organizations_by_user(user: User) -> QuerySet:
 
     return qs if len(qs) == 0 else \
         get_organizations(filters={"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})
+
+
+def get_organization_circle_queries(organization: Organization):
+    org_circles = organization.circles.values()
+    queries = get_queries(filters={"recipient_ids": form_ids_string_from_queryset(org_circles),
+                                   "sender_ct": ContentType.objects.get(model="studentprofile")},
+                          empty_filters=True)
+    return queries

@@ -1,8 +1,11 @@
 import json
+from datetime import datetime
 
 from typing import List, Dict, Any
 
+from dateutil.parser import parse
 from django.db.models import QuerySet
+from django.utils.timezone import make_aware
 from requests import Response
 from rest_framework import serializers
 
@@ -56,3 +59,16 @@ def filter_dict_from_none_values(dictionary: Dict[str, Any]):
 
 def form_ids_string_from_queryset(qs: QuerySet):
     return ",".join(list(map(lambda item: str(item["id"]) if isinstance(item, dict) else str(item.id), qs)))
+
+
+def filter_list_from_empty_strings(lst: list):
+    return list(filter(lambda x: x != "", lst))
+
+
+def convert_str_date_to_datetime(date: str, time: str):
+    """
+    This function allows to convert any format date-string
+    to datetime object
+    """
+    date = (parse(date, fuzzy=True)).strftime(f"%Y-%m-%d {time}")
+    return make_aware(datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
