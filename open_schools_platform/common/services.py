@@ -60,17 +60,19 @@ class BaseQueryHandler:
     allowed_statuses: List[str] = []
     available_statuses: Dict[Tuple[str, str], Tuple] = {}
     change_query: Dict[Type, Callable[[Any, Query], Query]] = {}
+    without_body = False
 
     def query_handler(self, query: Query, new_status: str, user: User):
-        BaseQueryHandler.query_handler_checks(self, query, new_status, user)
+        BaseQueryHandler.query_handler_checks(self, query, new_status, user, self.without_body)
 
         change_query_function = self.change_query.get(type(query.recipient), BaseQueryHandler.query_wrong_recipient)
         access_types = self._parse_changer_type(user, query)
         from open_schools_platform.query_management.queries.services import query_update
         for access_type in access_types:
-            if new_status in self.available_statuses[(query.status, access_type)]:
-                change_query_function(self, query)
+            if (query.status, access_type) in self.available_statuses and \
+                    new_status in self.available_statuses[(query.status, access_type)]:
                 query_update(query=query, data={"status": new_status})
+                change_query_function(self, query)
                 return query
 
         raise NotAcceptable(
