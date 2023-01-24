@@ -27,6 +27,17 @@ class UserCreateTests(TestCase):
         self.assertEqual(1, StudentProfile.objects.count())
         self.assertEqual(1, FirebaseNotificationToken.objects.count())
 
+    def test_user_create_with_existing_user_must_raise_exception(self):
+        create_test_user(phone="+79998782211")
+        with self.assertRaises(ValidationError):
+            create_test_user(phone="+79998782211")
+
+        self.assertEqual(1, User.objects.count())
+        self.assertEqual(1, EmployeeProfile.objects.count())
+        self.assertEqual(1, ParentProfile.objects.count())
+        self.assertEqual(1, StudentProfile.objects.count())
+        self.assertEqual(1, FirebaseNotificationToken.objects.count())
+
 
 class IsTokenAliveTests(TestCase):
     def test_token_with_old_date_of_creation_is_not_alive(self):

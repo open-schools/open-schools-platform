@@ -1,5 +1,4 @@
-from django.contrib import admin
-from open_schools_platform.common.admin import InputFilter, admin_wrapper
+from open_schools_platform.common.admin import InputFilter, admin_wrapper, BaseAdmin
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_query, get_queries
 from open_schools_platform.query_management.queries.services import run_sender_handler
@@ -51,7 +50,7 @@ class RecipientUUIDFilter(InputFilter):
 
 
 @admin_wrapper(Query)
-class QueryAdmin(admin.ModelAdmin):
+class QueryAdmin(BaseAdmin):
     list_display = ("id", "sender_ct", "recipient_ct", "status", "created_at")
     list_filter = ("status", SenderCTFilter, SenderUUIDFilter, RecipientCTFilter, RecipientUUIDFilter)
 
