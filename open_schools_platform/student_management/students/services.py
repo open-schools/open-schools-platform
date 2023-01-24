@@ -13,7 +13,6 @@ from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.student_management.students.exports import StudentExport
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
-from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
@@ -24,9 +23,7 @@ from open_schools_platform.user_management.users.models import User
 
 def create_student_profile(name: str, age: int = None, user: User = None,
                            phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
-    if not photo:
-        photo = Photo.objects.create_photo()
-    student_profile = StudentProfile.objects.create_student_profile(
+    student_profile = StudentProfile.objects.create(
         name=name,
         age=age,
         phone=phone,
