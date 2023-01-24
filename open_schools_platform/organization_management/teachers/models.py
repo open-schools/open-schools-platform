@@ -43,7 +43,7 @@ class TeacherProfile(BaseModel):
     photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True)
     history = HistoricalRecords()
 
-    objects = TeacherProfileManager()
+    objects = TeacherProfileManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name
@@ -70,7 +70,7 @@ class Teacher(BaseModel):
                                         blank=True)
     history = HistoricalRecords()
 
-    objects = TeacherManager()
+    objects = TeacherManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name
