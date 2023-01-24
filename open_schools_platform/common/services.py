@@ -55,7 +55,34 @@ def model_update(
 class BaseQueryHandler:
     """
     Base class for query handlers. It is meant to be inherited by other query handlers.
+    All rules functions must use @predicate_input_type_check decorator
     Contain basic query checks
+
+    Child class must redefine next attributes:
+        allowed_statuses: list of allowed statuses
+
+        available_statuses: a dictionary that denotes an allowed status change
+            where dictionary key is tuple of (Query.Status, str) which means (actual status, required access type)
+            and value is tuple of possible statuses
+            example:
+            available_statuses =
+                {(Query.Status.SENT, 'families.family_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+                (Query.Status.SENT, 'circles.circle_access'): (Query.Status.CANCELED,)}
+
+        change_query: a dictionary whose value is a function of query change for corresponding (key) recipient class
+            example:
+            def query_to_family(self, query: Query):
+                ...necessary operations with query
+
+            def query_to_teacher_profile(self, query: Query):
+                ...necessary operations with query
+
+            change_query = {
+                Family: query_to_family,
+                TeacherProfile: query_to_teacher_profile
+            }
+
+        without_body: a boolean value that indicates that this query type doesn't contain body
     """
     allowed_statuses: List[str] = []
     available_statuses: Dict[Tuple[str, str], Tuple] = {}
