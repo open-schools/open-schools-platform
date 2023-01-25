@@ -10,9 +10,11 @@ class HistorySerializerFields:
     HISTORY_EMPLOYEE_FIELDS = ["id", "name", "organization", "position"]
     HISTORY_EMPLOYEE_PROFILE_FIELDS = ["id", "name", "user"]
     HISTORY_ORGANIZATION_FIELDS = ["id", "name", "inn"]
-    HISTORY_PARENT_PROFILES_FIELDS = ["id", "name", "user"]
+    HISTORY_PARENT_PROFILE_FIELDS = ["id", "name", "user"]
     HISTORY_STUDENT_FIELDS = ["id", "name", "circle", "student_profile"]
-    HISTORY_STUDENT_PROFILES_FIELDS = ["id", "name", "phone", "age", "photo"]
+    HISTORY_STUDENT_PROFILE_FIELDS = ["id", "name", "phone", "age", "photo"]
+    HISTORY_TEACHER_FIELDS = ["id", "name", "circle", "teacher_profile"]
+    HISTORY_TEACHER_PROFILE_FIELDS = ["id", "name", "phone", "age", "photo"]
 
     @staticmethod
     def get_history_records_field(fields: list):

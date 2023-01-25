@@ -30,7 +30,7 @@ class Organization(BaseModel):
     inn = models.CharField(max_length=255, blank=True, default="")
     history = HistoricalRecords()
 
-    objects = OrganizationManager()
+    objects = OrganizationManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name

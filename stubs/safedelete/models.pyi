@@ -1,8 +1,8 @@
 from django.db import models
-from typing import Any, Dict, Optional, Tuple, Iterable, Type
+from typing import Any, Dict, Optional, Tuple, Iterable, Type, Union
 
+from safedelete.queryset import SafeDeleteQueryset  # noqa:F401
 from safedelete.managers import SafeDeleteAllManager, SafeDeleteDeletedManager, SafeDeleteManager
-from safedelete.queryset import SafeDeleteQueryset
 
 
 def is_safedelete_cls(cls): ...
@@ -28,7 +28,7 @@ class SafeDeleteModel(models.Model):
 
     def undelete(self, force_policy: Optional[int] = ..., **kwargs) -> Tuple[int, Dict[str, int]]: ...
 
-    def delete(self, force_policy: Any | None = ..., *,  # type: ignore[override]
+    def delete(self, force_policy: Union[Any, None] = ..., *,  # type: ignore[override]
                using: Any = None,
                keep_parents: bool = False) -> tuple[int, dict[str, int]]: ...
 

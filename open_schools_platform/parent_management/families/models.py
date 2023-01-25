@@ -27,7 +27,7 @@ class Family(BaseModel):
     name = models.CharField(max_length=200)
     history = HistoricalRecords()
 
-    objects = FamilyManager()
+    objects = FamilyManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name.__str__()

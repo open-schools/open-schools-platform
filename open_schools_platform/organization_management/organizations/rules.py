@@ -1,11 +1,13 @@
 import rules
 
+from open_schools_platform.common.rules import predicate_input_type_check
 from open_schools_platform.organization_management.employees.selectors import get_employee
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
 
 @rules.predicate
+@predicate_input_type_check
 def is_in_organization(user: User, organization: Organization):
     return get_employee(filters={"employee_profile": user.employee_profile,
                                  "organization": organization}) is not None

@@ -1,5 +1,7 @@
 import uuid
 
+import safedelete
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import (
     UserManager as BUM,
@@ -22,20 +24,16 @@ class UserManager(BaseManager, BUM):
         if not phone:
             raise ValueError('Users must have a phone number')
 
-        user = self.model(
-            phone=phone,
-            is_active=is_active,
-            is_admin=is_admin,
-            name=name,
-        )
+        try:
+            user = self.get(phone=phone)
+        except User.DoesNotExist:
+            user = None
+        if user and not user.deleted:
+            raise ValidationError("User with this phone number already exists")
 
-        if password is not None:
-            user.set_password(password)
-        else:
-            user.set_unusable_password()
-
-        user.full_clean()
-        user.save(using=self._db)
+        user = self.update_or_create_with_check(phone=phone,
+                                                defaults={'is_active': is_active, 'is_admin': is_admin,
+                                                          'name': name}, password=password)
 
         return user
 
@@ -72,6 +70,7 @@ class CreationTokenManager(BaseManager):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
+    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     phone = PhoneNumberField(
         verbose_name='telephone number',
@@ -109,12 +108,14 @@ class User(BaseModel, AbstractBaseUser, PermissionsMixin):
 
 class FirebaseNotificationTokenCreationManager(BaseManager):
     def create_token(self, user: User, token: str = None):
-        firebase_token = self.model(
-            user=user,
-            token=token
-        )
-        firebase_token.full_clean()
-        firebase_token.save(using=self.db)
+        try:
+            firebase_token = self.get(user=user)
+        except FirebaseNotificationToken.DoesNotExist:
+            firebase_token = None
+        if firebase_token and not firebase_token.deleted:
+            raise ValidationError("FirebaseToken with this user already exists")
+
+        firebase_token = self.update_or_create_with_check(user=user, defaults={'token': token})
         return firebase_token
 
 
@@ -123,10 +124,11 @@ class FirebaseNotificationToken(BaseModel):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='firebase_token')
     token = models.CharField(max_length=200, null=True, blank=True)
 
-    objects = FirebaseNotificationTokenCreationManager()
+    objects = FirebaseNotificationTokenCreationManager()  # type: ignore[assignment]
 
 
 class CreationToken(BaseModel):
+    _safedelete_policy = safedelete.config.NO_DELETE
     key = models.UUIDField(
         default=uuid.uuid4,
         primary_key=True,
@@ -141,7 +143,7 @@ class CreationToken(BaseModel):
     session = models.CharField(max_length=1000, null=True)
     is_verified = models.BooleanField(default=False)
 
-    objects = CreationTokenManager()
+    objects = CreationTokenManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.key.__str__()
