@@ -30,6 +30,9 @@ class CommonConstants:
     EMAIL_DOMAIN = 'openschools.education'
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     EMAIL_PRIVATE_API_KEY = os.environ.get("EMAIL_PRIVATE_API_KEY")
+    USING_BACKUP_EMAIL = os.environ.get("BACKUP_EMAIL_SERVICE")
+    BACKUP_EMAIL_DOMAIN = os.environ.get('BACKUP_EMAIL_DOMAIN')
+    BACKUP_EMAIL_PRIVATE_API_KEY = os.environ.get('BACKUP_EMAIL_PRIVATE_API_KEY')
     if not EMAIL_PRIVATE_API_KEY:
         warnings.warn("email_private_api_key is not defined")
     TEST_EMAIL = 'test.openschools.education@mail.ru'

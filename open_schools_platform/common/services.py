@@ -1,5 +1,6 @@
 from typing import List, Dict, Any, Tuple, Callable
 
+import requests
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
 
 from open_schools_platform.common.types import DjangoModelType
@@ -96,3 +97,24 @@ def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Ca
             result.append(None)
 
     return result
+
+
+class BackupEmailService:
+    def __init__(self, domain: str, api_key: str):
+        self.domain = domain
+        self.api_key = api_key
+
+    def send_html_email(self, subject: str,
+                        from_email: str, from_name: str,
+                        to_email: str, to_name: str,
+                        html: str, text: str = None):
+        url = "https://api.mailgun.net/v3/{}/messages".format(self.domain)
+        response = requests.post(
+            url,
+            auth=("api", self.api_key),
+            data={"from": f'{from_name} <{from_email}>',
+                  "to": f'{to_name} <{to_email}>',
+                  "subject": subject,
+                  "text": text,
+                  "html": html})
+        return response
