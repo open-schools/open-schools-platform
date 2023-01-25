@@ -1,12 +1,12 @@
+import typing
+
 from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.student_management.students.models import StudentProfile
-from open_schools_platform.user_management.users.models import User
 
 
 def add_parent_profile_to_family(family: Family, parent: ParentProfile):
@@ -32,32 +32,23 @@ def create_family(parent: ParentProfile, name: str = None) -> Family:
 
 
 class FamilyQueryHandler(BaseQueryHandler):
+    without_body = True
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.CANCELED]
+    available_statuses = {
+        (Query.Status.SENT, 'parents.parent_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'families.family_access'): (Query.Status.CANCELED,),
+    }
 
-    @staticmethod
-    def query_handler(query: Query, new_status: str, user: User):
-        BaseQueryHandler.query_handler_checks(FamilyQueryHandler, query, new_status, user, without_body=True)
-
-        family_access = user.has_perm("families.family_access", query.sender)
-        parent_profile_access = user.has_perm("parents.parent_profile_access", query.recipient)
-
-        if family_access or family_access and parent_profile_access:
-            if query.status != Query.Status.SENT:
-                raise NotAcceptable("Сan no longer change the query")
-            if new_status != Query.Status.CANCELED:
-                raise NotAcceptable("Family can only set canceled status")
-        elif parent_profile_access:
-            if new_status == Query.Status.CANCELED:
-                raise NotAcceptable("Parent profile cannot cancel query, he can only decline or accept it")
-            if query.status != Query.Status.SENT:
-                raise NotAcceptable("Сan no longer change the query")
-
-        query_update(query=query, data={"status": new_status})
+    @typing.no_type_check
+    def query_to_parent_profile(self, query: Query):
         if type(query.sender) != Family or type(query.recipient) != ParentProfile:
             raise NotAcceptable("Query is corrupted")
         if query.status == Query.Status.ACCEPTED:
             add_parent_profile_to_family(query.sender, query.recipient)
 
-        return query
+    change_query = {
+        ParentProfile: query_to_parent_profile
+    }
 
-    setattr(Family, "query_handler", query_handler)
+
+setattr(Family, "query_handler", FamilyQueryHandler())

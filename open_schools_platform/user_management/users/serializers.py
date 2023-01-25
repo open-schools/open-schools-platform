@@ -4,6 +4,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.serializers import EmployeeProfileSerializer
+from open_schools_platform.organization_management.teachers.serializers import TeacherProfileSerializer
 from open_schools_platform.parent_management.parents.serializers import ParentProfileSerializer
 from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
 from open_schools_platform.user_management.users.models import CreationToken, User
@@ -69,10 +70,11 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     parent_profile = ParentProfileSerializer()
     employee_profile = EmployeeProfileSerializer()
     student_profile = StudentProfileSerializer()
+    teacher_profile = TeacherProfileSerializer()
 
     class Meta:
         model = User
-        fields = ("id", "phone", "name", "parent_profile", "employee_profile", "student_profile")
+        fields = ("id", "phone", "name", "parent_profile", "employee_profile", "student_profile", "teacher_profile")
 
 
 class PasswordUserSerializer(serializers.ModelSerializer):

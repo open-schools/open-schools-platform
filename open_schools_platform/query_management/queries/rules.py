@@ -3,6 +3,7 @@ import rules
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
@@ -42,5 +43,12 @@ def circle_or_family_access(user: User, query: Query):
     return False
 
 
+@rules.predicate
+def teacher_profile_access(user: User, query: Query):
+    if (type(query.sender) == Circle and type(query.recipient) == TeacherProfile):
+        return user.has_perm("teachers.teacher_profile_access", query.recipient) or \
+               user.has_perm("circles.circle_access", query.sender)
+
+
 rules.add_perm("queries.query_access", employee_profile_or_organization_access | student_profile_or_circle_access |
-               parent_profile_or_family_access | circle_or_family_access)
+               parent_profile_or_family_access | circle_or_family_access | teacher_profile_access)
