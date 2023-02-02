@@ -1,5 +1,5 @@
 from django.contrib.gis.measure import D
-from django_filters import CharFilter, BooleanFilter
+from django_filters import CharFilter, NumberFilter
 
 from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
@@ -10,24 +10,29 @@ class CircleFilter(BaseFilterSet):
     ids = CharFilter(method=filter_by_ids)
     address = CharFilter(field_name="address", lookup_expr="icontains")
     organization_name = CharFilter(field_name="organization__name", lookup_expr="icontains")
-    suggest_far_circles = BooleanFilter(method='circle_suggestions_filter')
+    radius = NumberFilter(method='circle_determined_radius_filter')
     user_location = CharFilter(method='circle_radius_filter')
     name = CharFilter(field_name="name", lookup_expr="icontains")
-    suggest = False
+    determined_radius = 0
 
-    def circle_suggestions_filter(self, queryset, name, value):
-        self.suggest = value
+    def circle_determined_radius_filter(self, queryset, name, value):
+        self.determined_radius = value
         return queryset
 
     def circle_radius_filter(self, queryset, name, value):
-        radius = CirclesConstants.SEARCH_RADIUS
+        if self.determined_radius > 0:
+            return queryset.filter(location__distance_lte=(value, D(km=self.determined_radius)))
+
+        radius = CirclesConstants.START_SEARCH_RADIUS
+        multiplier = CirclesConstants.RADIUS_MULTIPLIER
+        count = CirclesConstants.MULTIPLICATIONS_COUNT
+
         result = queryset.filter(location__distance_lte=(value, D(km=radius)))
-        if self.suggest and len(result) == 0:
-            for i in range(3):
-                radius *= 10
-                result = queryset.filter(location__distance_lte=(value, D(km=radius)))
-                if len(result) > 0:
-                    return result
+        for i in range(count):
+            radius *= multiplier
+            result = queryset.filter(location__distance_lte=(value, D(km=radius)))
+            if len(result) > 0:
+                break
         return result
 
     class Meta:
