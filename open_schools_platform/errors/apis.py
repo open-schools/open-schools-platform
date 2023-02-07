@@ -7,13 +7,17 @@ from open_schools_platform.api.exception_handlers import (
     proposed_exception_handler
 )
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.serializers import Error400Serializer, Error401Serializer
+from open_schools_platform.common.views import convert_dict_to_serializer
 
 from open_schools_platform.errors.services import trigger_errors
 
 
 class TriggerApiException(APIView):
     @swagger_auto_schema(
-        tags=[SwaggerTags.ERRORS]
+        tags=[SwaggerTags.ERRORS],
+        responses={400: convert_dict_to_serializer({'error': Error400Serializer()}),
+                   401: convert_dict_to_serializer({'error': Error401Serializer()})}
     )
     def get(self, request):
         data = {

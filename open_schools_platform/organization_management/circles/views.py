@@ -77,7 +77,7 @@ class GetCircleApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "No such circle"}
+        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()})}
     )
     def get(self, request, pk):
         circle = get_circle(
