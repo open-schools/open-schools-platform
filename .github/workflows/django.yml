@@ -17,6 +17,7 @@ jobs:
         echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
         echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
         echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
+        echo EMAIL_SERVICE_TRANSPORT=${{secrets.EMAIL_SERVICE_TRANSPORT}} >> .env
         touch .firebase_admin_config
         echo ${{ secrets.FIREBASE_ADMIN_CONFIG }} >> .firebase_admin_config
     - name: Build docker

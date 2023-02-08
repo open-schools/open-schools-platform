@@ -222,3 +222,4 @@ from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
 from config.settings.geo_django import *  # noqa
 from config.settings.object_storage import *  # noqa
+from config.settings.email import *  # noqa

@@ -24,15 +24,13 @@ class CommonConstants:
         warnings.warn("google maps api key is not defined")
 
     # Email settings
-    EMAIL_ID = os.environ.get("EMAIL_ID")
-    if not EMAIL_ID:
-        warnings.warn("email_id is not defined")
+    EMAIL_SERVICE_TRANSPORT = os.environ.get("EMAIL_SERVICE_TRANSPORT")
+    VK_EMAIL_ID = os.environ.get("VK_EMAIL_ID")
+    if EMAIL_SERVICE_TRANSPORT == "VK" and not VK_EMAIL_ID:
+        warnings.warn("vk_email_id is not defined")
+    VK_EMAIL_PRIVATE_API_KEY = os.environ.get("VK_EMAIL_PRIVATE_API_KEY")
+    if EMAIL_SERVICE_TRANSPORT == "VK" and not VK_EMAIL_PRIVATE_API_KEY:
+        warnings.warn("vk_email_private_api_key is not defined")
     EMAIL_DOMAIN = 'openschools.education'
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
-    EMAIL_PRIVATE_API_KEY = os.environ.get("EMAIL_PRIVATE_API_KEY")
-    USING_BACKUP_EMAIL = os.environ.get("BACKUP_EMAIL_SERVICE")
-    BACKUP_EMAIL_DOMAIN = os.environ.get('BACKUP_EMAIL_DOMAIN')
-    BACKUP_EMAIL_PRIVATE_API_KEY = os.environ.get('BACKUP_EMAIL_PRIVATE_API_KEY')
-    if not EMAIL_PRIVATE_API_KEY:
-        warnings.warn("email_private_api_key is not defined")
     TEST_EMAIL = 'test.openschools.education@mail.ru'
