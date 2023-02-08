@@ -26,7 +26,7 @@ class UserExceptionsTests(TestCase):
             "recaptcha": "123456"
         }
         token_creation_response = self.client.post(self.token_creation_url, token_creation_data)
-        self.assertEqual(422, token_creation_response.status_code)
+        self.assertEqual(400, token_creation_response.status_code)
 
         token = create_test_token()
 
@@ -35,7 +35,7 @@ class UserExceptionsTests(TestCase):
         }
         token_verification_response = self.client.patch(self.token_verification_url(token.key),
                                                         token_verification_data)
-        self.assertEqual(422, token_verification_response.status_code)
+        self.assertEqual(400, token_verification_response.status_code)
 
     def test_token_does_not_exist(self):
         user_creation_data = {
@@ -132,7 +132,7 @@ class UserExceptionsTests(TestCase):
             "recaptcha": "123456"
         }
         response = self.client.post(self.sms_resend_url(token.key), data)
-        self.assertEqual(422, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_user_does_not_exist(self):
         token = create_test_token()

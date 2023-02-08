@@ -24,7 +24,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "status": Query.Status.IN_PROGRESS
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_set_invalid_status(self):
         user = create_logged_in_user(instance=self)
@@ -44,7 +44,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_user_can_no_longer_change_query(self):
         user = create_logged_in_user(instance=self)
@@ -55,7 +55,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_circle_set_canceled_status(self):
         user = create_logged_in_user(instance=self)
@@ -66,7 +66,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_circle_can_no_longer_change_query(self):
         user = create_logged_in_user(instance=self)
@@ -78,7 +78,7 @@ class StudentJoinCircleQueryTests(TestCase):
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
 
 class FamilyInviteParentQueryTests(TestCase):
@@ -105,7 +105,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_parent_can_no_longer_change_query(self):
         user = create_logged_in_user(instance=self)
@@ -116,7 +116,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_parent_set_canceled_status(self):
         user = create_logged_in_user(instance=self)
@@ -126,7 +126,7 @@ class FamilyInviteParentQueryTests(TestCase):
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
 
     def test_family_can_no_longer_change_query(self):
         user = create_logged_in_user(instance=self)
@@ -138,4 +138,4 @@ class FamilyInviteParentQueryTests(TestCase):
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)

@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 
 def create_serializer_class(name, fields):
-    return type(name, (serializers.Serializer, ), fields)
+    return type(name, (serializers.Serializer,), fields)
 
 
 def inline_serializer(*, fields, data=None, **kwargs):
@@ -12,3 +12,13 @@ def inline_serializer(*, fields, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
+
+
+def flatten(iterable):
+    flat_list = []
+    for sublist in iterable:
+        if isinstance(sublist, list):
+            flat_list.extend(sublist)
+        else:
+            flat_list.append(sublist)
+    return flat_list
