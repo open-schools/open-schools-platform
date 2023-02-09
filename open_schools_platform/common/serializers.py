@@ -3,7 +3,7 @@ from collections import OrderedDict
 from rest_framework.fields import CharField, DictField, ChoiceField, ListField
 from rest_framework.serializers import Serializer
 
-from open_schools_platform.api.errors import error_codes
+from open_schools_platform.errors.codes import error_codes
 
 
 def get_serializer_with_fields(serializer, fields):
@@ -30,7 +30,8 @@ def get_serializer_with_fields(serializer, fields):
 
 
 class ErrorSerializer(Serializer):
-    code = ChoiceField(required=False, choices=[item for sublist in error_codes.values() for item in sublist])
+    code = ChoiceField(required=False,
+                       choices=[item.__name__ for sublist in error_codes.values() for item in sublist])
     message = CharField(required=False, max_length=25, allow_null=True)
     violation_fields = DictField(required=False, allow_null=True, child=ListField(child=CharField()))
     violations = ListField(required=False, child=CharField())
@@ -41,8 +42,8 @@ class ErrorSerializer(Serializer):
 
 
 class Error400Serializer(ErrorSerializer):
-    code = ChoiceField(required=False, choices=error_codes[400])
+    code = ChoiceField(required=False, choices=list(map(lambda cls: cls.__name__, error_codes[400])))
 
 
 class Error401Serializer(ErrorSerializer):
-    code = ChoiceField(required=False, choices=error_codes[401])
+    code = ChoiceField(required=False, choices=list(map(lambda cls: cls.__name__, error_codes[401])))

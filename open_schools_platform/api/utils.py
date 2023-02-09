@@ -12,13 +12,3 @@ def inline_serializer(*, fields, data=None, **kwargs):
         return serializer_class(data=data, **kwargs)
 
     return serializer_class(**kwargs)
-
-
-def flatten(iterable):
-    flat_list = []
-    for sublist in iterable:
-        if isinstance(sublist, list):
-            flat_list.extend(sublist)
-        else:
-            flat_list.append(sublist)
-    return flat_list
