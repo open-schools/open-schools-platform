@@ -11,11 +11,14 @@ from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.selectors import get_organization
 from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.common.constants import CommonConstants
+from open_schools_platform.student_management.students.selectors import get_student_profile
+from open_schools_platform.user_management.users.models import User
 
 
 def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
@@ -90,6 +93,12 @@ setattr(Circle, "query_handler", CircleQueryHandler())
 def add_student_to_circle(student: Student, circle: Circle):
     student.circle = circle
     student.save()
+
+
+def is_organization_related_to_student_profile(organization_id: str, student_profile: str, user: User = None):
+    return len(get_organization(filters={"id": organization_id}, user=user).students.filter(
+        id__in=map(lambda student: student.id, get_student_profile(filters={"id": student_profile}).students.all())
+    )) > 0
 
 
 def convert_str_to_point(string: str):

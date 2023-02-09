@@ -1,6 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 
@@ -12,7 +12,8 @@ from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
     CircleSerializer, CircleStudentInviteSerializer
-from open_schools_platform.organization_management.circles.services import create_circle
+from open_schools_platform.organization_management.circles.services import create_circle, \
+    is_organization_related_to_student_profile
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -28,7 +29,7 @@ from ...parent_management.parents.services import get_parent_profile_or_create_n
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
 from ...query_management.queries.services import create_query
-from ...student_management.students.selectors import get_students, get_student
+from ...student_management.students.selectors import get_students
 from ...student_management.students.serializers import StudentSerializer
 from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
     export_students
@@ -65,10 +66,13 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         data = request.GET.dict()
-        if 'student' in data.keys():
-            get_student(filters={"id": data['student']}, user=request.user)
+        if 'student_profile' in data.keys():
             if 'organization' not in data.keys():
-                raise NotAcceptable("Organization is not defined")
+                raise ValidationError("Organization is not defined")
+            if not is_organization_related_to_student_profile(
+                    data["organization"], data["student_profile"], request.user):
+                raise PermissionDenied("This organization is not related to this student_profile")
+
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
