@@ -1,7 +1,6 @@
 from typing import List, Dict, Any, Tuple, Callable, Type
 
-from rest_framework.exceptions import ValidationError
-from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError, MethodNotAllowed
 
 from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.types import DjangoModelType
