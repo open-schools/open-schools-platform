@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 
@@ -11,7 +12,8 @@ from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
     CircleSerializer, CircleStudentInviteSerializer
-from open_schools_platform.organization_management.circles.services import create_circle
+from open_schools_platform.organization_management.circles.services import create_circle, \
+    is_organization_related_to_student_profile
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -63,6 +65,14 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def get(self, request, *args, **kwargs):
+        data = request.GET.dict()
+        if 'student_profile' in data.keys():
+            if 'organization' not in data.keys():
+                raise ValidationError("Organization is not defined")
+            if not is_organization_related_to_student_profile(
+                    data["organization"], data["student_profile"], request.user):
+                raise PermissionDenied("This organization is not related to this student_profile")
+
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
