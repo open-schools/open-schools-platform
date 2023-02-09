@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import requests
 from sendbox_sdk.api import SendBoxApi
 
-from open_schools_platform.common.constants import CommonConstants
+from open_schools_platform.common.constants import EmailConstants
 
 
 class BaseEmailService(ABC):
@@ -18,10 +18,10 @@ class BaseEmailService(ABC):
         3. Put your new class in project settings for emails.
     """
     def __init__(self):
-        self.vk_api_key = CommonConstants.VK_EMAIL_PRIVATE_API_KEY
-        self.vk_email_id = CommonConstants.VK_EMAIL_ID
-        self.domain = CommonConstants.EMAIL_DOMAIN
-        self.mailgun_api_key = CommonConstants.MAILGUN_EMAIL_PRIVATE_API_KEY
+        self.vk_api_key = EmailConstants.VK_EMAIL_PRIVATE_API_KEY
+        self.vk_email_id = EmailConstants.VK_EMAIL_ID
+        self.domain = EmailConstants.EMAIL_DOMAIN
+        self.mailgun_api_key = EmailConstants.MAILGUN_EMAIL_PRIVATE_API_KEY
 
     @abstractmethod
     def send_html_email(self, subject: str,
@@ -36,7 +36,7 @@ class MailgunEmailService(BaseEmailService):
                         from_email: str, from_name: str,
                         to_email: str, to_name: str,
                         html: str, text: str = None):
-        url = CommonConstants.MAILGUN_SEND_EMAIL_URL.format(self.domain)
+        url = EmailConstants.MAILGUN_SEND_EMAIL_URL.format(self.domain)
         response = requests.post(
             url,
             auth=("api", self.mailgun_api_key),

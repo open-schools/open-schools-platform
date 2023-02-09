@@ -1,4 +1,4 @@
-from open_schools_platform.common.constants import CommonConstants
+from open_schools_platform.common.constants import EmailConstants
 from open_schools_platform.common.services import exception_if_email_service_unavailable
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.selectors import get_family
@@ -27,7 +27,7 @@ def send_email_to_new_parent(circle_name, email, phone, user):
     send_mail_to_new_user_with_celery.delay(subject,
                                             {'login': phone, 'password': pwd, 'circle': circle_name,
                                              'name': name},
-                                            CommonConstants.DEFAULT_FROM_EMAIL,
+                                            EmailConstants.DEFAULT_FROM_EMAIL,
                                             email, 'new_user_circle_invite_mail_form.html')
     user = create_user(phone=phone, password=pwd, name=name, email=email)
     return user
