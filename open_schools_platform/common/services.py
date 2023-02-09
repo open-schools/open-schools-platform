@@ -1,5 +1,7 @@
 from typing import List, Dict, Any, Tuple, Callable, Type
 from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+
+from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.types import DjangoModelType
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
@@ -155,3 +157,13 @@ def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Ca
             result.append(None)
 
     return result
+
+
+class SendEmailService:
+    def __init__(self):
+        self.email_transport = EMAIL_TRANSPORT
+
+
+def is_email_service_available():
+    if SendEmailService().email_transport is None:
+        raise MethodNotAllowed("Email service")

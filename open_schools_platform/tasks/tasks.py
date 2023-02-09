@@ -1,7 +1,7 @@
 from django.template.loader import render_to_string
 
-from config.settings.email import SendEmailService
 from .celery import app
+from ..common.services import SendEmailService
 
 
 @app.task

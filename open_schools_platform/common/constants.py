@@ -12,6 +12,7 @@ class CommonConstants:
     FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3" \
                                 r"/relyingparty/verifyPhoneNumber?key="
     FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN = "https://fcm.googleapis.com/fcm/send"
+    MAILGUN_SEND_EMAIL_URL = r"https://api.mailgun.net/v3/{}/messages"
     SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
     SMS_API_KEY = os.environ.get("SMS_API_KEY")
     FCM_SERVER_KEY = os.environ.get("FCM_SERVER_KEY")
@@ -31,6 +32,9 @@ class CommonConstants:
     VK_EMAIL_PRIVATE_API_KEY = os.environ.get("VK_EMAIL_PRIVATE_API_KEY")
     if EMAIL_SERVICE_TRANSPORT == "VK" and not VK_EMAIL_PRIVATE_API_KEY:
         warnings.warn("vk_email_private_api_key is not defined")
+    MAILGUN_EMAIL_PRIVATE_API_KEY = os.environ.get("MAILGUN_EMAIL_PRIVATE_API_KEY")
+    if EMAIL_SERVICE_TRANSPORT == "MAILGUN" and not MAILGUN_EMAIL_PRIVATE_API_KEY:
+        warnings.warn("mailgun_email_private_api_key is not defined")
     EMAIL_DOMAIN = 'openschools.education'
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     TEST_EMAIL = 'test.openschools.education@mail.ru'

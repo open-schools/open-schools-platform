@@ -1,12 +1,12 @@
-from config.env import env
-from open_schools_platform.utils.email_utils import VKEmailService
+import os
 
-transport = env("EMAIL_SERVICE_TRANSPORT")
+from open_schools_platform.utils.email_utils import VKEmailService, MailgunEmailService
 
-if transport == "VK":
-    email_transport = VKEmailService
+transport = os.environ.get("EMAIL_SERVICE_TRANSPORT")
 
-
-class SendEmailService:
-    def __init__(self):
-        self.email_transport = email_transport
+if not transport:
+    EMAIL_TRANSPORT = None
+elif transport == "VK":
+    EMAIL_TRANSPORT = VKEmailService
+elif transport == "MAILGUN":
+    EMAIL_TRANSPORT = MailgunEmailService
