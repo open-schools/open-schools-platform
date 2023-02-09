@@ -1,10 +1,10 @@
 from typing import List, Dict, Any, Tuple, Callable, Type
 
-from rest_framework.exceptions import ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.types import DjangoModelType
-from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted
+from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -166,6 +166,6 @@ class SendEmailService:
         self.email_transport = EMAIL_TRANSPORT
 
 
-def is_email_service_available():
+def exception_if_email_service_unavailable():
     if SendEmailService().email_transport is None:
-        raise MethodNotAllowed("Email service")
+        raise EmailServiceUnavailable()
