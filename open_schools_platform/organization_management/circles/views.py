@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 
@@ -66,6 +67,8 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
         data = request.GET.dict()
         if 'student' in data.keys():
             get_student(filters={"id": data['student']}, user=request.user)
+            if 'organization' not in data.keys():
+                raise NotAcceptable("Organization is not defined")
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
