@@ -9,7 +9,7 @@ from rest_framework_jwt.settings import api_settings
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.errors.services import InvalidArgumentException
+from open_schools_platform.errors.exceptions import InvalidArgumentException
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
 

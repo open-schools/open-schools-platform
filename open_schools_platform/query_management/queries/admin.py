@@ -51,6 +51,7 @@ class RecipientUUIDFilter(InputFilter):
 
 @admin_wrapper(Query)
 class QueryAdmin(BaseAdmin):
+    field_to_highlight = 'id'
     list_display = ("id", "sender_ct", "recipient_ct", "status", "created_at")
     list_filter = ("status", SenderCTFilter, SenderUUIDFilter, RecipientCTFilter, RecipientUUIDFilter)
 

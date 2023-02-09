@@ -5,10 +5,11 @@ from typing import Dict
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
+from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.student_management.students.exports import StudentExport
 from open_schools_platform.parent_management.families.models import Family
@@ -123,7 +124,7 @@ class StudentProfileQueryHandler(BaseQueryHandler):
     def query_to_circle(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.circle = query.recipient
             query.body.student_profile = query.sender
             query.body.save()
