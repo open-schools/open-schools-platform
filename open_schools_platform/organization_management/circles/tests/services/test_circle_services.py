@@ -1,6 +1,6 @@
 from django.contrib.gis.geos import Point
 from django.test import TestCase
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import ValidationError
 
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
@@ -19,4 +19,4 @@ class GetCoordinatesFromAddressTests(TestCase):
 
     def test_incorrect_address(self):
         self.assertRaises(
-            NotAcceptable, lambda: create_test_circle(address="12345678910", location=None))
+            ValidationError, lambda: create_test_circle(address="12345678910", location=None))

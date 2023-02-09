@@ -1,7 +1,5 @@
 import typing
 
-from rest_framework.exceptions import NotAcceptable
-
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
@@ -41,8 +39,6 @@ class FamilyQueryHandler(BaseQueryHandler):
 
     @typing.no_type_check
     def query_to_parent_profile(self, query: Query):
-        if type(query.sender) != Family or type(query.recipient) != ParentProfile:
-            raise NotAcceptable("Query is corrupted")
         if query.status == Query.Status.ACCEPTED:
             add_parent_profile_to_family(query.sender, query.recipient)
 

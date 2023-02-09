@@ -1,8 +1,9 @@
 from typing import List, Dict, Any, Tuple, Callable, Type
 
-from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 
 from open_schools_platform.common.types import DjangoModelType
+from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -102,9 +103,9 @@ class BaseQueryHandler:
                 change_query_function(self, query)
                 return query
 
-        raise NotAcceptable(
+        raise WrongStatusChange(
             f'Status change [{query.status} => {new_status}] not allowed' +
-            f'{", no access permissions" if len(access_types) == 0 else f"for permission {access_types}"}')
+            f'{", no access permissions" if len(access_types) == 0 else f" for permission {access_types}"}')
 
     def __call__(self, query: Query, new_status: str, user: User):
         return self.query_handler(query, new_status, user)
@@ -118,11 +119,11 @@ class BaseQueryHandler:
     def query_handler_checks(query_handler_class, query: Query, new_status: str, user: User,
                              without_body: bool = False):
         if new_status not in query_handler_class.allowed_statuses:
-            raise NotAcceptable("Not allowed status")
+            raise WrongStatusChange("Not allowed status")
         if query.status == new_status:
             raise ValidationError(detail="Identical statuses")
         if query.recipient is None or query.sender is None or without_body is False and query.body is None:
-            raise MethodNotAllowed("put", detail="Query is corrupted")
+            raise QueryCorrupted()
 
     def _parse_changer_type(self, user: User, query: Query) -> set:
         result = set()

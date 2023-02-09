@@ -84,7 +84,7 @@ class CircleInviteTeacherQueryTests(TestCase):
             "status": Query.Status.ACCEPTED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
         self.assertEqual(Query.Status.SENT, get_query(filters={"id": str(query.id)}).status)
 
     def test_teacher_cannot_change_status_to_canceled(self):
@@ -97,5 +97,5 @@ class CircleInviteTeacherQueryTests(TestCase):
             "status": Query.Status.CANCELED
         }
         response = self.client.patch(self.query_status_change_url, data)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)
         self.assertEqual(Query.Status.SENT, get_query(filters={"id": str(query.id)}).status)

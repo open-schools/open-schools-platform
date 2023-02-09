@@ -3,11 +3,12 @@ from typing import Dict, Callable, Tuple, Type
 
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
-from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
 from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.teachers.models import TeacherProfile
@@ -35,10 +36,10 @@ def create_circle(name: str, organization: Organization, description: str, capac
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:
-                raise NotAcceptable("Address is incorrect.")
+                raise ValidationError({'address': 'Address is incorrect'})
             location = Point(coordinates.longitude, coordinates.latitude)
         except GeocoderUnavailable or GeocoderTimedOut:
-            raise NotAcceptable("Geopy error appeared. Probably address is incorrect.")
+            raise ValidationError("Geopy error appeared. Probably address is incorrect.")
     circle = Circle.objects.create_circle(
         name=name,
         organization=organization,
@@ -63,7 +64,7 @@ class CircleQueryHandler(BaseQueryHandler):
     def query_to_family(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.circle = query.sender
             query.body.student_profile = query.additional
             query.body.save()
@@ -72,7 +73,7 @@ class CircleQueryHandler(BaseQueryHandler):
     def query_to_teacher_profile(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.circle = query.sender
             query.body.teacher_profile = query.recipient
             query.body.save()

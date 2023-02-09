@@ -1,12 +1,11 @@
 from django.db.models import QuerySet
 import typing
 
-from rest_framework.exceptions import MethodNotAllowed
-
 from open_schools_platform.common.filters import BaseFilterSet
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.common.utils import form_ids_string_from_queryset, get_dict_including_fields, \
     convert_str_date_to_datetime
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -34,7 +33,7 @@ class OrganizationQueryHandler(BaseQueryHandler):
     def query_to_employee_profile(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.organization = query.sender
             query.body.employee_profile = query.recipient
             query.body.save()
