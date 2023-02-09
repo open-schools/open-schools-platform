@@ -27,7 +27,7 @@ from ...parent_management.parents.services import get_parent_profile_or_create_n
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
 from ...query_management.queries.services import create_query
-from ...student_management.students.selectors import get_students
+from ...student_management.students.selectors import get_students, get_student
 from ...student_management.students.serializers import StudentSerializer
 from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
     export_students
@@ -63,6 +63,9 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def get(self, request, *args, **kwargs):
+        data = request.GET.dict()
+        if 'student' in data.keys():
+            get_student(filters={"id": data['student']}, user=request.user)
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
