@@ -31,7 +31,12 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - ⚠️email id ```EMAIL_ID=<key>```
 - ⚠️mail.ru api key ```EMAIL_PRIVATE_API_KEY=<key>```
 - firebase cloud messaging server key ```FCM_SERVER_KEY=<key>```
-- firebase admin SDK configuration. ```FIREBASE_ADMIN_CONFIG=<key>```
+- ```FIREBASE_PROJECT_ID=<id>```
+- ```FIREBASE_PRIVATE_KEY_ID=<id>```
+- ```FIREBASE_PRIVATE_KEY=<key>```
+- ```FIREBASE_CLIENT_EMAIL=<email>```
+- ```FIREBASE_CLIENT_ID=<id>```
+- ```FIREBASE_CLIENT_CERT_URL=<url>```
 
 7. Migrate
 ```
