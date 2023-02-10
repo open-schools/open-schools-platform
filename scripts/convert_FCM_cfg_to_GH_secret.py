@@ -15,5 +15,3 @@ def convert_config_to_secret(config):
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent.absolute()
 
 frame = sys._getframe()
-
-FIREBASE_ADMIN_CONFIG = os.path.join(BASE_DIR, '.firebase_admin_config')
