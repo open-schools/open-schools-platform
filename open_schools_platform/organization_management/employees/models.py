@@ -3,6 +3,7 @@ from typing import Any
 import uuid
 
 import safedelete
+from django.core.exceptions import ValidationError
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -25,15 +26,15 @@ class EmployeeManager(BaseManager):
 
 
 class EmployeeProfileManager(BaseManager):
-    def create(self, *args: Any, **kwargs: Any):
-        employee_profile = self.model(
-            *args,
-            **kwargs,
-        )
+    def create_employee_profile(self, user: User, name: str, email: str = None):
+        try:
+            employee_profile = self.get(user=user)
+        except EmployeeProfile.DoesNotExist:
+            employee_profile = None
+        if employee_profile and not employee_profile.deleted:
+            raise ValidationError("EmployeeProfile with this user already exists")
 
-        employee_profile.full_clean()
-        employee_profile.save(using=self._db)
-
+        employee_profile = self.update_or_create_with_check(user=user, defaults={'name': name, 'email': email})
         return employee_profile
 
 
@@ -41,7 +42,7 @@ class EmployeeProfile(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    objects = EmployeeProfileManager()
+    objects = EmployeeProfileManager()  # type: ignore[assignment]
     email = models.EmailField(max_length=255, blank=True)
     history = HistoricalRecords()
 
@@ -60,7 +61,7 @@ class Employee(BaseModel):
     position = models.CharField(max_length=255, blank=True, default="")
     history = HistoricalRecords()
 
-    objects = EmployeeManager()
+    objects = EmployeeManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name

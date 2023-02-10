@@ -16,9 +16,9 @@ class InviteEmployeeTests(TestCase):
         self.invite_employee_url = \
             lambda pk: reverse("api:organization-management:organizations:invite-employee", args=[pk])
 
-    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_ID") is None or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") is None or
-                        env.ENVIRON.get("EMAIL_ID") == "" or env.ENVIRON.get("EMAIL_PRIVATE_API_KEY") == "",
-                        reason="EMAIL_ID or EMAIL_PRIVATE_API_KEY is not set")
+    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") is None or
+                        env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") == "",
+                        reason="EMAIL_SERVICE_TRANSPORT is not set")
     def test_invite_employee_query_successfully_formed(self):
         create_logged_in_user(instance=self)
         organization = create_test_organization()

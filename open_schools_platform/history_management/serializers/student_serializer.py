@@ -19,12 +19,12 @@ class StudentHistorySerializer(serializers.ModelSerializer):
 
 class StudentProfileHistorySerializer(serializers.ModelSerializer):
     history = HistorySerializerFields.get_history_records_field(
-        fields=HistorySerializerFields().HISTORY_STUDENT_PROFILES_FIELDS)(read_only=True)
+        fields=HistorySerializerFields().HISTORY_STUDENT_PROFILE_FIELDS)(read_only=True)
 
     class Meta:
         model = StudentProfile
         fields = ("history",)
         swagger_schema_fields = SwaggerSchemasHistoryGenerator(
-            fields=HistorySerializerFields().HISTORY_STUDENT_PROFILES_FIELDS,
+            fields=HistorySerializerFields().HISTORY_STUDENT_PROFILE_FIELDS,
             object_title='StudentProfileHistory',
             model=StudentProfile).generate_schemas()

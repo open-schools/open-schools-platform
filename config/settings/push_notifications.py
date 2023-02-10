@@ -1,20 +1,20 @@
-import os
-import sys
-import warnings
-
 import firebase_admin
-
 from firebase_admin import credentials
+from ..env import env
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+cred = credentials.Certificate(
+    {
+        "type": "service_account",
+        "project_id": env("FIREBASE_PROJECT_ID"),
+        "private_key_id": env("FIREBASE_PRIVATE_KEY_ID"),
+        "private_key": env("FIREBASE_PRIVATE_KEY").replace("\\n", "\n"),
+        "client_email": env("FIREBASE_CLIENT_EMAIL"),
+        "client_id": env("FIREBASE_CLIENT_ID"),
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://accounts.google.com/o/oauth2/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_x509_cert_url": env("FIREBASE_CLIENT_CERT_URL"),
+    }
+)
 
-frame = sys._getframe()
-
-FIREBASE_ADMIN_CONFIG = os.path.join(os.path.dirname(frame.f_back.f_code.co_filename), '.firebase_admin_config')
-
-if not os.path.exists(FIREBASE_ADMIN_CONFIG):
-    warnings.warn("Create .firebase_admin_config file")
-    app = firebase_admin.initialize_app()
-else:
-    cred = credentials.Certificate(FIREBASE_ADMIN_CONFIG)
-    app = firebase_admin.initialize_app(cred)
+app = firebase_admin.initialize_app(cred)

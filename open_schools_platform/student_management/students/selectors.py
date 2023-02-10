@@ -1,7 +1,8 @@
 from django.db.models import QuerySet
-from rest_framework.exceptions import PermissionDenied
+from rest_framework.exceptions import PermissionDenied, NotFound
 
 from open_schools_platform.common.selectors import selector_factory
+from open_schools_platform.common.utils import form_ids_string_from_queryset, filter_list_from_empty_strings
 from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
@@ -51,3 +52,15 @@ def get_students(*, filters=None) -> QuerySet:
     students = StudentFilter(filters, qs).qs
 
     return students
+
+
+def get_student_profiles_by_families(families: QuerySet) -> QuerySet:
+    if len(families) == 0:
+        return families
+    student_profiles_ids = \
+        filter_list_from_empty_strings(
+            list(map(lambda x: form_ids_string_from_queryset(x.student_profiles.all()), list(families)))
+        )
+    if len(student_profiles_ids) == 0:
+        raise NotFound("There are no student_profiles in provided families")
+    return get_student_profiles(filters={"ids": ','.join(student_profiles_ids)})

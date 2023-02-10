@@ -49,6 +49,7 @@ LOCAL_APPS = [
     'open_schools_platform.organization_management.circles.apps.CirclesConfig',
     'open_schools_platform.photo_management.photos.apps.PhotosConfig',
     'open_schools_platform.history_management.apps.HistoryConfig',
+    'open_schools_platform.organization_management.teachers.apps.TeachersConfig',
 ]
 
 THIRD_PARTY_APPS = [
@@ -221,3 +222,4 @@ from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
 from config.settings.geo_django import *  # noqa
 from config.settings.object_storage import *  # noqa
+from config.settings.email import *  # noqa

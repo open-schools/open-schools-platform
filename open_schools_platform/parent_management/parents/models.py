@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.db import models
 from simple_history.models import HistoricalRecords
 
@@ -9,12 +10,14 @@ from open_schools_platform.user_management.users.models import User
 
 class ParentProfileManager(BaseManager):
     def create_parent_profile(self, user: User, name: str):
-        parent_profile = self.model(
-            name=name,
-            user=user
-        )
-        parent_profile.full_clean()
-        parent_profile.save(using=self.db)
+        try:
+            parent_profile = self.get(user=user)
+        except ParentProfile.DoesNotExist:
+            parent_profile = None
+        if parent_profile and not parent_profile.deleted:
+            raise ValidationError("ParentProfile with this user already exists")
+
+        parent_profile = self.update_or_create_with_check(user=user, defaults={'name': name})
         return parent_profile
 
 
@@ -24,7 +27,7 @@ class ParentProfile(BaseModel):
     name = models.CharField(max_length=200)
     history = HistoricalRecords()
 
-    objects = ParentProfileManager()
+    objects = ParentProfileManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.name.__str__()

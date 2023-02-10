@@ -1,20 +1,21 @@
+import typing
 import uuid
 from typing import Dict
 
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.exceptions import NotAcceptable, MethodNotAllowed
+from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.student_management.students.exports import StudentExport
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family, create_family
-from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.services import query_update, create_query
+from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
 from open_schools_platform.student_management.students.selectors import get_student_profile
@@ -23,9 +24,7 @@ from open_schools_platform.user_management.users.models import User
 
 def create_student_profile(name: str, age: int = None, user: User = None,
                            phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
-    if not photo:
-        photo = Photo.objects.create_photo()
-    student_profile = StudentProfile.objects.create_student_profile(
+    student_profile = StudentProfile.objects.create(
         name=name,
         age=age,
         phone=phone,
@@ -115,38 +114,27 @@ def get_student_profile_by_family_or_create_new(student_phone: PhoneNumber, stud
 class StudentProfileQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
                         Query.Status.CANCELED]
+    available_statuses = {
+        (Query.Status.SENT, 'circles.circle_access'): (
+            Query.Status.DECLINED, Query.Status.IN_PROGRESS, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'students.student_profile_access'): (Query.Status.CANCELED,),
+    }
 
-    @staticmethod
-    def query_handler(query: Query, new_status: str, user: User):
-        BaseQueryHandler.query_handler_checks(StudentProfileQueryHandler, query, new_status, user)
-
-        circle_access = user.has_perm("circles.circle_access", query.recipient)
-        student_profile_access = user.has_perm("students.student_profile_access", query.sender)
-
-        if student_profile_access and circle_access:
-            pass
-        elif student_profile_access:
-            if query.status != Query.Status.SENT:
-                raise NotAcceptable("Сan no longer change the query")
-            if new_status != Query.Status.CANCELED:
-                raise NotAcceptable("User can only set canceled status")
-        elif circle_access:
-            if new_status == Query.Status.CANCELED:
-                raise NotAcceptable("Circle cannot cancel query, it can only decline it")
-            if query.status == Query.Status.CANCELED:
-                raise NotAcceptable("Сan no longer change the query")
-
-        query_update(query=query, data={"status": new_status})
+    @typing.no_type_check
+    def query_to_circle(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.circle = query.recipient
             query.body.student_profile = query.sender
             query.body.save()
 
-        return query
+    change_query = {
+        Circle: query_to_circle
+    }
 
-    setattr(StudentProfile, "query_handler", query_handler)
+
+setattr(StudentProfile, "query_handler", StudentProfileQueryHandler())
 
 
 def autogenerate_family_logic(fields: Dict, user: User) -> StudentProfile:

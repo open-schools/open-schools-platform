@@ -23,13 +23,21 @@ class CommonConstants:
     if not GOOGLE_MAPS_API_KEY:
         warnings.warn("google maps api key is not defined")
 
-    # Email settings
-    EMAIL_ID = os.environ.get("EMAIL_ID")
-    if not EMAIL_ID:
-        warnings.warn("email_id is not defined")
+
+class EmailConstants:
+    EMAIL_SERVICE_TRANSPORT = os.environ.get("EMAIL_SERVICE_TRANSPORT")
+    MAILGUN_SEND_EMAIL_URL = r"https://api.mailgun.net/v3/{}/messages"
+    VK_EMAIL_ID = os.environ.get("VK_EMAIL_ID")
+    VK_EMAIL_PRIVATE_API_KEY = os.environ.get("VK_EMAIL_PRIVATE_API_KEY")
+    if EMAIL_SERVICE_TRANSPORT == "VK":
+        if not VK_EMAIL_ID:
+            warnings.warn("vk_email_id is not defined")
+        if not VK_EMAIL_PRIVATE_API_KEY:
+            warnings.warn("vk_email_private_api_key is not defined")
+    MAILGUN_EMAIL_PRIVATE_API_KEY = os.environ.get("MAILGUN_EMAIL_PRIVATE_API_KEY")
+    if EMAIL_SERVICE_TRANSPORT == "MAILGUN":
+        if not not MAILGUN_EMAIL_PRIVATE_API_KEY:
+            warnings.warn("mailgun_email_private_api_key is not defined")
     EMAIL_DOMAIN = 'openschools.education'
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
-    EMAIL_PRIVATE_API_KEY = os.environ.get("EMAIL_PRIVATE_API_KEY")
-    if not EMAIL_PRIVATE_API_KEY:
-        warnings.warn("email_private_api_key is not defined")
     TEST_EMAIL = 'test.openschools.education@mail.ru'

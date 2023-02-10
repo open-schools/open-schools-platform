@@ -1,22 +1,27 @@
-from typing import Optional
+import typing
+from typing import Dict, Callable, Tuple, Type
 
 from django.contrib.gis.geos import Point
 from geopy.geocoders import GoogleV3
-from rest_framework.exceptions import NotAcceptable, ValidationError, MethodNotAllowed
+from rest_framework.exceptions import ValidationError
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
 from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.selectors import get_organization
+from open_schools_platform.organization_management.teachers.models import TeacherProfile
+from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.common.constants import CommonConstants
+from open_schools_platform.student_management.students.selectors import get_student_profile
 from open_schools_platform.user_management.users.models import User
 
 
-def create_circle(name: str, organization: Optional[Organization], description: str, capacity: int, address: str,
+def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
                   location: Point = None) -> Circle:
     """
     Geopy library allows to take coordinates from address.
@@ -34,10 +39,10 @@ def create_circle(name: str, organization: Optional[Organization], description: 
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:
-                raise NotAcceptable("Address is incorrect.")
+                raise ValidationError({'address': 'Address is incorrect'})
             location = Point(coordinates.longitude, coordinates.latitude)
         except GeocoderUnavailable or GeocoderTimedOut:
-            raise NotAcceptable("Geopy error appeared. Probably address is incorrect.")
+            raise ValidationError("Geopy error appeared. Probably address is incorrect.")
     circle = Circle.objects.create_circle(
         name=name,
         organization=organization,
@@ -52,44 +57,48 @@ def create_circle(name: str, organization: Optional[Organization], description: 
 
 class CircleQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED, Query.Status.DECLINED]
+    available_statuses: Dict[Tuple[str, str], Tuple] = {
+        (Query.Status.SENT, 'teachers.teacher_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'families.family_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'circles.circle_access'): (Query.Status.CANCELED,),
+    }
 
-    @staticmethod
-    def query_handler(query: Query, new_status: str, user: User):
-        BaseQueryHandler.query_handler_checks(CircleQueryHandler, query, new_status, user)
-
-        from open_schools_platform.parent_management.families.models import Family
-
-        if type(query.recipient) is not Family:
-            raise ValidationError(detail="The recipient must be a Family if the sender is a circle")
-
-        circle_access = user.has_perm('circles.circle_access', query.sender)
-        family_access = user.has_perm('families.family_access', query.recipient)
-
-        if not family_access:
-            if new_status != Query.Status.CANCELED:
-                raise NotAcceptable("Circle can only set canceled status")
-        elif not circle_access:
-            if query.status != Query.Status.SENT:
-                raise NotAcceptable("Сan no longer change the query")
-            if new_status == Query.Status.CANCELED:
-                raise NotAcceptable("User cannot cancel query, he can only decline or accept it")
-
-        query_update(query=query, data={"status": new_status})
+    @typing.no_type_check
+    def query_to_family(self, query: Query):
         if query.status == Query.Status.ACCEPTED:
             if query.body is None:
-                raise MethodNotAllowed("put", detail="Query is corrupted")
+                raise QueryCorrupted()
             query.body.circle = query.sender
             query.body.student_profile = query.additional
             query.body.save()
 
-        return query
+    @typing.no_type_check
+    def query_to_teacher_profile(self, query: Query):
+        if query.status == Query.Status.ACCEPTED:
+            if query.body is None:
+                raise QueryCorrupted()
+            query.body.circle = query.sender
+            query.body.teacher_profile = query.recipient
+            query.body.save()
 
-    setattr(Circle, "query_handler", query_handler)
+    change_query: Dict[Type, Callable[[typing.Any, Query], Query]] = {
+        Family: query_to_family,
+        TeacherProfile: query_to_teacher_profile
+    }
+
+
+setattr(Circle, "query_handler", CircleQueryHandler())
 
 
 def add_student_to_circle(student: Student, circle: Circle):
     student.circle = circle
     student.save()
+
+
+def is_organization_related_to_student_profile(organization_id: str, student_profile: str, user: User = None):
+    return len(get_organization(filters={"id": organization_id}, user=user).students.filter(
+        id__in=map(lambda student: student.id, get_student_profile(filters={"id": student_profile}).students.all())
+    )) > 0
 
 
 def convert_str_to_point(string: str):

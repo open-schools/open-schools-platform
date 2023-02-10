@@ -1,7 +1,7 @@
 import inspect
 import sys
 
-from rest_framework import status
+import rest_framework
 from django.core.exceptions import (
     ValidationError as DjangoValidationError,
     PermissionDenied,
@@ -10,8 +10,7 @@ from django.core.exceptions import (
 from django.http import Http404
 
 from rest_framework import serializers, exceptions
-from rest_framework.exceptions import ValidationError as RestValidationError, APIException
-from django.utils.translation import gettext_lazy as _
+from rest_framework.exceptions import ValidationError as RestValidationError, APIException, ErrorDetail
 
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.core.exceptions import ApplicationError
@@ -105,18 +104,17 @@ def trigger_application_error():
     raise ApplicationError(message="Something is not correct", extra={"type": "RANDOM"})
 
 
-class InvalidArgumentException(APIException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
-    default_detail = _("Some of input data are invalid.")
-
-    def __init__(self, detail="Some of input data are invalid"):
-        self.detail = detail
-
-
 def trigger_errors(exception_handler):
     result = {}
 
-    for name, member in inspect.getmembers(sys.modules[__name__]):
+    members = inspect.getmembers(sys.modules[__name__],
+                                 lambda obj: (inspect.isclass(obj) or inspect.isfunction(
+                                     obj)) and obj.__module__ == __name__)
+    members.extend([mem for mem in inspect.getmembers(rest_framework.exceptions, inspect.isclass) if
+                    mem[1].__module__ == rest_framework.exceptions.__name__ and mem[1] not in (
+                        ErrorDetail, APIException)])
+
+    for name, member in members:
         if inspect.isfunction(member) and name.startswith("trigger") and name != "trigger_errors":
             try:
                 member()
@@ -127,8 +125,9 @@ def trigger_errors(exception_handler):
                     result[name] = "500 SERVER ERROR"
                     continue
 
+                response.data['status_code'] = response.status_code
                 result[name] = response.data
-        if inspect.isclass(member) and name.endswith("Exception"):
+        if inspect.isclass(member) and not name.endswith("Serializer"):
             try:
                 raise member
             except Exception as exc:
@@ -138,6 +137,7 @@ def trigger_errors(exception_handler):
                     result[name] = "500 SERVER ERROR"
                     continue
 
+                response.data['status_code'] = response.status_code
                 result[name] = response.data
 
     return result

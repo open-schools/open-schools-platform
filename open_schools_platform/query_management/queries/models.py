@@ -1,9 +1,10 @@
+from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
+from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 import uuid
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
-#  type: ignore[name-defined]
 from open_schools_platform.common.models import BaseModel
 
 
@@ -46,3 +47,7 @@ class Query(BaseModel):
 
     def __str__(self):
         return self.id.__str__()
+
+    @staticmethod
+    def get_all_statuses() -> list:
+        return list(Query.Status.__dict__["_member_map_"].keys())

@@ -1,5 +1,6 @@
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.views import APIView
 
@@ -11,11 +12,15 @@ from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
     CircleSerializer, CircleStudentInviteSerializer
-from open_schools_platform.organization_management.circles.services import create_circle
+from open_schools_platform.organization_management.circles.services import create_circle, \
+    is_organization_related_to_student_profile
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
+from ..teachers.selectors import get_teacher_profile
+from ..teachers.serializers import CircleTeacherInviteSerializer
+from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import convert_dict_to_serializer
 from ...parent_management.families.selectors import get_families
@@ -60,6 +65,14 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def get(self, request, *args, **kwargs):
+        data = request.GET.dict()
+        if 'student_profile' in data.keys():
+            if 'organization' not in data.keys():
+                raise ValidationError("Organization is not defined")
+            if not is_organization_related_to_student_profile(
+                    data["organization"], data["student_profile"], request.user):
+                raise PermissionDenied("This organization is not related to this student_profile")
+
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
             serializer_class=CircleSerializer,
@@ -74,7 +87,7 @@ class GetCircleApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "No such circle"}
+        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()})}
     )
     def get(self, request, pk):
         circle = get_circle(
@@ -138,7 +151,7 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         invite_serializer = CircleStudentInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user)
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
         parent_phone = invite_serializer.validated_data["parent_phone"]
         student_phone = invite_serializer.validated_data["student_phone"]
         email = invite_serializer.validated_data["email"]
@@ -157,8 +170,31 @@ class InviteStudentApi(ApiAuthMixin, APIView):
                              body_model_name="student", body_id=student.id,
                              additional_model_name="studentprofile", additional_id=student_profile.id)
 
-        return Response({"query": QueryStatusSerializer(query).data},
-                        status=201)
+        return Response({"query": QueryStatusSerializer(query).data}, status=201)
+
+
+class InviteTeacherApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        request_body=CircleTeacherInviteSerializer,
+        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
+        operation_description="Creates invite teacher query.",
+    )
+    def post(self, request, pk) -> Response:
+        invite_serializer = CircleTeacherInviteSerializer(data=request.data)
+        invite_serializer.is_valid(raise_exception=True)
+
+        get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
+        phone = invite_serializer.validated_data["phone"]
+
+        teacher_profile = get_teacher_profile(filters={'phone': str(phone)})
+        teacher = create_teacher(**invite_serializer.validated_data["body"])
+
+        query = create_query(sender_model_name="circle", sender_id=pk,
+                             recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
+                             body_model_name="teacher", body_id=teacher.id)
+
+        return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 
 class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):

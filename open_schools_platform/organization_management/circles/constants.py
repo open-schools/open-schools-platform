@@ -2,4 +2,6 @@ class CirclesConstants:
     """
     SEARCH_RADIUS is given in Km
     """
-    SEARCH_RADIUS = 10
+    START_SEARCH_RADIUS = 10
+    RADIUS_MULTIPLIER = 2
+    MULTIPLICATIONS_COUNT = 10

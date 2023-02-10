@@ -30,7 +30,15 @@ class Organization(BaseModel):
     inn = models.CharField(max_length=255, blank=True, default="")
     history = HistoricalRecords()
 
-    objects = OrganizationManager()
+    objects = OrganizationManager()  # type: ignore[assignment]
+
+    @property
+    def students(self):
+        from open_schools_platform.student_management.students.models import Student
+        students = Student.objects.none()
+        for circle in self.circles.all():
+            students |= circle.students
+        return students
 
     def __str__(self):
         return self.name
