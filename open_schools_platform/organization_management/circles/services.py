@@ -96,8 +96,9 @@ def add_student_to_circle(student: Student, circle: Circle):
 
 
 def is_organization_related_to_student_profile(organization_id: str, student_profile: str, user: User = None):
-    return len(get_organization(filters={"id": organization_id}, user=user).students.filter(
-        id__in=map(lambda student: student.id, get_student_profile(filters={"id": student_profile}).students.all())
+    return len(get_organization(filters={"id": organization_id}, user=user, empty_exception=True).students.filter(
+        id__in=map(lambda student: student.id, get_student_profile(
+            filters={"id": student_profile}, empty_exception=True).students.all())
     )) > 0
 
 
