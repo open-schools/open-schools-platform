@@ -37,7 +37,7 @@ class Organization(BaseModel):
         from open_schools_platform.student_management.students.models import Student
         students = Student.objects.none()
         for circle in self.circles.all():
-            students |= circle.students
+            students |= circle.students.all()
         return students
 
     def __str__(self):
