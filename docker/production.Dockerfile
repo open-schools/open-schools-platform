@@ -4,7 +4,7 @@ FROM python:3.10
 
 # Installing all python dependencies
 ADD requirements/ requirements/
-RUN pip install -r requirements/production.txt
+RUN pip install -r requirements/base.txt
 
 # GeoDjango dependencies
 RUN apt-get update -y \
