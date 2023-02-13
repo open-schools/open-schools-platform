@@ -30,7 +30,7 @@ jobs:
     - name: Run migrations
       run: docker-compose run django python manage.py migrate
     - name: Collectstatic
-      run: python manage.py collectstatic
+      run: docker-compose run django python manage.py collectstatic
     - name: Run tests
       run: docker-compose run django py.test
 
