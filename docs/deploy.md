@@ -37,24 +37,27 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - ```FIREBASE_CLIENT_EMAIL=<email>```
 - ```FIREBASE_CLIENT_ID=<id>```
 - ```FIREBASE_CLIENT_CERT_URL=<url>```
-
 7. Migrate
 ```
 python manage.py migrate
 ```
-8. Run django server
+8. Migrate
+```
+python manage.py migrate
+```
+9. Run django server
 ```
 python manage.py runserver [port]
 ```
-9. Install pre-commit hooks
+10. Install pre-commit hooks
 ```
 pre-commit install
 ```
-10. Install pre-push hooks
+11. Install pre-push hooks
 ```
 pre-commit install --hook-type pre-push
 ```
-11. Install GeoDjango packages
+12. Install GeoDjango packages
 
 > You can specify custom paths to GeoDjango packages in .env file like this.
 > Special instructions for specifying these paths are provided for each system.
