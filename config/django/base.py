@@ -63,7 +63,6 @@ THIRD_PARTY_APPS = [
     'corsheaders',
     'django_extensions',
     'rest_framework_jwt',
-    'drf_yasg',
     'phonenumber_field',
     'rules.apps.AutodiscoverRulesConfig',
     'storages',
@@ -205,15 +204,6 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SWAGGER_SETTINGS = {
-    'SECURITY_DEFINITIONS': {
-        'api_key': {
-            'type': 'apiKey',
-            'in': 'header',
-            'name': 'Authorization'
-        }
-    },
-}
 
 from config.settings.cors import *  # noqa
 from config.settings.jwt import *  # noqa
@@ -223,3 +213,13 @@ from config.settings.sentry import *  # noqa
 from config.settings.geo_django import *  # noqa
 from config.settings.object_storage import *  # noqa
 from config.settings.email import *  # noqa
+
+ADMIN_PANEL_ENABLED = env.bool('ADMIN_PANEL_ENABLED', default=True)
+
+from config.settings.debug_toolbar.settings import *  # noqa
+from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
+INSTALLED_APPS, MIDDLEWARE = DebugToolbarSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)
+
+from config.settings.swagger.settings import *  # noqa
+from config.settings.swagger.setup import SwaggerSetup  # noqa
+INSTALLED_APPS, MIDDLEWARE = SwaggerSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)
