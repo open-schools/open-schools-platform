@@ -16,9 +16,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from config.django.base import ADMIN_PANEL_ENABLED
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('api/', include(('open_schools_platform.api.urls', 'api'))),
 ]
 
@@ -27,3 +27,6 @@ from config.settings.swagger.setup import SwaggerSetup  # noqa
 
 urlpatterns = DebugToolbarSetup.do_urls(urlpatterns)
 urlpatterns = SwaggerSetup.do_urls(urlpatterns)
+
+if ADMIN_PANEL_ENABLED:
+    urlpatterns += [path('admin/', admin.site.urls)]

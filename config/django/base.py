@@ -214,6 +214,8 @@ from config.settings.geo_django import *  # noqa
 from config.settings.object_storage import *  # noqa
 from config.settings.email import *  # noqa
 
+ADMIN_PANEL_ENABLED = env.bool('ADMIN_PANEL_ENABLED', default=True)
+
 from config.settings.debug_toolbar.settings import *  # noqa
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
 INSTALLED_APPS, MIDDLEWARE = DebugToolbarSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)
