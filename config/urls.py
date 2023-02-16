@@ -14,27 +14,19 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include, re_path
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from drf_yasg import openapi
+from django.urls import path, include
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Open Schools Platform API",
-        default_version='v1',
-        description="Backend for open source schools management platform",
-        contact=openapi.Contact(email="inbox@lamart.site"),
-        license=openapi.License(name="MIT License"),
-    ),
-    public=True,
-    permission_classes=[permissions.AllowAny],
-)
+from config.django.base import ADMIN_PANEL_ENABLED
 
 urlpatterns = [
-    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    re_path(r'^swagger/$', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    re_path(r'^redoc/$', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-    path('admin/', admin.site.urls),
     path('api/', include(('open_schools_platform.api.urls', 'api'))),
 ]
+
+from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
+from config.settings.swagger.setup import SwaggerSetup  # noqa
+
+urlpatterns = DebugToolbarSetup.do_urls(urlpatterns)
+urlpatterns = SwaggerSetup.do_urls(urlpatterns)
+
+if ADMIN_PANEL_ENABLED:
+    urlpatterns += [path('admin/', admin.site.urls)]
