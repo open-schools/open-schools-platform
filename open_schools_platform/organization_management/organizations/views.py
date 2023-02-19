@@ -11,7 +11,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.organization_management.circles.selectors import get_circle
+from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -25,6 +25,8 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
+from open_schools_platform.organization_management.teachers.selectors import get_teachers_by_circles, get_teacher
+from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
@@ -270,3 +272,28 @@ class GetAnalytics(ApiAuthMixin, APIView):
         if all(arg in dates for arg in ("date_from", "date_to")):
             queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
         return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
+
+
+class OrganizationTeachersListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get all teachers for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"results": TeacherSerializer(many=True)})}
+    )
+    def get(self, request, pk):
+        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        circles = get_circles(filters={"organization": str(organization.pk)}, empty_exception=True,
+                              empty_message="Provided organization has no circles")
+        teachers = get_teachers_by_circles(circles)
+        return Response({"results": TeacherSerializer(teachers, many=True).data}, status=200)
+
+
+class GetTeacherApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get teacher with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"teacher": TeacherSerializer()})}
+    )
+    def get(self, request, pk):
+        teacher = get_teacher(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        return Response({"teacher": TeacherSerializer(teacher).data}, status=200)

@@ -23,3 +23,9 @@ class CircleTeacherInviteSerializer(serializers.Serializer):
     body = QueryTeacherBodySerializer(required=True)
     phone = PhoneNumberField(max_length=17, required=True)
     email = serializers.EmailField(max_length=255, required=True)
+
+
+class TeacherSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Teacher
+        fields = ('id', 'name', 'circle', 'teacher_profile')
