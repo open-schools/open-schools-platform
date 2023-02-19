@@ -29,6 +29,8 @@ jobs:
       run: docker-compose run django mypy open_schools_platform/
     - name: Run migrations
       run: docker-compose run django python manage.py migrate
+    - name: Collectstatic
+      run: docker-compose run django python manage.py collectstatic
     - name: Run tests
       run: docker-compose run django py.test
 
@@ -78,5 +80,7 @@ jobs:
       run: mypy open_schools_platform/
     - name: Run migrations
       run: python manage.py migrate
+    - name: Collectstatic
+      run: python manage.py collectstatic
     - name: Run tests
       run: py.test
