@@ -2,7 +2,7 @@ from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import NotAcceptable, NotFound
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,7 +11,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles
+from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -25,7 +25,7 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
-from open_schools_platform.organization_management.teachers.selectors import get_teachers_by_circles, get_teacher
+from open_schools_platform.organization_management.teachers.selectors import get_teacher
 from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
@@ -282,9 +282,9 @@ class OrganizationTeachersListApi(ApiAuthMixin, APIView):
     )
     def get(self, request, pk):
         organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        circles = get_circles(filters={"organization": str(organization.pk)}, empty_exception=True,
-                              empty_message="Provided organization has no circles")
-        teachers = get_teachers_by_circles(circles)
+        teachers = organization.teachers
+        if not teachers:
+            raise NotFound("Organization has no teachers")
         return Response({"results": TeacherSerializer(teachers, many=True).data}, status=200)
 
 

@@ -2,7 +2,6 @@ from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import selector_factory
-from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter, TeacherProfileFilter
 from open_schools_platform.organization_management.teachers.models import Teacher, TeacherProfile
 from open_schools_platform.user_management.users.models import User
@@ -42,7 +41,3 @@ def get_teacher_profile(*, filters=None, user: User = None) -> QuerySet:
         raise PermissionDenied
 
     return teacher_profile
-
-
-def get_teachers_by_circles(circles: QuerySet) -> QuerySet:
-    return get_teachers(filters={"circle_ids": form_ids_string_from_queryset(circles)})
