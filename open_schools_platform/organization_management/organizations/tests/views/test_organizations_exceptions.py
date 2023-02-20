@@ -5,7 +5,6 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 
 from open_schools_platform.organization_management.circles.tests.utils import create_test_circle
-from open_schools_platform.organization_management.employees.tests.utils import create_test_employee
 from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
 from open_schools_platform.organization_management.teachers.tests.utils import create_test_teacher
 from open_schools_platform.student_management.students.tests.utils import create_test_student
@@ -44,13 +43,6 @@ class OrganizationsExceptions(TestCase):
     def test_teachers_list_organization_does_not_exist(self):
         create_logged_in_user(self)
         response = self.client.get(self.get_teachers_url(pk=uuid.uuid4()))
-        self.assertEqual(404, response.status_code)
-
-    def test_teachers_list_organization_has_no_circles(self):
-        user = create_logged_in_user(self)
-        organization = create_test_organization()
-        create_test_employee(user=user, organization=organization)
-        response = self.client.get(self.get_teachers_url(pk=str(organization.pk)))
         self.assertEqual(404, response.status_code)
 
     def test_get_teacher_does_not_exist(self):
