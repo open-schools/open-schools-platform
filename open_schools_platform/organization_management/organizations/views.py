@@ -282,10 +282,7 @@ class OrganizationTeachersListApi(ApiAuthMixin, APIView):
     )
     def get(self, request, pk):
         organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        teachers = organization.teachers
-        if not teachers:
-            raise NotFound("Organization has no teachers")
-        return Response({"results": TeacherSerializer(teachers, many=True).data}, status=200)
+        return Response({"results": TeacherSerializer(organization.teachers, many=True).data}, status=200)
 
 
 class GetTeacherApi(ApiAuthMixin, APIView):
