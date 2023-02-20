@@ -2,7 +2,7 @@ from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable, NotFound
+from rest_framework.exceptions import NotAcceptable
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
