@@ -33,6 +33,8 @@ class Circle(BaseModel):
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
     location = models.PointField(geography=True, default=Point(0.0, 0.0))
+    start_time = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField(null=True, blank=True)
     history = HistoricalRecords()
 
     @property
@@ -45,3 +47,9 @@ class Circle(BaseModel):
 
     def __str__(self):
         return self.name
+
+    def save(self, keep_deleted=False, **kwargs):
+        if self.start_time:
+            from open_schools_platform.organization_management.circles.services import setup_scheduled_notifications
+            setup_scheduled_notifications(self)
+        super(BaseModel, self).save(keep_deleted, **kwargs)

@@ -85,11 +85,12 @@ class ApiAuthMixin:
     permission_classes: PermissionClassesType = (IsAuthenticated,)
 
 
-class XLSXMixin(object):
+class FileMixin(object):
     """
-    A mixin that can be used to render a XLSX file
+        A mixin that can be used to render a file
     """
     filename = "file"
+    content_type = ""
 
     def finalize_response(self, request, response, *args, **kwargs):
         response = super().finalize_response(
@@ -97,8 +98,19 @@ class XLSXMixin(object):
         )
         if isinstance(response, Response) and isinstance(response.data, bytes):
             file = response.data
-            response = HttpResponse(file,
-                                    content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                                    status=200)
+            response = HttpResponse(file, content_type=self.content_type, status=200)
             response['Content-Disposition'] = 'attachment; filename={}'.format(escape_uri_path(self.filename), )
         return response
+
+
+class XLSXMixin(FileMixin):
+    """
+    A mixin that can be used to render a XLSX file
+    """
+    filename = "file.xlsx"
+    content_type = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+
+
+class ICalMixin(FileMixin):
+    filename = "file.ics"
+    content_type = 'application/calendar'

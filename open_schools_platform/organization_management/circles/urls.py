@@ -3,7 +3,7 @@ from django.urls import path
 from open_schools_platform.common.views import MultipleViewManager
 from open_schools_platform.organization_management.circles.views import CreateCircleApi, GetCirclesApi, \
     CirclesQueriesListApi, CirclesStudentsListApi, GetCircleApi, InviteStudentApi, CircleDeleteApi, \
-    CirclesStudentProfilesExportApi, InviteTeacherApi
+    CirclesStudentProfilesExportApi, InviteTeacherApi, CircleICalExportApi
 
 urlpatterns = [
     path('', MultipleViewManager({'get': GetCirclesApi, 'post': CreateCircleApi}).as_view(), name='circles'),
@@ -13,4 +13,5 @@ urlpatterns = [
     path('/<uuid:pk>/invite-student', InviteStudentApi.as_view(), name='invite-student'),
     path('/<uuid:pk>/invite-teacher', InviteTeacherApi.as_view(), name='invite-teacher'),
     path('/<uuid:pk>/students/export', CirclesStudentProfilesExportApi.as_view(), name='students-export'),
+    path('/<uuid:pk>/ical', CircleICalExportApi.as_view(), name='queries-ical'),
 ]
