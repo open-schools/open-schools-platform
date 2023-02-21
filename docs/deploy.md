@@ -41,9 +41,9 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 ```
 python manage.py migrate
 ```
-8. Migrate
+8. Collect static
 ```
-python manage.py migrate
+python manage.py collectstatic
 ```
 9. Run django server
 ```
