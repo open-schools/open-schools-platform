@@ -161,7 +161,7 @@ def generate_ical(queryset):
     cal = Calendar()
     cal.add('prodid', '-//LamArt//Open Schools//')
     cal.add('version', '2.0')
-    if not isinstance(queryset, list):
+    if not isinstance(queryset, typing.Iterable):
         queryset = [queryset]
     for circle in queryset:
         if not circle.start_time:

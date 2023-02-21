@@ -224,3 +224,27 @@ class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
         circle = get_circle(filters={'id': str(pk)}, empty_exception=True)
         file = generate_ical(circle)
         return Response(file, status=200)
+
+
+class CirclesICalExportApi(ApiAuthMixin, ICalMixin, ListAPIView):
+    filename = 'circles.ics'
+    filterset_class = CircleFilter
+
+    @swagger_auto_schema(
+        operation_description="Exports circles schedule",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        filterset_class=CircleFilter,
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
+    )
+    def get(self, request):
+        data = request.GET.dict()
+        if 'student_profile' in data.keys():
+            if 'organization' not in data.keys():
+                raise ValidationError("Organization is not defined")
+            if not is_organization_related_to_student_profile(
+                    data["organization"], data["student_profile"], request.user):
+                raise PermissionDenied("This organization is not related to this student_profile")
+
+        circles = get_circles(filters=request.GET.dict())
+        file = generate_ical(circles)
+        return Response(file, status=200)
