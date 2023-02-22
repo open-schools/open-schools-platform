@@ -40,5 +40,13 @@ class Organization(BaseModel):
             students |= circle.students.all()
         return students
 
+    @property
+    def teachers(self):
+        from open_schools_platform.organization_management.teachers.models import Teacher
+        teachers = Teacher.objects.none()
+        for circle in self.circles.all():
+            teachers |= circle.teachers.all()
+        return teachers
+
     def __str__(self):
         return self.name

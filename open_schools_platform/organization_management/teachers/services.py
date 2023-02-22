@@ -42,3 +42,8 @@ def update_teacher_profile(*, teacher_profile: TeacherProfile, data) -> TeacherP
         data=filtered_data
     )
     return teacher_profile
+
+
+def add_teacher_to_circle(teacher: Teacher, circle: Circle):
+    teacher.circle = circle
+    teacher.save()
