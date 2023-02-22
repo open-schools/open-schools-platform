@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import timedelta, datetime
 import typing
 from typing import Dict, Callable, Tuple, Type
 
@@ -28,7 +28,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
-                  location: Point = None) -> Circle:
+                  start_time: datetime = None, duration: timedelta = None, location: Point = None) -> Circle:
     """
     Geopy library allows to take coordinates from address.
 
@@ -55,7 +55,9 @@ def create_circle(name: str, organization: Organization, description: str, capac
         description=description,
         address=address,
         capacity=capacity,
-        location=location
+        location=location,
+        start_time=start_time,
+        duration=duration
     )
 
     return circle
