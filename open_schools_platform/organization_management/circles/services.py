@@ -1,4 +1,4 @@
-import datetime
+from datetime import timedelta
 import typing
 from typing import Dict, Callable, Tuple, Type
 
@@ -113,27 +113,29 @@ def convert_str_to_point(string: str):
     return Point(float(res[0]), float(res[1]), srid=4326)
 
 
-def setup_scheduled_notification(circle: Circle, minutes_before: int):
-    name = f'{minutes_before}minutes_{circle.id}'
-    task = PeriodicTask.objects.filter(name=name)
-    if len(task) == 0:
-        cron = create_crontab_schedule(circle, datetime.timedelta(minutes=minutes_before))
-        create_periodic_task(circle, cron, name)
-    elif task[0].description != str(circle.start_time):
-        task = task[0]
-        CrontabSchedule.objects.filter(id=task.crontab.id).delete()
-        cron = create_crontab_schedule(circle, datetime.timedelta(minutes=minutes_before))
-        task.crontab = cron
-        task.save()
+def setup_scheduled_notifications(circle: Circle, notification_delays: list[timedelta]):
+    tasks = PeriodicTask.objects.filter(args=f'["{circle.id}"]', task=send_circle_lesson_notification.name)
+    CrontabSchedule.objects.filter(id__in=list(map(lambda task: task.crontab.id, tasks))).delete()
+
+    if circle.start_time is None:
+        tasks.delete()
+        return
+
+    cron_list = list(map(lambda delta: create_crontab_schedule(circle, delta), notification_delays))
+    if len(tasks) == 0 or len(tasks) != len(notification_delays):
+        PeriodicTask.objects.filter(id__in=list(map(lambda task: task.id, tasks))).delete()
+        create_periodic_tasks(circle, cron_list)
+    else:
+        for i in range(len(cron_list)):
+            tasks[i].crontab = cron_list[i]
+            tasks[i].name = f'teacher notification [{cron_list[i]}_{circle.id}]'
+            tasks[i].save()
 
 
-def setup_scheduled_notifications(circle: Circle):
-    setup_scheduled_notification(circle, 60)
-    setup_scheduled_notification(circle, 24 * 60)
-
-
-def create_crontab_schedule(circle: Circle, timedelta: datetime.timedelta) -> CrontabSchedule:
-    time = circle.start_time.astimezone(pytz.UTC) - timedelta  # type: ignore[union-attr]
+def create_crontab_schedule(circle: Circle, time_delta: timedelta):
+    if circle.start_time is None:
+        return None
+    time = circle.start_time.astimezone(pytz.UTC) - time_delta
     cron = CrontabSchedule.objects.create(
         timezone='UTC',
         minute=time.minute,
@@ -145,16 +147,18 @@ def create_crontab_schedule(circle: Circle, timedelta: datetime.timedelta) -> Cr
     return cron
 
 
-def create_periodic_task(circle: Circle, cron: CrontabSchedule, name) -> PeriodicTask:
-    periodic_task = PeriodicTask.objects.create(
-        name=name,
-        task=send_circle_lesson_notification.name,
-        crontab=cron,
-        args=f'["{circle.id}"]',
-        description=circle.start_time,
-        enabled=True
-    )
-    return periodic_task
+def create_periodic_tasks(circle: Circle, cron_list: list[CrontabSchedule]) -> list[PeriodicTask]:
+    periodic_tasks = []
+    for cron in cron_list:
+        periodic_task = PeriodicTask.objects.create(
+            name=f'teacher notification [{cron}_{circle.id}]',
+            task=send_circle_lesson_notification.name,
+            crontab=cron,
+            args=f'["{circle.id}"]',
+            enabled=True
+        )
+        periodic_tasks.append(periodic_task)
+    return periodic_tasks
 
 
 def generate_ical(queryset):
@@ -169,7 +173,7 @@ def generate_ical(queryset):
         event = Event()
         event.add('summary', circle.name)
         event.add('dtstart', circle.start_time)
-        event.add('dtend', circle.start_time + (circle.duration or datetime.timedelta(hours=1)))
+        event.add('dtend', circle.start_time + (circle.duration or timedelta(hours=1)))
         event.add('dtstamp', circle.created_at)
         event.add('rrule', {'freq': 'weekly', 'byday': weekday_abbreviation[circle.start_time.weekday()]})
         event.add('geo', (circle.latitude, circle.longitude))

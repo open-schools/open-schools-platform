@@ -24,3 +24,4 @@ requests==2.27.1
 pre-commit==2.18.1
 
 icalendar==5.0.4
+django-lifecycle==1.0.0
