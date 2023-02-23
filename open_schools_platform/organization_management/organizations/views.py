@@ -10,8 +10,11 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle
+from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -33,7 +36,7 @@ from open_schools_platform.query_management.queries.serializers import QueryStat
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
-from open_schools_platform.student_management.students.selectors import get_students, get_student
+from open_schools_platform.student_management.students.selectors import get_students, get_student, get_student_profile
 from open_schools_platform.student_management.students.serializers import StudentSerializer, StudentGetSerializer
 from open_schools_platform.student_management.students.services import export_students
 
@@ -270,3 +273,28 @@ class GetAnalytics(ApiAuthMixin, APIView):
         if all(arg in dates for arg in ("date_from", "date_to")):
             queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
         return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
+
+
+class QueriesCirclesOrganizationStudent(ApiAuthMixin, ListAPIView):
+    pagination_class = ApiCircleListPagination
+    serializer_class = CircleSerializer
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Returns queries to student circles from the selected organization",
+    )
+    def get(self, request, organization_id, student_profile_id, *args, **kwargs):
+        get_student_profile(
+            filters={"id": str(student_profile_id)},
+            empty_exception=True
+        )
+        organization = get_organization(
+            filters={"id": str(organization_id)},
+            user=request.user,
+            empty_exception=True
+        )
+        queries = get_queries(
+            filters={"sender_id": str(student_profile_id),
+                     "recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
+        )
+        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
