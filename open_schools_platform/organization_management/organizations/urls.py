@@ -5,7 +5,7 @@ from open_schools_platform.organization_management.organizations.views import Or
     OrganizationCreateApi, InviteEmployeeApi, InviteEmployeeUpdateApi, \
     OrganizationEmployeeQueriesListApi, OrganizationCircleQueriesListApi, OrganizationStudentsListApi, \
     OrganizationDeleteApi, GetStudentApi, OrganizationStudentProfilesExportApi, GetAnalytics, \
-    OrganizationTeachersListApi, GetTeacherApi
+    QueriesCirclesOrganizationStudent, OrganizationTeachersListApi, GetTeacherApi
 
 urlpatterns = [
     path('', MultipleViewManager({'get': OrganizationListApi,
@@ -20,6 +20,7 @@ urlpatterns = [
     path('/<uuid:pk>/students/export', OrganizationStudentProfilesExportApi.as_view(),
          name='export-organization-students'),
     path('/<uuid:pk>/analytics', GetAnalytics.as_view(), name='analytics'),
+    path('/<uuid:organization_id>/student-profile/<uuid:student_profile_id>/circles', QueriesCirclesOrganizationStudent.as_view(), name='queries-organization-student-profile'),
     path('/<uuid:pk>/teachers', OrganizationTeachersListApi.as_view(), name='teachers-list'),
     path('/teachers/<uuid:pk>', GetTeacherApi.as_view(), name='get-teacher')
 ]
