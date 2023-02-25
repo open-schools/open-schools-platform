@@ -9,7 +9,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
-from open_schools_platform.organization_management.circles.serializers import CircleSerializer
+from open_schools_platform.organization_management.circles.serializers import CircleListSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
@@ -214,7 +214,7 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
 class StudentCirclesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        responses={200: convert_dict_to_serializer({"results": CircleSerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": CircleListSerializer(many=True)})},
         operation_description="Get all circles for provided student profile",
     )
     def get(self, request, pk):
@@ -227,7 +227,7 @@ class StudentCirclesListApi(ApiAuthMixin, APIView):
             filters={'student_profile': str(student_profile.id)},
         )
         circles = get_circles_by_students(students=students)
-        return Response({"results": CircleSerializer(circles, many=True).data}, status=200)
+        return Response({"results": CircleListSerializer(circles, many=True).data}, status=200)
 
 
 class StudentDeleteApi(ApiAuthMixin, APIView):
