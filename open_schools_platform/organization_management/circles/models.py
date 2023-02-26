@@ -6,7 +6,7 @@ import safedelete
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models
-from django_lifecycle import hook, AFTER_UPDATE, LifecycleModelMixin
+from django_lifecycle import hook, AFTER_SAVE, LifecycleModelMixin
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
@@ -50,7 +50,7 @@ class Circle(LifecycleModelMixin, BaseModel):
     def __str__(self):
         return self.name
 
-    @hook(AFTER_UPDATE, when='start_time', has_changed=True)
+    @hook(AFTER_SAVE, when='start_time', has_changed=True)
     def on_start_time_change(self):
         from open_schools_platform.organization_management.circles.services import setup_scheduled_notifications
         setup_scheduled_notifications(self, [datetime.timedelta(days=1), datetime.timedelta(hours=1)])

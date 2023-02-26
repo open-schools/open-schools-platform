@@ -9,10 +9,9 @@ class CirclesConstants:
     NOTIFY_TEACHER_TITLE = "Напоминание о занятии."
 
     @staticmethod
+    def task_name(cron, circle):
+        return f'open schools teacher notification [{cron}_{circle.id}]'
+
+    @staticmethod
     def get_invite_teacher_message(name, time):
         return f'{name} - {time}'
-
-
-weekday_abbreviation = {
-    0: "MO", 1: "TU", 2: "WE", 3: "TH", 4: "FR", 5: "SA", 6: "SU"
-}

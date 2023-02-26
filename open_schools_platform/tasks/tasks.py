@@ -1,6 +1,7 @@
 from django.template.loader import render_to_string
 
 from .celery import app
+from ..common.constants import NotificationType
 from ..common.services import SendEmailService
 from ..organization_management.circles.constants import CirclesConstants
 from ..user_management.users.services import notify_user
@@ -22,4 +23,4 @@ def send_circle_lesson_notification(circle_id):
         for teacher in teachers:
             notify_user(user=teacher.teacher_profile.user, title=CirclesConstants.NOTIFY_TEACHER_TITLE,
                         body=CirclesConstants.get_invite_teacher_message(circle.name, circle.start_time),
-                        data={"circle": str(circle.id), "type": "notify-circle-lesson"})
+                        data={"circle": str(circle.id), "type": NotificationType.TeacherReminder})

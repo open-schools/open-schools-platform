@@ -1,3 +1,4 @@
+import calendar
 from datetime import timedelta, datetime
 import typing
 from typing import Dict, Callable, Tuple, Type
@@ -13,7 +14,7 @@ import re
 
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.errors.exceptions import QueryCorrupted
-from open_schools_platform.organization_management.circles.constants import weekday_abbreviation
+from open_schools_platform.organization_management.circles.constants import CirclesConstants
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.selectors import get_organization
@@ -130,7 +131,7 @@ def setup_scheduled_notifications(circle: Circle, notification_delays: list[time
     else:
         for i in range(len(cron_list)):
             tasks[i].crontab = cron_list[i]
-            tasks[i].name = f'teacher notification [{cron_list[i]}_{circle.id}]'
+            tasks[i].name = CirclesConstants.task_name(cron_list[i], circle)
             tasks[i].save()
 
 
@@ -153,7 +154,7 @@ def create_periodic_tasks(circle: Circle, cron_list: list[CrontabSchedule]) -> l
     periodic_tasks = []
     for cron in cron_list:
         periodic_task = PeriodicTask.objects.create(
-            name=f'teacher notification [{cron}_{circle.id}]',
+            name=CirclesConstants.task_name(cron, circle),
             task=send_circle_lesson_notification.name,
             crontab=cron,
             args=f'["{circle.id}"]',
@@ -165,7 +166,7 @@ def create_periodic_tasks(circle: Circle, cron_list: list[CrontabSchedule]) -> l
 
 def generate_ical(queryset):
     cal = Calendar()
-    cal.add('prodid', '-//LamArt//Open Schools//')
+    cal.add('prodid', '-//Open Schools//')
     cal.add('version', '2.0')
     if not isinstance(queryset, typing.Iterable):
         queryset = [queryset]
@@ -177,7 +178,7 @@ def generate_ical(queryset):
         event.add('dtstart', circle.start_time)
         event.add('dtend', circle.start_time + (circle.duration or timedelta(hours=1)))
         event.add('dtstamp', circle.created_at)
-        event.add('rrule', {'freq': 'weekly', 'byday': weekday_abbreviation[circle.start_time.weekday()]})
+        event.add('rrule', {'freq': 'weekly', 'byday': calendar.day_abbr[circle.start_time.weekday()][:2].upper()})
         event.add('geo', (circle.latitude, circle.longitude))
         cal.add_component(event)
     return cal.to_ical()
