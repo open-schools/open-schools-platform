@@ -4,6 +4,7 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.constants import NotificationType
 from open_schools_platform.parent_management.families.constants import FamilyConstants
 from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import convert_dict_to_serializer
@@ -86,7 +87,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
                              recipient_model_name="parentprofile", recipient_id=parent.id)
         notify_user(user=parent.user, title=FamilyConstants.INVITE_PARENT_TITLE,
                     body=FamilyConstants.get_invite_parent_message(family),
-                    data={"query": str(query.id), "type": "invite-parent-query"})
+                    data={"query": str(query.id), "type": NotificationType.InviteParent})
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 

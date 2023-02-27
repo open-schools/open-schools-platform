@@ -1,5 +1,6 @@
 import os
 import warnings
+from enum import Enum
 
 from open_schools_platform.user_management.users.tests.constants.test_valid_api_key import is_google_api_key_valid
 
@@ -41,3 +42,8 @@ class EmailConstants:
     EMAIL_DOMAIN = 'openschools.education'
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     TEST_EMAIL = 'test.openschools.education@mail.ru'
+
+
+class NotificationType(str, Enum):
+    InviteParent = 'invite-parent-query'
+    TeacherReminder = 'circle-lesson'

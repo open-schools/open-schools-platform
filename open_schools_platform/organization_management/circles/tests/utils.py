@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta
 from typing import Any
 
 from django.contrib.gis.geos import Point
@@ -22,7 +23,8 @@ from open_schools_platform.user_management.users.tests.utils import create_test_
 
 def create_test_circle(organization: Organization = None, address: str = "address",
                        location: Any = Point(0.0, 0.0), name: str = "test_circle",
-                       capacity: int = 10, description: str = "description") -> Circle:
+                       capacity: int = 10, description: str = "description",
+                       start_time: datetime = None, duration: timedelta = None) -> Circle:
     if organization is None:
         organization = create_test_organization()
     circle = create_circle(
@@ -31,7 +33,9 @@ def create_test_circle(organization: Organization = None, address: str = "addres
         address=address,
         capacity=capacity,
         description=description,
-        location=location
+        location=location,
+        start_time=start_time,
+        duration=duration
     )
     return circle
 
