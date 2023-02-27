@@ -135,7 +135,7 @@ DATABASES = {
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
-if os.environ.get('GITHUB_WORKFLOW'):
+if env('GITHUB_WORKFLOW', default=None):
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',

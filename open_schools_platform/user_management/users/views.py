@@ -32,7 +32,7 @@ class CreationTokenApi(CreateAPIView):
         request_body=CreationTokenSerializer,
         responses={200: "Use old sms, it is still alive. Creation token id as response.",
                    201: "Token created and SMS was sent. Creation token id as response.",
-                   422: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
+                   400: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
                    404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
@@ -44,7 +44,7 @@ class CreationTokenApi(CreateAPIView):
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=200)
 
-        response = send_firebase_sms(**token_serializer.data)
+        response = send_firebase_sms(**token_serializer.validated_data)
 
         if response.status_code != 200:
             raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
@@ -86,11 +86,11 @@ class UserApi(CreateAPIView):
 
         user = create_user(
             phone=token.phone,
-            name=user_serializer.data["name"],
-            password=user_serializer.data["password"]
+            name=user_serializer.validated_data["name"],
+            password=user_serializer.validated_data["password"]
         )
         jwt_token = get_jwt_token(user.USERNAME_FIELD, str(user.get_username()),
-                                  user_serializer.data["password"], request)
+                                  user_serializer.validated_data["password"], request)
 
         response = Response({"token": jwt_token}, status=status.HTTP_201_CREATED)
         if api_settings.JWT_AUTH_COOKIE:
@@ -103,7 +103,7 @@ class VerificationApi(APIView):
     @swagger_auto_schema(
         operation_description="Verify phone number with CreationToken if otp is correct.",
         request_body=OtpSerializer,
-        responses={200: "Phone number verified.", 422: "Incorrect otp.",
+        responses={200: "Phone number verified.", 400: "Incorrect otp.",
                    401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
@@ -124,11 +124,12 @@ class VerificationApi(APIView):
 
 class CodeResendApi(APIView):
     @swagger_auto_schema(
-        operation_description="Resend sms to entered phone number"
+        operation_description="Resend sms to entered phone number "
                               "or tell that user with such number already exist.",
         request_body=ResendSerializer,
-        responses={200: "SMS was resent.", 401: "Token is not verified or it is overdue.",
-                   404: "Such token was not found.", 422: "Probably incorrect recaptcha."},
+        responses={200: "SMS was resent.", 400: "Probably incorrect recaptcha.",
+                   401: "Token is not verified or it is overdue.",
+                   404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request, pk):
@@ -137,7 +138,7 @@ class CodeResendApi(APIView):
 
         token = get_token_with_checks(key=pk, verify_check=False)
 
-        response = send_firebase_sms(str(token.phone), recaptcha_serializer.data["recaptcha"])
+        response = send_firebase_sms(str(token.phone), recaptcha_serializer.validated_data["recaptcha"])
 
         if response.status_code != 200:
             raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))

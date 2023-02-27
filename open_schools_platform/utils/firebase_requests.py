@@ -6,8 +6,7 @@ from open_schools_platform.common.utils import get_dict_from_response
 
 
 def send_firebase_sms(phone: str, recaptcha: str):
-    base_url = CommonConstants.FIREBASE_URL_TO_GET_SESSION + \
-               str(CommonConstants.GOOGLE_API_KEY)
+    base_url = CommonConstants.FIREBASE_URL_TO_GET_SESSION + CommonConstants.GOOGLE_API_KEY
 
     request_dict = {
         "phoneNumber": phone,
@@ -19,7 +18,7 @@ def send_firebase_sms(phone: str, recaptcha: str):
 
 
 def check_otp_with_firebase(session: str, otp: str):
-    base_url = CommonConstants.FIREBASE_URL_TO_CHECK_OTP + str(CommonConstants.GOOGLE_API_KEY)
+    base_url = CommonConstants.FIREBASE_URL_TO_CHECK_OTP + CommonConstants.GOOGLE_API_KEY
 
     request_dict = {
         "sessionInfo": session,
