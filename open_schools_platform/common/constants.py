@@ -1,6 +1,7 @@
 import os
 import warnings
 
+from config.env import env
 from open_schools_platform.user_management.users.tests.constants.test_valid_api_key import is_google_api_key_valid
 
 
@@ -27,17 +28,18 @@ class CommonConstants:
 class EmailConstants:
     EMAIL_SERVICE_TRANSPORT = os.environ.get("EMAIL_SERVICE_TRANSPORT")
     MAILGUN_SEND_EMAIL_URL = r"https://api.mailgun.net/v3/{}/messages"
-    VK_EMAIL_ID = os.environ.get("VK_EMAIL_ID")
-    VK_EMAIL_PRIVATE_API_KEY = os.environ.get("VK_EMAIL_PRIVATE_API_KEY")
+
+    VK_EMAIL_ID = ""
+    VK_EMAIL_PRIVATE_API_KEY = ""
+
     if EMAIL_SERVICE_TRANSPORT == "VK":
-        if not VK_EMAIL_ID:
-            warnings.warn("vk_email_id is not defined")
-        if not VK_EMAIL_PRIVATE_API_KEY:
-            warnings.warn("vk_email_private_api_key is not defined")
-    MAILGUN_EMAIL_PRIVATE_API_KEY = os.environ.get("MAILGUN_EMAIL_PRIVATE_API_KEY")
+        VK_EMAIL_ID = env("VK_EMAIL_ID")
+        VK_EMAIL_PRIVATE_API_KEY = env("VK_EMAIL_PRIVATE_API_KEY")
+
+    MAILGUN_EMAIL_PRIVATE_API_KEY = ""
     if EMAIL_SERVICE_TRANSPORT == "MAILGUN":
-        if not not MAILGUN_EMAIL_PRIVATE_API_KEY:
-            warnings.warn("mailgun_email_private_api_key is not defined")
-    EMAIL_DOMAIN = 'openschools.education'
+        MAILGUN_EMAIL_PRIVATE_API_KEY = env("MAILGUN_EMAIL_PRIVATE_API_KEY")
+
+    EMAIL_DOMAIN = env("EMAIL_DOMAIN", default='openschools.education')
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     TEST_EMAIL = 'test.openschools.education@mail.ru'

@@ -15,3 +15,6 @@ def convert_config_to_secret(config):
 BASE_DIR = Path(os.path.dirname(os.path.abspath(__file__))).parent.absolute()
 
 frame = sys._getframe()
+
+f = open("firebase_admin_config").readlines()
+print(convert_config_to_secret(f))

@@ -37,6 +37,9 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - ```FIREBASE_CLIENT_EMAIL=<email>```
 - ```FIREBASE_CLIENT_ID=<id>```
 - ```FIREBASE_CLIENT_CERT_URL=<url>```
+- ```EMAIL_SERVICE_TRANSPORT=<type-of-transport : MAILGUN, VK>```
+- ```MAILGUN_EMAIL_PRIVATE_API_KEY=<key>```
+- ```EMAIL_DOMAIN=<email-domain>```
 7. Migrate
 ```
 python manage.py migrate
