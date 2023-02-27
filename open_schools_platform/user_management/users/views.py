@@ -44,7 +44,7 @@ class CreationTokenApi(CreateAPIView):
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=200)
 
-        response = send_firebase_sms(**token_serializer.data)
+        response = send_firebase_sms(**token_serializer.validated_data)
 
         if response.status_code != 200:
             raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
