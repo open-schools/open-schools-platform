@@ -24,7 +24,7 @@ class CommonConstants:
 
 
 class EmailConstants:
-    EMAIL_SERVICE_TRANSPORT = env("EMAIL_SERVICE_TRANSPORT")
+    EMAIL_SERVICE_TRANSPORT = env("EMAIL_SERVICE_TRANSPORT", default=None)
     MAILGUN_SEND_EMAIL_URL = r"https://api.mailgun.net/v3/{}/messages"
 
     VK_EMAIL_ID = ""
