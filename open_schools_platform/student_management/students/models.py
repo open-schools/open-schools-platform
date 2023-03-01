@@ -50,7 +50,7 @@ class StudentProfile(BaseModel):
         blank=True,
         null=True,
     )
-    photo = models.ForeignKey(Photo, on_delete=models.CASCADE, null=True, blank=True, related_name="student_profile")
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True, related_name="student_profile")
     history = HistoricalRecords()
 
     objects = StudentProfileManager()  # type: ignore[assignment]
