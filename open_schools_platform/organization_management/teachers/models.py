@@ -42,7 +42,7 @@ class TeacherProfile(BaseModel):
         blank=True,
         null=True,
     )
-    photo = models.ForeignKey(Photo, on_delete=models.CASCADE, null=True, blank=True)
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True)
     history = HistoricalRecords()
 
     objects = TeacherProfileManager()  # type: ignore[assignment]
