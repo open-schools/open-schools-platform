@@ -2,7 +2,6 @@ import datetime
 import uuid
 from typing import Any
 
-import safedelete
 from django.contrib.gis.geos import Point
 from django.core.validators import MinValueValidator
 from django.contrib.gis.db import models
@@ -26,11 +25,9 @@ class CircleManager(BaseManager):
 
 
 class Circle(LifecycleModelMixin, BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=200)
     organization = models.ForeignKey(Organization, related_name="circles", on_delete=models.CASCADE)
-    objects = CircleManager()  # type: ignore[assignment]
     capacity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     address = models.CharField(max_length=255, default="")
     description = models.CharField(max_length=2000, default="")
@@ -38,6 +35,8 @@ class Circle(LifecycleModelMixin, BaseModel):
     start_time = models.DateTimeField(null=True, blank=True)
     duration = models.DurationField(null=True, blank=True)
     history = HistoricalRecords()
+
+    objects = CircleManager()  # type: ignore[assignment]
 
     @property
     def latitude(self):

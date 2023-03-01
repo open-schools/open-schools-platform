@@ -1,5 +1,4 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
@@ -8,6 +7,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
 from open_schools_platform.organization_management.circles.serializers import CircleListSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
@@ -116,13 +116,13 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=AutoStudentJoinCircleQuerySerializer(),
         responses={201: convert_dict_to_serializer({"query": StudentProfileQuerySerializer()}),
-                   406: "Current user already has family"}
+                   400: "Current user already has family"}
     )
     def post(self, request):
         student_join_circle_req_serializer = AutoStudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
-        if get_family(filters={"parent_profiles": str(request.user.parent_profile.id)}, user=request.user):
-            raise NotAcceptable("Please choose already created family")
+        if get_family(filters={"parent_profiles": str(request.user.parent_profile.id)}):
+            raise AlreadyExists("Family for that user already exists")
 
         student_profile = autogenerate_family_logic(student_join_circle_req_serializer.validated_data, request.user)
 
@@ -170,8 +170,8 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         request_body=StudentJoinCircleQueryUpdateSerializer(),
         responses={201: convert_dict_to_serializer({"query": StudentProfileQuerySerializer()}),
-                   404: "No such query",
-                   406: "Cant update query because it's status is not SENT"}
+                   400: "Cant update query because it's status is not SENT",
+                   404: "No such query"}
     )
     def patch(self, request):
         query_update_serializer = StudentJoinCircleQueryUpdateSerializer(data=request.data)

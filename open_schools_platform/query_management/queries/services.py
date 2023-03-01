@@ -2,9 +2,9 @@ import uuid
 
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
-from rest_framework.exceptions import MethodNotAllowed
 
 from open_schools_platform.common.services import model_update
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -51,7 +51,7 @@ def query_update(*, query: Query, data) -> Query:
 
 def run_sender_handler(query: Query, new_status: str, user: User):
     if query.sender is None:
-        raise MethodNotAllowed("put", detail="Query sender no longer exists")
+        raise QueryCorrupted("Query sender no longer exists")
     query = query.sender.query_handler(query, new_status, user)
     return query
 

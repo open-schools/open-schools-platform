@@ -31,9 +31,7 @@ class UserHistoryApi(ApiAuthMixin, APIView):
                    404: "No such user"},
     )
     def get(self, request, pk):
-        user = get_user(filters={"id": pk},
-                        user=request.user,
-                        empty_exception=True)
+        user = get_user(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": UserHistorySerializer(user).data}, status=200)
 
 
@@ -45,9 +43,7 @@ class OrganizationHistoryApi(ApiAuthMixin, APIView):
                    404: "No such organization"},
     )
     def get(self, request, pk):
-        organization = get_organization(filters={"id": pk},
-                                        user=request.user,
-                                        empty_exception=True)
+        organization = get_organization(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": OrganizationHistorySerializer(organization).data}, status=200)
 
 
@@ -59,9 +55,7 @@ class EmployeeHistoryApi(ApiAuthMixin, APIView):
                    404: "No such employee"},
     )
     def get(self, request, pk):
-        employee = get_employee(filters={"id": pk},
-                                user=request.user,
-                                empty_exception=True)
+        employee = get_employee(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": EmployeeHistorySerializer(employee).data}, status=200)
 
 
@@ -73,9 +67,7 @@ class CircleHistoryApi(ApiAuthMixin, APIView):
                    404: "No such circle"},
     )
     def get(self, request, pk):
-        circle = get_circle(filters={"id": pk},
-                            user=request.user,
-                            empty_exception=True)
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": CircleHistorySerializer(circle).data}, status=200)
 
 
@@ -87,9 +79,7 @@ class StudentHistoryApi(ApiAuthMixin, APIView):
                    404: "No such student"},
     )
     def get(self, request, pk):
-        student = get_student(filters={"id": pk},
-                              user=request.user,
-                              empty_exception=True)
+        student = get_student(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": StudentHistorySerializer(student).data}, status=200)
 
 
@@ -101,9 +91,7 @@ class StudentProfileHistoryApi(ApiAuthMixin, APIView):
                    404: "No such student-profile"},
     )
     def get(self, request, pk):
-        student_profile = get_student_profile(filters={"id": pk},
-                                              user=request.user,
-                                              empty_exception=True)
+        student_profile = get_student_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": StudentProfileHistorySerializer(student_profile).data}, status=200)
 
 
@@ -115,9 +103,7 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, APIView):
                    404: "No such employeeprofile"},
     )
     def get(self, request, pk):
-        employee_profile = get_employee_profile(filters={"id": pk},
-                                                user=request.user,
-                                                empty_exception=True)
+        employee_profile = get_employee_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": EmployeeProfileHistorySerializer(employee_profile).data}, status=200)
 
 
@@ -129,9 +115,7 @@ class ParentProfileHistoryApi(ApiAuthMixin, APIView):
                    404: "No such parent-profile"},
     )
     def get(self, request, pk):
-        parent_profile = get_parent_profile(filters={"id": pk},
-                                            user=request.user,
-                                            empty_exception=True)
+        parent_profile = get_parent_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": ParentProfileHistorySerializer(parent_profile).data}, status=200)
 
 
@@ -143,7 +127,5 @@ class FamilyHistoryApi(ApiAuthMixin, APIView):
                    404: "No such family"},
     )
     def get(self, request, pk):
-        family = get_family(filters={"id": pk},
-                            user=request.user,
-                            empty_exception=True)
+        family = get_family(filters={"id": pk}, user=request.user, empty_exception=True)
         return Response({"results": FamilyHistorySerializer(family).data}, status=200)

@@ -47,6 +47,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         create_circle_serializer.is_valid(raise_exception=True)
         organization = get_organization(
             filters={"id": create_circle_serializer.validated_data['organization']},
+            user=request.user,
             empty_exception=True,
         )
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
@@ -213,7 +214,7 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
 
 
 class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
-    filename = 'circle.ics'
+    filename = 'schedule.ics'
 
     @swagger_auto_schema(
         operation_description="Exports circle schedule",
@@ -222,12 +223,13 @@ class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
     )
     def get(self, request, pk):
         circle = get_circle(filters={'id': str(pk)}, empty_exception=True)
+        self.filename = circle.name
         file = generate_ical(circle)
         return Response(file, status=200)
 
 
 class CirclesICalExportApi(ApiAuthMixin, ICalMixin, ListAPIView):
-    filename = 'circles.ics'
+    filename = 'schedule.ics'
     filterset_class = CircleFilter
 
     @swagger_auto_schema(

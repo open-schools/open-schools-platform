@@ -17,7 +17,7 @@ class PhotoApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update photo",
         request_body=PhotoUpdateSerializer,
-        responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()}), },
+        responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()})},
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
     def patch(self, request, pk):

@@ -30,14 +30,14 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
     return BaseManageView
 
 
-def convert_dict_to_serializer(dict: Dict[str, Union[RestFrameworkSerializer, List[str]]])\
+def convert_dict_to_serializer(dictionary: Dict[str, Union[RestFrameworkSerializer, List[str]]])\
         -> Type[RestFrameworkSerializer]:
     class Serializer(RestFrameworkSerializer):  # type: ignore
         pass
 
     fields = {}  # type: Dict[str, Field[Any, Any, Any, Any]]
 
-    for key, value in dict.items():
+    for key, value in dictionary.items():
         if isinstance(value, list):
             fields[key] = ChoiceField(value)
         else:

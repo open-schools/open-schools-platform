@@ -9,7 +9,7 @@ from open_schools_platform.user_management.users.models import User
 @rules.predicate
 @predicate_input_type_check
 def is_student_profile_owner(user: User, student_profile: StudentProfile):
-    return user and student_profile.user == user
+    return student_profile.user == user
 
 
 @rules.predicate

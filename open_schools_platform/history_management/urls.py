@@ -1,7 +1,7 @@
 from django.urls import path
 
 from open_schools_platform.history_management.views import UserHistoryApi, OrganizationHistoryApi, EmployeeHistoryApi, \
-    CircleHistoryApi, StudentHistoryApi, StudentProfileHistoryApi, EmployeeProfileHistoryApi, ParentProfileHistoryApi,\
+    CircleHistoryApi, StudentHistoryApi, StudentProfileHistoryApi, EmployeeProfileHistoryApi, ParentProfileHistoryApi, \
     FamilyHistoryApi
 
 urlpatterns = [

@@ -14,6 +14,5 @@ RUN apt-get update -y \
     && apt install gdal-bin -y
 
 # Get the django project into the docker container
-RUN mkdir /app
 WORKDIR /app
 ADD ./ /app/

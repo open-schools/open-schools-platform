@@ -16,6 +16,9 @@ from open_schools_platform.user_management.users.models import User
 class TeacherProfileManager(BaseManager):
     def create_teacher_profile(self, name: str, age: int = None, phone: PhoneNumber = None, user: User = None,
                                photo: uuid.UUID = None):
+        if not photo:
+            photo = Photo.objects.create_photo()
+
         teacher_profile = self.model(
             name=name,
             age=age,
@@ -29,7 +32,6 @@ class TeacherProfileManager(BaseManager):
 
 
 class TeacherProfile(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='teacher_profile', null=True, blank=True)
     name = models.CharField(max_length=200)
@@ -40,7 +42,7 @@ class TeacherProfile(BaseModel):
         blank=True,
         null=True,
     )
-    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True)
+    photo = models.ForeignKey(Photo, on_delete=models.CASCADE, null=True, blank=True)
     history = HistoricalRecords()
 
     objects = TeacherProfileManager()  # type: ignore[assignment]
