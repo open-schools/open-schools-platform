@@ -33,7 +33,7 @@ from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
-    EmployeeProfileQuerySerializer, StudentProfileQuerySerializer, QuerySerializer
+    EmployeeProfileQuerySerializer, StudentProfileQuerySerializer
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
@@ -284,18 +284,40 @@ class QueriesOrganizationStudent(ApiAuthMixin, ListAPIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Returns queries to student circles from the selected organization",
     )
-    def get(self, request, organization_id, student_profile_id, *args, **kwargs):
+    def get(self, request, organization, student_profile, *args, **kwargs):
         get_student_profile(
-            filters={"id": str(student_profile_id)},
+            filters={"id": str(student_profile)},
             empty_exception=True
         )
         organization = get_organization(
-            filters={"id": str(organization_id)},
+            filters={"id": str(organization)},
             user=request.user,
             empty_exception=True
         )
         queries = get_queries(
-            filters={"sender_id": str(student_profile_id),
+            filters={"sender_id": str(student_profile),
                      "recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
         )
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+
+
+class OrganizationTeachersListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get all teachers for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"results": TeacherSerializer(many=True)})}
+    )
+    def get(self, request, pk):
+        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        return Response({"results": TeacherSerializer(organization.teachers, many=True).data}, status=200)
+
+
+class GetTeacherApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get teacher with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"teacher": TeacherSerializer()})}
+    )
+    def get(self, request, pk):
+        teacher = get_teacher(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        return Response({"teacher": TeacherSerializer(teacher).data}, status=200)
