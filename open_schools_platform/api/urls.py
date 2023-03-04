@@ -24,6 +24,8 @@ organization_management_urls = [
          include(('open_schools_platform.organization_management.employees.urls', 'employees'))),
     path('circles',
          include(('open_schools_platform.organization_management.circles.urls', 'circles'))),
+    path('teachers',
+         include(('open_schools_platform.organization_management.teachers.urls', 'teachers'))),
 ]
 
 students_management_urls = [

@@ -8,6 +8,19 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Teacher)
+def get_teacher(*, filters=None, user: User = None) -> Teacher:
+    filters = filters or {}
+
+    qs = Teacher.objects.all()
+    teacher = TeacherFilter(filters, qs).qs.first()
+
+    if user and teacher and not user.has_perm('teachers.teacher_access', teacher):
+        raise PermissionDenied
+
+    return teacher
+
+
+@selector_factory(Teacher)
 def get_teachers(*, filters=None) -> QuerySet:
     filters = filters or {}
 
@@ -24,7 +37,7 @@ def get_teacher_profile(*, filters=None, user: User = None) -> QuerySet:
     qs = TeacherProfile.objects.all()
     teacher_profile = TeacherProfileFilter(filters, qs).qs.first()
 
-    if user and teacher_profile and not user.has_perm('students.teacher_profile_access', teacher_profile):
+    if user and teacher_profile and not user.has_perm('teachers.teacher_profile_access', teacher_profile):
         raise PermissionDenied
 
     return teacher_profile
