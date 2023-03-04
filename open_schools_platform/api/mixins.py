@@ -20,7 +20,11 @@ def get_auth_header(headers):
     if not value:
         return None
 
-    auth_type, auth_value = value.split()[:2]
+    items = value.split()
+    if len(items) < 2:
+        return None
+
+    auth_type, auth_value = items[:2]
 
     return auth_type, auth_value
 
