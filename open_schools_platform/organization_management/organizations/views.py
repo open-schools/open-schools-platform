@@ -276,7 +276,7 @@ class GetAnalytics(ApiAuthMixin, APIView):
         return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
 
 
-class QueriesOrganizationStudent(ApiAuthMixin, ListAPIView):
+class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
     pagination_class = ApiCircleListPagination
     serializer_class = StudentProfileQuerySerializer
 
