@@ -299,25 +299,3 @@ class QueriesOrganizationStudent(ApiAuthMixin, ListAPIView):
                      "recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
         )
         return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
-
-
-class OrganizationTeachersListApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        operation_description="Get all teachers for this organization",
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"results": TeacherSerializer(many=True)})}
-    )
-    def get(self, request, pk):
-        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        return Response({"results": TeacherSerializer(organization.teachers, many=True).data}, status=200)
-
-
-class GetTeacherApi(ApiAuthMixin, APIView):
-    @swagger_auto_schema(
-        operation_description="Get teacher with provided UUID",
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"teacher": TeacherSerializer()})}
-    )
-    def get(self, request, pk):
-        teacher = get_teacher(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        return Response({"teacher": TeacherSerializer(teacher).data}, status=200)
