@@ -14,7 +14,6 @@ from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle
-from open_schools_platform.organization_management.circles.serializers import CircleSerializer
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -32,7 +31,7 @@ from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer, \
-    EmployeeProfileQuerySerializer, StudentProfileQuerySerializer
+    EmployeeProfileQuerySerializer, StudentProfileQuerySerializer, QuerySerializer
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
@@ -275,9 +274,9 @@ class GetAnalytics(ApiAuthMixin, APIView):
         return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
 
 
-class QueriesCirclesOrganizationStudent(ApiAuthMixin, ListAPIView):
+class QueriesOrganizationStudent(ApiAuthMixin, ListAPIView):
     pagination_class = ApiCircleListPagination
-    serializer_class = CircleSerializer
+    serializer_class = StudentProfileQuerySerializer
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
