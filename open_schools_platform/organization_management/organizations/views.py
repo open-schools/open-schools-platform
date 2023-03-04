@@ -298,7 +298,15 @@ class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
             filters={"sender_id": str(student_profile),
                      "recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
         )
-        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=StudentProfileQuerySerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+        return response
 
 
 class OrganizationTeachersListApi(ApiAuthMixin, APIView):
