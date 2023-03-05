@@ -8,7 +8,7 @@ from open_schools_platform.query_management.queries.tests.utils import create_te
 from open_schools_platform.user_management.users.tests.utils import create_logged_in_user
 
 
-class QueriesCirclesOrganizationStudentTests(TestCase):
+class QueriesOrganizationStudentTests(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.circle_organization_url = lambda organization_id, student_profile_id: reverse(
