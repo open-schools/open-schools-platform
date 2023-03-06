@@ -21,4 +21,4 @@ drf-yasg-stubs==0.1.4
 
 drf-yasg==1.20.0
 requests==2.27.1
-pre-commit==2.18.1
+pre-commit==3.1.1
