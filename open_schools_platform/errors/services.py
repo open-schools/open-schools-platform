@@ -12,7 +12,7 @@ from django.http import Http404
 from rest_framework import serializers, exceptions
 from rest_framework.exceptions import ValidationError as RestValidationError, APIException, ErrorDetail
 
-from open_schools_platform.core.exceptions import ApplicationError
+from open_schools_platform.errors.exceptions import ApplicationError
 from open_schools_platform.user_management.users.models import User
 
 
