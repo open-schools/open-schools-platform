@@ -55,10 +55,10 @@ def create_error(exception):
 
     message = None
     if isinstance(exception.detail, dict):
-        message = ';\n'.join(
-            map(lambda item: f"'{item[0]}': {','.join(item[1])}", process_detail(exception.detail).items()))
+        message = '. '.join(
+            map(lambda item: f"'{item[0]}': {', '.join(item[1])}", process_detail(exception.detail).items()))
     else:
-        message = '\n'.join(process_detail(exception.detail))
+        message = '. '.join(process_detail(exception.detail))
     from open_schools_platform.common.serializers import ErrorSerializer
     return ErrorSerializer(
         {'message': message, 'violation_fields': violations_dict, 'code': code, 'violations': violations})

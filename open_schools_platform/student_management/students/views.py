@@ -1,7 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.parsers import MultiPartParser
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -17,7 +16,7 @@ from open_schools_platform.query_management.queries.serializers import StudentPr
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students, get_student
 from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
     StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
-    StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer, StudentProfileAddPhotoSerializer
+    StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
 from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, update_student_join_circle_body, \
     autogenerate_family_logic, query_creation_logic
@@ -44,27 +43,6 @@ class StudentProfileApi(ApiAuthMixin, APIView):
         student_profile = create_student_profile(
             **get_dict_excluding_fields(student_profile_serializer.validated_data, ["family"]))
         add_student_profile_to_family(student_profile=student_profile, family=family)
-        return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
-
-
-class StudentProfileAddPhotoApi(ApiAuthMixin, APIView):
-    parser_classes = [MultiPartParser]
-
-    @swagger_auto_schema(
-        operation_description="Adds photo to provided student profile",
-        request_body=StudentProfileAddPhotoSerializer,
-        responses={200: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
-                   404: "No such student profile",
-                   403: "Current user do not have permission to perform this action"},
-        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
-    )
-    def post(self, request, pk):
-        add_photo_serializer = StudentProfileAddPhotoSerializer(data=request.data)
-        add_photo_serializer.is_valid(raise_exception=True)
-        student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user,
-                                              empty_exception=True)
-        update_student_profile(student_profile=student_profile,
-                               data=add_photo_serializer.validated_data)
         return Response({"student_profile": StudentProfileSerializer(student_profile).data}, status=201)
 
 

@@ -32,11 +32,11 @@ class EmailConstants:
 
     if EMAIL_SERVICE_TRANSPORT == "VK":
         VK_EMAIL_ID = env("VK_EMAIL_ID")
-        VK_EMAIL_PRIVATE_API_KEY = env("VK_EMAIL_PRIVATE_API_KEY", default="")
+        VK_EMAIL_PRIVATE_API_KEY = env("VK_EMAIL_PRIVATE_API_KEY")
 
     MAILGUN_EMAIL_PRIVATE_API_KEY = ""
     if EMAIL_SERVICE_TRANSPORT == "MAILGUN":
-        MAILGUN_EMAIL_PRIVATE_API_KEY = env("MAILGUN_EMAIL_PRIVATE_API_KEY", default="")
+        MAILGUN_EMAIL_PRIVATE_API_KEY = env("MAILGUN_EMAIL_PRIVATE_API_KEY")
 
     EMAIL_DOMAIN = env("EMAIL_DOMAIN", default='openschools.education')
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
