@@ -21,7 +21,6 @@ class BaseManager(SafeDeleteManager):
 
         Attention: If the object is "revived" from a soft-deleted state the created return value will
         still be false because the object is technically not created unless you set
-        SAFE_DELETE_INTERPRET_UNDELETED_OBJECTS_AS_CREATED = True in the django settings.
 
         Args:
             defaults: Dict with defaults to update/create model instance with

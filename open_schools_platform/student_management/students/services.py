@@ -24,7 +24,7 @@ from open_schools_platform.user_management.users.models import User
 
 def create_student_profile(name: str, age: int = None, user: User = None,
                            phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
-    student_profile = StudentProfile.objects.create(
+    student_profile = StudentProfile.objects.create_student_profile(
         name=name,
         age=age,
         phone=phone,
@@ -82,8 +82,8 @@ def update_student_join_circle_body(*, query: Query, data) -> Query:
     return query
 
 
-def create_studentprofileicrcle_additional(text: str = None, parent_phone: PhoneNumber = None,
-                                           parent_name: str = None, student_phone: PhoneNumber = None) \
+def create_student_profile_circle_additional(text: str = None, parent_phone: PhoneNumber = None,
+                                             parent_name: str = None, student_phone: PhoneNumber = None) \
         -> StudentProfileCircleAdditional:
     additional = StudentProfileCircleAdditional.objects.create(
         text=text,
@@ -156,7 +156,7 @@ def query_creation_logic(fields: Dict, circle: Circle,
     )
 
     if parent_user:
-        additional = create_studentprofileicrcle_additional(
+        additional = create_student_profile_circle_additional(
             parent_phone=parent_user.phone,
             parent_name=parent_user.parent_profile.name,
             text=fields["additional"]["text"],

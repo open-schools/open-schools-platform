@@ -118,8 +118,8 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
         responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
-                   404: "No such query",
-                   406: "Cant update query because it's status is not SENT"},
+                   400: "Cant update query because it's status is not SENT",
+                   404: "No such query"},
         operation_description="Update body of invite employee query",
     )
     def patch(self, request):
@@ -132,7 +132,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         )
         update_invite_employee_body(
             query=query,
-            data=query_update_serializer["body"]
+            data=query_update_serializer.validated_data["body"]
         )
         return Response({"query": EmployeeProfileQuerySerializer(query).data}, status=200)
 

@@ -1,7 +1,8 @@
 from django.db.models import QuerySet
-from rest_framework.exceptions import PermissionDenied, NotAcceptable
+from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import selector_factory
+from open_schools_platform.errors.exceptions import WrongStatusChange
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
@@ -28,7 +29,7 @@ def get_query_with_checks(pk: str, user: User, update_query_check: bool = False)
     )
     if update_query_check:
         if query.status != Query.Status.SENT:
-            raise NotAcceptable(f"Cant change query. It already has {query.status} status")
+            raise WrongStatusChange(f"Cant change query. It already has {query.status} status")
     return query
 
 

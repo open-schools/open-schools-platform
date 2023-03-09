@@ -1,8 +1,7 @@
-import os
-
+from config.env import env
 from open_schools_platform.utils.email_utils import VKEmailService, MailgunEmailService
 
-transport = os.environ.get("EMAIL_SERVICE_TRANSPORT")
+transport = env("EMAIL_SERVICE_TRANSPORT", default=None)
 
 EMAIL_TRANSPORT = None
 

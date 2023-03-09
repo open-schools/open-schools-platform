@@ -101,7 +101,7 @@ class StudentProfileExceptionsTests(TestCase):
         }
         student_join_circle_query_response = self.client.post(self.student_join_circle_query_url,
                                                               student_join_circle_query_data, format="json")
-        self.assertEqual(406, student_join_circle_query_response.status_code)
+        self.assertEqual(400, student_join_circle_query_response.status_code)
 
     def test_delete_student_profile_does_not_exist(self):
         create_logged_in_user(self)

@@ -107,7 +107,8 @@ class BaseFilterSet(django_filters.FilterSet):
         return base_queryset.filter(query)
 
     @staticmethod
-    def get_dict_filters(filter_class: Type[django_filters.FilterSet], prefix: str = "", include: List[str] = []):
+    def get_dict_filters(filter_class: Type[django_filters.FilterSet], prefix: str = "", include: List[str] = None):
+        include = include or []
         response = {}
 
         for key, value in filter_class.get_filters().items():

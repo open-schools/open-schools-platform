@@ -1,7 +1,6 @@
 import uuid
 
 import safedelete
-from django.core.exceptions import ValidationError
 from django.db import models
 from django.contrib.auth.models import (
     UserManager as BUM,
@@ -12,6 +11,7 @@ from phonenumber_field.modelfields import PhoneNumberField
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
+from open_schools_platform.errors.exceptions import AlreadyExists
 
 
 # Taken from here:
@@ -29,7 +29,7 @@ class UserManager(BaseManager, BUM):
         except User.DoesNotExist:
             user = None
         if user and not user.deleted:
-            raise ValidationError("User with this phone number already exists")
+            raise AlreadyExists("User with this phone number already exists")
 
         user = self.update_or_create_with_check(phone=phone,
                                                 defaults={'is_active': is_active, 'is_admin': is_admin,
@@ -70,7 +70,6 @@ class CreationTokenManager(BaseManager):
 
 
 class User(BaseModel, AbstractBaseUser, PermissionsMixin):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     phone = PhoneNumberField(
         verbose_name='telephone number',
@@ -113,7 +112,7 @@ class FirebaseNotificationTokenCreationManager(BaseManager):
         except FirebaseNotificationToken.DoesNotExist:
             firebase_token = None
         if firebase_token and not firebase_token.deleted:
-            raise ValidationError("FirebaseToken with this user already exists")
+            raise AlreadyExists("FirebaseToken with this user already exists")
 
         firebase_token = self.update_or_create_with_check(user=user, defaults={'token': token})
         return firebase_token

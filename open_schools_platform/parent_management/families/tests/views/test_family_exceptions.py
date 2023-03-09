@@ -68,7 +68,7 @@ class FamilyExceptionsTests(TestCase):
             "phone": str(parent.phone)
         }
         invite_parent_response = self.client.post(self.invite_parent_url, invite_parent_data)
-        self.assertEqual(406, invite_parent_response.status_code)
+        self.assertEqual(400, invite_parent_response.status_code)
 
     def test_delete_family_does_not_exist(self):
         response = self.client.delete(self.delete_family_url(pk=uuid.uuid4()))

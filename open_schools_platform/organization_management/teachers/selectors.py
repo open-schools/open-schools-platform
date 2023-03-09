@@ -31,7 +31,7 @@ def get_teachers(*, filters=None) -> QuerySet:
 
 
 @selector_factory(TeacherProfile)
-def get_teacher_profile(*, filters=None, user: User = None) -> QuerySet:
+def get_teacher_profile(*, filters=None, user: User = None) -> TeacherProfile:
     filters = filters or {}
 
     qs = TeacherProfile.objects.all()
