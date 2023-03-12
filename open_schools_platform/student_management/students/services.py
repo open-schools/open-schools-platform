@@ -5,7 +5,6 @@ from typing import Dict
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
@@ -73,7 +72,7 @@ def update_student_join_circle_body(*, query: Query, data) -> Query:
     non_side_effect_fields = ['name']
     filtered_data = filter_dict_from_none_values(data)
     if query.body is None:
-        raise NotAcceptable
+        raise QueryCorrupted
     query.body, has_updated = model_update(
         instance=query.body,
         fields=non_side_effect_fields,
