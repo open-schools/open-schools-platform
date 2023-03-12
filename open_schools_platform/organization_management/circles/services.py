@@ -35,7 +35,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
 
     If address is provided and location isn't, geopy will take coordinates from address. They will
     be put into location field (as Point object). If geopy won't be able to take coordinates from address,
-    or limit of api requests to Nominatim will be exceeded, NotAcceptable exception will be raised.
+    or limit of api requests to Nominatim will be exceeded, ValidationError exception will be raised.
 
     If you don't want geopy to take coordinates from address, then you can just pass location as
     argument in create_circle function (for example, if you want to create test circle). By default,
