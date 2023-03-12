@@ -67,10 +67,6 @@ class StudentProfileCreateSerializer(serializers.ModelSerializer):
         extra_kwargs = {"phone": {'required': False}}
 
 
-class StudentProfileAddPhotoSerializer(serializers.Serializer):
-    photo = serializers.FileField(required=True)
-
-
 class StudentProfileCreateSerializerForQuery(serializers.ModelSerializer):
     class Meta:
         model = StudentProfile

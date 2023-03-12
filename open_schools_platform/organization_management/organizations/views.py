@@ -2,7 +2,7 @@ from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -118,8 +118,8 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
         responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
-                   404: "No such query",
-                   406: "Cant update query because it's status is not SENT"},
+                   400: "Cant update query because it's status is not SENT",
+                   404: "No such query"},
         operation_description="Update body of invite employee query",
     )
     def patch(self, request):
@@ -132,7 +132,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         )
         update_invite_employee_body(
             query=query,
-            data=query_update_serializer["body"]
+            data=query_update_serializer.validated_data["body"]
         )
         return Response({"query": EmployeeProfileQuerySerializer(query).data}, status=200)
 
@@ -180,7 +180,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
             {"organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise NotAcceptable("You should define organization or circle")
+            raise ValidationError("You should define organization or circle")
 
         queries = organization_circle_query_filter(self, filters, organization, circle)
 
@@ -208,7 +208,7 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
             {"circle__organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise NotAcceptable("You should define organization or circle")
+            raise ValidationError("You should define organization or circle")
 
         students = get_students(filters=filters)
 

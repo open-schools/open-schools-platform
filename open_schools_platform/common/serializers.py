@@ -3,6 +3,7 @@ from collections import OrderedDict
 from rest_framework.fields import CharField, DictField, ChoiceField, ListField
 from rest_framework.serializers import Serializer
 
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.errors.codes import error_codes
 
 
@@ -38,7 +39,7 @@ class ErrorSerializer(Serializer):
 
     def to_representation(self, instance):
         result = super().to_representation(instance)
-        return OrderedDict([(key, result[key]) for key in result if result[key] is not None])
+        return OrderedDict(filter_dict_from_none_values(result))
 
 
 class Error400Serializer(ErrorSerializer):

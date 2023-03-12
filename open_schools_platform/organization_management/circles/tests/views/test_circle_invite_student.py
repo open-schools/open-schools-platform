@@ -25,8 +25,7 @@ class InviteStudentTests(TestCase):
         self.invite_student_url = \
             lambda pk: reverse("api:organization-management:circles:invite-student", args=[pk])
 
-    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") is None or
-                        env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") == "",
+    @pytest.mark.skipif(env("EMAIL_SERVICE_TRANSPORT", default=None) is None,
                         reason="EMAIL_SERVICE_TRANSPORT is not set")
     def test_invite_student_query_successfully_formed_1(self):
         user = create_logged_in_user(instance=self)
@@ -117,8 +116,7 @@ class InviteStudentTests(TestCase):
         self.assertTrue(new_student_profile)
         self.assertEqual(student_profile.phone, new_student_profile.phone)
 
-    @pytest.mark.skipif(env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") is None or
-                        env.ENVIRON.get("EMAIL_SERVICE_TRANSPORT") == "",
+    @pytest.mark.skipif(env("EMAIL_SERVICE_TRANSPORT", default=None) is None,
                         reason="EMAIL_SERVICE_TRANSPORT is not set")
     def test_invite_student_query_successfully_formed_6(self):
         user = create_logged_in_user(instance=self)

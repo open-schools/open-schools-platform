@@ -8,4 +8,4 @@ class RegistrationConstants:
 
 class GenerateConstants:
     ALPHABET = string.ascii_letters + string.digits
-    PASSWORD_LENGTH = 6
+    PASSWORD_LENGTH = 8

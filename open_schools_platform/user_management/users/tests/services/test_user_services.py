@@ -5,6 +5,7 @@ from django.test import TestCase
 from rest_framework_jwt.utils import jwt_decode_token
 from rest_framework import serializers
 
+from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.students.models import StudentProfile
@@ -29,7 +30,7 @@ class UserCreateTests(TestCase):
 
     def test_user_create_with_existing_user_must_raise_exception(self):
         create_test_user(phone="+79998782211")
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(AlreadyExists):
             create_test_user(phone="+79998782211")
 
         self.assertEqual(1, User.objects.count())

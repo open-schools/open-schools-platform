@@ -1,9 +1,10 @@
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.constants import NotificationType
+from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.parent_management.families.constants import FamilyConstants
 from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import convert_dict_to_serializer
@@ -68,8 +69,8 @@ class InviteParentApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
         request_body=FamilyInviteParentSerializer,
         responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()}),
-                   404: "No such family",
-                   406: "Parent is already in this family"},
+                   400: "Parent is already in this family",
+                   404: "No such family"},
         operation_description="Creates invite parent query.",
     )
     def post(self, request):
@@ -81,12 +82,12 @@ class InviteParentApi(ApiAuthMixin, APIView):
                                     empty_exception=True,
                                     empty_message="There is no parent_profile with such phone")
         if parent in family.parent_profiles.all():
-            raise NotAcceptable("Parent is already in this family")
+            raise AlreadyExists("Parent is already in this family")
         query = create_query(sender_model_name="family", sender_id=family.id,
                              recipient_model_name="parentprofile", recipient_id=parent.id)
         notify_user(user=parent.user, title=FamilyConstants.INVITE_PARENT_TITLE,
                     body=FamilyConstants.get_invite_parent_message(family),
-                    data={"query": str(query.id), "type": "invite-parent-query"})
+                    data={"query": str(query.id), "type": NotificationType.InviteParent})
         return Response({"query": QueryStatusSerializer(query).data}, status=201)
 
 

@@ -2,7 +2,6 @@ from typing import Any
 
 import uuid
 
-import safedelete
 from django.core.exceptions import ValidationError
 from django.db import models
 from simple_history.models import HistoricalRecords
@@ -42,16 +41,16 @@ class EmployeeProfile(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    objects = EmployeeProfileManager()  # type: ignore[assignment]
     email = models.EmailField(max_length=255, blank=True)
     history = HistoricalRecords()
+
+    objects = EmployeeProfileManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.user.__str__()
 
 
 class Employee(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     employee_profile = models.ForeignKey(EmployeeProfile, related_name='employees',
                                          null=True, default=None, blank=True, on_delete=models.CASCADE)

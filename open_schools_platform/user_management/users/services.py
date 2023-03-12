@@ -74,6 +74,9 @@ def user_update(*, user: User, data) -> User:
 
     user.parent_profile.name = user.name
     user.parent_profile.save()
+
+    user.teacher_profile.name = user.name
+    user.teacher_profile.save()
     return user
 
 
@@ -100,8 +103,7 @@ def get_jwt_token(username_field: str, username: str, password: str, request=Non
     token = JSONWebTokenAuthentication.jwt_encode_payload(payload)
     issued_at = payload.get('iat', unix_epoch())
 
-    response_data = JSONWebTokenAuthentication. \
-        jwt_create_response_payload(token, user, request, issued_at)
+    response_data = JSONWebTokenAuthentication.jwt_create_response_payload(token, user, request, issued_at)
 
     return str(response_data["token"])
 
@@ -136,7 +138,6 @@ def update_fcm_notification_token_entity(*, token: FirebaseNotificationToken, da
 
 
 def notify_user(user: User, title: str, body: str, data: dict = None) -> int:
-
     """
     notify_user returns numeric values:
         0 - User has no firebase registration token

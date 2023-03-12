@@ -1,7 +1,7 @@
-from rest_framework.exceptions import NotAcceptable
 from open_schools_platform.common.constants import EmailConstants
 from open_schools_platform.common.services import model_update, exception_if_email_service_unavailable
 from open_schools_platform.common.utils import filter_dict_from_none_values
+from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.models import Query
@@ -29,7 +29,7 @@ def update_invite_employee_body(*, query: Query, data) -> Query:
     non_side_effect_fields = ['name', 'position']
     filtered_data = filter_dict_from_none_values(data)
     if query.body is None:
-        raise NotAcceptable
+        raise QueryCorrupted
     query.body, has_updated = model_update(
         instance=query.body,
         fields=non_side_effect_fields,

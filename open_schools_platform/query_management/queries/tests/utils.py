@@ -8,7 +8,7 @@ from open_schools_platform.parent_management.families.tests.utils import create_
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.services import create_student, \
-    create_studentprofileicrcle_additional, create_student_profile_circle_query
+    create_student_profile_circle_additional, create_student_profile_circle_query
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.tests.utils import create_test_user
 
@@ -19,14 +19,14 @@ def create_test_student_join_circle_query(user: User = None, circle: Circle = No
     if circle is None:
         circle = create_test_circle()
     student = create_student(name='test_student')
-    additional = create_test_studentprofilecircle_additional(user=user)
+    additional = create_test_student_profile_circle_additional(user=user)
     query = create_student_profile_circle_query(student_profile=user.student_profile, student=student,
                                                 circle=circle, additional=additional)
     return query
 
 
-def create_test_studentprofilecircle_additional(*, user: User, text: str = "Please, let me in!"):
-    additional = create_studentprofileicrcle_additional(
+def create_test_student_profile_circle_additional(*, user: User, text: str = "Please, let me in!"):
+    additional = create_student_profile_circle_additional(
         text=text,
         parent_phone=user.phone,
         parent_name=user.parent_profile.name

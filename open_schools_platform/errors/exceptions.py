@@ -18,10 +18,16 @@ class QueryCorrupted(APIException):
 class WrongStatusChange(APIException):
     status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_406_NOT_ACCEPTABLE
     default_detail = _('Failed to set this status in the current context.')
-    default_code = 'wrong_status'
+    default_code = 'wrong_status_change'
 
 
 class EmailServiceUnavailable(APIException):
     status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_405_METHOD_NOT_ALLOWED
     default_detail = _('Email service is currently unavailable.')
     default_code = 'email_service_unavailable'
+
+
+class AlreadyExists(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("This object already exists")
+    default_code = 'already_exists'

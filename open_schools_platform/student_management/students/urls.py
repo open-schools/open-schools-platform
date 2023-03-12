@@ -3,7 +3,7 @@ from django.urls import path
 from open_schools_platform.common.views import MultipleViewManager
 from open_schools_platform.student_management.students.views import StudentProfileApi, AutoStudentJoinCircleQueryApi, \
     StudentJoinCircleQueryUpdateApi, StudentQueriesListApi, StudentCirclesListApi, StudentProfileUpdateApi, \
-    StudentJoinCircleQueryApi, StudentDeleteApi, StudentProfileAddPhotoApi, StudentProfileDeleteApi
+    StudentJoinCircleQueryApi, StudentDeleteApi, StudentProfileDeleteApi
 
 urlpatterns = [
     path('/<uuid:pk>', StudentDeleteApi.as_view(), name='delete-student'),
@@ -19,5 +19,4 @@ urlpatterns = [
          name='student-join-circle-update-query'),
     path('/student-profile/<uuid:pk>/queries', StudentQueriesListApi.as_view(), name='queries-list'),
     path('/student-profile/<uuid:pk>/circles', StudentCirclesListApi.as_view(), name='circles-list'),
-    path('/student-profile/<uuid:pk>/add-photo', StudentProfileAddPhotoApi.as_view(), name='add-photo'),
 ]
