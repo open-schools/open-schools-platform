@@ -278,6 +278,7 @@ class GetAnalytics(ApiAuthMixin, APIView):
 
 class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
     pagination_class = ApiCircleListPagination
+    queryset = Query.objects.all()
     serializer_class = StudentProfileQuerySerializer
 
     @swagger_auto_schema(
