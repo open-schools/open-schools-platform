@@ -41,7 +41,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
     argument in create_circle function (for example, if you want to create test circle). By default,
     location has None value.
     """
-    if location is None:
+    if not location:
         geolocator = GoogleV3(api_key=CommonConstants.GOOGLE_MAPS_API_KEY)
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)

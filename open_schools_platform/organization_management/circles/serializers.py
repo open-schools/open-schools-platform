@@ -9,7 +9,7 @@ from open_schools_platform.student_management.students.models import Student
 
 class CreateCircleSerializer(serializers.ModelSerializer):
     organization = serializers.UUIDField(required=True)
-    location = serializers.CharField(required=False)
+    location = serializers.CharField(required=False, allow_null=True, allow_blank=True)
 
     class Meta:
         model = Circle
