@@ -38,7 +38,7 @@ from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.student_management.students.selectors import get_students, get_student, get_student_profile
-from open_schools_platform.student_management.students.serializers import StudentSerializer, StudentGetSerializer
+from open_schools_platform.student_management.students.serializers import StudentSerializer
 from open_schools_platform.student_management.students.services import export_students
 
 
@@ -231,14 +231,14 @@ class GetStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "No such student"}
+        responses={200: convert_dict_to_serializer({"student": StudentSerializer()}), 404: "No such student"}
     )
     def get(self, request, pk):
         student = get_student(
             filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
         )
-        return Response({"student": StudentGetSerializer(student).data}, status=200)
+        return Response({"student": StudentSerializer(student).data}, status=200)
 
 
 class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
