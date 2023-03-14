@@ -30,7 +30,7 @@ class Circle(LifecycleModelMixin, BaseModel):
     organization = models.ForeignKey(Organization, related_name="circles", on_delete=models.CASCADE)
     capacity = models.IntegerField(validators=[MinValueValidator(0)], default=0)
     address = models.CharField(max_length=255, default="")
-    description = models.CharField(max_length=2000, default="")
+    description = models.CharField(max_length=2000, default="", blank=True, null=True)
     location = models.PointField(geography=True, default=Point(0.0, 0.0))
     start_time = models.DateTimeField(null=True, blank=True)
     duration = models.DurationField(null=True, blank=True)
