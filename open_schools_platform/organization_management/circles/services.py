@@ -28,7 +28,7 @@ from open_schools_platform.tasks.tasks import send_circle_lesson_notification
 from open_schools_platform.user_management.users.models import User
 
 
-def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
+def create_circle(name: str, organization: Organization, address: str, description: str = None, capacity: int = 0,
                   start_time: datetime = None, duration: timedelta = None, location: Point = None) -> Circle:
     """
     Geopy library allows to take coordinates from address.
@@ -41,7 +41,7 @@ def create_circle(name: str, organization: Organization, description: str, capac
     argument in create_circle function (for example, if you want to create test circle). By default,
     location has None value.
     """
-    if location is None:
+    if not location:
         geolocator = GoogleV3(api_key=CommonConstants.GOOGLE_MAPS_API_KEY)
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
