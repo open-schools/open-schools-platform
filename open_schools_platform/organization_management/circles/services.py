@@ -28,7 +28,7 @@ from open_schools_platform.tasks.tasks import send_circle_lesson_notification
 from open_schools_platform.user_management.users.models import User
 
 
-def create_circle(name: str, organization: Organization, description: str, capacity: int, address: str,
+def create_circle(name: str, organization: Organization, address: str, description: str = None, capacity: int = 0,
                   start_time: datetime = None, duration: timedelta = None, location: Point = None) -> Circle:
     """
     Geopy library allows to take coordinates from address.
