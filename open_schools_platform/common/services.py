@@ -169,3 +169,7 @@ class SendEmailService:
 def exception_if_email_service_unavailable():
     if SendEmailService().email_transport is None:
         raise EmailServiceUnavailable()
+
+
+def file_generate_upload_path(instance, filename):
+    return f"{instance.image.name}"
