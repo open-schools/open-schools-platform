@@ -1,10 +1,21 @@
+from django.contrib.gis.geos import GEOSGeometry
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.serializers import CircleOrganizationSerializer
 from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
 from open_schools_platform.student_management.students.models import Student
+
+
+def validate_geometry_string(string):
+    try:
+        GEOSGeometry(string)
+    except ValueError as exc:
+        if exc.args[0] == 'String input unrecognized as WKT EWKT, and HEXEWKB.':
+            raise ValidationError('String input unrecognized as valid geometry format such as WKT EWKT, and HEXEWKB.',
+                                  code='invalid_geometry')
 
 
 class CreateCircleSerializer(serializers.ModelSerializer):
