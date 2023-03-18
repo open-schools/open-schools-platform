@@ -13,7 +13,7 @@ def get_paginated_response(*, pagination_class, serializer_class, queryset, requ
         serializer = serializer_class(page, many=True)
         return paginator.get_paginated_response(serializer.data)
 
-    serializer = serializer_class(queryset, many=True)
+    serializer = serializer_class(queryset, many=True, context={'request': request})
 
     return Response(data=serializer.data)
 

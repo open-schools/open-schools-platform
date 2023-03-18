@@ -47,7 +47,8 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
             user=request.user,
             empty_exception=True,
         )
-        return Response({"results": StudentProfileSerializer(family.student_profiles, many=True).data}, status=200)
+        return Response({"results": StudentProfileSerializer(family.student_profiles, many=True,
+                                                             context={'request': request}).data}, status=200)
 
 
 class FamiliesListApi(ApiAuthMixin, APIView):

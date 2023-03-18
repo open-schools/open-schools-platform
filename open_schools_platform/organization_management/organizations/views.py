@@ -184,7 +184,9 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
 
         queries = organization_circle_query_filter(self, filters, organization, circle)
 
-        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+        return Response(
+            {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
+            status=200)
 
 
 class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
@@ -212,7 +214,8 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
 
         students = get_students(filters=filters)
 
-        return Response({"results": StudentSerializer(students, many=True).data}, status=200)
+        return Response({"results": StudentSerializer(students, many=True, context={'request': request}).data},
+                        status=200)
 
 
 class OrganizationDeleteApi(ApiAuthMixin, APIView):
@@ -238,7 +241,7 @@ class GetStudentApi(ApiAuthMixin, APIView):
             filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
         )
-        return Response({"student": StudentSerializer(student).data}, status=200)
+        return Response({"student": StudentSerializer(student, context={'request': request}).data}, status=200)
 
 
 class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
