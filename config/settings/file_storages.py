@@ -2,9 +2,9 @@ import os
 from config.django.base import BASE_DIR
 from config.env import env
 
-using_local_storage = env.bool("LOCAL_FILE_STORAGE", default=False)
+LOCAL_STORAGE_ENABLED = env.bool("LOCAL_FILE_STORAGE", default=True)
 
-if using_local_storage:
+if LOCAL_STORAGE_ENABLED:
     MEDIA_ROOT_NAME = "media"
     MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_ROOT_NAME)
     MEDIA_URL = f"/{MEDIA_ROOT_NAME}/"

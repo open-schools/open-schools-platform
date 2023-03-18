@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from config.django.base import ADMIN_PANEL_ENABLED
-from config.settings.file_storages import using_local_storage
+from config.settings.file_storages import LOCAL_STORAGE_ENABLED
 
 urlpatterns = [
     path('api/', include(('open_schools_platform.api.urls', 'api'))),
@@ -34,5 +34,5 @@ urlpatterns = SwaggerSetup.do_urls(urlpatterns)
 if ADMIN_PANEL_ENABLED:
     urlpatterns += [path('admin/', admin.site.urls)]
 
-if using_local_storage:
+if LOCAL_STORAGE_ENABLED:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
