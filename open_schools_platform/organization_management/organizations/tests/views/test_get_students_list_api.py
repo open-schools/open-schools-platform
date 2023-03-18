@@ -43,4 +43,4 @@ class CirclesStudentsListApiTests(TestCase):
 
     def test_require_at_least_one_field(self):
         response = self.client.get(self.reverse_url)
-        self.assertEqual(406, response.status_code)
+        self.assertEqual(400, response.status_code)

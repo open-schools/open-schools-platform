@@ -114,7 +114,9 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
             filters={"recipient_id": str(pk)},
             empty_exception=True,
         )
-        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+        return Response(
+            {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
+            status=200)
 
 
 class CirclesStudentsListApi(ApiAuthMixin, APIView):
@@ -126,7 +128,7 @@ class CirclesStudentsListApi(ApiAuthMixin, APIView):
     def get(self, request, pk):
         circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True)
         qs = circle.students.all()
-        return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
+        return Response({"results": StudentSerializer(qs, many=True, context={'request': request}).data}, status=200)
 
 
 class CircleDeleteApi(ApiAuthMixin, APIView):
