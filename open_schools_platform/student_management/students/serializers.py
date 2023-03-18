@@ -95,18 +95,3 @@ class StudentJoinCircleQuerySerializer(serializers.Serializer):
 class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
     body = QueryStudentBodySerializerUpdate()
-
-
-class StudentGetSerializer(serializers.ModelSerializer):
-    student_profile = get_serializer_with_fields(StudentProfileSerializer, fields=('phone', 'photo'))
-
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        families = instance.student_profile.families.all()
-        parent = get_parent_profile(filters={"families": form_ids_string_from_queryset(families)})
-        representation['parent_phone'] = str(parent.user.phone)
-        return representation
-
-    class Meta:
-        model = Student
-        fields = ["id", "name", "student_profile"]
