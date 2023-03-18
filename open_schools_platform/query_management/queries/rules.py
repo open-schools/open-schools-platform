@@ -48,6 +48,7 @@ def teacher_profile_access(user: User, query: Query):
     if type(query.sender) == Circle and type(query.recipient) == TeacherProfile:
         return user.has_perm("teachers.teacher_profile_access", query.recipient) or \
                user.has_perm("circles.circle_access", query.sender)
+    return False
 
 
 rules.add_perm("queries.query_access", employee_profile_or_organization_access | student_profile_or_circle_access |

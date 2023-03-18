@@ -2,7 +2,7 @@ from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, ErrorDetail
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -180,7 +180,9 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
             {"organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise ValidationError("You should define organization or circle")
+            raise ValidationError({'non_field_errors': 'You should define organization or circle',
+                                   'organization': ErrorDetail('', code='required'),
+                                   'circle': ErrorDetail('', code='required')})
 
         queries = organization_circle_query_filter(self, filters, organization, circle)
 
@@ -210,7 +212,9 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
             {"circle__organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise ValidationError("You should define organization or circle")
+            raise ValidationError({'non_field_errors': 'You should define organization or circle',
+                                   'organization': ErrorDetail('', code='required'),
+                                   'circle': ErrorDetail('', code='required')})
 
         students = get_students(filters=filters)
 

@@ -19,9 +19,6 @@ class BaseManager(SafeDeleteManager):
         If object is soft-deleted we don't update-or-create it but reset the deleted field to None.
         So the object is visible again like a create in any other case.
 
-        Attention: If the object is "revived" from a soft-deleted state the created return value will
-        still be false because the object is technically not created unless you set
-
         Args:
             defaults: Dict with defaults to update/create model instance with
             password: For AbstractBaseUser models

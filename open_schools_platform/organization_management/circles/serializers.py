@@ -1,5 +1,4 @@
 from django.contrib.gis.geos import GEOSGeometry
-from django.contrib.gis.geos.error import GEOSException
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
