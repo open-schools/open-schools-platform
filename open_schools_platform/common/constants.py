@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.tests.constants.test_valid_api_
 
 class CommonConstants:
     GOOGLE_API_KEY = env("GOOGLE_API_KEY")
-    GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY")
+    GOOGLE_MAPS_API_KEY = env("GOOGLE_MAPS_API_KEY", default=None)
     FIREBASE_URL_TO_GET_SESSION = r"https://www.googleapis.com/identitytoolkit" \
                                   r"/v3/relyingparty/sendVerificationCode?key="
     FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3" \

@@ -13,7 +13,7 @@ from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
 from open_schools_platform.common.services import BaseQueryHandler
-from open_schools_platform.errors.exceptions import QueryCorrupted
+from open_schools_platform.errors.exceptions import QueryCorrupted, MapServiceUnavailable
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -42,7 +42,11 @@ def create_circle(name: str, organization: Organization, address: str, descripti
     location has None value.
     """
     if not location:
-        geolocator = GoogleV3(api_key=CommonConstants.GOOGLE_MAPS_API_KEY)
+        api_key = CommonConstants.GOOGLE_MAPS_API_KEY
+        if not api_key:
+            raise MapServiceUnavailable(
+                'Server cannot handle address. Please specify the \'location\' field explicitly')
+        geolocator = GoogleV3(api_key=api_key)
         try:
             coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:

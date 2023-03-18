@@ -9,7 +9,7 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.errors.exceptions import InvalidArgumentException
+from open_schools_platform.errors.exceptions import InvalidArgument
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
@@ -40,7 +40,7 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
     def get(self, request, *args, **kwargs):
         filters = request.GET.dict()
         if "organization" not in filters.keys():
-            raise InvalidArgumentException("Your request should contain organization field.")
+            raise InvalidArgument("Your request should contain organization field.")
         get_organization(filters={"id": filters["organization"]}, user=request.user)
         response = get_paginated_response(
             pagination_class=EmployeeApiListPagination,

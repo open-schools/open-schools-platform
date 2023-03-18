@@ -9,7 +9,7 @@ from rest_framework_jwt.settings import api_settings
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.errors.exceptions import InvalidArgumentException
+from open_schools_platform.errors.exceptions import InvalidArgument
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
 
@@ -47,7 +47,7 @@ class CreationTokenApi(CreateAPIView):
         response = send_firebase_sms(**token_serializer.data)
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
+            raise InvalidArgument(detail=firebase_error_dict_with_additional_info(response))
 
         token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
 
@@ -115,7 +115,7 @@ class VerificationApi(APIView):
 
         response = check_otp_with_firebase(token.session, otp_serializer.validated_data["otp"])
         if response.status_code != 200:
-            raise InvalidArgumentException(detail="Otp is incorrect.")
+            raise InvalidArgument(detail="Otp is incorrect.")
 
         verify_token(token)
 
@@ -141,7 +141,7 @@ class CodeResendApi(APIView):
         response = send_firebase_sms(str(token.phone), recaptcha_serializer.validated_data["recaptcha"])
 
         if response.status_code != 200:
-            raise InvalidArgumentException(detail=firebase_error_dict_with_additional_info(response))
+            raise InvalidArgument(detail=firebase_error_dict_with_additional_info(response))
 
         update_token_session(token, get_dict_from_response(response)["sessionInfo"])
         return Response({"detail": "SMS was resent."}, status=200)

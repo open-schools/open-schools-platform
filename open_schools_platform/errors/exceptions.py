@@ -3,26 +3,26 @@ from rest_framework.exceptions import APIException
 from django.utils.translation import gettext_lazy as _
 
 
-class InvalidArgumentException(APIException):
-    status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_422_UNPROCESSABLE_ENTITY
+class InvalidArgument(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("Some of input data are invalid.")
     default_code = 'invalid_input'
 
 
 class QueryCorrupted(APIException):
-    status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_405_METHOD_NOT_ALLOWED
+    status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _('Query is corrupted')
     default_code = 'query_corrupted'
 
 
 class WrongStatusChange(APIException):
-    status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_406_NOT_ACCEPTABLE
+    status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _('Failed to set this status in the current context.')
     default_code = 'wrong_status_change'
 
 
 class EmailServiceUnavailable(APIException):
-    status_code = status.HTTP_400_BAD_REQUEST  # status.HTTP_405_METHOD_NOT_ALLOWED
+    status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _('Email service is currently unavailable.')
     default_code = 'email_service_unavailable'
 
@@ -31,6 +31,12 @@ class AlreadyExists(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("This object already exists")
     default_code = 'already_exists'
+
+
+class MapServiceUnavailable(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('Server cannot handle address')
+    default_code = 'map_service_unavailable'
 
 
 class ApplicationError(Exception):
