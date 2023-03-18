@@ -17,4 +17,6 @@ class GetTeacherProfileApi(ApiAuthMixin, APIView):
     )
     def get(self, request, pk):
         teacher_profile = get_teacher_profile(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        return Response({"teacher_profile": TeacherProfileSerializer(teacher_profile).data}, status=200)
+        return Response(
+            {"teacher_profile": TeacherProfileSerializer(teacher_profile, context={'request': request}).data},
+            status=200)

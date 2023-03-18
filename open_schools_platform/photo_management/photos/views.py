@@ -30,4 +30,4 @@ class PhotoApi(ApiAuthMixin, APIView):
             return Response({"result": "Photo was not provided"}, status=204)
         update_photo(photo=photo, data=photo_update_serializer.validated_data)
 
-        return Response({"photo": PhotoSerializer(photo).data}, status=200)
+        return Response({"photo": PhotoSerializer(photo, context={'request': request}).data}, status=200)
