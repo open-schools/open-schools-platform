@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 LOCAL_APPS = [
-    'open_schools_platform.core.apps.CoreConfig',
     'open_schools_platform.common.apps.CommonConfig',
     'open_schools_platform.tasks.apps.TasksConfig',
     'open_schools_platform.api.apps.ApiConfig',

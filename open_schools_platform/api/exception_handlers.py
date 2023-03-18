@@ -8,7 +8,7 @@ from rest_framework import exceptions, status
 from rest_framework.serializers import as_serializer_error
 from rest_framework.response import Response
 
-from open_schools_platform.core.exceptions import ApplicationError
+from open_schools_platform.errors.exceptions import ApplicationError
 from open_schools_platform.errors.codes import error_codes
 
 
