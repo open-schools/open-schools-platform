@@ -10,10 +10,10 @@ from open_schools_platform.user_management.users.models import User
 
 
 def model_update(
-    *,
-    instance: DjangoModelType,
-    fields: List[str],
-    data: Dict[str, Any]
+        *,
+        instance: DjangoModelType,
+        fields: List[str],
+        data: Dict[str, Any]
 ) -> Tuple[DjangoModelType, bool]:
     """
     Generic update service meant to be reused in local update services
@@ -169,3 +169,7 @@ class SendEmailService:
 def exception_if_email_service_unavailable():
     if SendEmailService().email_transport is None:
         raise EmailServiceUnavailable()
+
+
+def file_generate_upload_path(instance, filename):
+    return f"{instance.image.name}"

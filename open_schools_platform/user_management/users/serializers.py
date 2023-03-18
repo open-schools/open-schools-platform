@@ -20,12 +20,6 @@ class CreationTokenSerializer(serializers.Serializer):
         required=True,
     )
 
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
 
 class RetrieveCreationTokenSerializer(serializers.ModelSerializer):
     class Meta:
@@ -41,23 +35,11 @@ class OtpSerializer(serializers.Serializer):
             raise serializers.ValidationError(detail="Invalid otp")
         return attrs
 
-    def create(self, validated_data):
-        pass
-
-    def update(self, instance, validated_data):
-        pass
-
 
 class UserRegisterSerializer(serializers.Serializer):
     token = serializers.UUIDField(required=True)
     name = serializers.CharField(max_length=120)
     password = serializers.CharField(min_length=6, max_length=40)
-
-    def update(self, instance, validated_data):
-        pass
-
-    def create(self, validated_data):
-        pass
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -88,12 +70,6 @@ class ResendSerializer(serializers.Serializer):
         allow_null=False,
         required=True,
     )
-
-    def update(self, instance, validated_data):
-        pass
-
-    def create(self, validated_data):
-        pass
 
 
 class PasswordResetSerializer(serializers.Serializer):

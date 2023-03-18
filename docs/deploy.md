@@ -27,7 +27,7 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - google maps api key ```GOOGLE_MAPS_API_KEY=<key>```
 - object storage access key ```AWS_ACCESS_KEY=<key>```
 - object storage secret access key ```AWS_SECRET_ACCESS_KEY=<key>```
-- object storage bucket name ```YANDEX_CLIENT_DOCS_BUCKET_NAME=<key>```
+- object storage bucket name ```AWS_STORAGE_BUCKET_NAME=<key>```
 - ⚠️email id ```EMAIL_ID=<key>```
 - ⚠️mail.ru api key ```EMAIL_PRIVATE_API_KEY=<key>```
 - firebase cloud messaging server key ```FCM_SERVER_KEY=<key>```
@@ -37,13 +37,16 @@ DATABASE_URL=postgres://postgres:postgres@localhost:5432/local_db
 - ```FIREBASE_CLIENT_EMAIL=<email>```
 - ```FIREBASE_CLIENT_ID=<id>```
 - ```FIREBASE_CLIENT_CERT_URL=<url>```
+- ```EMAIL_SERVICE_TRANSPORT=<type-of-transport : MAILGUN, VK>```
+- ```MAILGUN_EMAIL_PRIVATE_API_KEY=<key>```
+- ```EMAIL_DOMAIN=<email-domain>```
 7. Migrate
 ```
 python manage.py migrate
 ```
-8. Migrate
+8. Collect static
 ```
-python manage.py migrate
+python manage.py collectstatic
 ```
 9. Run django server
 ```

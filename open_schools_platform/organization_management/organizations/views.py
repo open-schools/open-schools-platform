@@ -2,7 +2,7 @@ from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import NotAcceptable
+from rest_framework.exceptions import ValidationError, ErrorDetail
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -10,7 +10,9 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle
 from open_schools_platform.organization_management.employees.serializers import EmployeeSerializer, \
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
@@ -25,6 +27,8 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
+from open_schools_platform.organization_management.teachers.selectors import get_teacher
+from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
@@ -33,8 +37,8 @@ from open_schools_platform.query_management.queries.serializers import QueryStat
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
-from open_schools_platform.student_management.students.selectors import get_students, get_student
-from open_schools_platform.student_management.students.serializers import StudentSerializer, StudentGetSerializer
+from open_schools_platform.student_management.students.selectors import get_students, get_student, get_student_profile
+from open_schools_platform.student_management.students.serializers import StudentSerializer
 from open_schools_platform.student_management.students.services import export_students
 
 
@@ -114,8 +118,8 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=OrganizationEmployeeInviteUpdateSerializer,
         responses={200: convert_dict_to_serializer({"query": EmployeeProfileQuerySerializer()}),
-                   404: "No such query",
-                   406: "Cant update query because it's status is not SENT"},
+                   400: "Cant update query because it's status is not SENT",
+                   404: "No such query"},
         operation_description="Update body of invite employee query",
     )
     def patch(self, request):
@@ -128,7 +132,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
         )
         update_invite_employee_body(
             query=query,
-            data=query_update_serializer["body"]
+            data=query_update_serializer.validated_data["body"]
         )
         return Response({"query": EmployeeProfileQuerySerializer(query).data}, status=200)
 
@@ -176,11 +180,15 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
             {"organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise NotAcceptable("You should define organization or circle")
+            raise ValidationError({'non_field_errors': 'You should define organization or circle',
+                                   'organization': ErrorDetail('', code='required'),
+                                   'circle': ErrorDetail('', code='required')})
 
         queries = organization_circle_query_filter(self, filters, organization, circle)
 
-        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+        return Response(
+            {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
+            status=200)
 
 
 class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
@@ -204,11 +212,14 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
             {"circle__organization": get_organization, "circle": get_circle}
         )
         if not organization and not circle:
-            raise NotAcceptable("You should define organization or circle")
+            raise ValidationError({'non_field_errors': 'You should define organization or circle',
+                                   'organization': ErrorDetail('', code='required'),
+                                   'circle': ErrorDetail('', code='required')})
 
         students = get_students(filters=filters)
 
-        return Response({"results": StudentSerializer(students, many=True).data}, status=200)
+        return Response({"results": StudentSerializer(students, many=True, context={'request': request}).data},
+                        status=200)
 
 
 class OrganizationDeleteApi(ApiAuthMixin, APIView):
@@ -227,14 +238,14 @@ class GetStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"student": StudentGetSerializer()}), 404: "No such student"}
+        responses={200: convert_dict_to_serializer({"student": StudentSerializer()}), 404: "No such student"}
     )
     def get(self, request, pk):
         student = get_student(
             filters={"id": str(pk)}, user=request.user,
             empty_exception=True,
         )
-        return Response({"student": StudentGetSerializer(student).data}, status=200)
+        return Response({"student": StudentSerializer(student, context={'request': request}).data}, status=200)
 
 
 class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
@@ -270,3 +281,59 @@ class GetAnalytics(ApiAuthMixin, APIView):
         if all(arg in dates for arg in ("date_from", "date_to")):
             queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
         return Response({"analytics": AnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
+
+
+class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
+    pagination_class = ApiCircleListPagination
+    queryset = Query.objects.all()
+    serializer_class = StudentProfileQuerySerializer
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Returns queries to student circles from the selected organization",
+    )
+    def get(self, request, organization, student_profile, *args, **kwargs):
+        get_student_profile(
+            filters={"id": str(student_profile)},
+            empty_exception=True
+        )
+        organization = get_organization(
+            filters={"id": str(organization)},
+            user=request.user,
+            empty_exception=True
+        )
+        queries = get_queries(
+            filters={"sender_id": str(student_profile),
+                     "recipient_ids": form_ids_string_from_queryset(organization.circles.values())}
+        )
+
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=StudentProfileQuerySerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+        return response
+
+
+class OrganizationTeachersListApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get all teachers for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"results": TeacherSerializer(many=True)})}
+    )
+    def get(self, request, pk):
+        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        return Response({"results": TeacherSerializer(organization.teachers, many=True).data}, status=200)
+
+
+class GetTeacherApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get teacher with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"teacher": TeacherSerializer()})}
+    )
+    def get(self, request, pk):
+        teacher = get_teacher(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        return Response({"teacher": TeacherSerializer(teacher).data}, status=200)

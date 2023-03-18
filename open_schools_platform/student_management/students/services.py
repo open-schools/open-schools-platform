@@ -5,7 +5,6 @@ from typing import Dict
 from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.exceptions import NotAcceptable
 
 from open_schools_platform.common.services import model_update, BaseQueryHandler
 from open_schools_platform.common.utils import filter_dict_from_none_values, form_ids_string_from_queryset
@@ -24,7 +23,7 @@ from open_schools_platform.user_management.users.models import User
 
 def create_student_profile(name: str, age: int = None, user: User = None,
                            phone: PhoneNumber = None, photo: uuid.UUID = None) -> StudentProfile:
-    student_profile = StudentProfile.objects.create(
+    student_profile = StudentProfile.objects.create_student_profile(
         name=name,
         age=age,
         phone=phone,
@@ -73,7 +72,7 @@ def update_student_join_circle_body(*, query: Query, data) -> Query:
     non_side_effect_fields = ['name']
     filtered_data = filter_dict_from_none_values(data)
     if query.body is None:
-        raise NotAcceptable
+        raise QueryCorrupted
     query.body, has_updated = model_update(
         instance=query.body,
         fields=non_side_effect_fields,
@@ -82,8 +81,8 @@ def update_student_join_circle_body(*, query: Query, data) -> Query:
     return query
 
 
-def create_studentprofileicrcle_additional(text: str = None, parent_phone: PhoneNumber = None,
-                                           parent_name: str = None, student_phone: PhoneNumber = None) \
+def create_student_profile_circle_additional(text: str = None, parent_phone: PhoneNumber = None,
+                                             parent_name: str = None, student_phone: PhoneNumber = None) \
         -> StudentProfileCircleAdditional:
     additional = StudentProfileCircleAdditional.objects.create(
         text=text,
@@ -156,7 +155,7 @@ def query_creation_logic(fields: Dict, circle: Circle,
     )
 
     if parent_user:
-        additional = create_studentprofileicrcle_additional(
+        additional = create_student_profile_circle_additional(
             parent_phone=parent_user.phone,
             parent_name=parent_user.parent_profile.name,
             text=fields["additional"]["text"],

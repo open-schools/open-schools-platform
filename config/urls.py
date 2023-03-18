@@ -13,10 +13,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf import settings
+from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 
 from config.django.base import ADMIN_PANEL_ENABLED
+from config.settings.file_storages import LOCAL_STORAGE_ENABLED
 
 urlpatterns = [
     path('api/', include(('open_schools_platform.api.urls', 'api'))),
@@ -30,3 +33,6 @@ urlpatterns = SwaggerSetup.do_urls(urlpatterns)
 
 if ADMIN_PANEL_ENABLED:
     urlpatterns += [path('admin/', admin.site.urls)]
+
+if LOCAL_STORAGE_ENABLED:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

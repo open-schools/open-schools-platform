@@ -1,8 +1,8 @@
 from django.contrib.contenttypes.models import ContentType
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.exceptions import ValidationError, ErrorDetail
 from rest_framework.generics import ListAPIView
-from rest_framework.exceptions import NotAcceptable
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -40,7 +40,8 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
     def get(self, request, *args, **kwargs):
         filters = request.GET.dict()
         if "organization" not in filters.keys():
-            raise NotAcceptable("Your request should contain organization field.")
+            raise ValidationError(
+                {'organization': ErrorDetail('Your request should contain organization field.', code='required')})
         get_organization(filters={"id": filters["organization"]}, user=request.user)
         response = get_paginated_response(
             pagination_class=EmployeeApiListPagination,

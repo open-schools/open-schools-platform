@@ -1,6 +1,5 @@
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
 
-from django.core.exceptions import ValidationError
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 import uuid
 
@@ -12,6 +11,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
+from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.organization_management.circles.models import Circle
@@ -23,12 +23,15 @@ class StudentProfileManager(BaseManager):
         if not photo:
             photo = Photo.objects.create_photo()
 
+        if not user:
+            return self.create(name=name, age=age, phone=phone, photo=photo, user=user)
+
         try:
             student_profile = self.get(user=user)
         except StudentProfile.DoesNotExist:
             student_profile = None
         if student_profile and not student_profile.deleted:
-            raise ValidationError("StudentProfile with this user already exists")
+            raise AlreadyExists("StudentProfile with this user already exists")
 
         student_profile = self.update_or_create_with_check(user=user,
                                                            defaults={'name': name, 'age': age, 'phone': phone,
@@ -37,7 +40,6 @@ class StudentProfileManager(BaseManager):
 
 
 class StudentProfile(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='student_profile', null=True, blank=True)
     name = models.CharField(max_length=200)
@@ -48,7 +50,7 @@ class StudentProfile(BaseModel):
         blank=True,
         null=True,
     )
-    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, related_name="photo", blank=True)
+    photo = models.ForeignKey(Photo, on_delete=models.SET_NULL, null=True, blank=True, related_name="student_profile")
     history = HistoricalRecords()
 
     objects = StudentProfileManager()  # type: ignore[assignment]

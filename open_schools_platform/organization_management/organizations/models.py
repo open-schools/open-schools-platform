@@ -4,7 +4,6 @@ from typing import Any
 
 
 from simple_history.models import HistoricalRecords
-import safedelete
 
 from open_schools_platform.common.models import BaseModel, BaseManager
 from django.db import models
@@ -24,7 +23,6 @@ class OrganizationManager(BaseManager):
 
 
 class Organization(BaseModel):
-    _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     inn = models.CharField(max_length=255, blank=True, default="")
@@ -39,6 +37,14 @@ class Organization(BaseModel):
         for circle in self.circles.all():
             students |= circle.students.all()
         return students
+
+    @property
+    def teachers(self):
+        from open_schools_platform.organization_management.teachers.models import Teacher
+        teachers = Teacher.objects.none()
+        for circle in self.circles.all():
+            teachers |= circle.teachers.all()
+        return teachers
 
     def __str__(self):
         return self.name

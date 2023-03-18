@@ -15,7 +15,6 @@ Few important things:
   * `mypy` is ran as a build step in [`.github/workflows/django.yml`](.github/workflows/django.yml)
   * ⚠️  The provided configuration is quite minimal. **You should figure out your team needs & configure accordingly** - <https://mypy.readthedocs.io/en/stable/config_file.html>
 * It comes with GitHub Actions support, [based on that article](https://hacksoft.io/github-actions-in-action-setting-up-django-and-postgres/)
-* It can be easily deployed to Heroku or AWS ECS.
 * It comes with an example list API, that uses [`django-filter`](https://django-filter.readthedocs.io/en/stable/) for filtering & pagination from DRF.
 * It comes with examples for writing tests with fakes & factories, based on the following articles - <https://www.hacksoft.io/blog/improve-your-tests-django-fakes-and-factories>, <https://www.hacksoft.io/blog/improve-your-tests-django-fakes-and-factories-advanced-usage>
 
@@ -55,8 +54,8 @@ The specific details about how the cookie is set, can be found here - <https://g
 
 The JWT related APIs are:
 
-1. `/api/auth/jwt/login/`
-1. `/api/auth/jwt/logout/`
+1. `/api/user-management/auth/jwt/login`
+1. `/api/user-management/auth/jwt/logout`
 
 The current implementation of the login API returns just the token:
 
@@ -137,9 +136,8 @@ We have the following general cases:
 
 ### APIs
 
-1. `POST` to `/api/auth/session/login/` requires JSON body with `email` and `password`.
-1. `GET` to `/api/auth/me/` returns the current user information, if the request is authenticated (has the corresponding `sessionid` cookie)
-1. `GET` or `POST` to `/api/auth/logout/` will remove the `sessionid` cookie, effectively logging you out.
+1. `GET` to `/api/user-management/auth/me` returns the current user information, if the request is authenticated (has the corresponding `sessionid` cookie)
+2. `GET` or `POST` to `/api/user-management/auth/jwt/logout` will remove the `sessionid` cookie, effectively logging you out.
 
 ### `HTTP Only` / `SameSite`
 
@@ -160,38 +158,6 @@ Since cookies can be somewhat elusive, check the following urls:
 1. <https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies> - It's a good idea to read everything, several times.
 
 
-## Example List API
-
-You can find the `UserListApi` in [`styleguide_example/users/apis.py`](https://github.com/HackSoftware/Styleguide-Example/blob/master/styleguide_example/users/apis.py#L12)
-
-List API is located at:
-
-<http://localhost:8000/api/users/>
-
-The API can be filtered:
-
-* <http://localhost:8000/api/users/?is_admin=True>
-* <http://localhost:8000/api/users/?id=1>
-* <http://localhost:8000/api/users/?email=radorado@hacksoft.io>
-
-Example data structure:
-
-```
-{
-    "limit": 1,
-    "offset": 0,
-    "count": 4,
-    "next": "http://localhost:8000/api/users/?limit=1&offset=1",
-    "previous": null,
-    "results": [
-        {
-            "id": 1,
-            "email": "radorado@hacksoft.io",
-            "is_admin": false
-        }
-    ]
-}
-```
 
 ## Helpful commands for local development without docker-compose
 
@@ -243,23 +209,6 @@ docker-compose run django python manage.py shell
 
 This project is ready to be deployed either on **Heroku** or **AWS ECS**.
 
-### Heroku
-
-Deploying a Python / Django application on Heroku is quite straighforward & this project is ready to be deployed.
-
-To get an overview of how Heroku deployment works, we recommend reading this first - <https://devcenter.heroku.com/articles/deploying-python>
-
-There's a current deployment that can be found here - <https://hacksoft-styleguide-example.herokuapp.com/>
-
-**Files related to Heroku deployment:**
-
-1. `Procfile`
-    - Comes with default `web`, `worker` and `beat` processes.
-    - Additionally, there's a `release` phase to run migrations safely, before releasing the new build.
-1. `runtime.txt`
-    - Simply specifies the Python version to be used.
-1. `requirements.txt`
-    - Heroku requires a root-level `requirements.txt`, so we've added that.
 
 **Additionally, you need to specify at least the following settings:**
 
@@ -277,6 +226,3 @@ On top of that, we've added `gunicorn.conf.py` with some example settings.
 1. Worker settings - <https://docs.gunicorn.org/en/latest/settings.html#worker-processes>
 1. A brief description of the architecture of Gunicorn - <https://docs.gunicorn.org/en/latest/design.html>
 
-### AWS ECS
-
-*Coming soon*

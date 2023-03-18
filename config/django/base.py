@@ -33,7 +33,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 LOCAL_APPS = [
-    'open_schools_platform.core.apps.CoreConfig',
     'open_schools_platform.common.apps.CommonConfig',
     'open_schools_platform.tasks.apps.TasksConfig',
     'open_schools_platform.api.apps.ApiConfig',
@@ -135,7 +134,7 @@ DATABASES = {
 DATABASES['default']['ATOMIC_REQUESTS'] = True
 DATABASES['default']['ENGINE'] = 'django.contrib.gis.db.backends.postgis'
 
-if os.environ.get('GITHUB_WORKFLOW'):
+if env('GITHUB_WORKFLOW', default=None):
     DATABASES = {
         'default': {
             'ENGINE': 'django.contrib.gis.db.backends.postgis',
@@ -211,7 +210,7 @@ from config.settings.sessions import *  # noqa
 from config.settings.celery import *  # noqa
 from config.settings.sentry import *  # noqa
 from config.settings.geo_django import *  # noqa
-from config.settings.object_storage import *  # noqa
+from config.settings.file_storages import *  # noqa
 from config.settings.email import *  # noqa
 
 ADMIN_PANEL_ENABLED = env.bool('ADMIN_PANEL_ENABLED', default=True)

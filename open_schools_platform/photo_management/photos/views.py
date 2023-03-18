@@ -17,7 +17,7 @@ class PhotoApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update photo",
         request_body=PhotoUpdateSerializer,
-        responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()}), },
+        responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()})},
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
     def patch(self, request, pk):
@@ -30,4 +30,4 @@ class PhotoApi(ApiAuthMixin, APIView):
             return Response({"result": "Photo was not provided"}, status=204)
         update_photo(photo=photo, data=photo_update_serializer.validated_data)
 
-        return Response({"photo": PhotoSerializer(photo).data}, status=200)
+        return Response({"photo": PhotoSerializer(photo, context={'request': request}).data}, status=200)

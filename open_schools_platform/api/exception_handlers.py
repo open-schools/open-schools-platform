@@ -8,7 +8,7 @@ from rest_framework import exceptions, status
 from rest_framework.serializers import as_serializer_error
 from rest_framework.response import Response
 
-from open_schools_platform.core.exceptions import ApplicationError
+from open_schools_platform.errors.exceptions import ApplicationError
 from open_schools_platform.errors.codes import error_codes
 
 
@@ -55,10 +55,10 @@ def create_error(exception):
 
     message = None
     if isinstance(exception.detail, dict):
-        message = ';\n'.join(
-            map(lambda item: f"'{item[0]}': {','.join(item[1])}", process_detail(exception.detail).items()))
+        message = '. '.join(
+            map(lambda item: f"'{item[0]}': {', '.join(item[1])}", process_detail(exception.detail).items()))
     else:
-        message = '\n'.join(process_detail(exception.detail))
+        message = '. '.join(process_detail(exception.detail))
     from open_schools_platform.common.serializers import ErrorSerializer
     return ErrorSerializer(
         {'message': message, 'violation_fields': violations_dict, 'code': code, 'violations': violations})

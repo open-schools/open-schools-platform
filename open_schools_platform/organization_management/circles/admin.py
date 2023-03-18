@@ -29,6 +29,6 @@ class AddressFilter(InputFilter):
 
 @admin_wrapper(Circle)
 class CircleAdmin(BaseAdmin, LeafletGeoAdmin):
-    list_display = ("organization", "address", "capacity", "location", "id")
+    list_display = ("organization", "address", "start_time", "duration", "capacity", "location", "id")
     search_fields = ("name",)
     list_filter = (OrganizationFilter, AddressFilter)

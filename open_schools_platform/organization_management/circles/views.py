@@ -8,12 +8,12 @@ from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
 from .models import Circle
 
-from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
+from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    CircleSerializer, CircleStudentInviteSerializer
+    CircleSerializer, CircleStudentInviteSerializer, CircleListSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
-    is_organization_related_to_student_profile
+    is_organization_related_to_student_profile, generate_ical
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -47,6 +47,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         create_circle_serializer.is_valid(raise_exception=True)
         organization = get_organization(
             filters={"id": create_circle_serializer.validated_data['organization']},
+            user=request.user,
             empty_exception=True,
         )
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
@@ -58,7 +59,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
-    serializer_class = CircleSerializer
+    serializer_class = CircleListSerializer
 
     @swagger_auto_schema(
         operation_description="Get all circles",
@@ -75,7 +76,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
 
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
-            serializer_class=CircleSerializer,
+            serializer_class=CircleListSerializer,
             queryset=get_circles(filters=request.GET.dict()),
             request=request,
             view=self
@@ -113,7 +114,9 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
             filters={"recipient_id": str(pk)},
             empty_exception=True,
         )
-        return Response({"results": StudentProfileQuerySerializer(queries, many=True).data}, status=200)
+        return Response(
+            {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
+            status=200)
 
 
 class CirclesStudentsListApi(ApiAuthMixin, APIView):
@@ -125,7 +128,7 @@ class CirclesStudentsListApi(ApiAuthMixin, APIView):
     def get(self, request, pk):
         circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True)
         qs = circle.students.all()
-        return Response({"results": StudentSerializer(qs, many=True).data}, status=200)
+        return Response({"results": StudentSerializer(qs, many=True, context={'request': request}).data}, status=200)
 
 
 class CircleDeleteApi(ApiAuthMixin, APIView):
@@ -209,4 +212,43 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         get_circle(filters={'id': str(pk)}, user=request.user, empty_exception=True)
         students = get_students(filters={'circle': str(pk)})
         file = export_students(students, export_format='xlsx')
+        return Response(file, status=200)
+
+
+class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
+    filename = 'schedule.ics'
+
+    @swagger_auto_schema(
+        operation_description="Exports circle schedule",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
+    )
+    def get(self, request, pk):
+        circle = get_circle(filters={'id': str(pk)}, empty_exception=True)
+        self.filename = circle.name
+        file = generate_ical(circle)
+        return Response(file, status=200)
+
+
+class CirclesICalExportApi(ApiAuthMixin, ICalMixin, ListAPIView):
+    filename = 'schedule.ics'
+    filterset_class = CircleFilter
+
+    @swagger_auto_schema(
+        operation_description="Exports circles schedule",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        filterset_class=CircleFilter,
+        responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
+    )
+    def get(self, request):
+        data = request.GET.dict()
+        if 'student_profile' in data.keys():
+            if 'organization' not in data.keys():
+                raise ValidationError("Organization is not defined")
+            if not is_organization_related_to_student_profile(
+                    data["organization"], data["student_profile"], request.user):
+                raise PermissionDenied("This organization is not related to this student_profile")
+
+        circles = get_circles(filters=request.GET.dict())
+        file = generate_ical(circles)
         return Response(file, status=200)
