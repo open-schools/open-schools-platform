@@ -43,8 +43,7 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
             empty_message="There are no families for request user's parent_profile"
         )
         student_profiles = get_student_profiles_by_families(families)
-        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)},
-                              empty_exception=True)
+        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)})
         return Response(
             {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
             status=200)
