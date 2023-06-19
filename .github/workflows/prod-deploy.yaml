@@ -1,0 +1,37 @@
+name: PROD CI
+on:
+  push:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Prod deploy open-schools-platform-nginx
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.PROD_HOST}}
+          user: "root"
+          private_key: ${{secrets.PROD_PRIVATE_KEY}}
+          command: |
+            echo '--- START WORK ON REMOTE SERVER ---';
+            set -e;
+            
+            echo '--- CD ---';
+            cd /opt/open-schools-platform;
+            
+            echo '--- CHECKOUT ON BRANCH ---';
+            git checkout main;
+            
+            echo '--- Upgrade repo ---';
+            git pull;
+            
+            echo '--- Force updating services ---';
+            sh force-update-services.sh "prod";
+
+            echo '--- Success! ---';

@@ -1,0 +1,37 @@
+name: DEV CI
+on:
+  push:
+    branches: [ "dev" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Dev deploy open-schools-platform-nginx
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.DEV_HOST}}
+          user: "root"
+          private_key: ${{secrets.DEV_PRIVATE_KEY}}
+          command: |
+            echo '--- START WORK ON REMOTE SERVER ---';
+            set -e;
+            
+            echo '--- CD ---';
+            cd /opt/open-schools-platform;
+                       
+            echo '--- CHECKOUT ON BRANCH ---';
+            git checkout dev;
+                                  
+            echo '--- Upgrade repo ---';
+            git pull;                    
+                        
+            echo '--- Force updating services ---';
+            sh force-update-services.sh "dev";
+            
+            echo '--- Success! ---';
