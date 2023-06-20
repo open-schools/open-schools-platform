@@ -8,7 +8,7 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
-      - /private/var/lib/postgresql:/var/lib/postgresql
+      - ./deploy/postgres:/var/lib/postgres
     ports:
       - "5432:5432"
     deploy:
