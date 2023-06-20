@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgis/postgis:14-3.2
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - /private/var/lib/postgresql:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==db"
