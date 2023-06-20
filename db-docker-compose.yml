@@ -9,6 +9,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - ./deploy/postgres:/var/lib/postgres
+    env_file:
+      - .env.db
     ports:
       - "5432:5432"
     deploy:
