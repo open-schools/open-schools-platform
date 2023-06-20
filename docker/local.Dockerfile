@@ -19,3 +19,7 @@ RUN apt-get update -y \
 # Get the django project into the docker container
 WORKDIR /app
 ADD ./ /app/
+
+# Use gunicorn
+RUN chmod a+x docker/web_entrypoint.sh
+ENTRYPOINT ["bin/sh", "docker/web_entrypoint.sh", "dev.py"]

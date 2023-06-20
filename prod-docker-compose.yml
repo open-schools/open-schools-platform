@@ -1,20 +1,14 @@
 version: "3.9"
 
 services:
-  db:
-    image: postgis/postgis:14-3.2
-    environment:
-      - POSTGRES_DB=local_db
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-    ports:
-      - "5432:5432"
-
   rabbitmq:
     image: "rabbitmq:alpine"
 
     ports:
-      - "5672:5672"
+      - target: 5672
+        published: 5672
+        protocol: tcp
+        mode: host
 
     healthcheck:
       test: rabbitmq-diagnostics -q ping
@@ -22,27 +16,39 @@ services:
       timeout: 30s
       retries: 3
 
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==prod"
+
   django:
     build:
       context: .
-      dockerfile: docker/local.Dockerfile
-    command: python manage.py runserver 0.0.0.0:8000
+      dockerfile: docker/production.Dockerfile
+    command: python manage.py runserver 0.0.0.0:8010
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
       - .:/app
     ports:
-      - "8000:8000"
+      - target: 8010
+        published: 8010
+        protocol: tcp
+        mode: host
     depends_on:
       - db
       - rabbitmq
     restart: on-failure
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==prod"
 
   celery:
     build:
       context: .
-      dockerfile: docker/local.Dockerfile
+      dockerfile: docker/production.Dockerfile
     #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
     command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
     environment:
@@ -54,6 +60,10 @@ services:
       - db
       - rabbitmq
     restart: on-failure
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==prod"
 
   flower:
     image: mher/flower
@@ -61,12 +71,19 @@ services:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
       - FLOWER_PORT=5555
     ports:
-      - "5555:5555"
+      - target: 5555
+        published: 5555
+        protocol: tcp
+        mode: host
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==prod"
 
   beats:
     build:
       context: .
-      dockerfile: docker/local.Dockerfile
+      dockerfile: docker/production.Dockerfile
     command: celery -A open_schools_platform.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db
@@ -77,3 +94,7 @@ services:
       - db
       - rabbitmq
     restart: on-failure
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==prod"
