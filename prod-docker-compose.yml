@@ -1,6 +1,19 @@
 version: "3.9"
 
 services:
+  db:
+    image: postgis/postgis:14-3.2
+    volumes:
+      - ./deploy/postgres:/var/lib/postgres
+    env_file:
+      - .env.db
+    ports:
+      - "5432:5432"
+    deploy:
+      placement:
+        constraints:
+          - "node.labels.TAG==db"
+
   rabbitmq:
     image: "rabbitmq:alpine"
 
@@ -22,9 +35,7 @@ services:
           - "node.labels.TAG==prod"
 
   django:
-    build:
-      context: .
-      dockerfile: docker/production.Dockerfile
+    image: django-prod
     command: python manage.py runserver 0.0.0.0:8010
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db
@@ -46,9 +57,7 @@ services:
           - "node.labels.TAG==prod"
 
   celery:
-    build:
-      context: .
-      dockerfile: docker/production.Dockerfile
+    image: django-prod
     #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
     command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
     environment:
@@ -81,9 +90,7 @@ services:
           - "node.labels.TAG==prod"
 
   beats:
-    build:
-      context: .
-      dockerfile: docker/production.Dockerfile
+    image: django-prod
     command: celery -A open_schools_platform.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db

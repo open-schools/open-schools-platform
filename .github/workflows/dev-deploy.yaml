@@ -30,6 +30,9 @@ jobs:
                                   
             echo '--- Upgrade repo ---';
             git pull;                    
+            
+            echo '--- Create an image ---';          
+            docker build -f docker/local.Dockerfile -t django-dev .
                         
             echo '--- Force updating services ---';
             sh force-update-services.sh "dev";
