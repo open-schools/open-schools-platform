@@ -28,6 +28,7 @@ services:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
       - .:/app
+      - /var/www:/var/www
     ports:
       - target: 8010
         published: 8010
@@ -49,6 +50,7 @@ services:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
       - .:/app
+      - /var/www:/var/www
     depends_on:
       - rabbitmq
     restart: on-failure
@@ -79,6 +81,7 @@ services:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//
     volumes:
       - .:/app
+      - /var/www:/var/www
     depends_on:
       - rabbitmq
     restart: on-failure
