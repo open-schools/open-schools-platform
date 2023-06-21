@@ -32,7 +32,7 @@ jobs:
             git pull;
             
             echo '--- Create an image ---';          
-            docker build -f docker/prod.Dockerfile -t django-prod .
+            docker build -f docker/prod.Dockerfile -t django-prod .;
             
             echo '--- Force updating services ---';
             sh force-update-services.sh "prod";
