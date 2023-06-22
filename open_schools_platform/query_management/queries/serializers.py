@@ -9,8 +9,8 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.parent_management.families.serializers import FamilySerializer
 from open_schools_platform.parent_management.parents.serializers import QueryParentProfileRecipientSerializer
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.students.serializers import QueryStudentBodySerializer, \
-    QueryStudentProfileAdditionalSerializer, QueryStudentProfileSenderSerializer
+from open_schools_platform.student_management.students.serializers import StudentProfileAdditionalSerializer, \
+    StudentProfileSerializer, StudentSerializer
 
 
 class QueryStatusSerializer(serializers.Serializer):
@@ -33,10 +33,10 @@ class EmployeeProfileQuerySerializer(QuerySerializer):
 
 
 class StudentProfileQuerySerializer(QuerySerializer):
-    sender = QueryStudentProfileSenderSerializer()
+    sender = StudentProfileSerializer.with_fields(['id', 'photo'])()
     recipient = QueryCircleRecipientSerializer()
-    body = QueryStudentBodySerializer()
-    additional = QueryStudentProfileAdditionalSerializer()
+    body = StudentSerializer.with_fields(['id', 'name'])()
+    additional = StudentProfileAdditionalSerializer()
 
 
 class InviteParentQuerySerializer(QuerySerializer):
