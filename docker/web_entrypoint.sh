@@ -13,6 +13,16 @@ do
   sleep 2
 done
 
+# --> Duplicate logs to stdout for portainer console
+if [[ "$1" == "dev" ]]; then
+  tail -f /app/logs/gunicorn/dev.log > /dev/stdout &
+fi
+
+if [[ "$1" == "prod" ]]; then
+  tail -f /app/logs/gunicorn/access.log > /dev/stdout &
+  tail -f /app/logs/gunicorn/error.log > /dev/stdout &
+fi
+
 # --> Starting production gunicorn web server
 echo "--> Starting production gunicorn web server"
 gunicorn -c deploy/gunicorn/config/$1
