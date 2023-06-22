@@ -1,6 +1,6 @@
 import re
 from collections import OrderedDict
-from typing import Type
+from typing import Type, TypeVar, Any
 
 from rest_framework import serializers
 from rest_framework.fields import CharField, DictField, ChoiceField, ListField
@@ -20,7 +20,7 @@ def get_serializer_with_fields(serializer, allowed_fields: list, name=None):
     Returns a new serializer with the specified fields.
     """
 
-    class NewSerializer(serializer):
+    class NewSerializer(serializer):  # type: ignore[valid-type, misc]
         def __init__(self, *args, **kwargs):
             NewSerializer.__name__ = name or partial_serializer_name(serializer, allowed_fields)
 
