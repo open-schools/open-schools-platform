@@ -20,7 +20,7 @@ fi
 
 if [[ "$1" == "prod" ]]; then
   tail -f /app/logs/gunicorn/access.log > /dev/stdout &
-  tail -f /app/logs/gunicorn/error.log > /dev/stdout &
+  tail -f /app/logs/gunicorn/error.log > /dev/stderr &
 fi
 
 # --> Starting production gunicorn web server
