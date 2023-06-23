@@ -22,4 +22,4 @@ ADD ./ /app/
 
 # Use gunicorn
 RUN chmod a+x docker/web_entrypoint.sh
-ENTRYPOINT ["/bin/sh", "docker/web_entrypoint.sh", "dev.py"]
+ENTRYPOINT ["/bin/bash", "docker/web_entrypoint.sh", "dev.py"]
