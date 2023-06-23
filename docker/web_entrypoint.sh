@@ -14,11 +14,11 @@ do
 done
 
 # --> Duplicate logs to stdout for portainer console
-if [[ "$1" == "dev" ]]; then
+if [ "$1" == "dev" ]; then
   tail -f /app/logs/gunicorn/dev.log > /dev/stdout &
 fi
 
-if [[ "$1" == "prod" ]]; then
+if [ "$1" == "prod" ]; then
   tail -f /app/logs/gunicorn/access.log > /dev/stdout &
   tail -f /app/logs/gunicorn/error.log > /dev/stderr &
 fi

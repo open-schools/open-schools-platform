@@ -1,4 +1,4 @@
--r base.txt
+-r dev.txt
 
 pytest==7.2.0
 pytest-django==4.5.2
@@ -11,14 +11,10 @@ flake8==4.0.1
 ipdb==0.13.9
 ipython==8.1.1
 
-django-debug-toolbar==3.8.1
-
 mypy==0.981
 django-stubs==1.9.0
 djangorestframework-stubs==1.4.0
 types-requests==2.27.15
 drf-yasg-stubs==0.1.4
 
-drf-yasg==1.20.0
-requests==2.27.1
 pre-commit==2.18.1
