@@ -12,4 +12,5 @@ class FamilyStudentProfilesListApiTests(TestCase):
 
     def test_queries_do_not_exist(self):
         response = self.client.get(self.invite_parent_queries_list_url)
-        self.assertEqual(404, response.status_code)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(0, len(response.data['results']))

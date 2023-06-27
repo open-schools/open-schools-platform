@@ -59,8 +59,7 @@ class FamiliesListApi(ApiAuthMixin, APIView):
     )
     def get(self, request):
         families = get_families(
-            filters={"parent_profiles": str(request.user.parent_profile.id)},
-            empty_exception=True,
+            filters={"parent_profiles": str(request.user.parent_profile.id)}
         )
         return Response({"results": FamilySerializer(families, many=True).data}, status=200)
 
