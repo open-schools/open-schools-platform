@@ -43,7 +43,7 @@ services:
           - "node.labels.TAG==prod"
 
   celery:
-    image: django-prod
+    image: django-local
     #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
     command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
     environment:
@@ -69,13 +69,15 @@ services:
         published: 5555
         protocol: tcp
         mode: host
+    volumes:
+      - /flower-data:/data
     deploy:
       placement:
         constraints:
           - "node.labels.TAG==prod"
 
   beats:
-    image: django-prod
+    image: django-local
     command: celery -A open_schools_platform.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - CELERY_BROKER_URL=amqp://guest:guest@rabbitmq:5672//

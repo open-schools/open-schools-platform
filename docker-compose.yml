@@ -7,8 +7,6 @@ services:
       - POSTGRES_DB=local_db
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-    volumes:
-      - ./deploy/postgres:/var/lib/postgres
     ports:
       - "5432:5432"
 

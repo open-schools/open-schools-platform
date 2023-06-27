@@ -31,8 +31,11 @@ jobs:
             echo '--- Upgrade repo ---';
             git pull;                    
             
-            echo '--- Create an image ---';          
+            echo '--- Create dev image ---';
             docker build -f docker/dev.Dockerfile -t django-dev .;
+
+            echo '--- Create local image ---';
+            docker build -f docker/local.Dockerfile -t django-local .;
                         
             echo '--- Force updating services ---';
             sh force-update-services.sh "dev";
