@@ -1,5 +1,4 @@
 -r base.txt
 
-drf-yasg==1.20.0
 requests==2.27.1
 django-debug-toolbar==3.8.1
