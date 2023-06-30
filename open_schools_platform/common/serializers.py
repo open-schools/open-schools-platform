@@ -1,6 +1,6 @@
 import re
 from collections import OrderedDict
-from typing import Type, TypeVar, Any
+from typing import Type
 
 from rest_framework import serializers
 from rest_framework.fields import CharField, DictField, ChoiceField, ListField

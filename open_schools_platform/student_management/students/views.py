@@ -23,18 +23,19 @@ from open_schools_platform.student_management.students.services import \
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
+    create_student_profile_serializer = StudentProfileFullSerializer.with_fields(["age", "name", "family", "phone"])
+
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
-        request_body=StudentProfileFullSerializer.with_fields(["age", "name", "family", "phone"]),
+        request_body=create_student_profile_serializer,
         responses={201: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
                    404: "No such family",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
     def post(self, request):
-        student_profile_serializer = StudentProfileFullSerializer.with_fields(["age", "name", "family", "phone"])(
-            data=request.data)
+        student_profile_serializer = self.create_student_profile_serializer(data=request.data)
         student_profile_serializer.is_valid(raise_exception=True)
         family = get_family(
             filters={"id": str(student_profile_serializer.validated_data['family'])},
