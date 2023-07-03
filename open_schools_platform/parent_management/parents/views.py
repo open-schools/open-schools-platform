@@ -23,9 +23,7 @@ class InviteParentQueriesListApi(ApiAuthMixin, APIView):
     )
     def get(self, request):
         queries = get_queries(
-            filters={'recipient_id': str(request.user.parent_profile.id)},
-            empty_exception=True,
-            empty_message="There are no queries with such recipient"
+            filters={'recipient_id': str(request.user.parent_profile.id)}
         )
         return Response({"results": InviteParentQuerySerializer(queries, many=True).data}, status=200)
 
@@ -39,8 +37,6 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
     def get(self, request):
         families = get_families(
             filters={"parent_profiles": str(request.user.parent_profile.id)},
-            empty_exception=True,
-            empty_message="There are no families for request user's parent_profile"
         )
         student_profiles = get_student_profiles_by_families(families)
         queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)})
