@@ -26,7 +26,8 @@ class FamilyExceptionsTests(TestCase):
         self.assertEqual(404, studentprofiles_list_response.status_code)  # wrong family pk
 
         families_list_response = self.client.get(self.families_list_url)
-        self.assertEqual(404, families_list_response.status_code)  # no families for logged user
+        self.assertEqual(200, families_list_response.status_code)  # no families for logged user
+        self.assertEqual(0, len(families_list_response.data['results']))
 
         invite_parent_data = {
             "family": not_existing_pk,
