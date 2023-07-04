@@ -1,4 +1,4 @@
-name: Django application
+name: CI build
 on: [push]
 jobs:
   docker_build:
