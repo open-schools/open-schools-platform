@@ -1,4 +1,4 @@
-name: PROD CI
+name: Prod Deploy
 on:
   push:
     branches: [ "main" ]
