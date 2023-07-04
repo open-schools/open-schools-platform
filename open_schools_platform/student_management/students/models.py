@@ -80,6 +80,7 @@ class Student(BaseModel):
                                         blank=True)
 
     objects = StudentManager()  # type: ignore[assignment]
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.name
