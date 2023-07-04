@@ -5,6 +5,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Set up Docker Buildx
+      id: buildx
+      uses: docker/setup-buildx-action@master
+
+    # Registry login step intentionally missing
+
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-single-buildx
     - name: Create env file
       run: |
         touch .env
@@ -23,8 +36,18 @@ jobs:
         echo FIREBASE_CLIENT_EMAIL=${{secrets.FIREBASE_CLIENT_EMAIL}} >> .env
         echo FIREBASE_CLIENT_ID=${{secrets.FIREBASE_CLIENT_ID}} >> .env
         echo FIREBASE_CLIENT_CERT_URL=${{secrets.FIREBASE_CLIENT_CERT_URL}} >> .env
-    - name: Build docker
-      run: docker-compose build
+    - name: Build local image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        builder: ${{ steps.buildx.outputs.name }}
+        file: docker/local.Dockerfile
+        push: false # This would be set to true in a real world deployment scenario.
+        tags: django-local
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,dest=/tmp/.buildx-cache-new
+#    - name: Build docker
+#      run: docker-compose build
     - name: Type check
       run: docker-compose run django mypy open_schools_platform/
     - name: Run migrations
@@ -33,6 +56,10 @@ jobs:
       run: docker-compose run django python manage.py collectstatic
     - name: Run tests
       run: docker-compose run django py.test
+    - name: Move cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   build:
     runs-on: ubuntu-latest

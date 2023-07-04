@@ -11,7 +11,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    #if: ${{ github.ref == 'refs/heads/dev' && github.event_name == 'push' }} # Only run this workflow if it is main branch on push event
+    #if: ${{ github.ref == 'refs/heads/dev' && github.event_name == 'push' }} # Only run this workflow if it is dev branch on push event
     steps:
       - uses: actions/checkout@v3
       - name: Dev deploy open-schools-platform
