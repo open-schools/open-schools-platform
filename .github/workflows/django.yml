@@ -48,6 +48,8 @@ jobs:
         cache-to: type=local,dest=/tmp/.buildx-cache-new
 #    - name: Build docker
 #      run: docker-compose build
+    - name: Look up images
+      run: docker image ls
     - name: Type check
       run: docker-compose run django mypy open_schools_platform/
     - name: Run migrations
