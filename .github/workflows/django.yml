@@ -43,7 +43,7 @@ jobs:
         builder: ${{ steps.buildx.outputs.name }}
         file: docker/local.Dockerfile
         push: false # This would be set to true in a real world deployment scenario.
-        tags: django-local
+        tags: django
         cache-from: type=local,src=/tmp/.buildx-cache
         cache-to: type=local,dest=/tmp/.buildx-cache-new
 #    - name: Build docker
