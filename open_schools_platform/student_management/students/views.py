@@ -14,26 +14,28 @@ from open_schools_platform.parent_management.families.services import add_studen
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import StudentProfileQuerySerializer
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students, get_student
-from open_schools_platform.student_management.students.serializers import StudentProfileCreateSerializer, \
-    StudentProfileUpdateSerializer, StudentProfileSerializer, AutoStudentJoinCircleQuerySerializer, \
-    StudentJoinCircleQueryUpdateSerializer, StudentJoinCircleQuerySerializer
+from open_schools_platform.student_management.students.serializers import StudentProfileSerializer, \
+    StudentProfileFullSerializer, AutoStudentJoinCircleQuerySerializer, StudentJoinCircleQueryUpdateSerializer, \
+    StudentJoinCircleQuerySerializer, UpdateStudentProfileSerializer
 from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, update_student_join_circle_body, \
     autogenerate_family_logic, query_creation_logic
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
+    create_student_profile_serializer = StudentProfileFullSerializer.with_fields(["age", "name", "family", "phone"])
+
     @swagger_auto_schema(
         operation_description="Creates Student profile via provided age, name and family id \n"
                               "Returns Student profile data",
-        request_body=StudentProfileCreateSerializer,
+        request_body=create_student_profile_serializer,
         responses={201: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
                    404: "No such family",
                    403: "Current user do not have permission to perform this action"},
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS]
     )
     def post(self, request):
-        student_profile_serializer = StudentProfileCreateSerializer(data=request.data)
+        student_profile_serializer = self.create_student_profile_serializer(data=request.data)
         student_profile_serializer.is_valid(raise_exception=True)
         family = get_family(
             filters={"id": str(student_profile_serializer.validated_data['family'])},
@@ -52,13 +54,13 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        request_body=StudentProfileUpdateSerializer(),
+        request_body=UpdateStudentProfileSerializer,
         responses={200: convert_dict_to_serializer({"student_profile": StudentProfileSerializer()}),
                    404: "No such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
     def patch(self, request, pk):
-        student_profile_update_serializer = StudentProfileUpdateSerializer(data=request.data)
+        student_profile_update_serializer = UpdateStudentProfileSerializer(data=request.data)
         student_profile_update_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(
             filters={'id': str(pk)},

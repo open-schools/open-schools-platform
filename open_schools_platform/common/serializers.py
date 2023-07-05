@@ -1,5 +1,8 @@
+import re
 from collections import OrderedDict
+from typing import Type
 
+from rest_framework import serializers
 from rest_framework.fields import CharField, DictField, ChoiceField, ListField
 from rest_framework.serializers import Serializer
 
@@ -7,27 +10,44 @@ from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.errors.codes import error_codes
 
 
-def get_serializer_with_fields(serializer, fields):
+def partial_serializer_name(serializer, fields):
+    words = re.findall('[A-Z][^A-Z]*', serializer.__name__)
+    return f"Partial{''.join(words[:-1])}_{'_'.join(sorted(fields))}"
+
+
+def get_serializer_with_fields(serializer, allowed_fields: list, name=None):
     """
     Returns a new serializer with the specified fields.
     """
 
-    class NewSerializer(serializer):
+    class NewSerializer(serializer):  # type: ignore[valid-type, misc]
         def __init__(self, *args, **kwargs):
-            # Don't pass the 'fields' arg up to the superclass
-            fields = kwargs.pop('fields', None)
-            NewSerializer.__name__ = f"Partial{serializer.__name__}"
-            # Instantiate the superclass normally
+            NewSerializer.__name__ = name or partial_serializer_name(serializer, allowed_fields)
+
             super(NewSerializer, self).__init__(*args, **kwargs)
 
-            if fields is not None:
-                # Drop any fields that are not specified in the `fields` argument.
-                allowed = set(fields)
+            if allowed_fields is not None:
+                allowed = set(allowed_fields)
                 existing = set(self.fields)
                 for field_name in existing - allowed:
                     self.fields.pop(field_name)
 
-    return NewSerializer(fields=fields)
+    return NewSerializer
+
+
+partial_serializers_by_name: dict[str, Type] = {}
+
+
+class BaseModelSerializer(serializers.ModelSerializer):
+    @classmethod
+    def with_fields(cls, fields):
+        name = partial_serializer_name(cls, fields)
+        if name not in partial_serializers_by_name:
+            partial_serializers_by_name[name] = get_serializer_with_fields(
+                cls,
+                fields,
+                name)
+        return partial_serializers_by_name[name]
 
 
 class ErrorSerializer(Serializer):
