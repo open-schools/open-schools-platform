@@ -32,6 +32,13 @@ on:
         required: true
       FIREBASE_CLIENT_CERT_URL:
         required: true
+  push:
+    branches:
+      - '*'
+      - '*/*'
+      - '**'
+      - '!main'
+      - '!dev'
 
 jobs:
   docker_build:
