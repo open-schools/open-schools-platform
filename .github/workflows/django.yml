@@ -87,7 +87,7 @@ jobs:
           load: true
           tags: django-local
           cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
       - name: Look up images
         run: docker image ls
       - name: Type check
