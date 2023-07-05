@@ -28,7 +28,7 @@ jobs:
       FIREBASE_CLIENT_CERT_URL: ${{ secrets.FIREBASE_CLIENT_CERT_URL }}
   deploy:
     runs-on: ubuntu-latest
-
+    needs: build
     steps:
       - uses: actions/checkout@v3
       - name: Prod deploy open-schools-platform
