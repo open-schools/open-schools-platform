@@ -1,12 +1,5 @@
 name: CI build
 on:
-  push:
-    branches:
-      - '*'
-      - '*/*'
-      - '**'
-      - '!main'
-      - '!dev'
   workflow_call:
     secrets:
       GOOGLE_API_KEY:
