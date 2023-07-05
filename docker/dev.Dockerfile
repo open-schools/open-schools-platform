@@ -1,10 +1,13 @@
-# This docker file is used for production
+# This docker file is used for local development via docker-compose
 # Creating image based on official python3 image
-FROM python:3.10
+FROM python:3.9
+
+# Fix python printing
+ENV PYTHONUNBUFFERED 1
 
 # Installing all python dependencies
 ADD requirements/ requirements/
-RUN pip install -r requirements/base.txt
+RUN pip install -r requirements/dev.txt
 
 # GeoDjango dependencies
 RUN apt-get update -y \
@@ -16,3 +19,7 @@ RUN apt-get update -y \
 # Get the django project into the docker container
 WORKDIR /app
 ADD ./ /app/
+
+# Use gunicorn
+RUN chmod a+x docker/web_entrypoint.sh
+ENTRYPOINT ["/bin/bash", "docker/web_entrypoint.sh", "dev.py"]

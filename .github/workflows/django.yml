@@ -1,38 +1,107 @@
-name: Django application
-on: [push]
+name: CI build
+on:
+  workflow_call:
+    secrets:
+      GOOGLE_API_KEY:
+        required: true
+      SMS_API_KEY:
+        required: true
+      EMAIL_ID:
+        required: true
+      EMAIL_PRIVATE_API_KEY:
+        required: true
+      GOOGLE_MAPS_API_KEY:
+        required: true
+      AWS_ACCESS_KEY:
+        required: true
+      AWS_SECRET_ACCESS_KEY:
+        required: true
+      YANDEX_CLIENT_DOCS_BUCKET_NAME:
+        required: true
+      FCM_SERVER_KEY:
+        required: true
+      FIREBASE_PROJECT_ID:
+        required: true
+      FIREBASE_PRIVATE_KEY_ID:
+        required: true
+      FIREBASE_PRIVATE_KEY:
+        required: true
+      FIREBASE_CLIENT_EMAIL:
+        required: true
+      FIREBASE_CLIENT_ID:
+        required: true
+      FIREBASE_CLIENT_CERT_URL:
+        required: true
+  push:
+    branches:
+      - '*'
+      - '*/*'
+      - '**'
+      - '!main'
+      - '!dev'
+
 jobs:
   docker_build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Create env file
-      run: |
-        touch .env
-        echo GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} >> .env
-        echo SMS_API_KEY=${{secrets.SMS_API_KEY}} >> .env
-        echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
-        echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
-        echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
-        echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
-        echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
-        echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
-        echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
-        echo FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}} >> .env
-        echo FIREBASE_PRIVATE_KEY_ID=${{secrets.FIREBASE_PRIVATE_KEY_ID}} >> .env
-        echo FIREBASE_PRIVATE_KEY=${{secrets.FIREBASE_PRIVATE_KEY}} >> .env
-        echo FIREBASE_CLIENT_EMAIL=${{secrets.FIREBASE_CLIENT_EMAIL}} >> .env
-        echo FIREBASE_CLIENT_ID=${{secrets.FIREBASE_CLIENT_ID}} >> .env
-        echo FIREBASE_CLIENT_CERT_URL=${{secrets.FIREBASE_CLIENT_CERT_URL}} >> .env
-    - name: Build docker
-      run: docker-compose build
-    - name: Type check
-      run: docker-compose run django mypy open_schools_platform/
-    - name: Run migrations
-      run: docker-compose run django python manage.py migrate
-    - name: Collectstatic
-      run: docker-compose run django python manage.py collectstatic
-    - name: Run tests
-      run: docker-compose run django py.test
+      - uses: actions/checkout@v2
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@master
+
+      # Registry login step intentionally missing
+
+      - name: Cache Docker layers
+        uses: actions/cache@v2
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-single-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-single-buildx
+      - name: Create env file
+        run: |
+          touch .env
+          echo GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} >> .env
+          echo SMS_API_KEY=${{secrets.SMS_API_KEY}} >> .env
+          echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
+          echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
+          echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
+          echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
+          echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
+          echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
+          echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
+          echo FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}} >> .env
+          echo FIREBASE_PRIVATE_KEY_ID=${{secrets.FIREBASE_PRIVATE_KEY_ID}} >> .env
+          echo FIREBASE_PRIVATE_KEY=${{secrets.FIREBASE_PRIVATE_KEY}} >> .env
+          echo FIREBASE_CLIENT_EMAIL=${{secrets.FIREBASE_CLIENT_EMAIL}} >> .env
+          echo FIREBASE_CLIENT_ID=${{secrets.FIREBASE_CLIENT_ID}} >> .env
+          echo FIREBASE_CLIENT_CERT_URL=${{secrets.FIREBASE_CLIENT_CERT_URL}} >> .env
+      - name: Look up existing images
+        run: docker image ls
+      - name: Build local image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          file: docker/local.Dockerfile
+          load: true
+          tags: django-local
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new
+      - name: Look up images
+        run: docker image ls
+      - name: Type check
+        run: docker-compose run django mypy open_schools_platform/
+      - name: Run migrations
+        run: docker-compose run django python manage.py migrate
+      - name: Collectstatic
+        run: docker-compose run django python manage.py collectstatic
+      - name: Run tests
+        run: docker-compose run django py.test
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
   build:
     runs-on: ubuntu-latest
@@ -48,39 +117,55 @@ jobs:
         # needed because the postgres container does not provide a healthcheck
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
-    - uses: actions/checkout@v2
-    - name: Create env file
-      run: |
-        touch .env
-        echo GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} >> .env
-        echo SMS_API_KEY=${{secrets.SMS_API_KEY}} >> .env
-        echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
-        echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
-        echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
-        echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
-        echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
-        echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
-        echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
-        echo FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}} >> .env
-        echo FIREBASE_PRIVATE_KEY_ID=${{secrets.FIREBASE_PRIVATE_KEY_ID}} >> .env
-        echo FIREBASE_PRIVATE_KEY=${{secrets.FIREBASE_PRIVATE_KEY}} >> .env
-        echo FIREBASE_CLIENT_EMAIL=${{secrets.FIREBASE_CLIENT_EMAIL}} >> .env
-        echo FIREBASE_CLIENT_ID=${{secrets.FIREBASE_CLIENT_ID}} >> .env
-        echo FIREBASE_CLIENT_CERT_URL=${{secrets.FIREBASE_CLIENT_CERT_URL}} >> .env
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements/local.txt
-        sudo apt-get update
-        sudo apt-get install binutils libproj-dev gdal-bin
-        sudo apt-get install libgeos++
-        sudo apt-get install proj-bin
-        sudo apt install gdal-bin
-    - name: Type check
-      run: mypy open_schools_platform/
-    - name: Run migrations
-      run: python manage.py migrate
-    - name: Collectstatic
-      run: python manage.py collectstatic
-    - name: Run tests
-      run: py.test
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+          cache: "pip"
+          cache-dependency-path: |
+            requirements/local.txt
+            requirements/base.txt
+            requirements/dev.txt
+          # This is a more aggresive cache.
+          # The one above caches the wheel files, but still runs the installation for them
+          # While the cache below caches the entire Python directory.
+      - name: Cache pip
+        uses: actions/cache@v3
+        with:
+          path: /opt/hostedtoolcache/Python/3.9/x64/ # This path is specific to Ubuntu
+          key: python-${{ hashFiles('requirements/local.txt') }}-${{ hashFiles('requirements/base.txt') }}
+      - name: Create env file
+        run: |
+          touch .env
+          echo GOOGLE_API_KEY=${{ secrets.GOOGLE_API_KEY }} >> .env
+          echo SMS_API_KEY=${{secrets.SMS_API_KEY}} >> .env
+          echo EMAIL_ID=${{ secrets.EMAIL_ID }} >> .env
+          echo EMAIL_PRIVATE_API_KEY=${{ secrets.EMAIL_PRIVATE_API_KEY }} >> .env
+          echo GOOGLE_MAPS_API_KEY=${{secrets.GOOGLE_MAPS_API_KEY}} >> .env
+          echo AWS_ACCESS_KEY=${{secrets.AWS_ACCESS_KEY}} >> .env
+          echo AWS_SECRET_ACCESS_KEY=${{secrets.AWS_SECRET_ACCESS_KEY}} >> .env
+          echo YANDEX_CLIENT_DOCS_BUCKET_NAME=${{secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME}} >> .env
+          echo FCM_SERVER_KEY=${{secrets.FCM_SERVER_KEY}} >> .env
+          echo FIREBASE_PROJECT_ID=${{secrets.FIREBASE_PROJECT_ID}} >> .env
+          echo FIREBASE_PRIVATE_KEY_ID=${{secrets.FIREBASE_PRIVATE_KEY_ID}} >> .env
+          echo FIREBASE_PRIVATE_KEY=${{secrets.FIREBASE_PRIVATE_KEY}} >> .env
+          echo FIREBASE_CLIENT_EMAIL=${{secrets.FIREBASE_CLIENT_EMAIL}} >> .env
+          echo FIREBASE_CLIENT_ID=${{secrets.FIREBASE_CLIENT_ID}} >> .env
+          echo FIREBASE_CLIENT_CERT_URL=${{secrets.FIREBASE_CLIENT_CERT_URL}} >> .env
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements/local.txt
+          sudo apt-get update
+          sudo apt-get install binutils libproj-dev gdal-bin
+          sudo apt-get install libgeos++
+          sudo apt-get install proj-bin
+          sudo apt install gdal-bin
+      - name: Type check
+        run: mypy open_schools_platform/
+      - name: Run migrations
+        run: python manage.py migrate
+      - name: Collectstatic
+        run: python manage.py collectstatic
+      - name: Run tests
+        run: py.test

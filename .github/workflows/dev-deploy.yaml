@@ -1,0 +1,59 @@
+name: Dev Deploy
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    uses: LamArt/open-schools-platform/.github/workflows/django.yml@dev
+    secrets:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      SMS_API_KEY: ${{ secrets.SMS_API_KEY }}
+      EMAIL_ID: ${{ secrets.EMAIL_ID }}
+      EMAIL_PRIVATE_API_KEY: ${{ secrets.EMAIL_PRIVATE_API_KEY }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      YANDEX_CLIENT_DOCS_BUCKET_NAME: ${{ secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME }}
+      FCM_SERVER_KEY: ${{ secrets.FCM_SERVER_KEY }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+      FIREBASE_CLIENT_CERT_URL: ${{ secrets.FIREBASE_CLIENT_CERT_URL }}
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v3
+      - name: Dev deploy open-schools-platform
+        uses: D3rHase/ssh-command-action@v0.2.2
+        with:
+          host: ${{secrets.DEV_HOST}}
+          user: "root"
+          private_key: ${{secrets.DEV_PRIVATE_KEY}}
+          command: |
+            echo '--- START WORK ON REMOTE SERVER ---';
+            set -e;
+            
+            echo '--- CD ---';
+            cd /opt/open-schools-platform;
+                       
+            echo '--- CHECKOUT ON BRANCH ---';
+            git checkout dev;
+                                  
+            echo '--- Upgrade repo ---';
+            git pull;                    
+            
+            echo '--- Create dev image ---';
+            docker build -f docker/dev.Dockerfile -t django-dev .;
+
+            echo '--- Create local image ---';
+            docker build -f docker/local.Dockerfile -t django-local .;
+                        
+            echo '--- Force updating services ---';
+            sh force-update-services.sh "dev";
+            
+            echo '--- Success! ---';
