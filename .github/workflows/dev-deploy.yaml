@@ -1,17 +1,30 @@
 name: Dev Deploy
 on:
-  workflow_run:
-    workflows: ["CI build"]
-    types:
-      - completed
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  push:
+    branches:
+      - dev
 
 jobs:
+  build:
+    uses: LamArt/open-schools-platform/.github/workflows/django.yml@main
+    secrets:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+      SMS_API_KEY: ${{ secrets.SMS_API_KEY }}
+      EMAIL_ID: ${{ secrets.EMAIL_ID }}
+      EMAIL_PRIVATE_API_KEY: ${{ secrets.EMAIL_PRIVATE_API_KEY }}
+      GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+      AWS_ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      YANDEX_CLIENT_DOCS_BUCKET_NAME: ${{ secrets.YANDEX_CLIENT_DOCS_BUCKET_NAME }}
+      FCM_SERVER_KEY: ${{ secrets.FCM_SERVER_KEY }}
+      FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
+      FIREBASE_PRIVATE_KEY_ID: ${{ secrets.FIREBASE_PRIVATE_KEY_ID }}
+      FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+      FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+      FIREBASE_CLIENT_ID: ${{ secrets.FIREBASE_CLIENT_ID }}
+      FIREBASE_CLIENT_CERT_URL: ${{ secrets.FIREBASE_CLIENT_CERT_URL }}
   deploy:
     runs-on: ubuntu-latest
-    #if: ${{ github.ref == 'refs/heads/dev' && github.event_name == 'push' }} # Only run this workflow if it is dev branch on push event
     steps:
       - uses: actions/checkout@v3
       - name: Dev deploy open-schools-platform
