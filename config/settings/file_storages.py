@@ -6,7 +6,10 @@ LOCAL_STORAGE_ENABLED = env.bool("LOCAL_FILE_STORAGE", default=True)
 
 if LOCAL_STORAGE_ENABLED:
     MEDIA_ROOT_NAME = "media"
-    MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_ROOT_NAME)
+    if env("MEDIA_ROOT", default=None):
+        MEDIA_ROOT = env("MEDIA_ROOT")
+    else:
+        MEDIA_ROOT = os.path.join(BASE_DIR, MEDIA_ROOT_NAME)
     MEDIA_URL = f"/{MEDIA_ROOT_NAME}/"
 
 

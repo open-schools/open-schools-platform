@@ -82,8 +82,7 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request):
         families = get_families(
-            filters=request.GET.dict() | {"parent_profiles": str(request.user.parent_profile.id)},
-            empty_exception=True,
+            filters=request.GET.dict() | {"parent_profiles": str(request.user.parent_profile.id)}
         )
         response = get_paginated_response(
             pagination_class=ApiFamiliesListPagination,

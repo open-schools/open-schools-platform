@@ -1,0 +1,4 @@
+-r base.txt
+
+requests==2.27.1
+django-debug-toolbar==3.8.1
