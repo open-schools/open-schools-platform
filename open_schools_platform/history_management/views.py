@@ -4,7 +4,9 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.history_management.filters import HistoryFilter
 from open_schools_platform.history_management.paginators import ApiHistoryListPagination
+from open_schools_platform.history_management.selectors import get_history
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -33,6 +35,7 @@ from rest_framework.generics import ListAPIView
 
 class UserHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = User.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = UserHistorySerializer
 
@@ -43,10 +46,11 @@ class UserHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such user"},
     )
     def get(self, request, pk):
+        user = get_user(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=UserHistorySerializer,
-            queryset=get_user(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(user, request.GET.dict()),
             request=request,
             view=self
         )
@@ -55,6 +59,7 @@ class UserHistoryApi(ApiAuthMixin, ListAPIView):
 
 class OrganizationHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = OrganizationHistorySerializer
 
@@ -65,10 +70,11 @@ class OrganizationHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such organization"},
     )
     def get(self, request, pk):
+        organization = get_organization(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=OrganizationHistorySerializer,
-            queryset=get_organization(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(organization, request.GET.dict()),
             request=request,
             view=self
         )
@@ -77,6 +83,7 @@ class OrganizationHistoryApi(ApiAuthMixin, ListAPIView):
 
 class EmployeeHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Employee.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = EmployeeHistorySerializer
 
@@ -87,10 +94,11 @@ class EmployeeHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such employee"},
     )
     def get(self, request, pk):
+        employee = get_employee(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=EmployeeHistorySerializer,
-            queryset=get_employee(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(employee, request.GET.dict()),
             request=request,
             view=self
         )
@@ -99,6 +107,7 @@ class EmployeeHistoryApi(ApiAuthMixin, ListAPIView):
 
 class CircleHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = CircleHistorySerializer
 
@@ -109,10 +118,11 @@ class CircleHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such circle"},
     )
     def get(self, request, pk):
+        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=CircleHistorySerializer,
-            queryset=get_circle(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(circle, request.GET.dict()),
             request=request,
             view=self
         )
@@ -121,6 +131,7 @@ class CircleHistoryApi(ApiAuthMixin, ListAPIView):
 
 class StudentHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Student.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = StudentHistorySerializer
 
@@ -131,10 +142,11 @@ class StudentHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such student"},
     )
     def get(self, request, pk):
+        student = get_student(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=StudentHistorySerializer,
-            queryset=get_student(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(student, request.GET.dict()),
             request=request,
             view=self
         )
@@ -143,6 +155,7 @@ class StudentHistoryApi(ApiAuthMixin, ListAPIView):
 
 class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = StudentProfile.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = StudentProfileHistorySerializer
 
@@ -153,10 +166,11 @@ class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such student-profile"},
     )
     def get(self, request, pk):
+        student_profile = get_student_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=StudentProfileHistorySerializer,
-            queryset=get_student_profile(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(student_profile, request.GET.dict()),
             request=request,
             view=self
         )
@@ -165,6 +179,7 @@ class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
 
 class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = EmployeeProfile.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = EmployeeProfileHistorySerializer
 
@@ -175,10 +190,11 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such employeeprofile"},
     )
     def get(self, request, pk):
+        employee_profile = get_employee_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=EmployeeProfileHistorySerializer,
-            queryset=get_employee_profile(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(employee_profile, request.GET.dict()),
             request=request,
             view=self
         )
@@ -187,6 +203,7 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
 
 class ParentProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = ParentProfile.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = ParentProfileHistorySerializer
 
@@ -197,10 +214,11 @@ class ParentProfileHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such parent-profile"},
     )
     def get(self, request, pk):
+        parent_profile = get_parent_profile(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=ParentProfileHistorySerializer,
-            queryset=get_parent_profile(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(parent_profile, request.GET.dict()),
             request=request,
             view=self
         )
@@ -209,6 +227,7 @@ class ParentProfileHistoryApi(ApiAuthMixin, ListAPIView):
 
 class FamilyHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Family.objects.all()
+    filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
     serializer_class = FamilyHistorySerializer
 
@@ -219,10 +238,11 @@ class FamilyHistoryApi(ApiAuthMixin, ListAPIView):
                    404: "No such family"},
     )
     def get(self, request, pk):
+        family = get_family(filters={"id": pk}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=FamilyHistorySerializer,
-            queryset=get_family(filters={"id": pk}, user=request.user, empty_exception=True).history.all(),
+            queryset=get_history(family, request.GET.dict()),
             request=request,
             view=self
         )
