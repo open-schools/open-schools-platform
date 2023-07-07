@@ -6,6 +6,7 @@ from open_schools_platform.organization_management.teachers.models import Teache
 
 class TeacherFilter(BaseFilterSet):
     name = CharFilter(field_name="name", lookup_expr="icontains")
+    or_search = CharFilter(field_name="or_search", method="OR")
     phone = CharFilter(field_name="teacher_profile__phone")
     circle_name = CharFilter(field_name="circle__name", lookup_expr="icontains")
     circle_ids = CharFilter(method=filter_by_object_ids("circle"))
