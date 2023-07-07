@@ -2,6 +2,7 @@
 
 pytest==7.2.0
 pytest-django==4.5.2
+freezegun==1.2.2
 
 factory-boy==3.2.1
 Faker==13.3.1

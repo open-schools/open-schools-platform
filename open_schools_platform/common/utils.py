@@ -11,10 +11,14 @@ from rest_framework import serializers
 
 from django.shortcuts import get_object_or_404
 from django.http import Http404
+from django.utils.http import urlencode
+from django.urls import reverse
+from drf_yasg import openapi
+from drf_yasg.inspectors.field import get_basic_type_info
 
 
 def make_mock_object(**kwargs):
-    return type("", (object, ), kwargs)
+    return type("", (object,), kwargs)
 
 
 def get_object(model_or_queryset, **kwargs):
@@ -29,7 +33,7 @@ def get_object(model_or_queryset, **kwargs):
 
 
 def create_serializer_class(name, fields):
-    return type(name, (serializers.Serializer, ), fields)
+    return type(name, (serializers.Serializer,), fields)
 
 
 def inline_serializer(*, fields, data=None, **kwargs):
@@ -72,3 +76,47 @@ def convert_str_date_to_datetime(date: str, time: str):
     """
     date = (parse(date, fuzzy=True)).strftime(f"%Y-%m-%d {time}")
     return make_aware(datetime.strptime(date, "%Y-%m-%d %H:%M:%S"))
+
+
+def reverse_querystring(view, urlconf=None, args=None, kwargs=None, current_app=None, query_kwargs=None):
+    """Custom reverse to handle query strings.
+    Usage:
+        reverse('app.views.my_view', kwargs={'pk': 123}, query_kwargs={'search': 'Bob'})
+    """
+    base_url = reverse(view, urlconf=urlconf, args=args, kwargs=kwargs, current_app=current_app)
+    if query_kwargs:
+        return '{}?{}'.format(base_url, urlencode(query_kwargs))
+    return base_url
+
+
+class SwaggerSchemasGenerator:
+    def __init__(self, fields: list, object_title: str, model):
+        self.fields = fields
+        self.object_title = object_title
+        self.model = model
+
+    def _get_field_type_info(self, field_name) -> dict:
+        model_field = self.model._meta.get_field(field_name)
+        field = get_basic_type_info(model_field)
+        if not field:
+            return {"type": openapi.TYPE_STRING, "title": str(model_field)}
+        return field
+
+    def _properties_dict_generator(self):
+        for field in self.fields:
+            info = self._get_field_type_info(field_name=field)
+            yield {field: openapi.Schema(**info)}
+
+    def _get_properties_dict(self):
+        properties = dict()
+        for property_dict in self._properties_dict_generator():
+            properties |= property_dict
+        return properties
+
+    def generate_schemas(self) -> dict:
+        schema = {
+            "type": openapi.TYPE_OBJECT,
+            "title": self.object_title,
+            "properties": self._get_properties_dict(),
+        }
+        return schema
