@@ -6,10 +6,7 @@ from open_schools_platform.testing.tests.utils import create_test_model_objects
 
 
 def get_test_model_results_from_qs(qs):
-    result = []
-    for test_object in qs:
-        result.append(test_object.integer_field)
-    return result
+    return list(map(lambda test_object: test_object.integer_field, qs))
 
 
 class OrSearchTests(TestCase):

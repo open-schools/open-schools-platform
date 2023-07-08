@@ -9,8 +9,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
 from safedelete.config import DELETED_ONLY_VISIBLE, DELETED_VISIBLE
 
-from open_schools_platform.common.services import or_search_filter_is_valid,\
-    exception_if_filter_is_invalid_for_or_search
+from open_schools_platform.common.services import or_search_filter_is_valid, \
+    exception_if_filter_is_invalid_for_or_search, get_values_from_or_search
 
 
 class SoftCondition(Enum):
@@ -114,10 +114,7 @@ class BaseFilterSet(django_filters.FilterSet):
             return base_queryset
 
         query = Q()
-
-        or_search_list = self.or_search.rsplit(":", 1)
-        or_search_value = or_search_list[0]
-        or_search_filters = or_search_list[1].strip("][").split(",")
+        or_search_value, or_search_filters = get_values_from_or_search(self.or_search)
         for filter_name in or_search_filters:
             try:
                 filter_object = self.get_filters()[filter_name]

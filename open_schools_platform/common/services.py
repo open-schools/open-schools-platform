@@ -191,3 +191,11 @@ def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, all
                    f"CharFilter, ChoiceFilter and AllValuesFilter are"
                    f"allowed in filters list: {filter_name} is not allowed"
         )
+
+
+def get_values_from_or_search(or_search: str) -> tuple[str, list[str]]:
+    or_search_list = or_search.rsplit(":", 1)
+    or_search_value = or_search_list[0]
+    or_search_filters = or_search_list[1].strip("][").split(",")
+
+    return or_search_value, or_search_filters
