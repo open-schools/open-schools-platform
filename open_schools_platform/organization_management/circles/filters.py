@@ -17,6 +17,7 @@ def get_circles_by_student_profile(queryset, name, value):
 
 class CircleFilter(BaseFilterSet):
     ids = CharFilter(method=filter_by_ids)
+    or_search = CharFilter(field_name="or_search", method="OR")
     address = CharFilter(field_name="address", lookup_expr="icontains")
     organization_name = CharFilter(field_name="organization__name", lookup_expr="icontains")
     radius = NumberFilter(method='circle_determined_radius_filter')

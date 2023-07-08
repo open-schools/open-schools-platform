@@ -2,6 +2,7 @@ from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import selector_factory
+from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter, TeacherProfileFilter
 from open_schools_platform.organization_management.teachers.models import Teacher, TeacherProfile
 from open_schools_platform.user_management.users.models import User
@@ -41,3 +42,7 @@ def get_teacher_profile(*, filters=None, user: User = None) -> TeacherProfile:
         raise PermissionDenied
 
     return teacher_profile
+
+
+def get_teachers_from_orgaization_with_filters(organization: Organization, filters: dict) -> QuerySet:
+    return TeacherFilter(filters, organization.teachers.all()).qs

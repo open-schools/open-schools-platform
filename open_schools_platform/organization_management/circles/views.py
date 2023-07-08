@@ -29,7 +29,10 @@ from ...parent_management.parents.services import get_parent_profile_or_create_n
 from ...query_management.queries.selectors import get_queries
 from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
 from ...query_management.queries.services import create_query
-from ...student_management.students.selectors import get_students
+from ...student_management.students.filters import StudentFilter
+from ...student_management.students.models import Student
+from ...student_management.students.paginators import ApiStudentsListPagination
+from ...student_management.students.selectors import get_students, get_students_from_circle_with_filters
 from ...student_management.students.serializers import StudentSerializer
 from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
     export_students
@@ -119,16 +122,26 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
             status=200)
 
 
-class CirclesStudentsListApi(ApiAuthMixin, APIView):
+class CirclesStudentsListApi(ApiAuthMixin, ListAPIView):
+    queryset = Student.objects.all()
+    filterset_class = StudentFilter
+    pagination_class = ApiStudentsListPagination
+    serializer_class = StudentSerializer
+
     @swagger_auto_schema(
         operation_description="Get students in this circle",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"results": StudentSerializer(many=True)})}
     )
-    def get(self, request, pk):
-        circle = get_circle(filters={"id": str(pk)}, user=request.user, empty_exception=True)
-        qs = circle.students.all()
-        return Response({"results": StudentSerializer(qs, many=True, context={'request': request}).data}, status=200)
+    def get(self, request, circle_id):
+        circle = get_circle(filters={"id": str(circle_id)}, user=request.user, empty_exception=True)
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=StudentSerializer,
+            queryset=get_students_from_circle_with_filters(circle, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
 
 
 class CircleDeleteApi(ApiAuthMixin, APIView):

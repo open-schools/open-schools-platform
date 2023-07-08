@@ -1,12 +1,17 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.errors.exceptions import AlreadyExists
+from open_schools_platform.organization_management.circles.filters import CircleFilter
+from open_schools_platform.organization_management.circles.models import Circle
+from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
 from open_schools_platform.organization_management.circles.serializers import CircleListSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
@@ -197,23 +202,34 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
             status=200)
 
 
-class StudentCirclesListApi(ApiAuthMixin, APIView):
+class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Circle.objects.all()
+    filterset_class = CircleFilter
+    pagination_class = ApiCircleListPagination
+    serializer_class = CircleListSerializer
+
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
-        responses={200: convert_dict_to_serializer({"results": CircleListSerializer(many=True)})},
         operation_description="Get all circles for provided student profile",
     )
-    def get(self, request, pk):
+    def get(self, request, student_profile_id):
         student_profile = get_student_profile(
-            filters={"id": str(pk)},
+            filters={"id": str(student_profile_id)},
             user=request.user,
             empty_exception=True,
         )
         students = get_students(
             filters={'student_profile': str(student_profile.id)},
         )
-        circles = get_circles_by_students(students=students)
-        return Response({"results": CircleListSerializer(circles, many=True).data}, status=200)
+        circles = get_circles_by_students(students=students, filters=request.GET.dict())
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=CircleListSerializer,
+            queryset=circles,
+            request=request,
+            view=self
+        )
+        return response
 
 
 class StudentDeleteApi(ApiAuthMixin, APIView):
