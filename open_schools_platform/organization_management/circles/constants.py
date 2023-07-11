@@ -1,3 +1,6 @@
+from django.utils.translation import gettext_lazy as _
+
+
 class CirclesConstants:
     """
     START_SEARCH_RADIUS is given in Km
@@ -6,7 +9,7 @@ class CirclesConstants:
     RADIUS_MULTIPLIER = 2
     MULTIPLICATIONS_COUNT = 10
 
-    NOTIFY_TEACHER_TITLE = "Напоминание о занятии."
+    NOTIFY_TEACHER_TITLE = _("Lesson reminder.")
 
     @staticmethod
     def task_name(cron, circle):

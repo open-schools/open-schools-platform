@@ -1,0 +1,188 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: open-schools-platform\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-07-11 15:04+0500\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
+"%100>=11 && n%100<=14)? 2 : 3);\n"
+
+#: .\open_schools_platform\errors\exceptions.py:8
+msgid "Some of input data are invalid."
+msgstr "Некоторые введенные данные некорректны"
+
+#: .\open_schools_platform\errors\exceptions.py:14
+msgid "Query is corrupted"
+msgstr "Заявка повреждена"
+
+#: .\open_schools_platform\errors\exceptions.py:20
+msgid "Failed to set this status in the current context."
+msgstr "Невозможно установить этот статус в данном контексте"
+
+#: .\open_schools_platform\errors\exceptions.py:26
+msgid "Email service is currently unavailable."
+msgstr "Почтовый сервис не доступен"
+
+#: .\open_schools_platform\errors\exceptions.py:32
+msgid "This object already exists"
+msgstr "Этот объект уже существует"
+
+#: .\open_schools_platform\errors\exceptions.py:38
+msgid "Server cannot handle address"
+msgstr "Сервер не может обработать адрес"
+
+#: .\open_schools_platform\organization_management\circles\admin.py:11
+#: .\open_schools_platform\organization_management\employees\admin.py:15
+msgid "organization name"
+msgstr "имя организации"
+
+#: .\open_schools_platform\organization_management\circles\admin.py:22
+msgid "address"
+msgstr "адрес"
+
+#: .\open_schools_platform\organization_management\circles\constants.py:12
+msgid "Lesson reminder."
+msgstr "Напоминание об уроке"
+
+#: .\open_schools_platform\organization_management\employees\admin.py:26
+msgid "employee profile phone"
+msgstr "номер телефона профиля сотрудника"
+
+#: .\open_schools_platform\organization_management\employees\admin.py:37
+msgid "position"
+msgstr "позиция"
+
+#: .\open_schools_platform\organization_management\employees\services.py:49
+#, fuzzy
+#| msgid "organization name"
+msgid "Invite to organization"
+msgstr "имя организации"
+
+#: .\open_schools_platform\organization_management\organizations\admin.py:10
+msgid "INN"
+msgstr "ИНН"
+
+#: .\open_schools_platform\organization_management\organizations\constants.py:9
+msgid "Phone: +{phone}\n"
+msgstr "Тел: +{phone}\n"
+
+#: .\open_schools_platform\organization_management\organizations\constants.py:9
+#, fuzzy, python-brace-format
+#| msgid "Your password: %(pswd)s"
+msgid "Password: {pwd}\n"
+msgstr "Пароль: {pwd}\n"
+
+#: .\open_schools_platform\organization_management\teachers\admin.py:9
+#: .\open_schools_platform\student_management\students\admin.py:10
+msgid "circle name"
+msgstr "имя кружка"
+
+#: .\open_schools_platform\organization_management\teachers\admin.py:20
+msgid "teacher profile name"
+msgstr "имя профиля учителя"
+
+#: .\open_schools_platform\parent_management\families\constants.py:4
+msgid "You have been invited into the family!"
+msgstr "Вы были приглашены в семью!"
+
+#: .\open_schools_platform\parent_management\families\constants.py:8
+#, python-brace-format
+msgid "The {family} family invites you"
+msgstr "Семья {family} приглашает вас к себе"
+
+#: .\open_schools_platform\parent_management\parents\services.py:26
+msgid "Circle invitation"
+msgstr "Приглашение в кружок"
+
+#: .\open_schools_platform\parent_management\parents\services.py:27
+msgid "Parent"
+msgstr "Родитель"
+
+#: .\open_schools_platform\query_management\queries\admin.py:10
+msgid "sender CT model"
+msgstr "sender CT model"
+
+#: .\open_schools_platform\query_management\queries\admin.py:21
+msgid "recipient CT model"
+msgstr "recipient CT model"
+
+#: .\open_schools_platform\query_management\queries\admin.py:32
+msgid "sender UUID"
+msgstr "UUID отправителя"
+
+#: .\open_schools_platform\query_management\queries\admin.py:43
+msgid "recipient UUID"
+msgstr "UUID получателя"
+
+#: .\open_schools_platform\student_management\students\admin.py:21
+msgid "student profile name"
+msgstr "имя профиля студента"
+
+#: .\open_schools_platform\tasks\tasks.py:14
+msgid "Open Schools"
+msgstr "Открытые Школы"
+
+#: .\open_schools_platform\tasks\tasks.py:15
+msgid "Dear user"
+msgstr "Дорогой пользователь"
+
+#: .\open_schools_platform\user_management\authentication\serializers.py:17
+msgid "No such user."
+msgstr "Нет такого пользователя"
+
+#: .\open_schools_platform\user_management\authentication\serializers.py:20
+msgid "Incorrect password."
+msgstr "Неверный пароль"
+
+#: .\templates\new_user_circle_invite_mail_form.html:7
+#: .\templates\new_user_invite_mail_form.html:8
+#, python-format
+msgid "Hello, %(username)s!"
+msgstr "Приветствуем, %(username)s!"
+
+#: .\templates\new_user_circle_invite_mail_form.html:9
+#, fuzzy, python-format
+msgid "The <b>%(org_name)s</b> circle invites you to its classes."
+msgstr "Кружок b>%(org_name)s</b> приглашает вас на свои занятия. "
+
+#: .\templates\new_user_circle_invite_mail_form.html:11
+#: .\templates\new_user_invite_mail_form.html:12
+msgid "Login and password to enter your personal account on"
+msgstr "Логин и пароль для входа в личный кабинет на"
+
+#: .\templates\new_user_circle_invite_mail_form.html:14
+#: .\templates\new_user_invite_mail_form.html:15
+#, python-format
+msgid "Your login: %(lgn)s"
+msgstr "Ваш логин: %(lgn)s"
+
+#: .\templates\new_user_circle_invite_mail_form.html:16
+#: .\templates\new_user_invite_mail_form.html:17
+#, python-format
+msgid "Your password: %(pswd)s"
+msgstr "Ваш пароль: %(pswd)s"
+
+#: .\templates\new_user_circle_invite_mail_form.html:18
+#: .\templates\new_user_invite_mail_form.html:19
+msgid "Sincerely,<br> \"Open Schools\""
+msgstr "С уважением,<br> \"Открытые Школы\""
+
+#: .\templates\new_user_invite_mail_form.html:10
+#, python-format
+msgid ""
+"The <b>%(org_name)s</b> organization invites you to join us as an employee."
+msgstr ""
+"Организация b>%(org_name)s</b> приглашает вас к себе в качестве сотрудника. "
+
+#: .\templates\templates\input_filter.html:3
+#, python-format
+msgid " By %(filter_title)s "
+msgstr " От %(filter_title)s "
+
+#: .\templates\templates\input_filter.html:18
+msgid "Remove"
+msgstr "Удалить"

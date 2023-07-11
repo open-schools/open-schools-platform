@@ -9,6 +9,7 @@ from open_schools_platform.tasks.tasks import send_mail_to_new_user_with_celery
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import create_user, generate_user_password
+from django.utils.translation import gettext_lazy as _
 
 
 def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
@@ -45,7 +46,7 @@ def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
     if not user:
         exception_if_email_service_unavailable()
         pwd = generate_user_password()
-        subject = 'Приглашение в организацию'
+        subject = _('Invite to organization')
         send_mail_to_new_user_with_celery.delay(subject,
                                                 {'login': phone, 'password': pwd, 'organization': organization_name,
                                                  'name': name},
