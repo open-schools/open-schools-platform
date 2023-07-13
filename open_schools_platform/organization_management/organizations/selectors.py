@@ -34,11 +34,11 @@ def get_organizations(*, filters=None) -> QuerySet:
     return organizations
 
 
-def get_organizations_by_user(user: User) -> QuerySet:
+def get_organizations_by_user(user: User, filters: dict = {}) -> QuerySet:
     qs = get_employees(filters={"employee_profile": user.employee_profile})
 
     return qs if len(qs) == 0 else \
-        get_organizations(filters={"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})
+        get_organizations(filters=filters | {"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})
 
 
 def get_organization_circle_queries(organization: Organization):

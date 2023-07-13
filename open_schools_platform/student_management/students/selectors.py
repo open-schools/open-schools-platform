@@ -3,6 +3,8 @@ from rest_framework.exceptions import PermissionDenied, NotFound
 
 from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.utils import form_ids_string_from_queryset, filter_list_from_empty_strings
+from open_schools_platform.organization_management.circles.models import Circle
+from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.user_management.users.models import User
@@ -64,3 +66,11 @@ def get_student_profiles_by_families(families: QuerySet) -> QuerySet:
     if len(student_profiles_ids) == 0:
         raise NotFound("There are no student_profiles in provided families")
     return get_student_profiles(filters={"ids": ','.join(student_profiles_ids)})
+
+
+def get_student_profiles_from_family_with_filters(family: Family, filters: dict) -> QuerySet:
+    return StudentProfileFilter(filters, family.student_profiles.all()).qs
+
+
+def get_students_from_circle_with_filters(circle: Circle, filters: dict) -> QuerySet:
+    return StudentFilter(filters, circle.students.all()).qs

@@ -1,11 +1,20 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.constants import NotificationType
 from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.parent_management.families.constants import FamilyConstants
+from open_schools_platform.parent_management.families.filters import FamilyFilter
+from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.families.paginators import ApiFamiliesListPagination
+from open_schools_platform.student_management.students.filters import StudentProfileFilter
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.paginators import ApiStudentProfilesListPagination
+from open_schools_platform.student_management.students.selectors import get_student_profiles_from_family_with_filters
 from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
@@ -35,33 +44,54 @@ class FamilyApi(ApiAuthMixin, APIView):
         return Response({"family": FamilySerializer(family).data}, status=201)
 
 
-class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
+class FamilyStudentProfilesListApi(ApiAuthMixin, ListAPIView):
+    queryset = StudentProfile.objects.all()
+    filterset_class = StudentProfileFilter
+    pagination_class = ApiStudentProfilesListPagination
+    serializer_class = StudentProfileSerializer
+
     @swagger_auto_schema(
         operation_description="Get all student profiles for provided family.",
-        responses={200: convert_dict_to_serializer({"results": StudentProfileSerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
-    def get(self, request, pk):
+    def get(self, request, family_id):
         family = get_family(
-            filters={'id': str(pk)},
+            filters={'id': str(family_id)},
             user=request.user,
             empty_exception=True,
         )
-        return Response({"results": StudentProfileSerializer(family.student_profiles, many=True,
-                                                             context={'request': request}).data}, status=200)
+        response = get_paginated_response(
+            pagination_class=ApiStudentProfilesListPagination,
+            serializer_class=StudentProfileSerializer,
+            queryset=get_student_profiles_from_family_with_filters(family, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
 
 
-class FamiliesListApi(ApiAuthMixin, APIView):
+class FamiliesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Family.objects.all()
+    filterset_class = FamilyFilter
+    pagination_class = ApiFamiliesListPagination
+    serializer_class = FamilySerializer
+
     @swagger_auto_schema(
         operation_description="Get all families for currently logged in user",
-        responses={200: convert_dict_to_serializer({"results": FamilySerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request):
         families = get_families(
-            filters={"parent_profiles": str(request.user.parent_profile.id)}
+            filters=request.GET.dict() | {"parent_profiles": str(request.user.parent_profile.id)}
         )
-        return Response({"results": FamilySerializer(families, many=True).data}, status=200)
+        response = get_paginated_response(
+            pagination_class=ApiFamiliesListPagination,
+            serializer_class=FamilySerializer,
+            queryset=families,
+            request=request,
+            view=self
+        )
+        return response
 
 
 class InviteParentApi(ApiAuthMixin, APIView):

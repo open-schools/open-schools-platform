@@ -1,3 +1,4 @@
+import re
 from typing import List, Dict, Any, Tuple, Callable, Type
 
 from rest_framework.exceptions import ValidationError
@@ -173,3 +174,28 @@ def exception_if_email_service_unavailable():
 
 def file_generate_upload_path(instance, filename):
     return f"{instance.image.name}"
+
+
+def or_search_filter_is_valid(value):
+    pattern = re.compile(r".*?:\[[^\]]*\]", re.IGNORECASE)
+    if pattern.match(value) and " " not in value.rsplit(":", 1)[1]:
+        return True
+    return False
+
+
+def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, allowed_filter_types, allowed_lookup_expr):
+    if type(filter_object) not in allowed_filter_types or filter_object.method is not None or \
+            filter_object.lookup_expr not in allowed_lookup_expr:
+        raise ValidationError(
+            detail=f"only default (without redefined method, with [i]contains or [i]exact lookup) "
+                   f"CharFilter, ChoiceFilter and AllValuesFilter are"
+                   f"allowed in filters list: {filter_name} is not allowed"
+        )
+
+
+def get_values_from_or_search(or_search: str) -> tuple[str, list[str]]:
+    or_search_list = or_search.rsplit(":", 1)
+    or_search_value = or_search_list[0]
+    or_search_filters = or_search_list[1].strip("][").split(",")
+
+    return or_search_value, or_search_filters

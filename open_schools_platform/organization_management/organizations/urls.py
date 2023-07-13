@@ -22,6 +22,6 @@ urlpatterns = [
     path('/<uuid:pk>/analytics', GetAnalytics.as_view(), name='analytics'),
     path('/<uuid:organization>/student-profiles/<uuid:student_profile>/queries',
          OrganizationStudentProfileQueriesApi.as_view(), name='queries-organization-student-profile'),
-    path('/<uuid:pk>/teachers', OrganizationTeachersListApi.as_view(), name='teachers-list'),
+    path('/<uuid:organization_id>/teachers', OrganizationTeachersListApi.as_view(), name='teachers-list'),
     path('/teachers/<uuid:pk>', GetTeacherApi.as_view(), name='get-teacher')
 ]

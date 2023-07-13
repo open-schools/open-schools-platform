@@ -18,6 +18,7 @@ from open_schools_platform.organization_management.employees.serializers import 
     OrganizationEmployeeInviteUpdateSerializer, OrganizationEmployeeInviteSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
     get_employee_profile_or_create_new_user, update_invite_employee_body
+from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
@@ -27,7 +28,11 @@ from open_schools_platform.organization_management.organizations.serializers imp
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
-from open_schools_platform.organization_management.teachers.selectors import get_teacher
+from open_schools_platform.organization_management.teachers.filters import TeacherFilter
+from open_schools_platform.organization_management.teachers.models import Teacher
+from open_schools_platform.organization_management.teachers.paginators import ApiTeachersListPagination
+from open_schools_platform.organization_management.teachers.selectors import get_teacher, \
+    get_teachers_from_orgaization_with_filters
 from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
@@ -67,6 +72,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
 class OrganizationListApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
     pagination_class = OrganizationApiListPagination
+    filterset_class = OrganizationFilter
     serializer_class = OrganizationSerializer
 
     @swagger_auto_schema(
@@ -77,7 +83,7 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
         response = get_paginated_response(
             pagination_class=OrganizationApiListPagination,
             serializer_class=OrganizationSerializer,
-            queryset=get_organizations_by_user(request.user),
+            queryset=get_organizations_by_user(request.user, request.GET.dict()),
             request=request,
             view=self
         )
@@ -317,15 +323,26 @@ class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
         return response
 
 
-class OrganizationTeachersListApi(ApiAuthMixin, APIView):
+class OrganizationTeachersListApi(ApiAuthMixin, ListAPIView):
+    queryset = Teacher.objects.all()
+    filterset_class = TeacherFilter
+    pagination_class = ApiTeachersListPagination
+    serializer_class = TeacherSerializer
+
     @swagger_auto_schema(
         operation_description="Get all teachers for this organization",
-        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"results": TeacherSerializer(many=True)})}
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
     )
-    def get(self, request, pk):
-        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
-        return Response({"results": TeacherSerializer(organization.teachers, many=True).data}, status=200)
+    def get(self, request, organization_id):
+        organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
+        response = get_paginated_response(
+            pagination_class=ApiTeachersListPagination,
+            serializer_class=TeacherSerializer,
+            queryset=get_teachers_from_orgaization_with_filters(organization, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
 
 
 class GetTeacherApi(ApiAuthMixin, APIView):

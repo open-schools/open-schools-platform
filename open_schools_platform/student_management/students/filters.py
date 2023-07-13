@@ -11,6 +11,7 @@ from open_schools_platform.student_management.students.models import StudentProf
 class StudentProfileFilter(BaseFilterSet):
     families = UUIDInFilter(field_name="families", lookup_expr="in")
     ids = CharFilter(method=filter_by_ids)
+    or_search = CharFilter(field_name="or_search", method="OR")
 
     class Meta:
         model = StudentProfile
@@ -18,6 +19,8 @@ class StudentProfileFilter(BaseFilterSet):
 
 
 class StudentFilter(BaseFilterSet):
+    or_search = CharFilter(field_name="or_search", method="OR")
+
     @staticmethod
     def get_swagger_filters(prefix: str = "", include: List[str] = None):
         if include is None:
@@ -25,7 +28,7 @@ class StudentFilter(BaseFilterSet):
 
         if not include:
             include = ["name", "id", "circle", "student_profile",
-                       "student_profile__phone", "circle__name", "circle__organization"]
+                       "student_profile__phone", "circle__name", "circle__organization", "or_search"]
         return BaseFilterSet.get_dict_filters(StudentFilter, prefix, include)
 
     class Meta:
