@@ -7,6 +7,8 @@ services:
       - /database-data:/var/lib/postgresql/data/
     env_file:
       - .env.db
+#    environment:
+#      - POSTGRES_INITDB_ARGS=--locale=en_US.utf8
     ports:
       - "5432:5432"
     deploy:
