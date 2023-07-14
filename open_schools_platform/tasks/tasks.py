@@ -1,4 +1,5 @@
 from django.template.loader import render_to_string
+from django.utils.translation import gettext_lazy as _
 
 from .celery import app
 from ..common.constants import NotificationType
@@ -10,8 +11,8 @@ from ..user_management.users.services import notify_user
 @app.task
 def send_mail_to_new_user_with_celery(subject, html_kwargs, from_email, to, template):
     html = render_to_string(template, html_kwargs)
-    SendEmailService().email_transport().send_html_email(subject, from_email, 'Открытые Школы', to,
-                                                         'Уважаемый пользователь', html, '')
+    SendEmailService().email_transport().send_html_email(subject, from_email, _('Open Schools'), to,
+                                                         _('Dear user'), html, '')
 
 
 @app.task

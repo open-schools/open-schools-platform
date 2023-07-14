@@ -4,6 +4,7 @@ from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import create_family
 from open_schools_platform.parent_management.parents.models import ParentProfile
+from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import generate_user_password, create_user
@@ -22,8 +23,8 @@ def get_parent_profile_or_create_new_user(phone: str, email: str, circle: Circle
 def send_email_to_new_parent(circle_name, email, phone, user):
     exception_if_email_service_unavailable()
     pwd = generate_user_password()
-    subject = 'Приглашение в кружок'
-    name = 'Родитель'
+    subject = _('Circle invitation')
+    name = _('Parent')
     send_mail_to_new_user_with_celery.delay(subject,
                                             {'login': phone, 'password': pwd, 'circle': circle_name,
                                              'name': name},
