@@ -97,21 +97,21 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite employee query.",
     )
-    def post(self, request, pk) -> Response:
+    def post(self, request, organization_id) -> Response:
         invite_serializer = OrganizationEmployeeInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
         phone = invite_serializer.validated_data["phone"]
         email = invite_serializer.validated_data["email"]
         name = invite_serializer.validated_data["body"]["name"]
-        organization = get_organization(filters={"id": pk})
+        organization = get_organization(filters={"id": organization_id})
 
         employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__(), email=str(email),
                                                                    organization_name=organization.name, name=name)
 
         employee = create_employee(**invite_serializer.validated_data["body"])
 
-        query = create_query(sender_model_name="organization", sender_id=pk,
+        query = create_query(sender_model_name="organization", sender_id=organization_id,
                              recipient_model_name="employeeprofile", recipient_id=employee_profile.id,
                              body_model_name="employee", body_id=employee.id)
 
@@ -149,9 +149,9 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
         responses={200: convert_dict_to_serializer({"results": EmployeeProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
-    def get(self, request, pk):
+    def get(self, request, organization_id):
         organization = get_organization(
-            filters={'id': str(pk)},
+            filters={'id': str(organization_id)},
             user=request.user,
             empty_exception=True,
         )
@@ -234,8 +234,8 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete organization.",
         responses={204: "Successfully deleted", 404: "No such organization"}
     )
-    def delete(self, request, pk):
-        organization = get_organization(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, organization_id):
+        organization = get_organization(filters={'id': organization_id}, empty_exception=True, user=request.user)
         organization.delete()
         return Response(status=204)
 
@@ -246,9 +246,9 @@ class GetStudentApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         responses={200: convert_dict_to_serializer({"student": StudentSerializer()}), 404: "No such student"}
     )
-    def get(self, request, pk):
+    def get(self, request, student_id):
         student = get_student(
-            filters={"id": str(pk)}, user=request.user,
+            filters={"id": str(student_id)}, user=request.user,
             empty_exception=True,
         )
         return Response({"student": StudentSerializer(student, context={'request': request}).data}, status=200)
@@ -262,9 +262,9 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         operation_description="Export students from this organization",
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
-    def get(self, request, pk):
-        get_organization(filters={'id': str(pk)}, user=request.user, empty_exception=True)
-        students = get_students(filters={'circle__organization': str(pk)})
+    def get(self, request, organization_id):
+        get_organization(filters={'id': str(organization_id)}, user=request.user, empty_exception=True)
+        students = get_students(filters={'circle__organization': str(organization_id)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)
 
@@ -280,9 +280,9 @@ class GetAnalytics(ApiAuthMixin, APIView):
         responses={200: convert_dict_to_serializer({"analytics": AnalyticsSerializer()}),
                    404: "There is no such organization"}
     )
-    def get(self, request, pk):
+    def get(self, request, organization_id):
         dates = request.GET.dict()
-        organization = get_organization(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+        organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
         queries = get_organization_circle_queries(organization)
         if all(arg in dates for arg in ("date_from", "date_to")):
             queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
@@ -351,6 +351,6 @@ class GetTeacherApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         responses={200: convert_dict_to_serializer({"teacher": TeacherSerializer()})}
     )
-    def get(self, request, pk):
-        teacher = get_teacher(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+    def get(self, request, teacher_id):
+        teacher = get_teacher(filters={"id": str(teacher_id)}, empty_exception=True, user=request.user)
         return Response({"teacher": TeacherSerializer(teacher).data}, status=200)

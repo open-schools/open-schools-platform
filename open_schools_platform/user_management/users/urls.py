@@ -5,10 +5,10 @@ from .views import UserApi, CreationTokenApi, VerificationApi, CodeResendApi, Re
 
 urlpatterns = [
     path('/token', CreationTokenApi.as_view(), name='create-token'),
-    path('/token/<uuid:pk>', RetrieveCreationTokenApi.as_view(), name='get-token'),
-    path('/token/<uuid:pk>/verify', VerificationApi.as_view(), name='verification-phone-by-token'),
+    path('/token/<uuid:token_key>', RetrieveCreationTokenApi.as_view(), name='get-token'),
+    path('/token/<uuid:token_key>/verify', VerificationApi.as_view(), name='verification-phone-by-token'),
     path('', UserApi.as_view(), name='user'),
-    path('/token/<uuid:pk>/resend', CodeResendApi.as_view(), name='resend'),
+    path('/token/<uuid:token_key>/resend', CodeResendApi.as_view(), name='resend'),
     path('/reset-password', UserResetPasswordApi.as_view(), name='reset-password'),
     path('/firebase-notification-token', AddFCMNotificationTokenApi.as_view(), name='add-firebase-notification-token')
 ]

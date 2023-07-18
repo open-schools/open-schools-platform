@@ -15,8 +15,9 @@ class GetTeacherProfileApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_TEACHERS],
         responses={200: convert_dict_to_serializer({"teacher_profile": TeacherProfileSerializer()})}
     )
-    def get(self, request, pk):
-        teacher_profile = get_teacher_profile(filters={"id": str(pk)}, empty_exception=True, user=request.user)
+    def get(self, request, teacher_profile_id):
+        teacher_profile = get_teacher_profile(filters={"id": str(teacher_profile_id)}, empty_exception=True,
+                                              user=request.user)
         return Response(
             {"teacher_profile": TeacherProfileSerializer(teacher_profile, context={'request': request}).data},
             status=200)

@@ -64,11 +64,11 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
                    404: "No such student profile or family",
                    403: "Current user do not have permission to perform this action"}
     )
-    def patch(self, request, pk):
+    def patch(self, request, student_profile_id):
         student_profile_update_serializer = UpdateStudentProfileSerializer(data=request.data)
         student_profile_update_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(
-            filters={'id': str(pk)},
+            filters={'id': str(student_profile_id)},
             user=request.user,
             empty_exception=True,
         )
@@ -92,8 +92,9 @@ class StudentProfileDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete student-profile.",
         responses={204: "Successfully deleted", 404: "No such student-profile"}
     )
-    def delete(self, request, pk):
-        student_profile = get_student_profile(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, student_profile_id):
+        student_profile = get_student_profile(filters={'id': student_profile_id}, empty_exception=True,
+                                              user=request.user)
         student_profile.delete()
         return Response(status=204)
 
@@ -134,11 +135,11 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
         responses={201: convert_dict_to_serializer({"query": StudentProfileQuerySerializer()}),
                    404: "No such student profile"}
     )
-    def post(self, request, pk):
+    def post(self, request, student_profile_id):
         student_join_circle_req_serializer = StudentJoinCircleQuerySerializer(data=request.data)
         student_join_circle_req_serializer.is_valid(raise_exception=True)
         student_profile = get_student_profile(
-            filters={"id": str(pk)},
+            filters={"id": str(student_profile_id)},
             user=request.user,
             empty_exception=True,
         )
@@ -184,14 +185,14 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
         responses={200: convert_dict_to_serializer({"results": StudentProfileQuerySerializer(many=True)})},
         operation_description="Get all queries for provided student profile",
     )
-    def get(self, request, pk):
+    def get(self, request, student_profile_id):
         get_student_profile(
-            filters={'id': str(pk)},
+            filters={'id': str(student_profile_id)},
             empty_exception=True,
             empty_message='There is no such student profile'
         )
 
-        student_profile = get_student_profile(filters={"id": str(pk)}, user=request.user)
+        student_profile = get_student_profile(filters={"id": str(student_profile_id)}, user=request.user)
         queries = get_queries(
             filters={'sender_id': str(student_profile.id)},
             empty_exception=True,
@@ -238,7 +239,7 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete student.",
         responses={204: "Successfully deleted", 404: "No such student"}
     )
-    def delete(self, request, pk):
-        student = get_student(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, student_id):
+        student = get_student(filters={'id': student_id}, empty_exception=True, user=request.user)
         student.delete()
         return Response(status=204)

@@ -80,11 +80,11 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
         operation_description="Update data of provided employee.",
         responses={200: convert_dict_to_serializer({"employee": EmployeeSerializer()}), 404: "No such employee"}
     )
-    def patch(self, request, pk):
+    def patch(self, request, employee_id):
         employee_update_serializer = EmployeeUpdateSerializer(data=request.data)
         employee_update_serializer.is_valid()
         employee = get_employee(
-            filters={"id": str(pk)},
+            filters={"id": str(employee_id)},
             empty_exception=True,
         )
         get_employee_profile(filters={"id": str(employee.employee_profile.id)}, user=request.user)
@@ -98,7 +98,7 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete employee.",
         responses={204: "Successfully deleted", 404: "No such employee"}
     )
-    def delete(self, request, pk):
-        employee = get_employee(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, employee_id):
+        employee = get_employee(filters={'id': employee_id}, empty_exception=True, user=request.user)
         employee.delete()
         return Response(status=204)

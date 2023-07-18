@@ -20,11 +20,11 @@ class PhotoApi(ApiAuthMixin, APIView):
         responses={200: convert_dict_to_serializer({"photo": PhotoSerializer()})},
         tags=[SwaggerTags.PHOTO_MANAGEMENT_PHOTOS]
     )
-    def patch(self, request, pk):
+    def patch(self, request, photo_id):
         photo_update_serializer = PhotoUpdateSerializer(data=request.data)
         photo_update_serializer.is_valid(raise_exception=True)
 
-        photo = get_photo(filters={"id": str(pk)}, empty_exception=True,
+        photo = get_photo(filters={"id": str(photo_id)}, empty_exception=True,
                           user=request.user)
         if not photo_update_serializer.validated_data.get("image"):
             return Response({"result": "Photo was not provided"}, status=204)

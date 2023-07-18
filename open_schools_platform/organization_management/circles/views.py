@@ -93,9 +93,9 @@ class GetCircleApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         responses={200: convert_dict_to_serializer({"circle": CircleSerializer()})}
     )
-    def get(self, request, pk):
+    def get(self, request, circle_id):
         circle = get_circle(
-            filters={"id": str(pk)},
+            filters={"id": str(circle_id)},
             empty_exception=True,
         )
         return Response({"circle": CircleSerializer(circle).data}, status=200)
@@ -107,14 +107,14 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         responses={200: convert_dict_to_serializer({"results": StudentProfileQuerySerializer(many=True)})}
     )
-    def get(self, request, pk):
+    def get(self, request, circle_id):
         get_circle(
-            filters={"id": str(pk)},
+            filters={"id": str(circle_id)},
             user=request.user,
             empty_exception=True,
         )
         queries = get_queries(
-            filters={"recipient_id": str(pk)},
+            filters={"recipient_id": str(circle_id)},
             empty_exception=True,
         )
         return Response(
@@ -150,8 +150,8 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete circle.",
         responses={204: "Successfully deleted", 404: "No such circle"}
     )
-    def delete(self, request, pk):
-        circle = get_circle(filters={'id': str(pk)}, empty_exception=True, user=request.user)
+    def delete(self, request, circle_id):
+        circle = get_circle(filters={'id': str(circle_id)}, empty_exception=True, user=request.user)
         circle.delete()
         return Response(status=204)
 
@@ -163,11 +163,11 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite student query.",
     )
-    def post(self, request, pk) -> Response:
+    def post(self, request, circle_id) -> Response:
         invite_serializer = CircleStudentInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
+        circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
         parent_phone = invite_serializer.validated_data["parent_phone"]
         student_phone = invite_serializer.validated_data["student_phone"]
         email = invite_serializer.validated_data["email"]
@@ -181,7 +181,7 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         student = create_student(**invite_serializer.validated_data["body"])
         get_families()
 
-        query = create_query(sender_model_name="circle", sender_id=pk,
+        query = create_query(sender_model_name="circle", sender_id=circle_id,
                              recipient_model_name="family", recipient_id=family.id,
                              body_model_name="student", body_id=student.id,
                              additional_model_name="studentprofile", additional_id=student_profile.id)
@@ -196,17 +196,17 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
         responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
         operation_description="Creates invite teacher query.",
     )
-    def post(self, request, pk) -> Response:
+    def post(self, request, circle_id) -> Response:
         invite_serializer = CircleTeacherInviteSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
+        get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
         phone = invite_serializer.validated_data["phone"]
 
         teacher_profile = get_teacher_profile(filters={'phone': str(phone)})
         teacher = create_teacher(**invite_serializer.validated_data["body"])
 
-        query = create_query(sender_model_name="circle", sender_id=pk,
+        query = create_query(sender_model_name="circle", sender_id=circle_id,
                              recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
                              body_model_name="teacher", body_id=teacher.id)
 
@@ -221,9 +221,9 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
-    def get(self, request, pk):
-        get_circle(filters={'id': str(pk)}, user=request.user, empty_exception=True)
-        students = get_students(filters={'circle': str(pk)})
+    def get(self, request, circle_id):
+        get_circle(filters={'id': str(circle_id)}, user=request.user, empty_exception=True)
+        students = get_students(filters={'circle': str(circle_id)})
         file = export_students(students, export_format='xlsx')
         return Response(file, status=200)
 
@@ -236,8 +236,8 @@ class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         responses={200: openapi.Response('File Attachment', schema=openapi.Schema(type=openapi.TYPE_FILE))}
     )
-    def get(self, request, pk):
-        circle = get_circle(filters={'id': str(pk)}, empty_exception=True)
+    def get(self, request, circle_id):
+        circle = get_circle(filters={'id': str(circle_id)}, empty_exception=True)
         self.filename = circle.name
         file = generate_ical(circle)
         return Response(file, status=200)
