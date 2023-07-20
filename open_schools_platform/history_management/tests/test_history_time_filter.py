@@ -14,7 +14,7 @@ class HistoryApiTests(TestCase):
         self.client = APIClient()
         self.student_profile_history_url = lambda pk, kwargs=None: reverse_querystring(
             'api:history-management:history:student-profile-history',
-            kwargs={'pk': pk}, query_kwargs=kwargs)
+            kwargs={'student_profile_id': pk}, query_kwargs=kwargs)
 
         self.user = create_logged_in_user(instance=self)
 

@@ -8,5 +8,5 @@ urlpatterns = [
     path('', MultipleViewManager({'get': FamiliesListApi, 'post': FamilyApi}).as_view(), name='family-api'),
     path('/<uuid:family_id>/student-profiles', FamilyStudentProfilesListApi.as_view(), name='student-profiles-list'),
     path('/invite-parent', InviteParentApi.as_view(), name='invite-parent'),
-    path('/<uuid:pk>', FamilyDeleteApi.as_view(), name="delete-family")
+    path('/<uuid:family_id>', FamilyDeleteApi.as_view(), name="delete-family")
 ]

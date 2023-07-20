@@ -61,9 +61,9 @@ class RetrieveCreationTokenApi(APIView):
                    200: convert_dict_to_serializer({"token": RetrieveCreationTokenSerializer()})},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
-    def get(self, request, pk):
+    def get(self, request, token_key):
         token = get_token(
-            filters={"key": pk},
+            filters={"key": token_key},
             empty_exception=True,
         )
 
@@ -107,11 +107,11 @@ class VerificationApi(APIView):
                    401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
-    def patch(self, request, pk):
+    def patch(self, request, token_key):
         otp_serializer = OtpSerializer(data=request.data)
         otp_serializer.is_valid(raise_exception=True)
 
-        token = get_token_with_checks(key=pk, verify_check=False)
+        token = get_token_with_checks(key=token_key, verify_check=False)
 
         response = check_otp_with_firebase(token.session, otp_serializer.validated_data["otp"])
         if response.status_code != 200:
@@ -132,11 +132,11 @@ class CodeResendApi(APIView):
                    404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
-    def post(self, request, pk):
+    def post(self, request, token_key):
         recaptcha_serializer = ResendSerializer(data=request.data)
         recaptcha_serializer.is_valid(raise_exception=True)
 
-        token = get_token_with_checks(key=pk, verify_check=False)
+        token = get_token_with_checks(key=token_key, verify_check=False)
 
         response = send_firebase_sms(str(token.phone), recaptcha_serializer.validated_data["recaptcha"])
 

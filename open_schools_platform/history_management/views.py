@@ -45,8 +45,8 @@ class UserHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': UserHistorySerializer()}),
                    404: "No such user"},
     )
-    def get(self, request, pk):
-        user = get_user(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, user_id):
+        user = get_user(filters={"id": user_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=UserHistorySerializer,
@@ -69,8 +69,8 @@ class OrganizationHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': OrganizationHistorySerializer()}),
                    404: "No such organization"},
     )
-    def get(self, request, pk):
-        organization = get_organization(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, organization_id):
+        organization = get_organization(filters={"id": organization_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=OrganizationHistorySerializer,
@@ -93,8 +93,8 @@ class EmployeeHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': EmployeeHistorySerializer()}),
                    404: "No such employee"},
     )
-    def get(self, request, pk):
-        employee = get_employee(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, employee_id):
+        employee = get_employee(filters={"id": employee_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=EmployeeHistorySerializer,
@@ -117,8 +117,8 @@ class CircleHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': CircleHistorySerializer()}),
                    404: "No such circle"},
     )
-    def get(self, request, pk):
-        circle = get_circle(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, circle_id):
+        circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=CircleHistorySerializer,
@@ -141,8 +141,8 @@ class StudentHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': StudentHistorySerializer()}),
                    404: "No such student"},
     )
-    def get(self, request, pk):
-        student = get_student(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, student_id):
+        student = get_student(filters={"id": student_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=StudentHistorySerializer,
@@ -165,8 +165,9 @@ class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': StudentProfileHistorySerializer()}),
                    404: "No such student-profile"},
     )
-    def get(self, request, pk):
-        student_profile = get_student_profile(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, student_profile_id):
+        student_profile = get_student_profile(filters={"id": student_profile_id}, user=request.user,
+                                              empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=StudentProfileHistorySerializer,
@@ -189,8 +190,9 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': EmployeeProfileHistorySerializer()}),
                    404: "No such employeeprofile"},
     )
-    def get(self, request, pk):
-        employee_profile = get_employee_profile(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, employee_profile_id):
+        employee_profile = get_employee_profile(filters={"id": employee_profile_id}, user=request.user,
+                                                empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=EmployeeProfileHistorySerializer,
@@ -213,8 +215,8 @@ class ParentProfileHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': ParentProfileHistorySerializer()}),
                    404: "No such parent-profile"},
     )
-    def get(self, request, pk):
-        parent_profile = get_parent_profile(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, parent_profile_id):
+        parent_profile = get_parent_profile(filters={"id": parent_profile_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=ParentProfileHistorySerializer,
@@ -237,8 +239,8 @@ class FamilyHistoryApi(ApiAuthMixin, ListAPIView):
         responses={200: convert_dict_to_serializer({'results': FamilyHistorySerializer()}),
                    404: "No such family"},
     )
-    def get(self, request, pk):
-        family = get_family(filters={"id": pk}, user=request.user, empty_exception=True)
+    def get(self, request, family_id):
+        family = get_family(filters={"id": family_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
             serializer_class=FamilyHistorySerializer,

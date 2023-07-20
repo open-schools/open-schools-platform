@@ -127,7 +127,7 @@ class FamilyDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete family.",
         responses={204: "Successfully deleted", 404: "No such family"}
     )
-    def delete(self, request, pk):
-        family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, family_id):
+        family = get_family(filters={'id': family_id}, empty_exception=True, user=request.user)
         family.delete()
         return Response(status=204)
