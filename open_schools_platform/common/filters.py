@@ -4,7 +4,7 @@ from typing import List, Type
 import django_filters
 from django.core.exceptions import FieldError
 from django.db.models import Q, QuerySet
-from django_filters import CharFilter, BaseInFilter, UUIDFilter, ChoiceFilter, AllValuesFilter
+from django_filters import CharFilter, BaseInFilter, UUIDFilter, ChoiceFilter, AllValuesFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
 from safedelete.config import DELETED_ONLY_VISIBLE, DELETED_VISIBLE
@@ -74,13 +74,13 @@ class BaseFilterSet(django_filters.FilterSet):
             * not have lookup_expr that is not allowed. Allowed lookup_expressions: [i]contains, [i]exact
     3. Will order result by "-created_at" field
         * To use this class your input model type should inherit BaseModel
-        otherwise you can redefine ORDER_FIELD
-        * To disable this feature write ORDER_FIELD=None
+        otherwise you can redefine DEFAULT_ORDER_FIELD
+        * To disable this feature write DEFAULT_ORDER_FIELD=None
         * Note: symbol '-' is the reverse trigger
     4. SoftCondition by default is NOT_DELETED
     """
     OR_SEARCH_FIELD = "or_search"
-    ORDER_FIELD = "-created_at"
+    DEFAULT_ORDER_FIELD = "-created_at"
     MODEL_CHARFIELD = "CharField"
     ALLOWED_FILTER_TYPES = [CharFilter, ChoiceFilter, AllValuesFilter]
     ALLOWED_LOOKUP_EXPR = ["icontains", "contains", "exact", "iexact"]
@@ -107,8 +107,9 @@ class BaseFilterSet(django_filters.FilterSet):
     @property
     def qs(self):
         base_queryset = super().qs.all(force_visibility=self.force_visibility.value)
-        if self.ORDER_FIELD:
-            base_queryset = base_queryset.order_by(self.ORDER_FIELD)
+
+        if not self._has_provided_filter(OrderingFilter):
+            base_queryset = base_queryset.order_by(self.DEFAULT_ORDER_FIELD)
 
         if not self.or_search:
             return base_queryset
@@ -149,6 +150,12 @@ class BaseFilterSet(django_filters.FilterSet):
             response[new_key] = value
 
         return response
+
+    def _has_provided_filter(self, filter_type: Type):
+        for name, filter_field in self.get_filters().items():
+            if isinstance(filter_field, filter_type) and self.data.get(name, False):
+                return True
+        return False
 
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
