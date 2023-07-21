@@ -3,18 +3,16 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from open_schools_platform.common.serializers import BaseModelSerializer
-from open_schools_platform.photo_management.photos.serializers import PhotoSerializer
+from open_schools_platform.photo_management.photos.serializers import GetPhotoSerializer
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
 
 
-class StudentProfileFullSerializer(BaseModelSerializer):
-    photo = PhotoSerializer()
-    family = serializers.UUIDField(required=True)
+class CreateStudentProfileAutoStudentJoinCircleSerializer(BaseModelSerializer):
 
     class Meta:
         model = StudentProfile
-        fields = ("id", "name", "age", "phone", "photo", "family")
+        fields = ("age", "name", "phone")
 
 
 class UpdateStudentProfileSerializer(serializers.Serializer):
@@ -24,39 +22,75 @@ class UpdateStudentProfileSerializer(serializers.Serializer):
     phone = PhoneNumberField(max_length=17, required=False)
 
 
-class StudentProfileSerializer(BaseModelSerializer):
-    photo = PhotoSerializer()
+class GetStudentProfileSerializer(BaseModelSerializer):
+    photo = GetPhotoSerializer()
 
     class Meta:
         model = StudentProfile
         fields = ("id", "name", "age", "phone", "photo")
 
 
-class StudentSerializer(BaseModelSerializer):
-    student_profile = StudentProfileFullSerializer.with_fields(["id", "name", "age", "phone", "photo"])()
+class CreateStudentProfileSerializer(BaseModelSerializer):
+    family = serializers.UUIDField(required=True)
+
+    class Meta:
+        model = StudentProfile
+        fields = ("name", "age", "phone", "family")
+
+
+class GetStudentProfileSenderForOrganizationSerializer(BaseModelSerializer):
+    photo = GetPhotoSerializer()
+
+    class Meta:
+        model = StudentProfile
+        fields = ("id", "photo")
+
+
+class GetStudentBodySerializer(BaseModelSerializer):
+
+    class Meta:
+        model = Student
+        fields = ("id", "name")
+
+
+class CreateStudentBodySerializer(BaseModelSerializer):
+
+    class Meta:
+        model = Student
+        fields = ("name", )
+
+
+class GetStudentSerializer(BaseModelSerializer):
+    student_profile = GetStudentProfileSerializer()
 
     class Meta:
         model = Student
         fields = ("id", "name", "circle", "student_profile")
 
 
-class StudentProfileAdditionalSerializer(BaseModelSerializer):
+class GetStudentJoinCircleContext(BaseModelSerializer):
     class Meta:
         model = StudentProfileCircleAdditional
         fields = ("parent_phone", "parent_name", "student_phone", "text")
 
 
-class AutoStudentJoinCircleQuerySerializer(serializers.Serializer):
+class CreateStudentJoinCircleContext(BaseModelSerializer):
+    class Meta:
+        model = StudentProfileCircleAdditional
+        fields = ("text", )
+
+
+class CreateAutoStudentJoinCircleSerializer(serializers.Serializer):
     circle = serializers.UUIDField(required=True)
-    additional = StudentProfileAdditionalSerializer.with_fields(["text"])(required=True)
-    student_profile = StudentProfileFullSerializer.with_fields(["age", "name", "phone"])(required=True)
+    additional = CreateStudentJoinCircleContext()
+    student_profile = CreateStudentProfileAutoStudentJoinCircleSerializer()
 
 
-class StudentJoinCircleQuerySerializer(serializers.Serializer):
+class CreateStudentJoinCircleSerializer(serializers.Serializer):
     circle = serializers.UUIDField(required=True)
-    additional = StudentProfileAdditionalSerializer.with_fields(["text"])(required=True)
+    additional = CreateStudentJoinCircleContext()
 
 
-class StudentJoinCircleQueryUpdateSerializer(serializers.Serializer):
+class UpdateStudentJoinCircleSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
-    body = StudentSerializer.with_fields(['name'])()
+    body = CreateStudentBodySerializer()

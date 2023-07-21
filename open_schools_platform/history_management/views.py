@@ -21,15 +21,16 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from open_schools_platform.organization_management.employees.selectors import get_employee, get_employee_profile
 from open_schools_platform.student_management.students.selectors import get_student, get_student_profile
 from open_schools_platform.organization_management.circles.selectors import get_circle
-from open_schools_platform.history_management.serializers.user_serializer import UserHistorySerializer
-from open_schools_platform.history_management.serializers.organization_serializer import OrganizationHistorySerializer
-from open_schools_platform.history_management.serializers.employee_serializer import EmployeeHistorySerializer, \
-    EmployeeProfileHistorySerializer
-from open_schools_platform.history_management.serializers.circle_serializer import CircleHistorySerializer
-from open_schools_platform.history_management.serializers.student_serializer import StudentHistorySerializer, \
-    StudentProfileHistorySerializer
-from open_schools_platform.history_management.serializers.parent_serializer import ParentProfileHistorySerializer
-from open_schools_platform.history_management.serializers.family_serializer import FamilyHistorySerializer
+from open_schools_platform.history_management.serializers.user_serializer import GetUserHistorySerializer
+from open_schools_platform.history_management.serializers.organization_serializer import \
+    GetOrganizationHistorySerializer
+from open_schools_platform.history_management.serializers.employee_serializer import GetEmployeeHistorySerializer, \
+    GetEmployeeProfileHistorySerializer
+from open_schools_platform.history_management.serializers.circle_serializer import GetCircleHistorySerializer
+from open_schools_platform.history_management.serializers.student_serializer import GetStudentHistorySerializer, \
+    GetStudentProfileHistorySerializer
+from open_schools_platform.history_management.serializers.parent_serializer import GetParentProfileHistorySerializer
+from open_schools_platform.history_management.serializers.family_serializer import GetFamilyHistorySerializer
 from rest_framework.generics import ListAPIView
 
 
@@ -37,19 +38,19 @@ class UserHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = User.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = UserHistorySerializer
+    serializer_class = GetUserHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get user history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': UserHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetUserHistorySerializer()}),
                    404: "No such user"},
     )
     def get(self, request, user_id):
         user = get_user(filters={"id": user_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=UserHistorySerializer,
+            serializer_class=GetUserHistorySerializer,
             queryset=get_history(user, request.GET.dict()),
             request=request,
             view=self
@@ -61,19 +62,19 @@ class OrganizationHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = OrganizationHistorySerializer
+    serializer_class = GetOrganizationHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get organization history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': OrganizationHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetOrganizationHistorySerializer()}),
                    404: "No such organization"},
     )
     def get(self, request, organization_id):
         organization = get_organization(filters={"id": organization_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=OrganizationHistorySerializer,
+            serializer_class=GetOrganizationHistorySerializer,
             queryset=get_history(organization, request.GET.dict()),
             request=request,
             view=self
@@ -85,19 +86,19 @@ class EmployeeHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Employee.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = EmployeeHistorySerializer
+    serializer_class = GetEmployeeHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get employee history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': EmployeeHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetEmployeeHistorySerializer()}),
                    404: "No such employee"},
     )
     def get(self, request, employee_id):
         employee = get_employee(filters={"id": employee_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=EmployeeHistorySerializer,
+            serializer_class=GetEmployeeHistorySerializer,
             queryset=get_history(employee, request.GET.dict()),
             request=request,
             view=self
@@ -109,19 +110,19 @@ class CircleHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = CircleHistorySerializer
+    serializer_class = GetCircleHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get circle history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': CircleHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetCircleHistorySerializer()}),
                    404: "No such circle"},
     )
     def get(self, request, circle_id):
         circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=CircleHistorySerializer,
+            serializer_class=GetCircleHistorySerializer,
             queryset=get_history(circle, request.GET.dict()),
             request=request,
             view=self
@@ -133,19 +134,19 @@ class StudentHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Student.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = StudentHistorySerializer
+    serializer_class = GetStudentHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get student history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': StudentHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetStudentHistorySerializer()}),
                    404: "No such student"},
     )
     def get(self, request, student_id):
         student = get_student(filters={"id": student_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=StudentHistorySerializer,
+            serializer_class=GetStudentHistorySerializer,
             queryset=get_history(student, request.GET.dict()),
             request=request,
             view=self
@@ -157,12 +158,12 @@ class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = StudentProfile.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = StudentProfileHistorySerializer
+    serializer_class = GetStudentProfileHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get student-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': StudentProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetStudentProfileHistorySerializer()}),
                    404: "No such student-profile"},
     )
     def get(self, request, student_profile_id):
@@ -170,7 +171,7 @@ class StudentProfileHistoryApi(ApiAuthMixin, ListAPIView):
                                               empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=StudentProfileHistorySerializer,
+            serializer_class=GetStudentProfileHistorySerializer,
             queryset=get_history(student_profile, request.GET.dict()),
             request=request,
             view=self
@@ -182,12 +183,12 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = EmployeeProfile.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = EmployeeProfileHistorySerializer
+    serializer_class = GetEmployeeProfileHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get employee-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': EmployeeProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetEmployeeProfileHistorySerializer()}),
                    404: "No such employeeprofile"},
     )
     def get(self, request, employee_profile_id):
@@ -195,7 +196,7 @@ class EmployeeProfileHistoryApi(ApiAuthMixin, ListAPIView):
                                                 empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=EmployeeProfileHistorySerializer,
+            serializer_class=GetEmployeeProfileHistorySerializer,
             queryset=get_history(employee_profile, request.GET.dict()),
             request=request,
             view=self
@@ -207,19 +208,19 @@ class ParentProfileHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = ParentProfile.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = ParentProfileHistorySerializer
+    serializer_class = GetParentProfileHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get parent-profile history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': ParentProfileHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetParentProfileHistorySerializer()}),
                    404: "No such parent-profile"},
     )
     def get(self, request, parent_profile_id):
         parent_profile = get_parent_profile(filters={"id": parent_profile_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=ParentProfileHistorySerializer,
+            serializer_class=GetParentProfileHistorySerializer,
             queryset=get_history(parent_profile, request.GET.dict()),
             request=request,
             view=self
@@ -231,19 +232,19 @@ class FamilyHistoryApi(ApiAuthMixin, ListAPIView):
     queryset = Family.objects.all()
     filterset_class = HistoryFilter
     pagination_class = ApiHistoryListPagination
-    serializer_class = FamilyHistorySerializer
+    serializer_class = GetFamilyHistorySerializer
 
     @swagger_auto_schema(
         operation_description="Get family history",
         tags=[SwaggerTags.HISTORY_MANAGEMENT],
-        responses={200: convert_dict_to_serializer({'results': FamilyHistorySerializer()}),
+        responses={200: convert_dict_to_serializer({'results': GetFamilyHistorySerializer()}),
                    404: "No such family"},
     )
     def get(self, request, family_id):
         family = get_family(filters={"id": family_id}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiHistoryListPagination,
-            serializer_class=FamilyHistorySerializer,
+            serializer_class=GetFamilyHistorySerializer,
             queryset=get_history(family, request.GET.dict()),
             request=request,
             view=self

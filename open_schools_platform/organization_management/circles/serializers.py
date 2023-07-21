@@ -4,9 +4,9 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from open_schools_platform.organization_management.circles.models import Circle
-from open_schools_platform.organization_management.organizations.serializers import CircleOrganizationSerializer
-from open_schools_platform.organization_management.teachers.serializers import TeacherSerializer
-from open_schools_platform.student_management.students.models import Student
+from open_schools_platform.organization_management.organizations.serializers import GetCircleOrganizationSerializer
+from open_schools_platform.organization_management.teachers.serializers import GetTeacherSerializer
+from open_schools_platform.student_management.students.serializers import CreateStudentBodySerializer
 
 
 def validate_geometry_string(string):
@@ -27,9 +27,9 @@ class CreateCircleSerializer(serializers.ModelSerializer):
         fields = ('name', 'organization', 'address', 'capacity', 'description', 'location')
 
 
-class CircleSerializer(serializers.ModelSerializer):
-    organization = CircleOrganizationSerializer()
-    teachers = TeacherSerializer(many=True)
+class GetCircleSerializer(serializers.ModelSerializer):
+    organization = GetCircleOrganizationSerializer()
+    teachers = GetTeacherSerializer(many=True)
 
     class Meta:
         model = Circle
@@ -37,28 +37,22 @@ class CircleSerializer(serializers.ModelSerializer):
                   'longitude')
 
 
-class CircleListSerializer(serializers.ModelSerializer):
+class GetCircleListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
         fields = ('id', 'name', 'address', 'latitude', 'longitude')
 
 
-class QueryCircleRecipientSerializer(serializers.ModelSerializer):
-    organization = CircleOrganizationSerializer()
+class GetCircleRecipientSerializer(serializers.ModelSerializer):
+    organization = GetCircleOrganizationSerializer()
 
     class Meta:
         model = Circle
         fields = ('id', 'name', 'organization', 'address')
 
 
-class QueryCircleStudentBodySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Student
-        fields = ("name",)
-
-
-class CircleStudentInviteSerializer(serializers.Serializer):
-    body = QueryCircleStudentBodySerializer(required=True)
+class CreateCircleInviteStudentSerializer(serializers.Serializer):
+    body = CreateStudentBodySerializer(required=True)
     student_phone = PhoneNumberField(max_length=17, required=False)
     parent_phone = PhoneNumberField(max_length=17, required=True)
     email = serializers.EmailField(max_length=255, required=True)

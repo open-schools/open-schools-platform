@@ -4,7 +4,7 @@ from open_schools_platform.history_management.serializers.history_serializer imp
 from open_schools_platform.organization_management.circles.models import Circle
 
 
-class CircleHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
+class GetCircleHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = Circle
         fields = ('id', 'name', 'organization', 'address', 'capacity', 'description', 'history_id', 'history_user_id',
