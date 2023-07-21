@@ -55,7 +55,7 @@ class GetEmployeeBodySerializer(serializers.ModelSerializer):
         fields = ("name", "position")
 
 
-class GetEmployeeListSerializer(serializers.ModelSerializer):
+class GetListEmployeeSerializer(serializers.ModelSerializer):
     employee_profile = GetEmployeeProfileWithUserSerializer()
 
     def to_representation(self, instance):

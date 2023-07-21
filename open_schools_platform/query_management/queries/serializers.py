@@ -26,7 +26,7 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ('id', 'sender', 'recipient', 'status', 'body', 'additional')
 
 
-class GetEmployeeJoinOrganizationSerializer(QuerySerializer):
+class GetOrganizationInviteEmployeeSerializer(QuerySerializer):
     sender = GetOrganizationSenderSerializer()
     recipient = GetEmployeeProfileRecipientSerializer()
     body = GetEmployeeBodySerializer()

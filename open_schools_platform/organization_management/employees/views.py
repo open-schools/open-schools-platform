@@ -15,19 +15,19 @@ from open_schools_platform.organization_management.employees.models import Emplo
 from open_schools_platform.organization_management.employees.paginators import EmployeeApiListPagination
 from open_schools_platform.organization_management.employees.selectors import get_employees, get_employee_profile, \
     get_employee
-from open_schools_platform.organization_management.employees.serializers import GetEmployeeListSerializer, \
+from open_schools_platform.organization_management.employees.serializers import GetListEmployeeSerializer, \
     GetEmployeeSerializer, UpdateEmployeeSerializer
 from open_schools_platform.organization_management.employees.services import update_employee
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 
 from open_schools_platform.query_management.queries.selectors import get_queries
-from open_schools_platform.query_management.queries.serializers import GetEmployeeJoinOrganizationSerializer
+from open_schools_platform.query_management.queries.serializers import GetOrganizationInviteEmployeeSerializer
 
 
 class EmployeeListApi(ApiAuthMixin, ListAPIView):
     queryset = Employee.objects.all()
     pagination_class = EmployeeApiListPagination
-    serializer_class = GetEmployeeListSerializer
+    serializer_class = GetListEmployeeSerializer
     filterset_class = EmployeeFilter
 
     @swagger_auto_schema(
@@ -45,7 +45,7 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
         get_organization(filters={"id": filters["organization"]}, user=request.user)
         response = get_paginated_response(
             pagination_class=EmployeeApiListPagination,
-            serializer_class=GetEmployeeListSerializer,
+            serializer_class=GetListEmployeeSerializer,
             queryset=get_employees(filters=request.GET.dict()),
             request=request,
             view=self
@@ -57,7 +57,7 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Get all queries for the provided employee profile",
-        responses={200: convert_dict_to_serializer({"results": GetEmployeeJoinOrganizationSerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": GetOrganizationInviteEmployeeSerializer(many=True)})}
     )
     def get(self, request):
         employee_profile = get_employee_profile(
@@ -70,7 +70,7 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
             filters={'recipient_id': str(employee_profile.id),
                      'sender_ct': ContentType.objects.get(model="organization")})
 
-        return Response({"results": GetEmployeeJoinOrganizationSerializer(queries, many=True).data}, status=200)
+        return Response({"results": GetOrganizationInviteEmployeeSerializer(queries, many=True).data}, status=200)
 
 
 class EmployeeUpdateApi(ApiAuthMixin, APIView):

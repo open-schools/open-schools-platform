@@ -13,7 +13,7 @@ from open_schools_platform.organization_management.circles.filters import Circle
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles_by_students
-from open_schools_platform.organization_management.circles.serializers import GetCircleListSerializer
+from open_schools_platform.organization_management.circles.serializers import GetListCircleSerializer
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import add_student_profile_to_family
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
@@ -207,7 +207,7 @@ class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
-    serializer_class = GetCircleListSerializer
+    serializer_class = GetListCircleSerializer
 
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -225,7 +225,7 @@ class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
         circles = get_circles_by_students(students=students, filters=request.GET.dict())
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
-            serializer_class=GetCircleListSerializer,
+            serializer_class=GetListCircleSerializer,
             queryset=circles,
             request=request,
             view=self

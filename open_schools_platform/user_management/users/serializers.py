@@ -10,7 +10,7 @@ from open_schools_platform.student_management.students.serializers import GetStu
 from open_schools_platform.user_management.users.models import CreationToken, User
 
 
-class CreateCreationTokenSerializer(serializers.Serializer):
+class CreateRegistrationTokenSerializer(serializers.Serializer):
     phone = PhoneNumberField(
         max_length=17,
         required=True,
@@ -21,7 +21,7 @@ class CreateCreationTokenSerializer(serializers.Serializer):
     )
 
 
-class GetCreationTokenSerializer(serializers.ModelSerializer):
+class GetRegistrationTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreationToken
         fields = ("key", "phone", "is_verified")

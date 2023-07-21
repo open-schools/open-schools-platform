@@ -11,7 +11,7 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetCircleListSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
     is_organization_related_to_student_profile, generate_ical
 from open_schools_platform.organization_management.organizations.selectors import get_organization
@@ -62,7 +62,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
-    serializer_class = GetCircleListSerializer
+    serializer_class = GetListCircleSerializer
 
     @swagger_auto_schema(
         operation_description="Get all circles",
@@ -79,7 +79,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
 
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
-            serializer_class=GetCircleListSerializer,
+            serializer_class=GetListCircleSerializer,
             queryset=get_circles(filters=request.GET.dict()),
             request=request,
             view=self

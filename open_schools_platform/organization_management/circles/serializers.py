@@ -4,7 +4,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
 from open_schools_platform.organization_management.circles.models import Circle
-from open_schools_platform.organization_management.organizations.serializers import GetCircleOrganizationSerializer
+from open_schools_platform.organization_management.organizations.serializers import GetShallowOrganizationSerializer
 from open_schools_platform.organization_management.teachers.serializers import GetTeacherSerializer
 from open_schools_platform.student_management.students.serializers import CreateStudentBodySerializer
 
@@ -28,7 +28,7 @@ class CreateCircleSerializer(serializers.ModelSerializer):
 
 
 class GetCircleSerializer(serializers.ModelSerializer):
-    organization = GetCircleOrganizationSerializer()
+    organization = GetShallowOrganizationSerializer()
     teachers = GetTeacherSerializer(many=True)
 
     class Meta:
@@ -37,14 +37,14 @@ class GetCircleSerializer(serializers.ModelSerializer):
                   'longitude')
 
 
-class GetCircleListSerializer(serializers.ModelSerializer):
+class GetListCircleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
         fields = ('id', 'name', 'address', 'latitude', 'longitude')
 
 
 class GetCircleRecipientSerializer(serializers.ModelSerializer):
-    organization = GetCircleOrganizationSerializer()
+    organization = GetShallowOrganizationSerializer()
 
     class Meta:
         model = Circle

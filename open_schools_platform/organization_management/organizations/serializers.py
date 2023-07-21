@@ -24,7 +24,7 @@ class GetOrganizationSenderSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class GetCircleOrganizationSerializer(serializers.ModelSerializer):
+class GetShallowOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("id", "name")

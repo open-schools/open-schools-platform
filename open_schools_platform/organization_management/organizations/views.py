@@ -38,7 +38,7 @@ from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
-    GetEmployeeJoinOrganizationSerializer, GetStudentJoinCircleSerializer
+    GetOrganizationInviteEmployeeSerializer, GetStudentJoinCircleSerializer
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
@@ -123,7 +123,7 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=UpdateOrganizationInviteEmployeeSerializer,
-        responses={200: convert_dict_to_serializer({"query": GetEmployeeJoinOrganizationSerializer()}),
+        responses={200: convert_dict_to_serializer({"query": GetOrganizationInviteEmployeeSerializer()}),
                    400: "Cant update query because it's status is not SENT",
                    404: "No such query"},
         operation_description="Update body of invite employee query",
@@ -140,13 +140,13 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
             query=query,
             data=query_update_serializer.validated_data["body"]
         )
-        return Response({"query": GetEmployeeJoinOrganizationSerializer(query).data}, status=200)
+        return Response({"query": GetOrganizationInviteEmployeeSerializer(query).data}, status=200)
 
 
 class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"results": GetEmployeeJoinOrganizationSerializer(many=True)})},
+        responses={200: convert_dict_to_serializer({"results": GetOrganizationInviteEmployeeSerializer(many=True)})},
         operation_description="Get all queries for organization of current user",
     )
     def get(self, request, organization_id):
@@ -156,7 +156,7 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
             empty_exception=True,
         )
         queries = get_queries(filters={'sender_id': str(organization.id)})
-        return Response({"results": GetEmployeeJoinOrganizationSerializer(queries, many=True).data}, status=200)
+        return Response({"results": GetOrganizationInviteEmployeeSerializer(queries, many=True).data}, status=200)
 
 
 class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
