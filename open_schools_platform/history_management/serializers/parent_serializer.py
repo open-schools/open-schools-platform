@@ -4,7 +4,7 @@ from open_schools_platform.history_management.serializers.history_serializer imp
 from open_schools_platform.parent_management.parents.models import ParentProfile
 
 
-class ParentProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
+class GetParentProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = ParentProfile
         fields = ('id', 'name', 'user', 'history_id', 'history_user_id', 'history_date', 'history_type')

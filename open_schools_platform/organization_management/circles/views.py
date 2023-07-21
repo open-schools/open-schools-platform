@@ -11,7 +11,7 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    CircleSerializer, CircleStudentInviteSerializer, CircleListSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
     is_organization_related_to_student_profile, generate_ical
 from open_schools_platform.organization_management.organizations.selectors import get_organization
@@ -19,7 +19,7 @@ from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
 from ..teachers.selectors import get_teacher_profile
-from ..teachers.serializers import CircleTeacherInviteSerializer
+from ..teachers.serializers import CreateCircleInviteTeacherSerializer
 from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import convert_dict_to_serializer
@@ -27,13 +27,13 @@ from ...parent_management.families.selectors import get_families
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
 from ...query_management.queries.selectors import get_queries
-from ...query_management.queries.serializers import StudentProfileQuerySerializer, QueryStatusSerializer
+from ...query_management.queries.serializers import GetStudentJoinCircleSerializer, GetQueryStatusSerializer
 from ...query_management.queries.services import create_query
 from ...student_management.students.filters import StudentFilter
 from ...student_management.students.models import Student
 from ...student_management.students.paginators import ApiStudentsListPagination
 from ...student_management.students.selectors import get_students, get_students_from_circle_with_filters
-from ...student_management.students.serializers import StudentSerializer
+from ...student_management.students.serializers import GetStudentSerializer
 from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
     export_students
 
@@ -42,7 +42,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create circle via provided name and organization.",
         request_body=CreateCircleSerializer,
-        responses={201: convert_dict_to_serializer({"circle": CircleSerializer()}), 404: "No such organization"},
+        responses={201: convert_dict_to_serializer({"circle": GetCircleSerializer()}), 404: "No such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
     def post(self, request):
@@ -55,14 +55,14 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         )
         circle = create_circle(**get_dict_excluding_fields(create_circle_serializer.validated_data, ["organization"]),
                                organization=organization)
-        return Response({"circle": CircleSerializer(circle).data}, status=201)
+        return Response({"circle": GetCircleSerializer(circle).data}, status=201)
 
 
 class GetCirclesApi(ApiAuthMixin, ListAPIView):
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
-    serializer_class = CircleListSerializer
+    serializer_class = GetListCircleSerializer
 
     @swagger_auto_schema(
         operation_description="Get all circles",
@@ -79,7 +79,7 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
 
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
-            serializer_class=CircleListSerializer,
+            serializer_class=GetListCircleSerializer,
             queryset=get_circles(filters=request.GET.dict()),
             request=request,
             view=self
@@ -91,21 +91,21 @@ class GetCircleApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"circle": CircleSerializer()})}
+        responses={200: convert_dict_to_serializer({"circle": GetCircleSerializer()})}
     )
     def get(self, request, circle_id):
         circle = get_circle(
             filters={"id": str(circle_id)},
             empty_exception=True,
         )
-        return Response({"circle": CircleSerializer(circle).data}, status=200)
+        return Response({"circle": GetCircleSerializer(circle).data}, status=200)
 
 
 class CirclesQueriesListApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        responses={200: convert_dict_to_serializer({"results": StudentProfileQuerySerializer(many=True)})}
+        responses={200: convert_dict_to_serializer({"results": GetStudentJoinCircleSerializer(many=True)})}
     )
     def get(self, request, circle_id):
         get_circle(
@@ -118,7 +118,7 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
             empty_exception=True,
         )
         return Response(
-            {"results": StudentProfileQuerySerializer(queries, many=True, context={'request': request}).data},
+            {"results": GetStudentJoinCircleSerializer(queries, many=True, context={'request': request}).data},
             status=200)
 
 
@@ -126,7 +126,7 @@ class CirclesStudentsListApi(ApiAuthMixin, ListAPIView):
     queryset = Student.objects.all()
     filterset_class = StudentFilter
     pagination_class = ApiStudentsListPagination
-    serializer_class = StudentSerializer
+    serializer_class = GetStudentSerializer
 
     @swagger_auto_schema(
         operation_description="Get students in this circle",
@@ -136,7 +136,7 @@ class CirclesStudentsListApi(ApiAuthMixin, ListAPIView):
         circle = get_circle(filters={"id": str(circle_id)}, user=request.user, empty_exception=True)
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
-            serializer_class=StudentSerializer,
+            serializer_class=GetStudentSerializer,
             queryset=get_students_from_circle_with_filters(circle, request.GET.dict()),
             request=request,
             view=self
@@ -159,12 +159,12 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
 class InviteStudentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        request_body=CircleStudentInviteSerializer,
-        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
+        request_body=CreateCircleInviteStudentSerializer,
+        responses={201: convert_dict_to_serializer({"query": GetQueryStatusSerializer()})},
         operation_description="Creates invite student query.",
     )
     def post(self, request, circle_id) -> Response:
-        invite_serializer = CircleStudentInviteSerializer(data=request.data)
+        invite_serializer = CreateCircleInviteStudentSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
         circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
@@ -186,18 +186,18 @@ class InviteStudentApi(ApiAuthMixin, APIView):
                              body_model_name="student", body_id=student.id,
                              additional_model_name="studentprofile", additional_id=student_profile.id)
 
-        return Response({"query": QueryStatusSerializer(query).data}, status=201)
+        return Response({"query": GetQueryStatusSerializer(query).data}, status=201)
 
 
 class InviteTeacherApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        request_body=CircleTeacherInviteSerializer,
-        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()})},
+        request_body=CreateCircleInviteTeacherSerializer,
+        responses={201: convert_dict_to_serializer({"query": GetQueryStatusSerializer()})},
         operation_description="Creates invite teacher query.",
     )
     def post(self, request, circle_id) -> Response:
-        invite_serializer = CircleTeacherInviteSerializer(data=request.data)
+        invite_serializer = CreateCircleInviteTeacherSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
         get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
@@ -210,7 +210,7 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
                              recipient_model_name="teacherprofile", recipient_id=teacher_profile.id,
                              body_model_name="teacher", body_id=teacher.id)
 
-        return Response({"query": QueryStatusSerializer(query).data}, status=201)
+        return Response({"query": GetQueryStatusSerializer(query).data}, status=201)
 
 
 class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):

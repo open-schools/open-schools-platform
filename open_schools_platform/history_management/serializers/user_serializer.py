@@ -4,7 +4,7 @@ from open_schools_platform.history_management.serializers.history_serializer imp
 from open_schools_platform.user_management.users.models import User
 
 
-class UserHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
+class GetUserHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     last_login = serializers.CharField(required=False)
     last_login_ip_address = serializers.CharField(required=False)
 

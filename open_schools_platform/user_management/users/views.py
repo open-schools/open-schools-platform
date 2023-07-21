@@ -15,8 +15,8 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 
 # TODO: When JWT is resolved, add authenticated version
 from open_schools_platform.user_management.users.serializers \
-    import CreationTokenSerializer, UserRegisterSerializer, OtpSerializer, \
-    RetrieveCreationTokenSerializer, ResendSerializer, \
+    import CreateRegistrationTokenSerializer, CreateUserSerializer, OtpSerializer, \
+    GetRegistrationTokenSerializer, ResendSerializer, \
     PasswordResetSerializer, FCMNotificationToken
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
@@ -29,7 +29,7 @@ class CreationTokenApi(CreateAPIView):
     @swagger_auto_schema(
         operation_description="Send sms to entered phone number and"
                               "return token for phone verification. Creation token id as a response.",
-        request_body=CreationTokenSerializer,
+        request_body=CreateRegistrationTokenSerializer,
         responses={200: "Use old sms, it is still alive. Creation token id as response.",
                    201: "Token created and SMS was sent. Creation token id as response.",
                    400: "Probably incorrect recaptcha.", 401: "Token is not verified or it is overdue.",
@@ -37,7 +37,7 @@ class CreationTokenApi(CreateAPIView):
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request):
-        token_serializer = CreationTokenSerializer(data=request.data)
+        token_serializer = CreateRegistrationTokenSerializer(data=request.data)
         token_serializer.is_valid(raise_exception=True)
 
         token = get_token(filters=token_serializer.validated_data)
@@ -58,7 +58,7 @@ class RetrieveCreationTokenApi(APIView):
     @swagger_auto_schema(
         operation_description="Return CreationToken data.",
         responses={404: "Token with that id was not found.",
-                   200: convert_dict_to_serializer({"token": RetrieveCreationTokenSerializer()})},
+                   200: convert_dict_to_serializer({"token": GetRegistrationTokenSerializer()})},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def get(self, request, token_key):
@@ -67,19 +67,19 @@ class RetrieveCreationTokenApi(APIView):
             empty_exception=True,
         )
 
-        return Response({"token": RetrieveCreationTokenSerializer(token).data}, status=200)
+        return Response({"token": GetRegistrationTokenSerializer(token).data}, status=200)
 
 
 class UserApi(CreateAPIView):
     @swagger_auto_schema(
         operation_description="Create user due to verificated token.",
-        request_body=UserRegisterSerializer,
+        request_body=CreateUserSerializer,
         responses={201: "User was successfully created. JWT token as a response.",
                    401: "Token is not verified or it is overdue.", 404: "Such token was not found."},
         tags=[SwaggerTags.USER_MANAGEMENT_USERS]
     )
     def post(self, request, *args, **kwargs):
-        user_serializer = UserRegisterSerializer(data=request.data)
+        user_serializer = CreateUserSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
 
         token = get_token_with_checks(key=user_serializer.validated_data['token'])

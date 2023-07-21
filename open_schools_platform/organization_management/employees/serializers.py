@@ -2,18 +2,19 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
-from open_schools_platform.organization_management.organizations.serializers import OrganizationSerializer
+from open_schools_platform.organization_management.organizations.serializers import \
+    GetOrganizationSerializer
 from open_schools_platform.user_management.users.models import User
 
 
-class EmployeeProfileUserSerializer(serializers.ModelSerializer):
+class GetEmployeeProfileUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "phone", "name")
 
 
-class EmployeeProfileWithUserSerializer(serializers.ModelSerializer):
-    user = EmployeeProfileUserSerializer()
+class GetEmployeeProfileWithUserSerializer(serializers.ModelSerializer):
+    user = GetEmployeeProfileUserSerializer()
 
     class Meta:
         model = EmployeeProfile
@@ -21,14 +22,20 @@ class EmployeeProfileWithUserSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class EmployeeProfileSerializer(serializers.ModelSerializer):
+class GetEmployeeProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeProfile
         fields = ("id", "name", "user")
 
 
-class EmployeeSerializer(serializers.ModelSerializer):
-    organization = OrganizationSerializer(read_only=True)
+class GetEmployeeProfileRecipientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeProfile
+        fields = ("id", "name", "user")
+
+
+class GetEmployeeSerializer(serializers.ModelSerializer):
+    organization = GetOrganizationSerializer(read_only=True)
 
     class Meta:
         model = Employee
@@ -36,20 +43,20 @@ class EmployeeSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class EmployeeUpdateSerializer(serializers.ModelSerializer):
+class UpdateEmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ("name",)
 
 
-class QueryEmployeeBodySerializer(serializers.ModelSerializer):
+class GetEmployeeBodySerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ("name", "position")
 
 
-class EmployeeListSerializer(serializers.ModelSerializer):
-    employee_profile = EmployeeProfileWithUserSerializer()
+class GetListEmployeeSerializer(serializers.ModelSerializer):
+    employee_profile = GetEmployeeProfileWithUserSerializer()
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
@@ -63,12 +70,12 @@ class EmployeeListSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class OrganizationEmployeeInviteSerializer(serializers.Serializer):
+class CreateOrganizationInviteEmployeeSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255, required=True)
     phone = PhoneNumberField(max_length=17, required=True)
-    body = QueryEmployeeBodySerializer(required=True)
+    body = GetEmployeeBodySerializer(required=True)
 
 
-class OrganizationEmployeeInviteUpdateSerializer(serializers.Serializer):
+class UpdateOrganizationInviteEmployeeSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
-    body = QueryEmployeeBodySerializer(required=True)
+    body = GetEmployeeBodySerializer(required=True)

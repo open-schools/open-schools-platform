@@ -4,14 +4,14 @@ from open_schools_platform.history_management.serializers.history_serializer imp
 from open_schools_platform.student_management.students.models import Student, StudentProfile
 
 
-class StudentHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
+class GetStudentHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = Student
         fields = (
             'id', 'name', 'circle', 'student_profile', 'history_id', 'history_user_id', 'history_date', 'history_type')
 
 
-class StudentProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
+class GetStudentProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = StudentProfile
         fields = (

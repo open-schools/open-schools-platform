@@ -10,20 +10,27 @@ class CreateOrganizationSerializer(serializers.ModelSerializer):
         extra_kwargs = {"name": {'required': True}}
 
 
-class OrganizationSerializer(serializers.ModelSerializer):
+class GetOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("id", "name", "inn")
         read_only_fields = fields
 
 
-class CircleOrganizationSerializer(serializers.ModelSerializer):
+class GetOrganizationSenderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Organization
+        fields = ("id", "name", "inn")
+        read_only_fields = fields
+
+
+class GetShallowOrganizationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Organization
         fields = ("id", "name")
 
 
-class AnalyticsSerializer(serializers.Serializer):
+class GetAnalyticsSerializer(serializers.Serializer):
     IN_PROGRESS = serializers.IntegerField()
     SENT = serializers.IntegerField()
     ACCEPTED = serializers.IntegerField()

@@ -18,37 +18,37 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
-from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
-    FamilyInviteParentSerializer
+from open_schools_platform.parent_management.families.serializers import CreateFamilySerializer, GetFamilySerializer, \
+    CreateFamilyInviteParentSerializer
 from open_schools_platform.parent_management.families.services import create_family
 from rest_framework.response import Response
 
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer
 from open_schools_platform.query_management.queries.services import create_query
-from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
+from open_schools_platform.student_management.students.serializers import GetStudentProfileSerializer
 
 
 class FamilyApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates Family.\n"
                               "Returns Family data.",
-        request_body=FamilyCreateSerializer,
-        responses={201: convert_dict_to_serializer({"family": FamilySerializer()})},
+        request_body=CreateFamilySerializer,
+        responses={201: convert_dict_to_serializer({"family": GetFamilySerializer()})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def post(self, request):
-        family_create_serializer = FamilyCreateSerializer(data=request.data)
+        family_create_serializer = CreateFamilySerializer(data=request.data)
         family_create_serializer.is_valid(raise_exception=True)
         family = create_family(name=family_create_serializer.validated_data["name"], parent=request.user.parent_profile)
-        return Response({"family": FamilySerializer(family).data}, status=201)
+        return Response({"family": GetFamilySerializer(family).data}, status=201)
 
 
 class FamilyStudentProfilesListApi(ApiAuthMixin, ListAPIView):
     queryset = StudentProfile.objects.all()
     filterset_class = StudentProfileFilter
     pagination_class = ApiStudentProfilesListPagination
-    serializer_class = StudentProfileSerializer
+    serializer_class = GetStudentProfileSerializer
 
     @swagger_auto_schema(
         operation_description="Get all student profiles for provided family.",
@@ -62,7 +62,7 @@ class FamilyStudentProfilesListApi(ApiAuthMixin, ListAPIView):
         )
         response = get_paginated_response(
             pagination_class=ApiStudentProfilesListPagination,
-            serializer_class=StudentProfileSerializer,
+            serializer_class=GetStudentProfileSerializer,
             queryset=get_student_profiles_from_family_with_filters(family, request.GET.dict()),
             request=request,
             view=self
@@ -74,7 +74,7 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
     queryset = Family.objects.all()
     filterset_class = FamilyFilter
     pagination_class = ApiFamiliesListPagination
-    serializer_class = FamilySerializer
+    serializer_class = GetFamilySerializer
 
     @swagger_auto_schema(
         operation_description="Get all families for currently logged in user",
@@ -86,7 +86,7 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
         )
         response = get_paginated_response(
             pagination_class=ApiFamiliesListPagination,
-            serializer_class=FamilySerializer,
+            serializer_class=GetFamilySerializer,
             queryset=families,
             request=request,
             view=self
@@ -97,14 +97,14 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
 class InviteParentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
-        request_body=FamilyInviteParentSerializer,
-        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()}),
+        request_body=CreateFamilyInviteParentSerializer,
+        responses={201: convert_dict_to_serializer({"query": GetQueryStatusSerializer()}),
                    400: "Parent is already in this family",
                    404: "No such family"},
         operation_description="Creates invite parent query.",
     )
     def post(self, request):
-        invite_parent_serializer = FamilyInviteParentSerializer(data=request.data)
+        invite_parent_serializer = CreateFamilyInviteParentSerializer(data=request.data)
         invite_parent_serializer.is_valid(raise_exception=True)
         family = get_family(filters={"id": str(invite_parent_serializer.validated_data["family"])}, user=request.user,
                             empty_exception=True)
@@ -118,7 +118,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
         notify_user(user=parent.user, title=FamilyConstants.INVITE_PARENT_TITLE,
                     body=FamilyConstants.get_invite_parent_message(family),
                     data={"query": str(query.id), "type": NotificationType.InviteParent})
-        return Response({"query": QueryStatusSerializer(query).data}, status=201)
+        return Response({"query": GetQueryStatusSerializer(query).data}, status=201)
 
 
 class FamilyDeleteApi(ApiAuthMixin, APIView):
