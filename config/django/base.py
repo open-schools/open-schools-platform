@@ -205,6 +205,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': env("LOGIN_RATE_LIMIT", default="10/minute"),
+        'token_creation': env("TOKEN_CREATION_RATE_LIMIT", default="10/minute")
+    }
 }
 
 AUTHENTICATION_BACKENDS = (
