@@ -22,6 +22,7 @@ from ...common.views import convert_dict_to_serializer
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
     serializer_class = JSONWebTokenWithTwoResponses
+    throttle_scope = "login"
 
     @swagger_auto_schema(
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH]

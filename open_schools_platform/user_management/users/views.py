@@ -26,6 +26,8 @@ from open_schools_platform.utils.firebase_requests import send_firebase_sms, che
 
 
 class CreationTokenApi(CreateAPIView):
+    throttle_scope = "token_creation"
+
     @swagger_auto_schema(
         operation_description="Send sms to entered phone number and"
                               "return token for phone verification. Creation token id as a response.",

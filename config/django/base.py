@@ -170,7 +170,7 @@ AUTH_USER_MODEL = 'users.User'
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = env('LANGUAGE', default='en')
+LANGUAGE_CODE = env('LOCALE_LANGUAGE', default='en')
 
 TIME_ZONE = 'UTC'
 
@@ -195,8 +195,7 @@ STATIC_URL = '/static/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 REST_FRAMEWORK = {
-    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',
-    # noqa: E501
+    'EXCEPTION_HANDLER': 'open_schools_platform.api.exception_handlers.drf_default_with_modifications_exception_handler',  # noqa: E501
     'DEFAULT_FILTER_BACKENDS': (
         'open_schools_platform.common.filters.CustomDjangoFilterBackend',
     ),
@@ -205,6 +204,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': env("LOGIN_RATE_LIMIT", default="10/minute"),
+        'token_creation': env("TOKEN_CREATION_RATE_LIMIT", default="10/minute")
+    }
 }
 
 AUTHENTICATION_BACKENDS = (
