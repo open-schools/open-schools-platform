@@ -1,4 +1,3 @@
-from django_filters import UUIDFilter
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
@@ -27,14 +26,13 @@ from open_schools_platform.organization_management.organizations.serializers imp
     GetAnalyticsSerializer, GetOrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     organization_circle_query_filter, filter_organization_circle_queries_by_dates
-from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
+from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
 from open_schools_platform.organization_management.teachers.paginators import ApiTeachersListPagination
 from open_schools_platform.organization_management.teachers.selectors import get_teacher, \
     get_teachers_from_orgaization_with_filters
 from open_schools_platform.organization_management.teachers.serializers import GetTeacherSerializer
-from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
@@ -160,17 +158,8 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
 
 
 class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
-    class FilterProperties:
-        query_fields = QueryFilter.get_swagger_filters(prefix="query")
-        student_fields = StudentFilter.get_swagger_filters(prefix="student", include=["name", "student_profile__phone"])
-        additional_fields = {"organization": UUIDFilter(lookup_expr=["exact"]),
-                             "circle": UUIDFilter(lookup_expr=["exact"])}
-
     queryset = Query.objects.all()
-    visible_filter_fields = \
-        FilterProperties.query_fields | \
-        FilterProperties.student_fields | \
-        FilterProperties.additional_fields
+    visible_filter_fields = organization_circle_query_filter.get_dict_filters()
 
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",
@@ -183,26 +172,35 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
         organization, circle = get_object_by_id_in_field_with_checks(
             filters,
             request,
-            {"organization": get_organization, "circle": get_circle}
+            {"circle__organization__id": get_organization, "circle__id": get_circle}
         )
         if not organization and not circle:
             raise ValidationError({'non_field_errors': 'You should define organization or circle',
-                                   'organization': ErrorDetail('', code='required'),
-                                   'circle': ErrorDetail('', code='required')})
+                                   'circle__organization__id': ErrorDetail('', code='required'),
+                                   'circle__id': ErrorDetail('', code='required')})
 
-        queries = organization_circle_query_filter(self, filters, organization, circle)
+        queries = organization_circle_query_filter.get_objects(filters)
 
-        return Response(
-            {"results": GetStudentJoinCircleSerializer(queries, many=True, context={'request': request}).data},
-            status=200)
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=GetStudentJoinCircleSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
+        return response
 
 
 class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
-    class FilterProperties:
-        student_fields = StudentFilter.get_swagger_filters()
-
+    complex_filter = ComplexFilter(
+        filterset_type=StudentFilter,
+        selector=get_students,
+        include_list=["name", "id", "circle", "student_profile",
+                      "student_profile__phone", "circle__name", "circle__organization", "or_search"]
+    )
     queryset = Student.objects.all()
-    visible_filter_fields = FilterProperties.student_fields
+    visible_filter_fields = complex_filter.get_dict_filters()
 
     @swagger_auto_schema(
         operation_description="Get students in this circle",
@@ -222,7 +220,7 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
                                    'organization': ErrorDetail('', code='required'),
                                    'circle': ErrorDetail('', code='required')})
 
-        students = get_students(filters=filters)
+        students = OrganizationStudentsListApi.complex_filter.get_objects(filters=filters)
 
         return Response({"results": GetStudentSerializer(students, many=True, context={'request': request}).data},
                         status=200)

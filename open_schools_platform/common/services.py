@@ -1,11 +1,17 @@
-import re
 from typing import List, Dict, Any, Tuple, Callable, Type
+
+import django_filters
+from django_filters import Filter, CharFilter
 
 from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
+from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
+from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.types import DjangoModelType
-from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable
+from open_schools_platform.common.utils import get_dict_including_fields, intersect_lists, form_ids_string_from_queryset
+from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
+    ApplicationError
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -176,26 +182,168 @@ def file_generate_upload_path(instance, filename):
     return f"{instance.image.name}"
 
 
-def or_search_filter_is_valid(value):
-    pattern = re.compile(r".*?:\[[^\]]*\]", re.IGNORECASE)
-    if pattern.match(value) and " " not in value.rsplit(":", 1)[1]:
-        return True
-    return False
+class ComplexFilter:
+    """
+        ComplexFilter is used for filtering GenericForeignKey models and in simpler cases
 
+        It is component that manage to convenient filter for some related model
+        and return qs from specified selector
 
-def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, allowed_filter_types, allowed_lookup_expr):
-    if type(filter_object) not in allowed_filter_types or filter_object.method is not None or \
-            filter_object.lookup_expr not in allowed_lookup_expr:
-        raise ValidationError(
-            detail=f"only default (without redefined method, with [i]contains or [i]exact lookup) "
-                   f"CharFilter, ChoiceFilter and AllValuesFilter are"
-                   f"allowed in filters list: {filter_name} is not allowed"
+        How to configure:
+            1. !!! Define ids_field in filter that selector uses and pass at initialization.
+               It is necessary to merge several qs in ComplexMultipleFilter
+            2. Pass selector that will filter relevant model
+            3. Pass filterset where outer filters come from
+            4. Pass prefix for non matching filter names in cases where several filter are used
+            5. Pass including fields that will display in swagger and will be available for use
+            6. Pass advance_filters for finer tuning
+
+        How to use:
+            1. Call get_dict_filters for displaying filters for clients
+            2. Call get_crossed_filters for getting desired part from the complex incoming filters
+            3. Call get_objects for calling selector with incoming filters
+            4. Call get_ids_objects for getting ids of received qs
+    """
+
+    def __init__(self, *, filterset_type: Type[django_filters.FilterSet], selector,
+                 advance_filters: Dict[str, Any] = {},
+                 include_list: List[str] = None, ids_field: str = None, prefix: str = None):
+        self.selector = selector
+        self.django_filters_list = dict(filterset_type.get_filters().items())
+        self.include_list = include_list or filterset_type.get_filters().keys()
+        self.ids_field = ids_field
+        self.prefix = prefix
+        self.advance_filters = advance_filters
+
+    def get_dict_filters(self) -> Dict[str, Filter]:
+        return {key if not self.prefix else self.prefix + "__" + key: value
+                for key, value in self.django_filters_list.items() if key in self.include_list}
+
+    def _truncate_prefix_dict_keys(self, dictionary: Dict[str, str]) -> Dict[str, str]:
+        return {key.split(f"{self.prefix}__")[-1] if len(key.split(f"{self.prefix}__")) > 1 else key: value for
+                key, value in
+                get_dict_including_fields(dictionary, list(ComplexFilter.get_dict_filters(self).keys())).items()}
+
+    def _truncate_prefix_list(self, _list: List[str]) -> List[str]:
+        return [key.split(f"{self.prefix}__")[-1] if len(key.split(f"{self.prefix}__")) > 1 else key for
+                key in intersect_lists([set(_list), set(ComplexFilter.get_dict_filters(self).keys())])]
+
+    def get_crossed_filters(self, filters: Dict[str, str], is_or_search: bool = False) -> Dict[str, str]:
+        if is_or_search and BaseFilterSet.OR_SEARCH_FIELD in filters:
+            or_search_value, or_search_list = get_values_from_or_search(filters[BaseFilterSet.OR_SEARCH_FIELD])
+            new_or_search_list = self._truncate_prefix_list(or_search_list)
+
+            if len(new_or_search_list) == 0:
+                return self._truncate_prefix_dict_keys(filters)
+
+            or_search_dict = {
+                BaseFilterSet.OR_SEARCH_FIELD:
+                    f'{or_search_value}:[{",".join(new_or_search_list)}]'
+            }
+
+            return self._truncate_prefix_dict_keys(filters) | or_search_dict
+        return self._truncate_prefix_dict_keys(filters)
+
+    def get_objects(self, filters: Dict[str, str]):
+        return self.selector(filters=(filters | self.advance_filters))
+
+    def get_ids_objects(self, filters: Dict[str, str]) -> str:
+        return form_ids_string_from_queryset(
+            self.get_objects(
+                filters,
+            )
         )
 
+    def _is_root(self):
+        return self.ids_field is None
 
-def get_values_from_or_search(or_search: str) -> tuple[str, list[str]]:
-    or_search_list = or_search.rsplit(":", 1)
-    or_search_value = or_search_list[0]
-    or_search_filters = or_search_list[1].strip("][").split(",")
 
-    return or_search_value, or_search_filters
+class ComplexMultipleFilter(ComplexFilter):
+    """
+        ComplexMultipleFilter is used for filtering GenericForeignKey models
+
+        It is class that allows to filter with several selectors defined in ComplexFilter's
+        You can use ComplexMultipleFilter as ComplexFilter because of inheriting and has the same methods.
+
+        How to configure:
+            1. Pass complex_filter_list with list of ComplexFilter
+            2. Pass is_has_or_search_field to enable or_search field in outer filters
+            3. !!! If you use ComplexMultipleFilter object as root you don't need to use prefix and ids_field
+
+        How to use:
+            1. Call get_dict_filters for displaying filters for clients
+            2. Call get_objects for calling selector with incoming filters
+    """
+
+    def __init__(self, *, complex_filter_list: List[ComplexFilter], is_has_or_search_field: bool = False, **kwargs):
+        super().__init__(**kwargs)
+
+        self.is_has_or_search_field = self._is_root() and is_has_or_search_field
+        self.complex_filter_list = complex_filter_list
+        self._preform_initialization_checks()
+
+    def _preform_initialization_checks(self):
+        prefixes = set()
+        for complex_filter in self.complex_filter_list:
+            if complex_filter.prefix is None:
+                raise ApplicationError(message="prefix must be defined for element of complex filter list")
+            if complex_filter.ids_field is None:
+                raise ApplicationError(message="ids_field must be defined for element of complex filter list")
+
+            if complex_filter.prefix in prefixes:
+                raise ApplicationError(message="Elements of complex filter list must be different")
+            prefixes.add(complex_filter.prefix)
+            if self.is_has_or_search_field and BaseFilterSet.OR_SEARCH_FIELD not in complex_filter.django_filters_list:
+                raise ApplicationError(message="All complex filters must contain or_search field if "
+                                               "is_has_or_search_field targeted to True")
+
+    def _interact_or_union_condition(self, crossed_filters):
+        return self.is_has_or_search_field and \
+               BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
+               len(crossed_filters.keys()) == 1
+
+    def get_objects(self, filters):
+        if self.is_has_or_search_field and \
+                BaseFilterSet.OR_SEARCH_FIELD in filters and \
+                not or_search_filter_is_valid(filters[BaseFilterSet.OR_SEARCH_FIELD]):
+            raise ValidationError(
+                detail="or_search field must be in value:[filter1,filter2,...] format, without spaces after : sign."
+            )
+
+        qs_intersection = super().get_objects(filters=super().get_crossed_filters(
+            filters, is_or_search=self.is_has_or_search_field
+        ))
+        qs_union = super().get_objects(filters={}).none()
+
+        tr = False
+        for complex_filter in self.complex_filter_list:
+            crossed_filters = complex_filter.get_crossed_filters(filters, is_or_search=True)
+            ids = complex_filter.get_ids_objects(crossed_filters)
+
+            child_qs = self.selector(
+                filters={f'{complex_filter.ids_field}': ids},
+                empty_filters=True
+            )
+
+            if self._interact_or_union_condition(crossed_filters):
+                qs_union |= child_qs
+                tr = True
+            else:
+                qs_intersection &= child_qs
+
+        if tr:
+            return qs_intersection & qs_union
+
+        return qs_intersection
+
+    def get_dict_filters(self):
+        dict_filters = super().get_dict_filters()
+
+        if self.is_has_or_search_field:
+            dict_filters |= {BaseFilterSet.OR_SEARCH_FIELD: CharFilter(field_name="or_search")}
+
+        for i in self.complex_filter_list:
+            dict_filters |= i.get_dict_filters()
+
+        return {key if not self.prefix else self.prefix + "__" + key: value
+                for key, value in dict_filters.items()}
