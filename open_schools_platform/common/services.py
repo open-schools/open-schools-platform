@@ -228,29 +228,34 @@ class ComplexFilter:
         return [key.split(f"{self.prefix}__")[-1] if len(key.split(f"{self.prefix}__")) > 1 else key for
                 key in intersect_lists([set(_list), set(ComplexFilter.get_dict_filters(self).keys())])]
 
-    def get_crossed_filters(self, filters: Dict[str, str], is_or_search: bool = False) -> Dict[str, str]:
+    def get_crossed_filters(self, filters: Dict[str, str], is_or_search: bool = False) \
+            -> Tuple[Dict[str, str], Dict[str, str]]:
         if is_or_search and BaseFilterSet.OR_SEARCH_FIELD in filters:
             or_search_value, or_search_list = get_values_from_or_search(filters[BaseFilterSet.OR_SEARCH_FIELD])
             new_or_search_list = self._truncate_prefix_list(or_search_list)
 
             if len(new_or_search_list) == 0:
-                return self._truncate_prefix_dict_keys(filters)
+                return self._truncate_prefix_dict_keys(filters), {}
 
             or_search_dict = {
                 BaseFilterSet.OR_SEARCH_FIELD:
                     f'{or_search_value}:[{",".join(new_or_search_list)}]'
             }
 
-            return self._truncate_prefix_dict_keys(filters) | or_search_dict
-        return self._truncate_prefix_dict_keys(filters)
+            return self._truncate_prefix_dict_keys(filters), or_search_dict
+        return self._truncate_prefix_dict_keys(filters), {}
 
-    def get_objects(self, filters: Dict[str, str]):
+    def get_objects(self, filters: Dict[str, str], empty_filter=False):
+        if empty_filter and filters == {}:
+            return self.selector(filters={}).none()
+
         return self.selector(filters=(filters | self.advance_filters))
 
-    def get_ids_objects(self, filters: Dict[str, str]) -> str:
+    def get_ids_objects(self, filters: Dict[str, str], empty_filter=False) -> str:
         return form_ids_string_from_queryset(
             self.get_objects(
                 filters,
+                empty_filter,
             )
         )
 
@@ -280,6 +285,7 @@ class ComplexMultipleFilter(ComplexFilter):
 
         self.is_has_or_search_field = self._is_root() and is_has_or_search_field
         self.complex_filter_list = complex_filter_list
+        self.qs_union_trigger = False
         self._preform_initialization_checks()
 
     def _preform_initialization_checks(self):
@@ -297,12 +303,12 @@ class ComplexMultipleFilter(ComplexFilter):
                 raise ApplicationError(message="All complex filters must contain or_search field if "
                                                "is_has_or_search_field targeted to True")
 
-    def _interact_or_union_condition(self, crossed_filters):
+    def _union_condition(self, crossed_filters):
         return self.is_has_or_search_field and \
                BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
                len(crossed_filters.keys()) == 1
 
-    def get_objects(self, filters):
+    def get_objects(self, filters, empty_filters=False):
         if self.is_has_or_search_field and \
                 BaseFilterSet.OR_SEARCH_FIELD in filters and \
                 not or_search_filter_is_valid(filters[BaseFilterSet.OR_SEARCH_FIELD]):
@@ -310,31 +316,42 @@ class ComplexMultipleFilter(ComplexFilter):
                 detail="or_search field must be in value:[filter1,filter2,...] format, without spaces after : sign."
             )
 
-        qs_intersection = super().get_objects(filters=super().get_crossed_filters(
+        crossed_filters = super().get_crossed_filters(
             filters, is_or_search=self.is_has_or_search_field
-        ))
-        qs_union = super().get_objects(filters={}).none()
+        )
+        qs_intersection = super().get_objects(filters=crossed_filters[0])
+        qs_union = super().get_objects(filters=crossed_filters[1], empty_filter=True)
 
-        tr = False
+        self.qs_union_trigger = False
         for complex_filter in self.complex_filter_list:
-            crossed_filters = complex_filter.get_crossed_filters(filters, is_or_search=True)
-            ids = complex_filter.get_ids_objects(crossed_filters)
-
-            child_qs = self.selector(
-                filters={f'{complex_filter.ids_field}': ids},
-                empty_filters=True
+            qs_intersection, qs_union = self._complex_filter_iteration(
+                filters, complex_filter, qs_intersection, qs_union
             )
 
-            if self._interact_or_union_condition(crossed_filters):
-                qs_union |= child_qs
-                tr = True
-            else:
-                qs_intersection &= child_qs
-
-        if tr:
+        if self.qs_union_trigger:
             return qs_intersection & qs_union
 
         return qs_intersection
+
+    def _complex_filter_iteration(self, filters, complex_filter: ComplexFilter, qs_intersection, qs_union):
+        crossed_filters = complex_filter.get_crossed_filters(filters, is_or_search=True)
+        ids_interact = complex_filter.get_ids_objects(crossed_filters[0])
+
+        if self._union_condition(crossed_filters[1]):
+            ids_union = complex_filter.get_ids_objects(crossed_filters[1], empty_filter=True)
+            qs_union |= self.selector(
+                filters={f'{complex_filter.ids_field}': ids_union},
+                empty_filters=True
+            )
+            self.qs_union_trigger = True
+
+        # TODO: optimize when crossed_filters[0] == {}
+        qs_intersection &= self.selector(
+            filters={f'{complex_filter.ids_field}': ids_interact},
+            empty_filters=True
+        )
+
+        return qs_intersection, qs_union
 
     def get_dict_filters(self):
         dict_filters = super().get_dict_filters()
