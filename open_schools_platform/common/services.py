@@ -8,7 +8,7 @@ from rest_framework.exceptions import ValidationError
 from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
 from open_schools_platform.common.types import DjangoModelType
-from open_schools_platform.common.utils import get_dict_including_fields, intersect_lists, form_ids_string_from_queryset
+from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, form_ids_string_from_queryset
 from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
     ApplicationError
 from open_schools_platform.query_management.queries.models import Query
@@ -225,7 +225,7 @@ class ComplexFilter:
 
     def _truncate_prefix_list(self, _list: List[str]) -> List[str]:
         return [key.split(f"{self.prefix}__")[-1] if len(key.split(f"{self.prefix}__")) > 1 else key for
-                key in intersect_lists([set(_list), set(ComplexFilter.get_dict_filters(self).keys())])]
+                key in intersect_sets([set(_list), set(ComplexFilter.get_dict_filters(self).keys())])]
 
     def get_crossed_filters(self, filters: Dict[str, str], is_or_search: bool = False) \
             -> Tuple[Dict[str, str], Dict[str, str]]:

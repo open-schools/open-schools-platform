@@ -90,7 +90,7 @@ def reverse_querystring(view, urlconf=None, args=None, kwargs=None, current_app=
     return base_url
 
 
-def intersect_lists(lists: Iterable[set]):
+def intersect_sets(lists: Iterable[set]):
     return reduce(lambda x, y: set(x) & set(y), lists)
 
 
