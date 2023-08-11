@@ -7,7 +7,6 @@ from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
-from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.types import DjangoModelType
 from open_schools_platform.common.utils import get_dict_including_fields, intersect_lists, form_ids_string_from_queryset
 from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
