@@ -48,40 +48,41 @@ class OrganizationQueryHandler(BaseQueryHandler):
 setattr(Organization, "query_handler", OrganizationQueryHandler())
 
 
-organization_circle_query_filter = ComplexMultipleFilter(
-    complex_filter_list=[
-        ComplexFilter(
-            filterset_type=CircleFilter,
-            selector=get_circles,
-            ids_field="recipient_ids",
-            prefix="circle",
-            include_list=["id", "organization__id", "name", "address"],
-        ),
-        ComplexFilter(
-            filterset_type=StudentProfileFilter,
-            selector=get_student_profiles,
-            ids_field="sender_ids",
-            prefix="student_profile",
-            include_list=["id", "phone"],
-        ),
-        ComplexFilter(
-            filterset_type=StudentFilter,
-            selector=get_students,
-            ids_field="body_ids",
-            prefix="student",
-            include_list=["id", "name", "student_profile__phone"],
-        ),
-    ],
-    filterset_type=QueryFilter,
-    selector=get_queries,
-    include_list=["status", "id"],
-    advance_filters={
-        "sender_ct": ContentType.objects.get(model="studentprofile"),
-        "recipient_ct": ContentType.objects.get(model="circle"),
-        "body_ct": ContentType.objects.get(model="student"),
-    },
-    is_has_or_search_field=True,
-)
+def get_organization_circle_query_filter():
+    return ComplexMultipleFilter(
+        complex_filter_list=[
+            ComplexFilter(
+                filterset_type=CircleFilter,
+                selector=get_circles,
+                ids_field="recipient_ids",
+                prefix="circle",
+                include_list=["id", "organization__id", "name", "address"],
+            ),
+            ComplexFilter(
+                filterset_type=StudentProfileFilter,
+                selector=get_student_profiles,
+                ids_field="sender_ids",
+                prefix="student_profile",
+                include_list=["id", "phone"],
+            ),
+            ComplexFilter(
+                filterset_type=StudentFilter,
+                selector=get_students,
+                ids_field="body_ids",
+                prefix="student",
+                include_list=["id", "name", "student_profile__phone"],
+            ),
+        ],
+        filterset_type=QueryFilter,
+        selector=get_queries,
+        include_list=["status", "id"],
+        advance_filters={
+            "sender_ct": ContentType.objects.get(model="studentprofile"),
+            "recipient_ct": ContentType.objects.get(model="circle"),
+            "body_ct": ContentType.objects.get(model="student"),
+        },
+        is_has_or_search_field=True,
+    )
 
 
 def filter_organization_circle_queries_by_dates(queries: QuerySet, date_from, date_to):

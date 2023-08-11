@@ -25,7 +25,7 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
     GetAnalyticsSerializer, GetOrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    organization_circle_query_filter, filter_organization_circle_queries_by_dates
+    get_organization_circle_query_filter, filter_organization_circle_queries_by_dates
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
@@ -158,8 +158,9 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
 
 
 class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
+    complex_filter = get_organization_circle_query_filter()
     queryset = Query.objects.all()
-    visible_filter_fields = organization_circle_query_filter.get_dict_filters()
+    visible_filter_fields = complex_filter.get_dict_filters()
 
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",
@@ -179,7 +180,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
                                    'circle__organization__id': ErrorDetail('', code='required'),
                                    'circle__id': ErrorDetail('', code='required')})
 
-        queries = organization_circle_query_filter.get_objects(filters)
+        queries = self.complex_filter.get_objects(filters)
 
         response = get_paginated_response(
             pagination_class=ApiCircleListPagination,
