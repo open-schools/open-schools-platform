@@ -9,7 +9,7 @@
     {% blocktrans with org_name=organization %}The <b>{{ org_name }}</b> circle invites you to its classes.{% endblocktrans %}
     <br>
     {% blocktrans with lgn=login pswd=password dom=domain %}Login and password to enter your personal account on{% endblocktrans %}
-    <a href="https://{{ dom }}">{{ dom }}:</a>
+    {% blocktrans with dom=domain %}<a href="https://{{ dom }}">{{ dom }}:</a>{% endblocktrans %}
     <br><br>
     {% blocktrans with lgn=login %}Your login: {{ lgn }}{% endblocktrans %}
     <br>
