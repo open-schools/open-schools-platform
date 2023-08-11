@@ -10,11 +10,11 @@
     {% blocktrans with org_name=organization %}The <b>{{ org_name }}</b> organization invites you to join us as an employee.{% endblocktrans %}
     <br>
     {% blocktrans with lgn=login pswd=password %}Login and password to enter your personal account on{% endblocktrans %}
-    <a href="https://openschools.education/#">openschools.education:</a>
+    <a href="https://{{ dom }}">{{ dom }}:</a>
     <br><br>
     {% blocktrans with lgn=login %}Your login: {{ lgn }}{% endblocktrans %}
     <br>
-    {% blocktrans with lgn=login %}Your password: {{ pswd }}{% endblocktrans %}
+    {% blocktrans with pswd=password %}Your password: {{ pswd }}{% endblocktrans %}
     <br><br>
     <small>{% trans 'Sincerely,<br> "Open Schools"' %}</small>
 </p>
