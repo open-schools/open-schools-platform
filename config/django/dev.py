@@ -10,3 +10,7 @@ SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=True)
 SECURE_CONTENT_TYPE_NOSNIFF = env.bool(
     "SECURE_CONTENT_TYPE_NOSNIFF", default=True
 )
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.profiling.ProfilingPanel',
+]

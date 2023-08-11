@@ -1,10 +1,6 @@
-from typing import List
-
-import django_filters
-from django.db.models import CharField
 from django_filters import CharFilter
 
-from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter, filter_by_ids
+from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter, filter_by_ids, MetaCharIContainsMixin
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 
 
@@ -13,7 +9,7 @@ class StudentProfileFilter(BaseFilterSet):
     ids = CharFilter(method=filter_by_ids)
     or_search = CharFilter(field_name="or_search", method="OR")
 
-    class Meta:
+    class Meta(MetaCharIContainsMixin):
         model = StudentProfile
         fields = ('id', 'user', 'name', 'age', 'phone', 'photo')
 
@@ -21,25 +17,7 @@ class StudentProfileFilter(BaseFilterSet):
 class StudentFilter(BaseFilterSet):
     or_search = CharFilter(field_name="or_search", method="OR")
 
-    @staticmethod
-    def get_swagger_filters(prefix: str = "", include: List[str] = None):
-        if include is None:
-            include = []
-
-        if not include:
-            include = ["name", "id", "circle", "student_profile",
-                       "student_profile__phone", "circle__name", "circle__organization", "or_search"]
-        return BaseFilterSet.get_dict_filters(StudentFilter, prefix, include)
-
-    class Meta:
+    class Meta(MetaCharIContainsMixin):
         model = Student
         fields = ('id', 'name', 'circle', 'student_profile', 'student_profile__phone',
                   'circle__name', 'student_profile__name', "circle__organization")
-        filter_overrides = {
-            CharField: {
-                'filter_class': django_filters.CharFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'icontains',
-                },
-            },
-        }

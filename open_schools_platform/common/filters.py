@@ -1,16 +1,15 @@
+import re
 from enum import Enum
-from typing import List, Type
+from typing import Type
 
 import django_filters
 from django.core.exceptions import FieldError
 from django.db.models import Q, QuerySet
 from django_filters import CharFilter, BaseInFilter, UUIDFilter, ChoiceFilter, AllValuesFilter, OrderingFilter
+from django.db.models import CharField
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
 from safedelete.config import DELETED_ONLY_VISIBLE, DELETED_VISIBLE
-
-from open_schools_platform.common.services import or_search_filter_is_valid, \
-    exception_if_filter_is_invalid_for_or_search, get_values_from_or_search
 
 
 class SoftCondition(Enum):
@@ -130,32 +129,22 @@ class BaseFilterSet(django_filters.FilterSet):
             raise ValidationError(detail="cannot filter through this model's fields with this filter.")
         return or_filtered_qs
 
-    @staticmethod
-    def get_dict_filters(filter_class: Type[django_filters.FilterSet], prefix: str = "", include: List[str] = None):
-        include = include or []
-        response = {}
-
-        for key, value in filter_class.get_filters().items():
-            if key in include:
-                new_key = key if prefix == "" else prefix + "__" + key
-                response[new_key] = value
-        return response
-
-    @staticmethod
-    def get_dict_filters_without_prefix(filters):
-        response = {}
-
-        for key, value in filters.items():
-            new_key = key.split("__")[1] if len(key.split("__")) > 1 else key.split("__")[0]
-            response[new_key] = value
-
-        return response
-
     def _has_provided_filter(self, filter_type: Type):
         for name, filter_field in self.get_filters().items():
             if isinstance(filter_field, filter_type) and self.data.get(name, False):
                 return True
         return False
+
+
+class MetaCharIContainsMixin:
+    filter_overrides = {
+        CharField: {
+            'filter_class': django_filters.CharFilter,
+            'extra': lambda f: {
+                'lookup_expr': 'icontains',
+            },
+        },
+    }
 
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
@@ -173,3 +162,28 @@ def filter_by_object_ids(object_name: str):
         return queryset.filter(**{"{object_name}__in".format(object_name=object_name): values})
 
     return func
+
+
+def or_search_filter_is_valid(value):
+    pattern = re.compile(r".*?:\[[^\]]*\]", re.IGNORECASE)
+    if pattern.match(value) and " " not in value.rsplit(":", 1)[1]:
+        return True
+    return False
+
+
+def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, allowed_filter_types, allowed_lookup_expr):
+    if type(filter_object) not in allowed_filter_types or filter_object.method is not None or \
+            filter_object.lookup_expr not in allowed_lookup_expr:
+        raise ValidationError(
+            detail=f"only default (without redefined method, with [i]contains or [i]exact lookup) "
+                   f"CharFilter, ChoiceFilter and AllValuesFilter are"
+                   f"allowed in filters list: {filter_name} is not allowed"
+        )
+
+
+def get_values_from_or_search(or_search: str) -> tuple[str, list[str]]:
+    or_search_list = or_search.rsplit(":", 1)
+    or_search_value = or_search_list[0]
+    or_search_filters = or_search_list[1].strip("][").split(",")
+
+    return or_search_value, or_search_filters

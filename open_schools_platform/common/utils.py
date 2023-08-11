@@ -1,7 +1,8 @@
 import json
 from datetime import datetime
+from functools import reduce
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Iterable
 
 from dateutil.parser import parse
 from django.db.models import QuerySet
@@ -87,6 +88,10 @@ def reverse_querystring(view, urlconf=None, args=None, kwargs=None, current_app=
     if query_kwargs:
         return '{}?{}'.format(base_url, urlencode(query_kwargs))
     return base_url
+
+
+def intersect_sets(lists: Iterable[set]):
+    return reduce(lambda x, y: set(x) & set(y), lists)
 
 
 class SwaggerSchemasGenerator:

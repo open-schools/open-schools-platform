@@ -52,4 +52,4 @@ class CircleFilter(BaseFilterSet):
 
     class Meta:
         model = Circle
-        fields = ("id", "organization", "capacity", "description")
+        fields = ("id", "organization", "organization__id", "capacity", "description")
