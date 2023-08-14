@@ -47,3 +47,7 @@ def get_organization_circle_queries(organization: Organization):
                                    "sender_ct": ContentType.objects.get(model="studentprofile")},
                           empty_filters=True)
     return queries
+
+
+def get_organization_students_invitations(organization: Organization):
+    ...

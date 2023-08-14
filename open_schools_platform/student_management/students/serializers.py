@@ -74,6 +74,12 @@ class GetStudentJoinCircleContext(BaseModelSerializer):
         fields = ("parent_phone", "parent_name", "student_phone", "text")
 
 
+class GetCircleInviteStudentContext(BaseModelSerializer):
+    class Meta:
+        model = StudentProfile
+        fields = ("id", "name")
+
+
 class CreateStudentJoinCircleContext(BaseModelSerializer):
     class Meta:
         model = StudentProfileCircleAdditional

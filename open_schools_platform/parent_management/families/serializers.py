@@ -20,6 +20,12 @@ class GetFamilySenderSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class GetFamilyRecipientSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Family
+        fields = ("id", "name")
+
+
 class CreateFamilyInviteParentSerializer(serializers.Serializer):
     family = serializers.UUIDField(required=True)
     phone = PhoneNumberField(required=True, max_length=17)

@@ -33,6 +33,7 @@ def get_circle(*, filters=None, user: User = None) -> Circle:
     return circle
 
 
-def get_circles_by_students(students: QuerySet, filters: dict = {}) -> QuerySet:
+def get_circles_by_students(students: QuerySet, filters: dict = None) -> QuerySet:
+    filters = filters or {}
     return students if len(students) == 0 else \
         get_circles(filters=filters | {"ids": ','.join(list(map(lambda x: str(x.circle.id), list(students))))})
