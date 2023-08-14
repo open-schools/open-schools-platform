@@ -51,6 +51,14 @@ class GetCircleRecipientSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'organization', 'address')
 
 
+class GetCircleSenderSerializer(serializers.ModelSerializer):
+    organization = GetShallowOrganizationSerializer()
+
+    class Meta:
+        model = Circle
+        fields = ('id', 'name', 'organization', 'address')
+
+
 class CreateCircleInviteStudentSerializer(serializers.Serializer):
     body = CreateStudentBodySerializer(required=True)
     student_phone = PhoneNumberField(max_length=17, required=False)

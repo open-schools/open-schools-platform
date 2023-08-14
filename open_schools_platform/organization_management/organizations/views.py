@@ -25,7 +25,8 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
     GetAnalyticsSerializer, GetOrganizationSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    get_organization_circle_query_filter, filter_organization_circle_queries_by_dates
+    get_organization_circle_query_filter, filter_organization_circle_queries_by_dates, \
+    get_organization_students_invitations_filter
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
@@ -36,7 +37,7 @@ from open_schools_platform.organization_management.teachers.serializers import G
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries, get_query_with_checks
 from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
-    GetOrganizationInviteEmployeeSerializer, GetStudentJoinCircleSerializer
+    GetOrganizationInviteEmployeeSerializer, GetStudentJoinCircleSerializer, GetCircleInviteStudentSerializer
 from open_schools_platform.query_management.queries.services import create_query, count_queries_by_statuses
 from open_schools_platform.student_management.students.filters import StudentFilter
 from open_schools_platform.student_management.students.models import Student
@@ -353,3 +354,40 @@ class GetTeacherApi(ApiAuthMixin, APIView):
     def get(self, request, teacher_id):
         teacher = get_teacher(filters={"id": str(teacher_id)}, empty_exception=True, user=request.user)
         return Response({"teacher": GetTeacherSerializer(teacher).data}, status=200)
+
+
+class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
+    complex_filter = get_organization_students_invitations_filter()
+    queryset = Query.objects.all()
+    visible_filter_fields = complex_filter.get_dict_filters()
+    pagination_class = ApiCircleListPagination
+
+    @swagger_auto_schema(
+        operation_description='Get invited students from all circles of this organization',
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({'results': GetCircleInviteStudentSerializer(many=True)})}
+    )
+    def get(self, request):
+        filters = request.GET.dict()
+
+        organization, circle = get_object_by_id_in_field_with_checks(
+            filters,
+            request,
+            {'circle__organization__id': get_organization, 'circle__id': get_circle}
+        )
+        if not organization and not circle:
+            raise ValidationError({'non_field_errors': 'You should define organization or circle',
+                                   'circle__organization__id': ErrorDetail('', code='required'),
+                                   'circle__id': ErrorDetail('', code='required')})
+
+        queries = self.complex_filter.get_objects(filters)
+
+        response = get_paginated_response(
+            pagination_class=ApiCircleListPagination,
+            serializer_class=GetCircleInviteStudentSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
+        return response

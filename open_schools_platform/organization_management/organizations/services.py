@@ -8,6 +8,8 @@ from open_schools_platform.organization_management.circles.filters import Circle
 from open_schools_platform.organization_management.circles.selectors import get_circles
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.parent_management.families.filters import FamilyFilter
+from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries
@@ -80,6 +82,51 @@ def get_organization_circle_query_filter():
             "sender_ct": ContentType.objects.get(model="studentprofile"),
             "recipient_ct": ContentType.objects.get(model="circle"),
             "body_ct": ContentType.objects.get(model="student"),
+        },
+        is_has_or_search_field=True,
+    )
+
+
+def get_organization_students_invitations_filter():
+    return ComplexMultipleFilter(
+        complex_filter_list=[
+            ComplexFilter(
+                filterset_type=CircleFilter,
+                selector=get_circles,
+                ids_field="sender_ids",
+                prefix="circle",
+                include_list=["id", "organization__id", "name", "address"],
+            ),
+            ComplexFilter(
+                filterset_type=FamilyFilter,
+                selector=get_families,
+                ids_field="recipient_ids",
+                prefix="family",
+                include_list=["id", "name"],
+            ),
+            ComplexFilter(
+                filterset_type=StudentFilter,
+                selector=get_students,
+                ids_field="body_ids",
+                prefix="student",
+                include_list=["id", "name", "student_profile__phone"],
+            ),
+            # ComplexFilter(
+            #     filterset_type=StudentFilter,
+            #     selector=get_students,
+            #     ids_field="additional_ids",
+            #     prefix="studentprofile",
+            #     include_list=["id", "name", "phone"],
+            # ),
+        ],
+        filterset_type=QueryFilter,
+        selector=get_queries,
+        include_list=["status", "id"],
+        advance_filters_delegate=lambda: {
+            "sender_ct": ContentType.objects.get(model="circle"),
+            "recipient_ct": ContentType.objects.get(model="family"),
+            "body_ct": ContentType.objects.get(model="student"),
+            # "additional_ct": ContentType.objects.get(model="studentprofile")
         },
         is_has_or_search_field=True,
     )
