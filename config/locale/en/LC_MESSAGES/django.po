@@ -47,7 +47,7 @@ msgstr "position"
 #, fuzzy
 #| msgid "organization name"
 msgid "Invite to organization"
-msgstr "organization name"
+msgstr "Invite to organization"
 
 #: .\open_schools_platform\organization_management\organizations\admin.py:10
 msgid "INN"
@@ -134,7 +134,7 @@ msgstr "Hello, %(username)s!"
 #: .\templates\new_user_circle_invite_mail_form.html:9
 #, python-format
 msgid "The <b>%(org_name)s</b> circle invites you to its classes."
-msgstr "The <b>%(org_name)s</b> circle invites you to its classes."
+msgstr "The <b> %(org_name)s </b> circle invites you to its classes."
 
 #: .\templates\new_user_circle_invite_mail_form.html:11
 #: .\templates\new_user_invite_mail_form.html:12

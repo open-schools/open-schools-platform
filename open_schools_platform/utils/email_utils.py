@@ -45,6 +45,9 @@ class MailgunEmailService(BaseEmailService):
                   "subject": subject,
                   "text": text,
                   "html": html})
+        print("\n\n\n\n")
+        print(response)
+        print("\n\n\n\n")
         return response
 
 
