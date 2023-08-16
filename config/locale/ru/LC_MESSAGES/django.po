@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: open-schools-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-07-11 15:04+0500\n"
+"POT-Creation-Date: 2023-08-16 15:21+0500\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -60,17 +60,18 @@ msgstr "позиция"
 #, fuzzy
 #| msgid "organization name"
 msgid "Invite to organization"
-msgstr "имя организации"
+msgstr "Приглашение в организацию"
 
 #: .\open_schools_platform\organization_management\organizations\admin.py:10
 msgid "INN"
 msgstr "ИНН"
 
-#: .\open_schools_platform\organization_management\organizations\constants.py:9
+#: .\open_schools_platform\organization_management\organizations\constants.py:10
+#, python-brace-format
 msgid "Phone: +{phone}\n"
 msgstr "Тел: +{phone}\n"
 
-#: .\open_schools_platform\organization_management\organizations\constants.py:9
+#: .\open_schools_platform\organization_management\organizations\constants.py:10
 #, fuzzy, python-brace-format
 #| msgid "Your password: %(pswd)s"
 msgid "Password: {pwd}\n"
@@ -85,11 +86,11 @@ msgstr "имя кружка"
 msgid "teacher profile name"
 msgstr "имя профиля учителя"
 
-#: .\open_schools_platform\parent_management\families\constants.py:4
+#: .\open_schools_platform\parent_management\families\constants.py:5
 msgid "You have been invited into the family!"
 msgstr "Вы были приглашены в семью!"
 
-#: .\open_schools_platform\parent_management\families\constants.py:8
+#: .\open_schools_platform\parent_management\families\constants.py:9
 #, python-brace-format
 msgid "The {family} family invites you"
 msgstr "Семья {family} приглашает вас к себе"
@@ -138,18 +139,18 @@ msgstr "Нет такого пользователя"
 msgid "Incorrect password."
 msgstr "Неверный пароль"
 
-#: .\templates\new_user_circle_invite_mail_form.html:7
+#: .\templates\new_user_circle_invite_mail_form.html:8
 #: .\templates\new_user_invite_mail_form.html:8
 #, python-format
 msgid "Hello, %(username)s!"
 msgstr "Приветствуем, %(username)s!"
 
-#: .\templates\new_user_circle_invite_mail_form.html:9
+#: .\templates\new_user_circle_invite_mail_form.html:10
 #, fuzzy, python-format
 msgid "The <b>%(org_name)s</b> circle invites you to its classes."
-msgstr "Кружок b>%(org_name)s</b> приглашает вас на свои занятия. "
+msgstr "Кружок <b> %(org_name)s </b> приглашает вас на свои занятия. "
 
-#: .\templates\new_user_circle_invite_mail_form.html:11
+#: .\templates\new_user_circle_invite_mail_form.html:12
 #: .\templates\new_user_invite_mail_form.html:12
 msgid "Login and password to enter your personal account on"
 msgstr "Логин и пароль для входа в личный кабинет на"
@@ -160,13 +161,13 @@ msgstr "Логин и пароль для входа в личный кабин�
 msgid "Your login: %(lgn)s"
 msgstr "Ваш логин: %(lgn)s"
 
-#: .\templates\new_user_circle_invite_mail_form.html:16
+#: .\templates\new_user_circle_invite_mail_form.html:17
 #: .\templates\new_user_invite_mail_form.html:17
 #, python-format
 msgid "Your password: %(pswd)s"
 msgstr "Ваш пароль: %(pswd)s"
 
-#: .\templates\new_user_circle_invite_mail_form.html:18
+#: .\templates\new_user_circle_invite_mail_form.html:19
 #: .\templates\new_user_invite_mail_form.html:19
 msgid "Sincerely,<br> \"Open Schools\""
 msgstr "С уважением,<br> \"Открытые Школы\""
@@ -176,7 +177,7 @@ msgstr "С уважением,<br> \"Открытые Школы\""
 msgid ""
 "The <b>%(org_name)s</b> organization invites you to join us as an employee."
 msgstr ""
-"Организация b>%(org_name)s</b> приглашает вас к себе в качестве сотрудника. "
+"Организация <b> %(org_name)s </b> приглашает вас к себе в качестве сотрудника. "
 
 #: .\templates\templates\input_filter.html:3
 #, python-format
