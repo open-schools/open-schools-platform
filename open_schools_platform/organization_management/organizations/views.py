@@ -103,7 +103,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         phone = invite_serializer.validated_data["phone"]
         email = invite_serializer.validated_data["email"]
         name = invite_serializer.validated_data["body"]["name"]
-        organization = get_organization(filters={"id": organization_id}, empty_exception=True)
+        organization = get_organization(filters={"id": organization_id}, user=request.user, empty_exception=True)
 
         employee_profile = get_employee_profile_or_create_new_user(phone=phone.__str__(), email=str(email),
                                                                    organization_name=organization.name, name=name)
