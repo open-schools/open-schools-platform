@@ -7,7 +7,7 @@
 <p>
     {% blocktrans with username=name %}Hello, {{ username }}!{% endblocktrans %}
     <br>
-    {% blocktrans with org_name=organization %}The <b>{{ org_name }}</b> circle invites you to its classes.{% endblocktrans %}
+    {% blocktrans with circle_name=circle %}The <b>{{ circle_name }}</b> circle invites you to its classes.{% endblocktrans %}
     <br>
     {% blocktrans with lgn=login pswd=password dom=domain %}Login and password to enter your personal account on{% endblocktrans %}
     {% blocktrans with dom=domain %}<a href="https://{{ dom }}">{{ dom }}:</a>{% endblocktrans %}
