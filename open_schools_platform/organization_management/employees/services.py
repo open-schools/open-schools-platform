@@ -42,11 +42,10 @@ def update_invite_employee_body(*, query: Query, data) -> Query:
 def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
                                             organization_name: str) -> EmployeeProfile:
     user = get_user(filters={"phone": phone})
-
     if not user:
         exception_if_email_service_unavailable()
         pwd = generate_user_password()
-        subject = _('Invite to organization')
+        subject = _("Invite to organization")
         send_mail_to_new_user_with_celery.delay(subject,
                                                 {'login': phone, 'password': pwd, 'organization': organization_name,
                                                  'name': name, 'domain': CommonConstants.OPEN_SCHOOLS_DOMAIN},
