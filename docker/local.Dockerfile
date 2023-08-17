@@ -17,7 +17,7 @@ RUN apt-get update -y \
     && apt install gdal-bin -y
 
 # Localization library
-RUN apt-get install gettext
+RUN apt-get install gettext -y
 
 # Get the django project into the docker container
 WORKDIR /app
