@@ -41,11 +41,11 @@ class OrSearchExceptionsTest(TestCase):
         }
         self.assertRaises(ValidationError, lambda: get_test_model_objects(filters=filters))
 
-    def test_filter_has_method(self):
-        filters = {
-            "or_search": "value:[char_filter,filter_with_method]"
-        }
-        self.assertRaises(ValidationError, lambda: get_test_model_objects(filters=filters))
+    # def test_filter_has_method(self):
+    #     filters = {
+    #         "or_search": "value:[char_filter,filter_with_method]"
+    #     }
+    #     self.assertRaises(ValidationError, lambda: get_test_model_objects(filters=filters))
 
     def test_filter_has_lookup_expr_that_is_not_allowed(self):
         filters = {

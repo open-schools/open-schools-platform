@@ -11,7 +11,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(StudentProfile)
-def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
+def get_student_profile(*, filters=None, user: User = None, prefetch_related_list=None) -> StudentProfile:
     filters = filters or {}
 
     qs = StudentProfile.objects.all()
@@ -24,17 +24,17 @@ def get_student_profile(*, filters=None, user: User = None) -> StudentProfile:
 
 
 @selector_factory(StudentProfile)
-def get_student_profiles(*, filters=None) -> QuerySet:
+def get_student_profiles(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
-    qs = StudentProfile.objects.all()
+    qs = StudentProfile.objects.prefetch_related(*prefetch_related_list).all()
     student_profiles = StudentProfileFilter(filters, qs).qs
 
     return student_profiles
 
 
 @selector_factory(Student)
-def get_student(*, filters=None, user: User = None) -> Student:
+def get_student(*, filters=None, user: User = None, prefetch_related_list=None) -> Student:
     filters = filters or {}
 
     qs = Student.objects.all()
@@ -47,7 +47,7 @@ def get_student(*, filters=None, user: User = None) -> Student:
 
 
 @selector_factory(Student)
-def get_students(*, filters=None) -> QuerySet:
+def get_students(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Student.objects.all()

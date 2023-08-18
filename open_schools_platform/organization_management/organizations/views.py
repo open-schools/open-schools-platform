@@ -9,6 +9,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
@@ -184,7 +185,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
         queries = self.complex_filter.get_objects(filters)
 
         response = get_paginated_response(
-            pagination_class=ApiCircleListPagination,
+            pagination_class=DefaultListPagination,
             serializer_class=GetStudentJoinCircleSerializer,
             queryset=queries,
             request=request,
@@ -195,10 +196,11 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
+    pagination_class = DefaultListPagination
     complex_filter = ComplexFilter(
         filterset_type=StudentFilter,
         selector=get_students,
-        include_list=["name", "id", "circle", "student_profile",
+        include_list=["name", "id", "circle", "student_profile", "parent_phone",
                       "student_profile__phone", "circle__name", "circle__organization", "or_search"]
     )
     queryset = Student.objects.all()
@@ -224,8 +226,15 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
 
         students = OrganizationStudentsListApi.complex_filter.get_objects(filters=filters)
 
-        return Response({"results": GetStudentSerializer(students, many=True, context={'request': request}).data},
-                        status=200)
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetStudentSerializer,
+            queryset=students,
+            request=request,
+            view=self
+        )
+
+        return response
 
 
 class OrganizationDeleteApi(ApiAuthMixin, APIView):

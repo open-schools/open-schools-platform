@@ -24,10 +24,15 @@ class UpdateStudentProfileSerializer(serializers.Serializer):
 
 class GetStudentProfileSerializer(BaseModelSerializer):
     photo = GetPhotoSerializer()
+    parent_phones = serializers.SerializerMethodField('get_parent_phones')
+
+    def get_parent_phones(self, obj):
+        families = obj.families.prefetch_related('parent_profiles').all()
+        return ",".join([str(j.user.phone) for i in families for j in i.parent_profiles.all()])
 
     class Meta:
         model = StudentProfile
-        fields = ("id", "name", "age", "phone", "photo")
+        fields = ("id", "name", "age", "phone", "photo", "parent_phones")
 
 
 class CreateStudentProfileSerializer(BaseModelSerializer):

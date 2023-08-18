@@ -10,7 +10,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Circle)
-def get_circles(*, filters=None) -> QuerySet:
+def get_circles(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Circle.objects.all()
@@ -21,7 +21,7 @@ def get_circles(*, filters=None) -> QuerySet:
 
 
 @selector_factory(Circle)
-def get_circle(*, filters=None, user: User = None) -> Circle:
+def get_circle(*, filters=None, user: User = None, prefetch_related_list=None) -> Circle:
     filters = filters or {}
 
     qs = Circle.objects.all()

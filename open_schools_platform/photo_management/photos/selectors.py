@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Photo)
-def get_photo(*, filters=None, user: User = None) -> Photo:
+def get_photo(*, filters=None, user: User = None, prefetch_related_list=None) -> Photo:
     filters = filters or {}
 
     qs = Photo.objects.all()

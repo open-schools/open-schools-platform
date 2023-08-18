@@ -102,7 +102,7 @@ def get_organization_students_invitations_filter():
                 selector=get_families,
                 ids_field="recipient_ids",
                 prefix="family",
-                include_list=["id", "name"],
+                include_list=["id", "name", "parent_phone"],
             ),
             ComplexFilter(
                 filterset_type=StudentFilter,
@@ -111,13 +111,13 @@ def get_organization_students_invitations_filter():
                 prefix="student",
                 include_list=["id", "name", "student_profile__phone"],
             ),
-            # ComplexFilter(
-            #     filterset_type=StudentFilter,
-            #     selector=get_students,
-            #     ids_field="additional_ids",
-            #     prefix="studentprofile",
-            #     include_list=["id", "name", "phone"],
-            # ),
+            ComplexFilter(
+                filterset_type=StudentProfileFilter,
+                selector=get_student_profiles,
+                ids_field="additional_ids",
+                prefix="student_profile",
+                include_list=["id", "phone"],
+            ),
         ],
         filterset_type=QueryFilter,
         selector=get_queries,
@@ -126,7 +126,7 @@ def get_organization_students_invitations_filter():
             "sender_ct": ContentType.objects.get(model="circle"),
             "recipient_ct": ContentType.objects.get(model="family"),
             "body_ct": ContentType.objects.get(model="student"),
-            # "additional_ct": ContentType.objects.get(model="studentprofile")
+            "additional_ct": ContentType.objects.get(model="studentprofile")
         },
         is_has_or_search_field=True,
     )

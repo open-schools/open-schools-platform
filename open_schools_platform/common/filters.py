@@ -4,7 +4,7 @@ from typing import Type
 
 import django_filters
 from django.core.exceptions import FieldError
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 from django_filters import CharFilter, BaseInFilter, UUIDFilter, ChoiceFilter, AllValuesFilter, OrderingFilter
 from django.db.models import CharField
 from django_filters.rest_framework import DjangoFilterBackend
@@ -113,7 +113,7 @@ class BaseFilterSet(django_filters.FilterSet):
         if not self.or_search:
             return base_queryset
 
-        query = Q()
+        or_queryset = base_queryset.none()
         or_search_value, or_search_filters = get_values_from_or_search(self.or_search)
         for filter_name in or_search_filters:
             try:
@@ -122,12 +122,14 @@ class BaseFilterSet(django_filters.FilterSet):
                 raise ValidationError(detail=f"{filter_name} is not listed in this view's filters")
             exception_if_filter_is_invalid_for_or_search(filter_object, filter_name,
                                                          self.ALLOWED_FILTER_TYPES, self.ALLOWED_LOOKUP_EXPR)
-            query |= Q(**{"{0}__icontains".format(filter_object.field_name): or_search_value})
-        try:
-            or_filtered_qs = base_queryset.filter(query)
-        except FieldError:
-            raise ValidationError(detail="cannot filter through this model's fields with this filter.")
-        return or_filtered_qs
+            try:
+                # TODO: is it safe?
+                filter_object.lookup_expr = "icontains"
+                or_queryset |= filter_object.filter(base_queryset, or_search_value)
+            except FieldError:
+                raise ValidationError(detail=f"cannot filter through this"
+                                             f" model's fields with {str(filter_object)} filter.")
+        return base_queryset & or_queryset
 
     def _has_provided_filter(self, filter_type: Type):
         for name, filter_field in self.get_filters().items():
@@ -172,8 +174,7 @@ def or_search_filter_is_valid(value):
 
 
 def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, allowed_filter_types, allowed_lookup_expr):
-    if type(filter_object) not in allowed_filter_types or filter_object.method is not None or \
-            filter_object.lookup_expr not in allowed_lookup_expr:
+    if type(filter_object) not in allowed_filter_types or filter_object.lookup_expr not in allowed_lookup_expr:
         raise ValidationError(
             detail=f"only default (without redefined method, with [i]contains or [i]exact lookup) "
                    f"CharFilter, ChoiceFilter and AllValuesFilter are"
