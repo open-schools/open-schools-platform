@@ -21,14 +21,14 @@ class GetFamilySenderSerializer(serializers.ModelSerializer):
 
 
 class GetFamilyRecipientSerializer(serializers.ModelSerializer):
-    parent_phone = serializers.SerializerMethodField('get_parent_phone')
+    parent_phones = serializers.SerializerMethodField('get_parent_phones')
 
-    def get_parent_phone(self, obj):
-        return str(obj.parent_profiles.all().first().user.phone)
+    def get_parent_phones(self, obj):
+        return ",".join(map(lambda x: str(x.user.phone), obj.parent_profiles.all()))
 
     class Meta:
         model = Family
-        fields = ("id", "name", "parent_phone")
+        fields = ("id", "name", "parent_phones")
 
 
 class CreateFamilyInviteParentSerializer(serializers.Serializer):

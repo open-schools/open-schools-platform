@@ -206,13 +206,15 @@ class ComplexFilter:
 
     def __init__(self, *, filterset_type: Type[django_filters.FilterSet], selector,
                  advance_filters_delegate: Callable[[], Dict[str, Any]] = lambda: {},
-                 include_list: List[str] = None, ids_field: str = None, prefix: str = None):
+                 include_list: List[str] = None, ids_field: str = None, prefix: str = None,
+                 advance_prefetch_delegate: Callable[[], List[Any]] = lambda: []):
         self.selector = selector
         self.django_filters_list = dict(filterset_type.get_filters().items())
         self.include_list = include_list or filterset_type.get_filters().keys()
         self.ids_field = ids_field
         self.prefix = prefix
         self.advance_filters_delegate = advance_filters_delegate
+        self.advance_prefetch_delegate = advance_prefetch_delegate
 
     def get_dict_filters(self) -> Dict[str, Filter]:
         return {key if not self.prefix else self.prefix + "__" + key: value
@@ -248,7 +250,8 @@ class ComplexFilter:
         if empty_filter and filters == {}:
             return self.selector(filters={}).none()
 
-        return self.selector(filters=(filters | self.advance_filters_delegate()))
+        return self.selector(filters=(filters | self.advance_filters_delegate()),
+                             prefetch_related_list=self.advance_prefetch_delegate())
 
     def get_ids_objects(self, filters: Dict[str, str], empty_filter=False) -> str:
         return form_ids_string_from_queryset(

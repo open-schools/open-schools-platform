@@ -9,7 +9,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Teacher)
-def get_teacher(*, filters=None, user: User = None) -> Teacher:
+def get_teacher(*, filters=None, user: User = None, prefetch_related_list=None) -> Teacher:
     filters = filters or {}
 
     qs = Teacher.objects.all()
@@ -22,7 +22,7 @@ def get_teacher(*, filters=None, user: User = None) -> Teacher:
 
 
 @selector_factory(Teacher)
-def get_teachers(*, filters=None) -> QuerySet:
+def get_teachers(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Teacher.objects.all()
@@ -32,7 +32,7 @@ def get_teachers(*, filters=None) -> QuerySet:
 
 
 @selector_factory(TeacherProfile)
-def get_teacher_profile(*, filters=None, user: User = None) -> TeacherProfile:
+def get_teacher_profile(*, filters=None, user: User = None, prefetch_related_list=None) -> TeacherProfile:
     filters = filters or {}
 
     qs = TeacherProfile.objects.all()

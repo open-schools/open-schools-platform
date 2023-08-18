@@ -4,7 +4,7 @@ from open_schools_platform.testing.models import TestModel
 
 
 @selector_factory(TestModel)
-def get_test_model_objects(*, filters=None) -> TestModel:
+def get_test_model_objects(*, filters=None, prefetch_related_list=None) -> TestModel:
     filters = filters or {}
 
     qs = TestModel.objects.all()

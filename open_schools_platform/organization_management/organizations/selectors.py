@@ -12,7 +12,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Organization)
-def get_organization(*, filters=None, user: User = None) -> Organization:
+def get_organization(*, filters=None, user: User = None, prefetch_related_list=None) -> Organization:
     filters = filters or {}
 
     qs = Organization.objects.all()
@@ -25,7 +25,7 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
 
 
 @selector_factory(Organization)
-def get_organizations(*, filters=None) -> QuerySet:
+def get_organizations(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Organization.objects.all()

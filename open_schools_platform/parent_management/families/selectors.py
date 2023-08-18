@@ -8,7 +8,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Family)
-def get_family(*, filters=None, user: User = None) -> Family:
+def get_family(*, filters=None, user: User = None, prefetch_related_list=None) -> Family:
     filters = filters or {}
 
     qs = Family.objects.all()
@@ -21,7 +21,7 @@ def get_family(*, filters=None, user: User = None) -> Family:
 
 
 @selector_factory(Family)
-def get_families(*, filters=None) -> QuerySet:
+def get_families(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Family.objects.all()

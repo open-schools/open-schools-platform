@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.services import is_token_alive
 
 
 @selector_factory(User)
-def get_user(*, filters=None, user: User = None) -> User:
+def get_user(*, filters=None, user: User = None, prefetch_related_list=None) -> User:
     filters = filters or {}
 
     qs = User.objects.all()
@@ -20,7 +20,7 @@ def get_user(*, filters=None, user: User = None) -> User:
 
 
 @selector_factory(CreationToken)
-def get_token(*, filters=None, user: User = None) -> CreationToken:
+def get_token(*, filters=None, user: User = None, prefetch_related_list=None) -> CreationToken:
     filters = filters or {}
 
     qs = CreationToken.objects.all().order_by('created_at')

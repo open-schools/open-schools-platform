@@ -12,6 +12,7 @@ class QueryFilter(BaseFilterSet):
     recipient_ids = CharFilter(method=filter_by_object_ids("recipient_id"))
     sender_ids = CharFilter(method=filter_by_object_ids("sender_id"))
     body_ids = CharFilter(method=filter_by_object_ids("body_id"))
+    additional_ids = CharFilter(method=filter_by_object_ids("additional_id"))
 
     def sender_ct_filter(self, queryset, name, value):
         return queryset.filter(sender_ct__model=value.replace(" ", ""))
