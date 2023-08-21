@@ -205,11 +205,11 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
     )
     queryset = Student.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
+    serializer_class = GetStudentSerializer
 
     @swagger_auto_schema(
         operation_description="Get students in this circle",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({"results": GetStudentSerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()

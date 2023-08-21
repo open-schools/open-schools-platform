@@ -4,6 +4,7 @@ from rest_framework import serializers
 
 from open_schools_platform.common.serializers import BaseModelSerializer
 from open_schools_platform.photo_management.photos.serializers import GetPhotoSerializer
+from open_schools_platform.shared.serializers import GetShallowCircleSerializer
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
 
@@ -67,6 +68,7 @@ class CreateStudentBodySerializer(BaseModelSerializer):
 
 class GetStudentSerializer(BaseModelSerializer):
     student_profile = GetStudentProfileSerializer()
+    circle = GetShallowCircleSerializer()
 
     class Meta:
         model = Student
