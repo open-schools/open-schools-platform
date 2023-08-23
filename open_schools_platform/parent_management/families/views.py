@@ -6,11 +6,15 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.constants import NotificationType
+from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.errors.exceptions import AlreadyExists
+from open_schools_platform.organization_management.organizations.services import \
+    get_organization_students_invitations_filter
 from open_schools_platform.parent_management.families.constants import FamilyConstants
 from open_schools_platform.parent_management.families.filters import FamilyFilter
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.paginators import ApiFamiliesListPagination
+from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.filters import StudentProfileFilter
 from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.student_management.students.paginators import ApiStudentProfilesListPagination
@@ -24,7 +28,8 @@ from open_schools_platform.parent_management.families.services import create_fam
 from rest_framework.response import Response
 
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
-from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer
+from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
+    GetCircleInviteStudentSerializer
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.serializers import GetStudentProfileSerializer
 
@@ -91,6 +96,40 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
             request=request,
             view=self
         )
+        return response
+
+
+class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
+    complex_filter = get_organization_students_invitations_filter()
+    queryset = Query.objects.all()
+    visible_filter_fields = complex_filter.get_dict_filters()
+    pagination_class = DefaultListPagination
+    serializer_class = GetCircleInviteStudentSerializer
+
+    @swagger_auto_schema(
+        operation_description='Get all invited students for this family',
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+    )
+    def get(self, request, family_id):
+        filters = request.GET.dict()
+
+        get_family(
+            filters={"id": family_id},
+            user=request.user,
+            empty_exception=True
+        )
+
+        filters["family__id"] = family_id
+        queries = self.complex_filter.get_objects(filters)
+
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetCircleInviteStudentSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
         return response
 
 

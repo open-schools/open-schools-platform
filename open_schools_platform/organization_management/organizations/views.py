@@ -370,11 +370,11 @@ class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
     pagination_class = ApiCircleListPagination
+    serializer_class = GetCircleInviteStudentSerializer
 
     @swagger_auto_schema(
         operation_description='Get invited students from all circles of this organization',
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
-        responses={200: convert_dict_to_serializer({'results': GetCircleInviteStudentSerializer(many=True)})}
     )
     def get(self, request):
         filters = request.GET.dict()
