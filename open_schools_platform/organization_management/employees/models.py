@@ -41,7 +41,7 @@ class EmployeeProfile(BaseModel):
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
     user = models.OneToOneField(User, related_name='employee_profile', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
-    email = models.EmailField(max_length=255, blank=True)
+    email = models.EmailField(max_length=255, blank=True, null=True)
     history = HistoricalRecords()
 
     objects = EmployeeProfileManager()  # type: ignore[assignment]

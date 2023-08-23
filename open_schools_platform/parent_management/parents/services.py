@@ -1,4 +1,4 @@
-from open_schools_platform.common.constants import EmailConstants, CommonConstants
+from open_schools_platform.common.constants import EmailConstants, CommonConstants, NewUserMessageType
 from open_schools_platform.common.services import exception_if_email_service_unavailable
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.selectors import get_family
@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import generate_user_password, create_user
-from open_schools_platform.tasks.tasks import send_mail_to_new_user_with_celery
+from open_schools_platform.tasks.tasks import send_message_to_new_user_with_celery
 
 
 def get_parent_profile_or_create_new_user(phone: str, email: str, circle: Circle) -> ParentProfile:
@@ -25,11 +25,12 @@ def send_email_to_new_parent(circle_name, email, phone, user):
     pwd = generate_user_password()
     subject = _('Circle invitation')
     name = _('Parent')
-    send_mail_to_new_user_with_celery.delay(subject,
-                                            {'login': phone, 'password': pwd, 'circle': circle_name,
-                                             'name': name, 'domain': CommonConstants.OPEN_SCHOOLS_DOMAIN},
-                                            EmailConstants.DEFAULT_FROM_EMAIL,
-                                            email, 'new_user_circle_invite_mail_form.html')
+    send_message_to_new_user_with_celery.delay(subject,
+                                               {'login': phone, 'password': pwd, 'circle': circle_name,
+                                                'name': name, 'domain': CommonConstants.OPEN_SCHOOLS_DOMAIN},
+                                               EmailConstants.DEFAULT_FROM_EMAIL, email,
+                                               {'phone': phone, 'user_password': pwd},
+                                               NewUserMessageType.InviteParent)
     user = create_user(phone=phone, password=pwd, name=name, email=email)
     return user
 

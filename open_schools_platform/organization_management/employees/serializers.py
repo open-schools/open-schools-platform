@@ -71,7 +71,7 @@ class GetListEmployeeSerializer(serializers.ModelSerializer):
 
 
 class CreateOrganizationInviteEmployeeSerializer(serializers.Serializer):
-    email = serializers.EmailField(max_length=255, required=True)
+    email = serializers.EmailField(max_length=255, required=False)
     phone = PhoneNumberField(max_length=17, required=True)
     body = GetEmployeeBodySerializer(required=True)
 
