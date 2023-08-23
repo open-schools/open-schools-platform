@@ -11,16 +11,16 @@ from open_schools_platform.user_management.users.services import generate_user_p
 from open_schools_platform.tasks.tasks import send_message_to_new_user_with_celery
 
 
-def get_parent_profile_or_create_new_user(phone: str, email: str, circle: Circle) -> ParentProfile:
+def get_parent_profile_or_create_new_user(phone: str, email: str, circle: Circle, student_name) -> ParentProfile:
     user = get_user(filters={"phone": phone})
 
     if not user:
-        user = send_email_to_new_parent(circle.name, email, phone, user)
+        user = send_email_to_new_parent(circle.name, email, phone, user, student_name)
 
     return user.parent_profile
 
 
-def send_email_to_new_parent(circle_name, email, phone, user):
+def send_email_to_new_parent(circle_name, email, phone, user, student_name):
     exception_if_email_service_unavailable()
     pwd = generate_user_password()
     subject = _('Circle invitation')
@@ -29,7 +29,7 @@ def send_email_to_new_parent(circle_name, email, phone, user):
                                                {'login': phone, 'password': pwd, 'circle': circle_name,
                                                 'name': name, 'domain': CommonConstants.OPEN_SCHOOLS_DOMAIN},
                                                EmailConstants.DEFAULT_FROM_EMAIL, email,
-                                               {'phone': phone, 'user_password': pwd},
+                                               {'phone': phone, 'user_password': pwd, 'name': student_name},
                                                NewUserMessageType.InviteParent)
     user = create_user(phone=phone, password=pwd, name=name, email=email)
     return user

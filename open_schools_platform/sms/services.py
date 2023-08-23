@@ -1,3 +1,4 @@
+import json
 from urllib.parse import urlencode
 
 import requests
@@ -14,7 +15,8 @@ def crop_name(name):
 
 
 def valid_sms(login, sms_password, phone, user_password, link):
-    return link and login and sms_password and len(phone) <= 12 and user_password <= SmsConstants.PASSWORD_MAX_LENGTH
+    return (link and login and sms_password
+            and len(phone) <= 12 and len(user_password) <= SmsConstants.PASSWORD_MAX_LENGTH)
 
 
 def send_sms_to_parent(phone, name, user_password):
@@ -64,7 +66,7 @@ class SmsSender:
                 }
             ]
         }
-        return requests.post(self._get_url('send.json'), data=data)
+        return requests.post(self._get_url('send.json'), data=json.dumps(data))
 
     def _get_senders(self):
         response = requests.post(self._get_url('senders.json'), data=self.login_data)

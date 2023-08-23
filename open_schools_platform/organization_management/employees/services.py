@@ -50,7 +50,7 @@ def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
                                                    {'login': phone, 'password': pwd, 'organization': organization_name,
                                                     'name': name, 'domain': CommonConstants.OPEN_SCHOOLS_DOMAIN},
                                                    EmailConstants.DEFAULT_FROM_EMAIL, email,
-                                                   {'phone': phone, 'name': name, 'user_password': pwd},
+                                                   {'phone': phone, 'user_password': pwd},
                                                    NewUserMessageType.InviteEmployee)
         user = create_user(phone=phone, password=pwd, name=name, email=email)
 

@@ -61,6 +61,6 @@ class GetCircleSenderSerializer(serializers.ModelSerializer):
 
 class CreateCircleInviteStudentSerializer(serializers.Serializer):
     body = CreateStudentBodySerializer(required=True)
-    student_phone = PhoneNumberField(max_length=17)
+    student_phone = PhoneNumberField(max_length=17, required=False)
     parent_phone = PhoneNumberField(max_length=17, required=True)
-    email = serializers.EmailField(max_length=255)
+    email = serializers.EmailField(max_length=255, required=False)
