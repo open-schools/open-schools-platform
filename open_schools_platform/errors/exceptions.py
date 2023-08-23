@@ -27,6 +27,12 @@ class EmailServiceUnavailable(APIException):
     default_code = 'email_service_unavailable'
 
 
+class SmsServiceUnavailable(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('SMS service is currently unavailable.')
+    default_code = 'sms_service_unavailable'
+
+
 class AlreadyExists(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("This object already exists")

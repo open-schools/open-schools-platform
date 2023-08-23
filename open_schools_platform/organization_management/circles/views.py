@@ -169,12 +169,12 @@ class InviteStudentApi(ApiAuthMixin, APIView):
 
         circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
         parent_phone = invite_serializer.validated_data["parent_phone"]
-        student_phone = invite_serializer.validated_data["student_phone"]
-        email = invite_serializer.validated_data["email"]
+        student_phone = invite_serializer.validated_data.get("student_phone")
+        email = invite_serializer.validated_data.get("email") or ''
         name = invite_serializer.validated_data["body"]["name"]
 
         parent_profile = get_parent_profile_or_create_new_user(phone=str(parent_phone), email=str(email),
-                                                               circle=circle)
+                                                               circle=circle, student_name=name)
         family = get_parent_family_or_create_new(parent_profile=parent_profile)
         student_profile = get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
                                                                       families=parent_profile.families.all())

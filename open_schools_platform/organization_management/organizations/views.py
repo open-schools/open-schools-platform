@@ -102,7 +102,7 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
         invite_serializer.is_valid(raise_exception=True)
 
         phone = invite_serializer.validated_data["phone"]
-        email = invite_serializer.validated_data["email"]
+        email = invite_serializer.validated_data.get("email") or ''
         name = invite_serializer.validated_data["body"]["name"]
         organization = get_organization(filters={"id": organization_id}, user=request.user, empty_exception=True)
 

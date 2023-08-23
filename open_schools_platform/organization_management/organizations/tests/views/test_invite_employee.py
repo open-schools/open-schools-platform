@@ -16,8 +16,10 @@ class InviteEmployeeTests(TestCase):
         self.invite_employee_url = \
             lambda pk: reverse("api:organization-management:organizations:invite-employee", args=[pk])
 
-    @pytest.mark.skipif(env("EMAIL_SERVICE_TRANSPORT", default=None) is None,
-                        reason="EMAIL_SERVICE_TRANSPORT is not set")
+    @pytest.mark.skipif(
+        env("EMAIL_SERVICE_TRANSPORT", default=None) is None
+        or env("REGISTRATION_MESSAGES_TRANSPORT", default='email') == "sms",
+        reason="EMAIL_SERVICE_TRANSPORT is not set or SMS skip")
     def test_invite_employee_query_successfully_formed(self):
         create_logged_in_user(instance=self)
         organization = create_test_organization()
