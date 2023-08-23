@@ -8,6 +8,7 @@ from phonenumber_field.phonenumber import PhoneNumber
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseManager, BaseModel
+from open_schools_platform.errors.exceptions import AlreadyExists
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.photo_management.photos.models import Photo
 from open_schools_platform.user_management.users.models import User
@@ -19,15 +20,16 @@ class TeacherProfileManager(BaseManager):
         if not photo:
             photo = Photo.objects.create_photo()
 
-        teacher_profile = self.model(
-            name=name,
-            age=age,
-            user=user,
-            phone=phone,
-            photo=photo
-        )
-        teacher_profile.full_clean()
-        teacher_profile.save(using=self.db)
+        try:
+            teacher_profile = self.get(user=user)
+        except TeacherProfile.DoesNotExist:
+            teacher_profile = None
+        if teacher_profile and not teacher_profile.deleted:
+            raise AlreadyExists("StudentProfile with this user already exists")
+
+        teacher_profile = self.update_or_create_with_check(user=user,
+                                                           defaults={'name': name, 'age': age, 'phone': phone,
+                                                                     'photo': photo})
         return teacher_profile
 
 
