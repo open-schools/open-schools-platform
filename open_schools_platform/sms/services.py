@@ -8,7 +8,7 @@ from open_schools_platform.sms.constants import SmsConstants
 
 
 def crop_name(name):
-    max_length = SmsConstants.NAME_MAX_LENGTH
+    max_length = SmsConstants.MAX_NAME_LENGTH
     if len(name) > max_length:
         return name[:max_length - 3] + '...'
     return name
@@ -16,7 +16,7 @@ def crop_name(name):
 
 def valid_sms(login, sms_password, phone, user_password, link):
     return (link and login and sms_password
-            and len(phone) <= 12 and len(user_password) <= SmsConstants.PASSWORD_MAX_LENGTH)
+            and len(phone) <= SmsConstants.MAX_PHONE_LENGTH and len(user_password) <= SmsConstants.PASSWORD_MAX_LENGTH)
 
 
 def send_sms_to_parent(phone, name, user_password):

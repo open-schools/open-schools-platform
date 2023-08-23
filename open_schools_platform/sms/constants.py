@@ -18,5 +18,6 @@ class SmsConstants:
     INVITE_PARENT_MESSAGE = '{name}:\n{link}\nпароль: {password}'
     INVITE_EMPLOYEE_MESSAGE = '{phone}\n{password}\n-> {link}'
 
-    NAME_MAX_LENGTH = 27
+    MAX_NAME_LENGTH = 27
+    MAX_PHONE_LENGTH = 12
     PASSWORD_MAX_LENGTH = 8
