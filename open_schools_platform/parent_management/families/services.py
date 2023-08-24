@@ -1,10 +1,15 @@
 import typing
 
+from django.contrib.contenttypes.models import ContentType
+
 from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.query_management.queries.selectors import get_queries
+from open_schools_platform.user_management.users.models import User
 
 
 def add_parent_profile_to_family(family: Family, parent: ParentProfile):
@@ -45,6 +50,18 @@ class FamilyQueryHandler(BaseQueryHandler):
     change_query = {
         ParentProfile: query_to_parent_profile
     }
+
+
+def get_all_student_invites_for_current_user(user: User):
+    return get_queries(
+        filters={
+            "sender_ct": ContentType.objects.get(model="circle"),
+            "recipient_ct": ContentType.objects.get(model="family"),
+            "body_ct": ContentType.objects.get(model="student"),
+            "additional_ct": ContentType.objects.get(model="studentprofile"),
+            "recipient_ids": form_ids_string_from_queryset(user.parent_profile.families.all())
+        }
+    )
 
 
 setattr(Family, "query_handler", FamilyQueryHandler())
