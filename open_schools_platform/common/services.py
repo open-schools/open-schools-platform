@@ -6,6 +6,7 @@ from django_filters import Filter, CharFilter
 from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
+from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
 from open_schools_platform.common.types import DjangoModelType
 from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, form_ids_string_from_queryset
@@ -172,9 +173,14 @@ class SendEmailService:
         self.email_transport = EMAIL_TRANSPORT
 
 
-def exception_if_email_service_unavailable():
-    if SendEmailService().email_transport is None:
-        raise EmailServiceUnavailable()
+class email_service:
+    def __enter__(self):
+        if CommonConstants.REGISTRATION_MESSAGES_TRANSPORT == "email" and \
+                SendEmailService().email_transport is None:
+            raise EmailServiceUnavailable()
+
+    def __exit__(self, type, value, traceback):
+        pass
 
 
 def file_generate_upload_path(instance, filename):
