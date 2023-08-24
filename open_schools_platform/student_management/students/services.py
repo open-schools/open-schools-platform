@@ -17,7 +17,7 @@ from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import create_query
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
     StudentProfileCircleAdditional
-from open_schools_platform.student_management.students.selectors import get_student_profile
+from open_schools_platform.student_management.students.selectors import get_student_profiles
 from open_schools_platform.user_management.users.models import User
 
 
@@ -95,10 +95,11 @@ def create_student_profile_circle_additional(text: str = None, parent_phone: Pho
 
 def get_student_profile_by_family_or_create_new(student_phone: PhoneNumber, student_name: str,
                                                 families: QuerySet[Family]):
-    student_profile = get_student_profile(
+    student_profile = get_student_profiles(
         filters={"phone": student_phone,
-                 "families": form_ids_string_from_queryset(families)}
-    )
+                 "families": form_ids_string_from_queryset(families)},
+        empty_filters=True,
+    ).first()
 
     if not student_profile:
         student_profile = create_student_profile(name=student_name, phone=student_phone)
