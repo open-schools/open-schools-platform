@@ -25,7 +25,7 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.parent_management.families.serializers import CreateFamilySerializer, GetFamilySerializer, \
     CreateFamilyInviteParentSerializer
 from open_schools_platform.parent_management.families.services import create_family, \
-    get_all_student_invites_for_current_user
+    get_all_student_invites_for_current_user_families
 from rest_framework.response import Response
 
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
@@ -145,7 +145,7 @@ class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request):
 
-        queries = get_all_student_invites_for_current_user(request.user)
+        queries = get_all_student_invites_for_current_user_families(request.user)
 
         response = get_paginated_response(
             pagination_class=DefaultListPagination,

@@ -52,7 +52,7 @@ class FamilyQueryHandler(BaseQueryHandler):
     }
 
 
-def get_all_student_invites_for_current_user(user: User):
+def get_all_student_invites_for_current_user_families(user: User):
     return get_queries(
         filters={
             "sender_ct": ContentType.objects.get(model="circle"),
