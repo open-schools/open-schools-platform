@@ -24,7 +24,8 @@ from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
 from open_schools_platform.parent_management.families.serializers import CreateFamilySerializer, GetFamilySerializer, \
     CreateFamilyInviteParentSerializer
-from open_schools_platform.parent_management.families.services import create_family
+from open_schools_platform.parent_management.families.services import create_family, \
+    get_all_student_invites_for_current_user_families
 from rest_framework.response import Response
 
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
@@ -99,7 +100,7 @@ class FamiliesListApi(ApiAuthMixin, ListAPIView):
         return response
 
 
-class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
+class FamilyStudentInvitesListApi(ApiAuthMixin, ListAPIView):
     complex_filter = get_organization_students_invitations_filter()
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
@@ -121,6 +122,30 @@ class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
 
         filters["family__id"] = family_id
         queries = self.complex_filter.get_objects(filters)
+
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetCircleInviteStudentSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
+        return response
+
+
+class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Query.objects.all()
+    pagination_class = DefaultListPagination
+    serializer_class = GetCircleInviteStudentSerializer
+
+    @swagger_auto_schema(
+        operation_description='Get all invited students for current user',
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+    )
+    def get(self, request):
+
+        queries = get_all_student_invites_for_current_user_families(request.user)
 
         response = get_paginated_response(
             pagination_class=DefaultListPagination,
