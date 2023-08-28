@@ -16,11 +16,13 @@ class CommonConstants:
     SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
     SMS_API_KEY = env("SMS_API_KEY", default=None)
     FCM_SERVER_KEY = env("FCM_SERVER_KEY", default=None)
-    SCHOOLS_AI_URL = env("SCHOOLS_AI_URL", default=None)
+    OPEN_SCHOOLS_DOMAIN = env("OPEN_SCHOOLS_DOMAIN", default="v1.openschools.education")
     GEOPY_GEOCODE_TIMEOUT = 10
 
     if not is_google_api_key_valid(FIREBASE_URL_TO_GET_SESSION, GOOGLE_API_KEY):
         warnings.warn("google api key is not valid")
+
+    REGISTRATION_MESSAGES_TRANSPORT = env("REGISTRATION_MESSAGES_TRANSPORT", default="email")
 
 
 class EmailConstants:
@@ -46,3 +48,14 @@ class EmailConstants:
 class NotificationType(str, Enum):
     InviteParent = 'invite-parent-query'
     TeacherReminder = 'circle-lesson'
+
+
+class NewUserMessageType(str, Enum):
+    InviteEmployee = 'invite-employee'
+    InviteParent = 'invite-parent'
+
+
+EmailTemplateName = {
+    NewUserMessageType.InviteParent: 'new_user_circle_invite_mail_form.html',
+    NewUserMessageType.InviteEmployee: 'new_user_invite_mail_form.html'
+}

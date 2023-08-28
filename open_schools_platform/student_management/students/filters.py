@@ -1,42 +1,43 @@
-from typing import List
-
-import django_filters
-from django.db.models import CharField
 from django_filters import CharFilter
 
-from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter, filter_by_ids
+from open_schools_platform.common.filters import BaseFilterSet, UUIDInFilter, filter_by_ids, MetaCharIContainsMixin
+from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.students.models import StudentProfile, Student
+
+
+def parent_phone_filter(queryset, field_name, value):
+    ids = []
+    parent_profiles = ParentProfile.objects.prefetch_related('families') \
+        .filter(user__phone__icontains=value)
+    families = Family.objects.none()
+
+    for i in parent_profiles:
+        families |= i.families.all()
+
+    for i in queryset:
+        if i.student_profile.families.all() & families:
+            ids.append(str(i.student_profile.id))
+            continue
+
+    return queryset.filter(student_profile__id__in=ids)
 
 
 class StudentProfileFilter(BaseFilterSet):
     families = UUIDInFilter(field_name="families", lookup_expr="in")
     ids = CharFilter(method=filter_by_ids)
+    or_search = CharFilter(field_name="or_search", method="OR")
 
-    class Meta:
+    class Meta(MetaCharIContainsMixin):
         model = StudentProfile
         fields = ('id', 'user', 'name', 'age', 'phone', 'photo')
 
 
 class StudentFilter(BaseFilterSet):
-    @staticmethod
-    def get_swagger_filters(prefix: str = "", include: List[str] = None):
-        if include is None:
-            include = []
+    or_search = CharFilter(field_name="or_search", method="OR")
+    parent_phone = CharFilter(field_name="parent_phone", method=parent_phone_filter)
 
-        if not include:
-            include = ["name", "id", "circle", "student_profile",
-                       "student_profile__phone", "circle__name", "circle__organization"]
-        return BaseFilterSet.get_dict_filters(StudentFilter, prefix, include)
-
-    class Meta:
+    class Meta(MetaCharIContainsMixin):
         model = Student
         fields = ('id', 'name', 'circle', 'student_profile', 'student_profile__phone',
-                  'circle__name', 'student_profile__name', "circle__organization")
-        filter_overrides = {
-            CharField: {
-                'filter_class': django_filters.CharFilter,
-                'extra': lambda f: {
-                    'lookup_expr': 'icontains',
-                },
-            },
-        }
+                  'circle__name', 'student_profile__name', "circle__organization", "parent_phone")

@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .serializers import JSONWebTokenWithTwoResponses, PasswordUpdateSerializer, UserUpdateSerializer
+from .serializers import JSONWebTokenWithTwoResponses, UpdatePasswordSerializer, UpdateUserSerializer
 
 from rest_framework_jwt.views import BaseJSONWebTokenAPIView
 
@@ -15,13 +15,14 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.user_management.authentication.services import auth_logout
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
-from ..users.serializers import UserSerializer, UserProfilesSerializer
+from ..users.serializers import GetUserSerializer, GetUserProfilesSerializer
 from ..users.services import set_new_password_for_user, user_update
 from ...common.views import convert_dict_to_serializer
 
 
 class UserJwtLoginApi(BaseJSONWebTokenAPIView):
     serializer_class = JSONWebTokenWithTwoResponses
+    throttle_scope = "login"
 
     @swagger_auto_schema(
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH]
@@ -56,34 +57,35 @@ class UserMeApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get user data.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        responses={200: convert_dict_to_serializer({"user": UserProfilesSerializer()})},
+        responses={200: convert_dict_to_serializer({"user": GetUserProfilesSerializer()})},
     )
     def get(self, request):
-        return Response({"user": UserProfilesSerializer(request.user, context={'request': request}).data}, status=200)
+        return Response({"user": GetUserProfilesSerializer(request.user, context={'request': request}).data},
+                        status=200)
 
     @swagger_auto_schema(
         operation_description="Update user.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        request_body=UserUpdateSerializer,
-        responses={200: convert_dict_to_serializer({"user": UserSerializer()})}
+        request_body=UpdateUserSerializer,
+        responses={200: convert_dict_to_serializer({"user": GetUserSerializer()})}
     )
     def patch(self, request):
         user = request.user
-        user_serializer = UserUpdateSerializer(data=request.data)
+        user_serializer = UpdateUserSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user_update(user=user, data=user_serializer.validated_data)
-        return Response({"user": UserSerializer(user).data}, status=200)
+        return Response({"user": GetUserSerializer(user).data}, status=200)
 
 
 class UpdatePasswordApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Update user password.",
         tags=[SwaggerTags.USER_MANAGEMENT_AUTH],
-        request_body=PasswordUpdateSerializer,
+        request_body=UpdatePasswordSerializer,
         responses={200: "Password was successfully updated."},
     )
     def patch(self, request):
-        user_serializer = PasswordUpdateSerializer(data=request.data)
+        user_serializer = UpdatePasswordSerializer(data=request.data)
         user_serializer.is_valid(raise_exception=True)
         user = request.user
 

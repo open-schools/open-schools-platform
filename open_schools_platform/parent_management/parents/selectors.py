@@ -7,7 +7,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(ParentProfile)
-def get_parent_profile(*, filters=None, user: User = None) -> ParentProfile:
+def get_parent_profile(*, filters=None, user: User = None, prefetch_related_list=None) -> ParentProfile:
     filters = filters or {}
 
     qs = ParentProfile.objects.all()

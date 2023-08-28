@@ -135,3 +135,14 @@ find / -name "libgdal.dylib" -print 2>/dev/null
 ```
 find / -name "libgeos.dylib" -print 2>/dev/null
 ```
+
+# Dump and load data
+
+1. Dump data
+```
+python -Xutf8 manage.py dumpdata --indent 4 --exclude auth.permission --exclude contenttypes > db.json
+```
+2. Load data
+```
+python manage.py loaddata db.json
+```

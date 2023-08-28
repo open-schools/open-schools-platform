@@ -49,6 +49,8 @@ LOCAL_APPS = [
     'open_schools_platform.photo_management.photos.apps.PhotosConfig',
     'open_schools_platform.history_management.apps.HistoryConfig',
     'open_schools_platform.organization_management.teachers.apps.TeachersConfig',
+    'open_schools_platform.testing.apps.TestingConfig',
+    'open_schools_platform.sms.apps.SmsConfig'
 ]
 
 THIRD_PARTY_APPS = [
@@ -169,7 +171,7 @@ AUTH_USER_MODEL = 'users.User'
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = env('LOCALE_LANGUAGE', default='en')
 
 TIME_ZONE = 'UTC'
 
@@ -178,6 +180,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'config', 'locale')
+]
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -199,13 +205,19 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'login': env("LOGIN_RATE_LIMIT", default="10/minute"),
+        'token_creation': env("TOKEN_CREATION_RATE_LIMIT", default="10/minute")
+    }
 }
 
 AUTHENTICATION_BACKENDS = (
     'rules.permissions.ObjectPermissionBackend',
     'django.contrib.auth.backends.ModelBackend',
 )
-
 
 from config.settings.cors import *  # noqa
 from config.settings.jwt import *  # noqa
@@ -220,8 +232,10 @@ ADMIN_PANEL_ENABLED = env.bool('ADMIN_PANEL_ENABLED', default=True)
 
 from config.settings.debug_toolbar.settings import *  # noqa
 from config.settings.debug_toolbar.setup import DebugToolbarSetup  # noqa
+
 INSTALLED_APPS, MIDDLEWARE = DebugToolbarSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)
 
 from config.settings.swagger.settings import *  # noqa
 from config.settings.swagger.setup import SwaggerSetup  # noqa
+
 INSTALLED_APPS, MIDDLEWARE = SwaggerSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)

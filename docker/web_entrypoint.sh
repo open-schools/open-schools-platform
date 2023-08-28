@@ -2,8 +2,11 @@
 
 # Collect static files
 echo "Collect static files"
-
 python manage.py collectstatic --noinput
+
+# Generate localization files
+echo "Generate localization files"
+python manage.py compilemessages
 
 # Apply database migrations
 echo "Apply database migrations"

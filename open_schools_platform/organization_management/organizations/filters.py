@@ -6,6 +6,7 @@ from open_schools_platform.organization_management.organizations.models import O
 
 class OrganizationFilter(BaseFilterSet):
     ids = CharFilter(method=filter_by_ids)
+    or_search = CharFilter(field_name="or_search", method="OR")
 
     class Meta:
         model = Organization

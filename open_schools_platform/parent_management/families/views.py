@@ -1,80 +1,174 @@
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.constants import NotificationType
+from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.errors.exceptions import AlreadyExists
+from open_schools_platform.organization_management.organizations.services import \
+    get_organization_students_invitations_filter
 from open_schools_platform.parent_management.families.constants import FamilyConstants
+from open_schools_platform.parent_management.families.filters import FamilyFilter
+from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.families.paginators import ApiFamiliesListPagination
+from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.student_management.students.filters import StudentProfileFilter
+from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.paginators import ApiStudentProfilesListPagination
+from open_schools_platform.student_management.students.selectors import get_student_profiles_from_family_with_filters
 from open_schools_platform.user_management.users.services import notify_user
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.parent_management.families.selectors import get_family, get_families
-from open_schools_platform.parent_management.families.serializers import FamilyCreateSerializer, FamilySerializer, \
-    FamilyInviteParentSerializer
-from open_schools_platform.parent_management.families.services import create_family
+from open_schools_platform.parent_management.families.serializers import CreateFamilySerializer, GetFamilySerializer, \
+    CreateFamilyInviteParentSerializer
+from open_schools_platform.parent_management.families.services import create_family, \
+    get_all_student_invites_for_current_user_families
 from rest_framework.response import Response
 
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
-from open_schools_platform.query_management.queries.serializers import QueryStatusSerializer
+from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
+    GetCircleInviteStudentSerializer
 from open_schools_platform.query_management.queries.services import create_query
-from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
+from open_schools_platform.student_management.students.serializers import GetStudentProfileSerializer
 
 
 class FamilyApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Creates Family.\n"
                               "Returns Family data.",
-        request_body=FamilyCreateSerializer,
-        responses={201: convert_dict_to_serializer({"family": FamilySerializer()})},
+        request_body=CreateFamilySerializer,
+        responses={201: convert_dict_to_serializer({"family": GetFamilySerializer()})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def post(self, request):
-        family_create_serializer = FamilyCreateSerializer(data=request.data)
+        family_create_serializer = CreateFamilySerializer(data=request.data)
         family_create_serializer.is_valid(raise_exception=True)
         family = create_family(name=family_create_serializer.validated_data["name"], parent=request.user.parent_profile)
-        return Response({"family": FamilySerializer(family).data}, status=201)
+        return Response({"family": GetFamilySerializer(family).data}, status=201)
 
 
-class FamilyStudentProfilesListApi(ApiAuthMixin, APIView):
+class FamilyStudentProfilesListApi(ApiAuthMixin, ListAPIView):
+    queryset = StudentProfile.objects.all()
+    filterset_class = StudentProfileFilter
+    pagination_class = ApiStudentProfilesListPagination
+    serializer_class = GetStudentProfileSerializer
+
     @swagger_auto_schema(
         operation_description="Get all student profiles for provided family.",
-        responses={200: convert_dict_to_serializer({"results": StudentProfileSerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
-    def get(self, request, pk):
+    def get(self, request, family_id):
         family = get_family(
-            filters={'id': str(pk)},
+            filters={'id': str(family_id)},
             user=request.user,
             empty_exception=True,
         )
-        return Response({"results": StudentProfileSerializer(family.student_profiles, many=True,
-                                                             context={'request': request}).data}, status=200)
+        response = get_paginated_response(
+            pagination_class=ApiStudentProfilesListPagination,
+            serializer_class=GetStudentProfileSerializer,
+            queryset=get_student_profiles_from_family_with_filters(family, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
 
 
-class FamiliesListApi(ApiAuthMixin, APIView):
+class FamiliesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Family.objects.all()
+    filterset_class = FamilyFilter
+    pagination_class = ApiFamiliesListPagination
+    serializer_class = GetFamilySerializer
+
     @swagger_auto_schema(
         operation_description="Get all families for currently logged in user",
-        responses={200: convert_dict_to_serializer({"results": FamilySerializer(many=True)})},
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES]
     )
     def get(self, request):
         families = get_families(
-            filters={"parent_profiles": str(request.user.parent_profile.id)}
+            filters=request.GET.dict() | {"parent_profiles": str(request.user.parent_profile.id)}
         )
-        return Response({"results": FamilySerializer(families, many=True).data}, status=200)
+        response = get_paginated_response(
+            pagination_class=ApiFamiliesListPagination,
+            serializer_class=GetFamilySerializer,
+            queryset=families,
+            request=request,
+            view=self
+        )
+        return response
+
+
+class FamilyStudentInvitesListApi(ApiAuthMixin, ListAPIView):
+    complex_filter = get_organization_students_invitations_filter()
+    queryset = Query.objects.all()
+    visible_filter_fields = complex_filter.get_dict_filters()
+    pagination_class = DefaultListPagination
+    serializer_class = GetCircleInviteStudentSerializer
+
+    @swagger_auto_schema(
+        operation_description='Get all invited students for this family',
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+    )
+    def get(self, request, family_id):
+        filters = request.GET.dict()
+
+        get_family(
+            filters={"id": family_id},
+            user=request.user,
+            empty_exception=True
+        )
+
+        filters["family__id"] = family_id
+        queries = self.complex_filter.get_objects(filters)
+
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetCircleInviteStudentSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
+        return response
+
+
+class FamiliesStudentInvitesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Query.objects.all()
+    pagination_class = DefaultListPagination
+    serializer_class = GetCircleInviteStudentSerializer
+
+    @swagger_auto_schema(
+        operation_description='Get all invited students for current user',
+        tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
+    )
+    def get(self, request):
+
+        queries = get_all_student_invites_for_current_user_families(request.user)
+
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetCircleInviteStudentSerializer,
+            queryset=queries,
+            request=request,
+            view=self
+        )
+
+        return response
 
 
 class InviteParentApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_FAMILIES],
-        request_body=FamilyInviteParentSerializer,
-        responses={201: convert_dict_to_serializer({"query": QueryStatusSerializer()}),
+        request_body=CreateFamilyInviteParentSerializer,
+        responses={201: convert_dict_to_serializer({"query": GetQueryStatusSerializer()}),
                    400: "Parent is already in this family",
                    404: "No such family"},
         operation_description="Creates invite parent query.",
     )
     def post(self, request):
-        invite_parent_serializer = FamilyInviteParentSerializer(data=request.data)
+        invite_parent_serializer = CreateFamilyInviteParentSerializer(data=request.data)
         invite_parent_serializer.is_valid(raise_exception=True)
         family = get_family(filters={"id": str(invite_parent_serializer.validated_data["family"])}, user=request.user,
                             empty_exception=True)
@@ -88,7 +182,7 @@ class InviteParentApi(ApiAuthMixin, APIView):
         notify_user(user=parent.user, title=FamilyConstants.INVITE_PARENT_TITLE,
                     body=FamilyConstants.get_invite_parent_message(family),
                     data={"query": str(query.id), "type": NotificationType.InviteParent})
-        return Response({"query": QueryStatusSerializer(query).data}, status=201)
+        return Response({"query": GetQueryStatusSerializer(query).data}, status=201)
 
 
 class FamilyDeleteApi(ApiAuthMixin, APIView):
@@ -97,7 +191,7 @@ class FamilyDeleteApi(ApiAuthMixin, APIView):
         operation_description="Delete family.",
         responses={204: "Successfully deleted", 404: "No such family"}
     )
-    def delete(self, request, pk):
-        family = get_family(filters={'id': pk}, empty_exception=True, user=request.user)
+    def delete(self, request, family_id):
+        family = get_family(filters={'id': family_id}, empty_exception=True, user=request.user)
         family.delete()
         return Response(status=204)

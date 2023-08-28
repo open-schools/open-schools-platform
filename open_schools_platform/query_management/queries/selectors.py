@@ -9,7 +9,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Query)
-def get_query(*, filters=None, user: User = None) -> Query:
+def get_query(*, filters=None, user: User = None, prefetch_related_list=None) -> Query:
     filters = filters or {}
 
     qs = Query.objects.all()
@@ -34,7 +34,7 @@ def get_query_with_checks(pk: str, user: User, update_query_check: bool = False)
 
 
 @selector_factory(Query)
-def get_queries(*, filters=None) -> QuerySet:
+def get_queries(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Query.objects.all()

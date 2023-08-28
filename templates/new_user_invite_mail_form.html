@@ -1,17 +1,22 @@
+{% load i18n %}
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="UTF-8">
 <title>Message</title>
 <body>
-<p>Приветствуем, {{ name }}!
+<p>
+    {% blocktrans with username=name %}Hello, {{ username }}!{% endblocktrans %}
     <br>
-    Организация <b>{{ organization }}</b> приглашает вас к себе в качестве сотрудника. <br>Логин и пароль для входа в
-        личный кабинет на <a href="https://openschools.education/#">openschools.education:</a>
+    {% blocktrans with org_name=organization %}The <b>{{ org_name }}</b> organization invites you to join us as an employee.{% endblocktrans %}
+    <br>
+    {% blocktrans with lgn=login pswd=password %}Login and password to enter your personal account on{% endblocktrans %}
+    {% blocktrans with dom=domain %}<a href="https://{{ dom }}">{{ dom }}:</a>{% endblocktrans %}
     <br><br>
-    Ваш логин: {{ login }}<br>
-    Ваш пароль: {{ password }}<br><br>
-
-    <small>С уважением,<br> "Открытые Школы"</small>
+    {% blocktrans with lgn=login %}Your login: {{ lgn }}{% endblocktrans %}
+    <br>
+    {% blocktrans with pswd=password %}Your password: {{ pswd }}{% endblocktrans %}
+    <br><br>
+    <small>{% trans 'Sincerely,<br> "Open Schools"' %}</small>
 </p>
 </body>
 </html>

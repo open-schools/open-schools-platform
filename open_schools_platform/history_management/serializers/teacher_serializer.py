@@ -1,30 +1,18 @@
 from rest_framework import serializers
 
-from open_schools_platform.history_management.serializers.fields import HistorySerializerFields
-from open_schools_platform.history_management.swagger_schemas_generator import SwaggerSchemasHistoryGenerator
+from open_schools_platform.history_management.serializers.history_serializer import BaseHistorySerializer
 from open_schools_platform.organization_management.teachers.models import Teacher, TeacherProfile
 
 
-class TeacherHistorySerializer(serializers.ModelSerializer):
-    history = HistorySerializerFields.get_history_records_field(
-        fields=HistorySerializerFields().HISTORY_TEACHER_FIELDS)(read_only=True)
-
+class GetTeacherHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = Teacher
-        fields = ("history",)
-        swagger_schema_fields = SwaggerSchemasHistoryGenerator(fields=HistorySerializerFields().HISTORY_TEACHER_FIELDS,
-                                                               object_title='TeacherHistory',
-                                                               model=Teacher).generate_schemas()
+        fields = (
+            'id', 'name', 'circle', 'teacher_profile', 'history_id', 'history_user_id', 'history_date', 'history_type')
 
 
-class TeacherProfileHistorySerializer(serializers.ModelSerializer):
-    history = HistorySerializerFields.get_history_records_field(
-        fields=HistorySerializerFields().HISTORY_TEACHER_PROFILE_FIELDS)(read_only=True)
-
+class GetTeacherProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = TeacherProfile
-        fields = ("history",)
-        swagger_schema_fields = SwaggerSchemasHistoryGenerator(
-            fields=HistorySerializerFields().HISTORY_TEACHER_PROFILE_FIELDS,
-            object_title='TeacherProfileHistory',
-            model=TeacherProfile).generate_schemas()
+        fields = (
+            'id', 'name', 'phone', 'age', 'photo', 'history_id', 'history_user_id', 'history_date', 'history_type')

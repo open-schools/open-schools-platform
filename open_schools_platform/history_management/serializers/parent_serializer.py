@@ -1,18 +1,10 @@
 from rest_framework import serializers
 
-from open_schools_platform.history_management.serializers.fields import HistorySerializerFields
-from open_schools_platform.history_management.swagger_schemas_generator import SwaggerSchemasHistoryGenerator
+from open_schools_platform.history_management.serializers.history_serializer import BaseHistorySerializer
 from open_schools_platform.parent_management.parents.models import ParentProfile
 
 
-class ParentProfileHistorySerializer(serializers.ModelSerializer):
-    history = HistorySerializerFields.get_history_records_field(
-        fields=HistorySerializerFields().HISTORY_PARENT_PROFILE_FIELDS)(read_only=True)
-
+class GetParentProfileHistorySerializer(serializers.ModelSerializer, BaseHistorySerializer):
     class Meta:
         model = ParentProfile
-        fields = ("history",)
-        swagger_schema_fields = SwaggerSchemasHistoryGenerator(
-            fields=HistorySerializerFields().HISTORY_PARENT_PROFILE_FIELDS,
-            object_title='ParentProfileHistory',
-            model=ParentProfile).generate_schemas()
+        fields = ('id', 'name', 'user', 'history_id', 'history_user_id', 'history_date', 'history_type')

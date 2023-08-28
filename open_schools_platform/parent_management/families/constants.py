@@ -1,6 +1,9 @@
+from django.utils.translation import gettext_lazy as _
+
+
 class FamilyConstants:
-    INVITE_PARENT_TITLE = "Вы были приглашены в семью!"
+    INVITE_PARENT_TITLE = _('You have been invited into the family!')
 
     @staticmethod
     def get_invite_parent_message(family):
-        return "{family} пригласила вас к себе!".format(family=family)
+        return _('The {family} family invites you').format(family=family)

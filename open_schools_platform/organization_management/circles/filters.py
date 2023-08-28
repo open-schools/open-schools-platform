@@ -1,5 +1,5 @@
 from django.contrib.gis.measure import D
-from django_filters import CharFilter, NumberFilter
+from django_filters import CharFilter, NumberFilter, OrderingFilter
 
 from open_schools_platform.common.filters import BaseFilterSet, filter_by_ids
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
@@ -17,6 +17,7 @@ def get_circles_by_student_profile(queryset, name, value):
 
 class CircleFilter(BaseFilterSet):
     ids = CharFilter(method=filter_by_ids)
+    or_search = CharFilter(field_name="or_search", method="OR")
     address = CharFilter(field_name="address", lookup_expr="icontains")
     organization_name = CharFilter(field_name="organization__name", lookup_expr="icontains")
     radius = NumberFilter(method='circle_determined_radius_filter')
@@ -24,6 +25,10 @@ class CircleFilter(BaseFilterSet):
     student_profile = CharFilter(method=get_circles_by_student_profile)
     name = CharFilter(field_name="name", lookup_expr="icontains")
     determined_radius = 0
+    order = OrderingFilter(fields=(
+        ('name', 'name'),
+        ('address', 'address')
+    ))
 
     def circle_determined_radius_filter(self, queryset, name, value):
         self.determined_radius = value
@@ -47,4 +52,4 @@ class CircleFilter(BaseFilterSet):
 
     class Meta:
         model = Circle
-        fields = ("id", "organization", "capacity", "description")
+        fields = ("id", "organization", "organization__id", "capacity", "description")

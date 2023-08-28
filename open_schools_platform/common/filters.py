@@ -1,9 +1,12 @@
+import re
 from enum import Enum
-from typing import List, Type
+from typing import Type
 
 import django_filters
-from django.db.models import Q, QuerySet
-from django_filters import CharFilter, BaseInFilter, UUIDFilter
+from django.core.exceptions import FieldError
+from django.db.models import QuerySet
+from django_filters import CharFilter, BaseInFilter, UUIDFilter, ChoiceFilter, AllValuesFilter, OrderingFilter
+from django.db.models import CharField
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError
 from safedelete.config import DELETED_ONLY_VISIBLE, DELETED_VISIBLE
@@ -57,22 +60,32 @@ class BaseFilterSet(django_filters.FilterSet):
     BaseFilterSet provide you some useful features:
 
     1. Opportunity to use special field OR_SEARCH_FIELD that will search
-    for all char fields and combine results
-        * Your filter should contain this attribute: 'search = CharFilter(field_name="search", method="OR")'
-        * This feature works only if your input dictionary has  pair [OR_SEARCH_FIELD: some_value]
-    2. Will raise ValidationError when filter get not valid data
+    through all filters, that are provided with it and combine results
+        * Your filter should contain this attribute: 'or_search = CharFilter(field_name="or_search", method="OR")'
+        * This feature works only if your input dictionary has pair [OR_SEARCH_FIELD: some_value]
+    2. Will raise ValidationError when filter gets invalid data.
+    The validation criteria:
+        * Value passed in OR_SEARCH_FIELD should be in a strict format - value:[filter1,filter2,...]
+        * Filters inside [] should:
+            * exist in view's filterset
+            * have CharFilter, AllValuesFilter or ChoiceFilter type
+            * not have redefined method
+            * not have lookup_expr that is not allowed. Allowed lookup_expressions: [i]contains, [i]exact
     3. Will order result by "-created_at" field
         * To use this class your input model type should inherit BaseModel
-        otherwise you can redefine ORDER_FIELD
-        * To disable this feature write ORDER_FIELD=None
+        otherwise you can redefine DEFAULT_ORDER_FIELD
+        * To disable this feature write DEFAULT_ORDER_FIELD=None
         * Note: symbol '-' is the reverse trigger
     4. SoftCondition by default is NOT_DELETED
     """
-    OR_SEARCH_FIELD = "search"
-    ORDER_FIELD = "-created_at"
+    OR_SEARCH_FIELD = "or_search"
+    DEFAULT_ORDER_FIELD = "-created_at"
+    MODEL_CHARFIELD = "CharField"
+    ALLOWED_FILTER_TYPES = [CharFilter, ChoiceFilter, AllValuesFilter]
+    ALLOWED_LOOKUP_EXPR = ["icontains", "contains", "exact", "iexact"]
 
     def __init__(self, data: dict = None, queryset: QuerySet = None, **kwargs):
-        self.search_value = None
+        self.or_search = None
         self.force_visibility = SoftCondition.NOT_DELETED
         if data is not None:
             self.force_visibility = data.get('DELETED', SoftCondition.NOT_DELETED)
@@ -82,51 +95,58 @@ class BaseFilterSet(django_filters.FilterSet):
             raise ValidationError(self.errors)
 
     def OR(self, queryset, field_name, value):
-        if type(value) is not str:
-            raise ValidationError(detail="Search field must be str type.")
+        if not or_search_filter_is_valid(value):
+            raise ValidationError(
+                detail="or_search field must be in value:[filter1,filter2,...] format, without spaces after : sign."
+            )
 
-        self.search_value = value
+        self.or_search = value
         return queryset
 
     @property
     def qs(self):
         base_queryset = super().qs.all(force_visibility=self.force_visibility.value)
 
-        if self.ORDER_FIELD:
-            base_queryset = base_queryset.order_by(self.ORDER_FIELD)
+        if not self._has_provided_filter(OrderingFilter):
+            base_queryset = base_queryset.order_by(self.DEFAULT_ORDER_FIELD)
 
-        if not self.search_value:
+        if not self.or_search:
             return base_queryset
 
-        query = Q()
-        filters = self.get_filters()
-        for filter in filters.values():
-            if type(filter) is CharFilter and filter.field_name != self.OR_SEARCH_FIELD:
-                query |= Q(**{"{0}__icontains".format(filter.field_name): self.search_value})
+        or_queryset = base_queryset.none()
+        or_search_value, or_search_filters = get_values_from_or_search(self.or_search)
+        for filter_name in or_search_filters:
+            try:
+                filter_object = self.get_filters()[filter_name]
+            except KeyError:
+                raise ValidationError(detail=f"{filter_name} is not listed in this view's filters")
+            exception_if_filter_is_invalid_for_or_search(filter_object, filter_name,
+                                                         self.ALLOWED_FILTER_TYPES, self.ALLOWED_LOOKUP_EXPR)
+            try:
+                # TODO: is it safe?
+                filter_object.lookup_expr = "icontains"
+                or_queryset |= filter_object.filter(base_queryset, or_search_value)
+            except FieldError:
+                raise ValidationError(detail=f"cannot filter through this"
+                                             f" model's fields with {str(filter_object)} filter.")
+        return base_queryset & or_queryset
 
-        return base_queryset.filter(query)
+    def _has_provided_filter(self, filter_type: Type):
+        for name, filter_field in self.get_filters().items():
+            if isinstance(filter_field, filter_type) and self.data.get(name, False):
+                return True
+        return False
 
-    @staticmethod
-    def get_dict_filters(filter_class: Type[django_filters.FilterSet], prefix: str = "", include: List[str] = None):
-        include = include or []
-        response = {}
 
-        for key, value in filter_class.get_filters().items():
-            if key in include:
-                new_key = key if prefix == "" else prefix + "__" + key
-                response[new_key] = value
-
-        return response
-
-    @staticmethod
-    def get_dict_filters_without_prefix(filters):
-        response = {}
-
-        for key, value in filters.items():
-            new_key = key.split("__")[1] if len(key.split("__")) > 1 else key.split("__")[0]
-            response[new_key] = value
-
-        return response
+class MetaCharIContainsMixin:
+    filter_overrides = {
+        CharField: {
+            'filter_class': django_filters.CharFilter,
+            'extra': lambda f: {
+                'lookup_expr': 'icontains',
+            },
+        },
+    }
 
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
@@ -144,3 +164,27 @@ def filter_by_object_ids(object_name: str):
         return queryset.filter(**{"{object_name}__in".format(object_name=object_name): values})
 
     return func
+
+
+def or_search_filter_is_valid(value):
+    pattern = re.compile(r".*?:\[[^\]]*\]", re.IGNORECASE)
+    if pattern.match(value) and " " not in value.rsplit(":", 1)[1]:
+        return True
+    return False
+
+
+def exception_if_filter_is_invalid_for_or_search(filter_object, filter_name, allowed_filter_types, allowed_lookup_expr):
+    if type(filter_object) not in allowed_filter_types or filter_object.lookup_expr not in allowed_lookup_expr:
+        raise ValidationError(
+            detail=f"only default (without redefined method, with [i]contains or [i]exact lookup) "
+                   f"CharFilter, ChoiceFilter and AllValuesFilter are"
+                   f"allowed in filters list: {filter_name} is not allowed"
+        )
+
+
+def get_values_from_or_search(or_search: str) -> tuple[str, list[str]]:
+    or_search_list = or_search.rsplit(":", 1)
+    or_search_value = or_search_list[0]
+    or_search_filters = or_search_list[1].strip("][").split(",")
+
+    return or_search_value, or_search_filters

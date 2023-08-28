@@ -2,18 +2,20 @@ import uuid
 
 from rest_framework import serializers
 
-from open_schools_platform.organization_management.circles.serializers import QueryCircleRecipientSerializer
-from open_schools_platform.organization_management.employees.serializers import QueryEmployeeBodySerializer, \
-    EmployeeProfileSerializer
-from open_schools_platform.organization_management.organizations.serializers import OrganizationSerializer
-from open_schools_platform.parent_management.families.serializers import FamilySerializer
-from open_schools_platform.parent_management.parents.serializers import QueryParentProfileRecipientSerializer
+from open_schools_platform.organization_management.circles.serializers import GetCircleRecipientSerializer, \
+    GetCircleSenderSerializer
+from open_schools_platform.organization_management.employees.serializers import GetEmployeeBodySerializer, \
+    GetEmployeeProfileRecipientSerializer
+from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSenderSerializer
+from open_schools_platform.parent_management.families.serializers import GetFamilySenderSerializer, \
+    GetFamilyRecipientSerializer
+from open_schools_platform.parent_management.parents.serializers import ParentProfileRecipientSerializer
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.students.serializers import QueryStudentBodySerializer, \
-    QueryStudentProfileAdditionalSerializer, QueryStudentProfileSenderSerializer
+from open_schools_platform.student_management.students.serializers import GetStudentJoinCircleContext, \
+    GetStudentProfileSenderForOrganizationSerializer, GetStudentBodySerializer, GetCircleInviteStudentContext
 
 
-class QueryStatusSerializer(serializers.Serializer):
+class GetQueryStatusSerializer(serializers.Serializer):
     id = serializers.UUIDField(default=uuid.uuid4())
     status = serializers.ChoiceField(choices=Query.Status.choices)
 
@@ -26,19 +28,26 @@ class QuerySerializer(serializers.ModelSerializer):
         fields = ('id', 'sender', 'recipient', 'status', 'body', 'additional')
 
 
-class EmployeeProfileQuerySerializer(QuerySerializer):
-    sender = OrganizationSerializer()
-    recipient = EmployeeProfileSerializer()
-    body = QueryEmployeeBodySerializer()
+class GetOrganizationInviteEmployeeSerializer(QuerySerializer):
+    sender = GetOrganizationSenderSerializer()
+    recipient = GetEmployeeProfileRecipientSerializer()
+    body = GetEmployeeBodySerializer()
 
 
-class StudentProfileQuerySerializer(QuerySerializer):
-    sender = QueryStudentProfileSenderSerializer()
-    recipient = QueryCircleRecipientSerializer()
-    body = QueryStudentBodySerializer()
-    additional = QueryStudentProfileAdditionalSerializer()
+class GetCircleInviteStudentSerializer(QuerySerializer):
+    sender = GetCircleSenderSerializer()
+    recipient = GetFamilyRecipientSerializer()
+    body = GetStudentBodySerializer()
+    additional = GetCircleInviteStudentContext()
 
 
-class InviteParentQuerySerializer(QuerySerializer):
-    sender = FamilySerializer()
-    recipient = QueryParentProfileRecipientSerializer()
+class GetStudentJoinCircleSerializer(QuerySerializer):
+    sender = GetStudentProfileSenderForOrganizationSerializer()
+    recipient = GetCircleRecipientSerializer()
+    body = GetStudentBodySerializer()
+    additional = GetStudentJoinCircleContext()
+
+
+class GetFamilyInviteParentSerializer(QuerySerializer):
+    sender = GetFamilySenderSerializer()
+    recipient = ParentProfileRecipientSerializer()

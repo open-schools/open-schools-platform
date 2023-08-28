@@ -3,14 +3,14 @@ from re import match
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
-from open_schools_platform.organization_management.employees.serializers import EmployeeProfileSerializer
-from open_schools_platform.organization_management.teachers.serializers import TeacherProfileSerializer
-from open_schools_platform.parent_management.parents.serializers import ParentProfileSerializer
-from open_schools_platform.student_management.students.serializers import StudentProfileSerializer
+from open_schools_platform.organization_management.employees.serializers import GetEmployeeProfileSerializer
+from open_schools_platform.organization_management.teachers.serializers import GetTeacherProfileSerializer
+from open_schools_platform.parent_management.parents.serializers import GetParentProfileSerializer
+from open_schools_platform.student_management.students.serializers import GetStudentProfileSerializer
 from open_schools_platform.user_management.users.models import CreationToken, User
 
 
-class CreationTokenSerializer(serializers.Serializer):
+class CreateRegistrationTokenSerializer(serializers.Serializer):
     phone = PhoneNumberField(
         max_length=17,
         required=True,
@@ -21,7 +21,7 @@ class CreationTokenSerializer(serializers.Serializer):
     )
 
 
-class RetrieveCreationTokenSerializer(serializers.ModelSerializer):
+class GetRegistrationTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = CreationToken
         fields = ("key", "phone", "is_verified")
@@ -36,23 +36,23 @@ class OtpSerializer(serializers.Serializer):
         return attrs
 
 
-class UserRegisterSerializer(serializers.Serializer):
+class CreateUserSerializer(serializers.Serializer):
     token = serializers.UUIDField(required=True)
     name = serializers.CharField(max_length=120)
     password = serializers.CharField(min_length=6, max_length=40)
 
 
-class UserSerializer(serializers.ModelSerializer):
+class GetUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id", "phone", "name")
 
 
-class UserProfilesSerializer(serializers.ModelSerializer):
-    parent_profile = ParentProfileSerializer()
-    employee_profile = EmployeeProfileSerializer()
-    student_profile = StudentProfileSerializer()
-    teacher_profile = TeacherProfileSerializer()
+class GetUserProfilesSerializer(serializers.ModelSerializer):
+    parent_profile = GetParentProfileSerializer()
+    employee_profile = GetEmployeeProfileSerializer()
+    student_profile = GetStudentProfileSerializer()
+    teacher_profile = GetTeacherProfileSerializer()
 
     class Meta:
         model = User

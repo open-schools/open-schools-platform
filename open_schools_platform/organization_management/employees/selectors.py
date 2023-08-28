@@ -8,7 +8,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Employee)
-def get_employee(*, filters=None, user: User = None) -> Employee:
+def get_employee(*, filters=None, user: User = None, prefetch_related_list=None) -> Employee:
     filters = filters or {}
 
     qs = Employee.objects.all()
@@ -21,7 +21,7 @@ def get_employee(*, filters=None, user: User = None) -> Employee:
 
 
 @selector_factory(Employee)
-def get_employees(*, filters=None) -> QuerySet:
+def get_employees(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Employee.objects.all()
@@ -31,7 +31,7 @@ def get_employees(*, filters=None) -> QuerySet:
 
 
 @selector_factory(EmployeeProfile)
-def get_employee_profile(*, filters=None, user: User = None) -> EmployeeProfile:
+def get_employee_profile(*, filters=None, user: User = None, prefetch_related_list=None) -> EmployeeProfile:
     filters = filters or {}
 
     qs = EmployeeProfile.objects.all()

@@ -12,7 +12,7 @@ from open_schools_platform.user_management.users.models import User
 
 
 @selector_factory(Organization)
-def get_organization(*, filters=None, user: User = None) -> Organization:
+def get_organization(*, filters=None, user: User = None, prefetch_related_list=None) -> Organization:
     filters = filters or {}
 
     qs = Organization.objects.all()
@@ -25,7 +25,7 @@ def get_organization(*, filters=None, user: User = None) -> Organization:
 
 
 @selector_factory(Organization)
-def get_organizations(*, filters=None) -> QuerySet:
+def get_organizations(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
     qs = Organization.objects.all()
@@ -34,11 +34,11 @@ def get_organizations(*, filters=None) -> QuerySet:
     return organizations
 
 
-def get_organizations_by_user(user: User) -> QuerySet:
+def get_organizations_by_user(user: User, filters: dict = {}) -> QuerySet:
     qs = get_employees(filters={"employee_profile": user.employee_profile})
 
     return qs if len(qs) == 0 else \
-        get_organizations(filters={"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})
+        get_organizations(filters=filters | {"ids": ','.join(list(map(lambda x: str(x.organization.id), list(qs))))})
 
 
 def get_organization_circle_queries(organization: Organization):
@@ -47,3 +47,7 @@ def get_organization_circle_queries(organization: Organization):
                                    "sender_ct": ContentType.objects.get(model="studentprofile")},
                           empty_filters=True)
     return queries
+
+
+def get_organization_students_invitations(organization: Organization):
+    ...

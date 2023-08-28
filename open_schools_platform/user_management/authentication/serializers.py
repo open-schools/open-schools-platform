@@ -22,7 +22,7 @@ class JSONWebTokenWithTwoResponses(JSONWebTokenSerializer):
         return response
 
 
-class UserUpdateSerializer(serializers.Serializer):
+class UpdateUserSerializer(serializers.Serializer):
     name = serializers.CharField(
         allow_null=False,
         allow_blank=False,
@@ -30,6 +30,6 @@ class UserUpdateSerializer(serializers.Serializer):
     )
 
 
-class PasswordUpdateSerializer(serializers.Serializer):
+class UpdatePasswordSerializer(serializers.Serializer):
     old_password = serializers.CharField(min_length=6, max_length=40)
     new_password = serializers.CharField(min_length=6, max_length=40)
