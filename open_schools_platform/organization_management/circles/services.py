@@ -48,7 +48,8 @@ def create_circle(name: str, organization: Organization, address: str, descripti
                 'Server cannot handle address. Please specify the \'location\' field explicitly')
         geolocator = GoogleV3(api_key=api_key)
         try:
-            coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
+            coordinates = geolocator.geocode(get_address_after_split_by_separator(address),
+                                             timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:
                 raise ValidationError({'address': 'Address is incorrect'})
             location = Point(coordinates.longitude, coordinates.latitude)
@@ -118,6 +119,10 @@ def is_organization_related_to_student_profile(organization_id: str, student_pro
 def convert_str_to_point(string: str):
     res = re.findall(r"\d+\.\d+", string)
     return Point(float(res[0]), float(res[1]), srid=4326)
+
+
+def get_address_after_split_by_separator(address: str):
+    return address.split(CirclesConstants.ADDRESS_SEPARATOR)[0]
 
 
 def setup_scheduled_notifications(circle: Circle, notification_delays: list[timedelta]):

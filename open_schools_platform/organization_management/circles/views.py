@@ -6,6 +6,8 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
+
+from .constants import CirclesConstants
 from .models import Circle
 
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
@@ -40,7 +42,13 @@ from ...student_management.students.services import create_student, get_student_
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
-        operation_description="Create circle via provided name and organization.",
+        operation_description=f"Create circle via provided name and organization. "
+                              f"If you provide address without location server "
+                              f"will try to determine coordinates itself. "
+                              f"You can write additional information in address field that will not be used for "
+                              f"determining coordinates using "
+                              f"{CirclesConstants.ADDRESS_SEPARATOR} separator like this: "
+                              f"address{CirclesConstants.ADDRESS_SEPARATOR}info",
         request_body=CreateCircleSerializer,
         responses={201: convert_dict_to_serializer({"circle": GetCircleSerializer()}), 404: "No such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],

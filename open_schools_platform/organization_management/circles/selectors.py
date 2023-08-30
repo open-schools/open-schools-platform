@@ -13,7 +13,7 @@ from open_schools_platform.user_management.users.models import User
 def get_circles(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Circle.objects.all()
+    qs = Circle.objects.prefetch_related(*prefetch_related_list).all()
     circles = CircleFilter(filters, qs).qs
     if 'user_location' in filters:
         circles = circles.order_by(GeometryDistance("location", convert_str_to_point(filters['user_location'])))
