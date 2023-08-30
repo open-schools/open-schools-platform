@@ -1,3 +1,4 @@
+from drf_yasg.utils import swagger_serializer_method
 from rest_framework import serializers
 
 from open_schools_platform.organization_management.circles.models import Circle
@@ -44,6 +45,7 @@ class GetOrganizationCircleListSerializer(serializers.ModelSerializer):
         "get_student_profile_queries"
     )
 
+    @swagger_serializer_method(GetAnalyticsSerializer)
     def get_student_profile_queries(self, obj):
         from open_schools_platform.query_management.queries.services import count_queries_by_statuses
         return GetAnalyticsSerializer(count_queries_by_statuses(obj.student_profile_queries)).data
