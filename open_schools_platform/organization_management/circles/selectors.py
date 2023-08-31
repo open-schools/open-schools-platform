@@ -24,7 +24,7 @@ def get_circles(*, filters=None, prefetch_related_list=None) -> QuerySet:
 def get_circle(*, filters=None, user: User = None, prefetch_related_list=None) -> Circle:
     filters = filters or {}
 
-    qs = Circle.objects.all()
+    qs = Circle.objects.prefetch_related(*prefetch_related_list).all()
     circle = CircleFilter(filters, qs).qs.first()
 
     if user and circle and not user.has_perm("circles.circle_access", circle):
