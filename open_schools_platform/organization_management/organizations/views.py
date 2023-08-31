@@ -383,6 +383,21 @@ class OrganizationCirclesListApi(ApiAuthMixin, ListAPIView):
         return response
 
 
+class OrganizationCirclesApi(ApiAuthMixin, ListAPIView):
+    queryset = Circle.objects.all()
+    pagination_class = DefaultListPagination
+    serializer_class = GetOrganizationCircleListSerializer
+
+    @swagger_auto_schema(
+        operation_description="Get circle by id for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
+    )
+    def get(self, request, organization_id, circle_id):
+        circle = get_circle(filters={"organization__id": organization_id, "id": circle_id}, user=request.user,
+                            prefetch_related_list=["recipient_queries"])
+        return Response({"circle": GetOrganizationCircleListSerializer(circle).data}, status=200)
+
+
 class GetTeacherApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
         operation_description="Get teacher with provided UUID",
