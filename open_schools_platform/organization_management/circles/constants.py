@@ -8,7 +8,7 @@ class CirclesConstants:
     START_SEARCH_RADIUS = 10
     RADIUS_MULTIPLIER = 2
     MULTIPLICATIONS_COUNT = 10
-    ADDRESS_SEPARATOR = '&;'
+    ADDRESS_SEPARATOR = '|'
 
     NOTIFY_TEACHER_TITLE = _("Lesson reminder.")
 
