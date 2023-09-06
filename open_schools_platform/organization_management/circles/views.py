@@ -13,9 +13,9 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, PatchCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
-    is_organization_related_to_student_profile, generate_ical
+    is_organization_related_to_student_profile, generate_ical, update_circle
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -106,6 +106,30 @@ class GetCircleApi(ApiAuthMixin, APIView):
             filters={"id": str(circle_id)},
             empty_exception=True,
         )
+        return Response({"circle": GetCircleSerializer(circle).data}, status=200)
+
+
+class PatchCircleApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Patch circle with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        request_body=PatchCircleSerializer,
+        responses={200: convert_dict_to_serializer({"circle": GetCircleSerializer()})}
+    )
+    def patch(self, request, circle_id):
+        patch_circle_serializer = PatchCircleSerializer(data=request.data)
+        patch_circle_serializer.is_valid(raise_exception=True)
+
+        circle = get_circle(
+            filters={"id": str(circle_id)},
+            empty_exception=True,
+            user=request.user
+        )
+        circle = update_circle(
+            circle=circle,
+            data=patch_circle_serializer.validated_data
+        )
+
         return Response({"circle": GetCircleSerializer(circle).data}, status=200)
 
 

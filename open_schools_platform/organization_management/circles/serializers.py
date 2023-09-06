@@ -37,6 +37,13 @@ class GetCircleSerializer(serializers.ModelSerializer):
                   'longitude')
 
 
+class PatchCircleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Circle
+        fields = ('name', 'address', 'location')
+
+
 class GetListCircleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Circle
