@@ -12,7 +12,8 @@ from rest_framework.exceptions import ValidationError
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
-from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.common.services import BaseQueryHandler, model_update
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.errors.exceptions import QueryCorrupted, MapServiceUnavailable
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
 from open_schools_platform.organization_management.circles.models import Circle
@@ -171,6 +172,17 @@ def create_periodic_tasks(circle: Circle, cron_list: list[CrontabSchedule]) -> l
         )
         periodic_tasks.append(periodic_task)
     return periodic_tasks
+
+
+def update_circle(*, circle: Circle, data) -> Circle:
+    non_side_effect_fields = ['name', 'address', 'location']
+    filtered_data = filter_dict_from_none_values(data)
+    circle, has_updated = model_update(
+        instance=circle,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return circle
 
 
 def generate_ical(queryset):
