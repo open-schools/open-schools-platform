@@ -37,7 +37,7 @@ class GetCircleSerializer(serializers.ModelSerializer):
                   'longitude')
 
 
-class PatchCircleSerializer(serializers.ModelSerializer):
+class UpdateCircleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Circle

@@ -13,7 +13,7 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, PatchCircleSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
     is_organization_related_to_student_profile, generate_ical, update_circle
 from open_schools_platform.organization_management.organizations.selectors import get_organization
@@ -109,16 +109,16 @@ class GetCircleApi(ApiAuthMixin, APIView):
         return Response({"circle": GetCircleSerializer(circle).data}, status=200)
 
 
-class PatchCircleApi(ApiAuthMixin, APIView):
+class UpdateCircleApi(ApiAuthMixin, APIView):
     @swagger_auto_schema(
-        operation_description="Patch circle with provided UUID",
+        operation_description="Update circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
-        request_body=PatchCircleSerializer,
+        request_body=UpdateCircleSerializer,
         responses={200: convert_dict_to_serializer({"circle": GetCircleSerializer()})}
     )
     def patch(self, request, circle_id):
-        patch_circle_serializer = PatchCircleSerializer(data=request.data)
-        patch_circle_serializer.is_valid(raise_exception=True)
+        update_circle_serializer = UpdateCircleSerializer(data=request.data)
+        update_circle_serializer.is_valid(raise_exception=True)
 
         circle = get_circle(
             filters={"id": str(circle_id)},
@@ -127,7 +127,7 @@ class PatchCircleApi(ApiAuthMixin, APIView):
         )
         circle = update_circle(
             circle=circle,
-            data=patch_circle_serializer.validated_data
+            data=update_circle_serializer.validated_data
         )
 
         return Response({"circle": GetCircleSerializer(circle).data}, status=200)
