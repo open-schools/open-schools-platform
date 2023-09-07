@@ -165,6 +165,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     complex_filter = get_organization_circle_query_filter()
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
+    pagination_class = DefaultListPagination
 
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",

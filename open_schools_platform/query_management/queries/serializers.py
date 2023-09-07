@@ -25,7 +25,7 @@ class QuerySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Query
-        fields = ('id', 'sender', 'recipient', 'status', 'body', 'additional')
+        fields = ('id', 'sender', 'recipient', 'status', 'body', 'additional', 'created_at')
 
 
 class GetOrganizationInviteEmployeeSerializer(QuerySerializer):

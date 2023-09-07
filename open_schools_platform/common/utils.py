@@ -90,6 +90,10 @@ def reverse_querystring(view, urlconf=None, args=None, kwargs=None, current_app=
     return base_url
 
 
+def convert_qs_to_ids_set(qs: QuerySet):
+    return set(map(lambda x: str(x.id), qs.all()))
+
+
 def intersect_sets(lists: Iterable[set]):
     return reduce(lambda x, y: set(x) & set(y), lists)
 

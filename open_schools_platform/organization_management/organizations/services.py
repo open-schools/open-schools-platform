@@ -13,8 +13,10 @@ from open_schools_platform.parent_management.families.selectors import get_famil
 from open_schools_platform.query_management.queries.filters import QueryFilter
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.selectors import get_queries
-from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
-from open_schools_platform.student_management.students.selectors import get_students, get_student_profiles
+from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter, \
+    StudentProfileCircleAdditionalFilter
+from open_schools_platform.student_management.students.selectors import get_students, get_student_profiles, \
+    get_student_profiles_circle_additional
 from django.contrib.contenttypes.models import ContentType
 
 
@@ -65,7 +67,7 @@ def get_organization_circle_query_filter():
                 selector=get_student_profiles,
                 ids_field="sender_ids",
                 prefix="student_profile",
-                include_list=["id", "phone"],
+                include_list=["id", "phone", "parent_name", "parent_phone"],
             ),
             ComplexFilter(
                 filterset_type=StudentFilter,
@@ -74,6 +76,13 @@ def get_organization_circle_query_filter():
                 prefix="student",
                 include_list=["id", "name", "student_profile__phone"],
             ),
+            ComplexFilter(
+                filterset_type=StudentProfileCircleAdditionalFilter,
+                selector=get_student_profiles_circle_additional,
+                ids_field='additional_ids',
+                prefix="additional",
+                include_list=["parent_phone", "parent_name", "text"]
+            )
         ],
         filterset_type=QueryFilter,
         selector=get_queries,
@@ -82,6 +91,7 @@ def get_organization_circle_query_filter():
             "sender_ct": ContentType.objects.get(model="studentprofile"),
             "recipient_ct": ContentType.objects.get(model="circle"),
             "body_ct": ContentType.objects.get(model="student"),
+            "additional_ct": ContentType.objects.get(model="studentprofilecircleadditional")
         },
         is_has_or_search_field=True,
     )
