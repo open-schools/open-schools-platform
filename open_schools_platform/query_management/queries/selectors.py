@@ -37,7 +37,7 @@ def get_query_with_checks(pk: str, user: User, update_query_check: bool = False)
 def get_queries(*, filters=None, prefetch_related_list=None) -> QuerySet:
     filters = filters or {}
 
-    qs = Query.objects.all()
+    qs = Query.objects.prefetch_related(*prefetch_related_list).all()
     queries = QueryFilter(filters, qs).qs
 
     return queries
