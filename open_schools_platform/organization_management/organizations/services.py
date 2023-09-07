@@ -86,7 +86,7 @@ def get_organization_circle_query_filter():
         ],
         filterset_type=QueryFilter,
         selector=get_queries,
-        include_list=["status", "id"],
+        include_list=["status", "id", "created_at"],
         advance_filters_delegate=lambda: {
             "sender_ct": ContentType.objects.get(model="studentprofile"),
             "recipient_ct": ContentType.objects.get(model="circle"),
