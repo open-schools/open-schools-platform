@@ -12,7 +12,8 @@ from rest_framework.exceptions import ValidationError
 from geopy.exc import GeocoderTimedOut, GeocoderUnavailable
 import re
 
-from open_schools_platform.common.services import BaseQueryHandler
+from open_schools_platform.common.services import BaseQueryHandler, model_update
+from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.errors.exceptions import QueryCorrupted, MapServiceUnavailable
 from open_schools_platform.organization_management.circles.constants import CirclesConstants
 from open_schools_platform.organization_management.circles.models import Circle
@@ -48,7 +49,8 @@ def create_circle(name: str, organization: Organization, address: str, descripti
                 'Server cannot handle address. Please specify the \'location\' field explicitly')
         geolocator = GoogleV3(api_key=api_key)
         try:
-            coordinates = geolocator.geocode(address, timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
+            coordinates = geolocator.geocode(get_address_after_split_by_separator(address),
+                                             timeout=CommonConstants.GEOPY_GEOCODE_TIMEOUT)
             if coordinates is None:
                 raise ValidationError({'address': 'Address is incorrect'})
             location = Point(coordinates.longitude, coordinates.latitude)
@@ -120,6 +122,10 @@ def convert_str_to_point(string: str):
     return Point(float(res[0]), float(res[1]), srid=4326)
 
 
+def get_address_after_split_by_separator(address: str):
+    return address.split(CirclesConstants.ADDRESS_SEPARATOR)[0]
+
+
 def setup_scheduled_notifications(circle: Circle, notification_delays: list[timedelta]):
     tasks = PeriodicTask.objects.filter(args=f'["{circle.id}"]', task=send_circle_lesson_notification.name)
     CrontabSchedule.objects.filter(id__in=list(map(lambda task: task.crontab.id, tasks))).delete()
@@ -166,6 +172,17 @@ def create_periodic_tasks(circle: Circle, cron_list: list[CrontabSchedule]) -> l
         )
         periodic_tasks.append(periodic_task)
     return periodic_tasks
+
+
+def update_circle(*, circle: Circle, data) -> Circle:
+    non_side_effect_fields = ['name', 'address', 'location']
+    filtered_data = filter_dict_from_none_values(data)
+    circle, has_updated = model_update(
+        instance=circle,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return circle
 
 
 def generate_ical(queryset):

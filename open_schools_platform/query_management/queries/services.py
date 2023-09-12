@@ -60,6 +60,5 @@ def count_queries_by_statuses(queries: QuerySet):
     statuses = Query.get_all_statuses()
     values = {}
     for status in statuses:
-        filtered_qs = queries.filter(status=status)
-        values[status] = filtered_qs.count()
+        values[status] = len(list(filter(lambda x: x.status == status, queries)))
     return values

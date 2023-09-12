@@ -6,14 +6,16 @@ from rest_framework.views import APIView
 
 from open_schools_platform.api.pagination import get_paginated_response
 from rest_framework.response import Response
+
+from .constants import CirclesConstants
 from .models import Circle
 
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
-    is_organization_related_to_student_profile, generate_ical
+    is_organization_related_to_student_profile, generate_ical, update_circle
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -40,7 +42,13 @@ from ...student_management.students.services import create_student, get_student_
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
     @swagger_auto_schema(
-        operation_description="Create circle via provided name and organization.",
+        operation_description=f"Create circle via provided name and organization. "
+                              f"If you provide address without location server "
+                              f"will try to determine coordinates itself. "
+                              f"You can write additional information in address field that will not be used for "
+                              f"determining coordinates using "
+                              f"{CirclesConstants.ADDRESS_SEPARATOR} separator like this: "
+                              f"address{CirclesConstants.ADDRESS_SEPARATOR}info",
         request_body=CreateCircleSerializer,
         responses={201: convert_dict_to_serializer({"circle": GetCircleSerializer()}), 404: "No such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
@@ -98,6 +106,30 @@ class GetCircleApi(ApiAuthMixin, APIView):
             filters={"id": str(circle_id)},
             empty_exception=True,
         )
+        return Response({"circle": GetCircleSerializer(circle).data}, status=200)
+
+
+class UpdateCircleApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Update circle with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        request_body=UpdateCircleSerializer,
+        responses={200: convert_dict_to_serializer({"circle": GetCircleSerializer()})}
+    )
+    def patch(self, request, circle_id):
+        update_circle_serializer = UpdateCircleSerializer(data=request.data)
+        update_circle_serializer.is_valid(raise_exception=True)
+
+        circle = get_circle(
+            filters={"id": str(circle_id)},
+            empty_exception=True,
+            user=request.user
+        )
+        circle = update_circle(
+            circle=circle,
+            data=update_circle_serializer.validated_data
+        )
+
         return Response({"circle": GetCircleSerializer(circle).data}, status=200)
 
 

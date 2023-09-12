@@ -5,8 +5,10 @@ from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.utils import form_ids_string_from_queryset, filter_list_from_empty_strings
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
-from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter
-from open_schools_platform.student_management.students.models import StudentProfile, Student
+from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter, \
+    StudentProfileCircleAdditionalFilter
+from open_schools_platform.student_management.students.models import StudentProfile, Student, \
+    StudentProfileCircleAdditional
 from open_schools_platform.user_management.users.models import User
 
 
@@ -31,6 +33,16 @@ def get_student_profiles(*, filters=None, prefetch_related_list=None) -> QuerySe
     student_profiles = StudentProfileFilter(filters, qs).qs
 
     return student_profiles
+
+
+@selector_factory(StudentProfileCircleAdditional)
+def get_student_profiles_circle_additional(*, filters=None, prefetch_related_list=None) -> QuerySet:
+    filters = filters or {}
+
+    qs = StudentProfileCircleAdditional.objects.prefetch_related(*prefetch_related_list).all()
+    objs = StudentProfileCircleAdditionalFilter(filters, qs).qs
+
+    return objs
 
 
 @selector_factory(Student)

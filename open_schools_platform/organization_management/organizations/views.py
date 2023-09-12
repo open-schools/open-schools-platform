@@ -12,8 +12,10 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
+from open_schools_platform.organization_management.circles.filters import CircleFilter
+from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
-from open_schools_platform.organization_management.circles.selectors import get_circle
+from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles
 from open_schools_platform.organization_management.employees.serializers import GetEmployeeSerializer, \
     UpdateOrganizationInviteEmployeeSerializer, CreateOrganizationInviteEmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -24,7 +26,7 @@ from open_schools_platform.organization_management.organizations.paginators impo
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
     get_organization, get_organization_circle_queries
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
-    GetAnalyticsSerializer, GetOrganizationSerializer
+    GetAnalyticsSerializer, GetOrganizationSerializer, GetOrganizationCircleListSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     get_organization_circle_query_filter, filter_organization_circle_queries_by_dates, \
     get_organization_students_invitations_filter
@@ -163,6 +165,7 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
     complex_filter = get_organization_circle_query_filter()
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
+    pagination_class = DefaultListPagination
 
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle or organization.",
@@ -352,6 +355,48 @@ class OrganizationTeachersListApi(ApiAuthMixin, ListAPIView):
             view=self
         )
         return response
+
+
+class OrganizationCirclesListApi(ApiAuthMixin, ListAPIView):
+    queryset = Circle.objects.all()
+    filterset_class = CircleFilter
+    pagination_class = DefaultListPagination
+    serializer_class = GetOrganizationCircleListSerializer
+
+    @swagger_auto_schema(
+        operation_description="Get all circles for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
+    )
+    def get(self, request, organization_id):
+        get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
+
+        filters = request.GET.dict()
+        filters["organization__id"] = organization_id
+        circles = get_circles(filters=filters, prefetch_related_list=["recipient_queries"])
+
+        response = get_paginated_response(
+            pagination_class=DefaultListPagination,
+            serializer_class=GetOrganizationCircleListSerializer,
+            queryset=circles,
+            request=request,
+            view=self
+        )
+        return response
+
+
+class OrganizationCirclesApi(ApiAuthMixin, ListAPIView):
+    queryset = Circle.objects.all()
+    pagination_class = DefaultListPagination
+    serializer_class = GetOrganizationCircleListSerializer
+
+    @swagger_auto_schema(
+        operation_description="Get circle by id for this organization",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS]
+    )
+    def get(self, request, organization_id, circle_id):
+        circle = get_circle(filters={"organization__id": organization_id, "id": circle_id}, user=request.user,
+                            prefetch_related_list=["recipient_queries"])
+        return Response({"circle": GetOrganizationCircleListSerializer(circle).data}, status=200)
 
 
 class GetTeacherApi(ApiAuthMixin, APIView):
