@@ -10,7 +10,7 @@ from open_schools_platform.user_management.users.models import User
 class GetEmployeeProfileUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ("id", "phone", "name", "email")
+        fields = ("id", "phone", "name")
 
 
 class GetEmployeeProfileWithUserSerializer(serializers.ModelSerializer):
@@ -18,7 +18,7 @@ class GetEmployeeProfileWithUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = EmployeeProfile
-        fields = ("id", "name", "user")
+        fields = ("id", "name", "user", "email")
         read_only_fields = fields
 
 
