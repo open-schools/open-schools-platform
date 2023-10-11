@@ -84,13 +84,12 @@ class GettingEmployeesTests(TestCase):
         self.get_employees_test(correct_answers, data)
 
     def test_get_employee_by_employee_profile(self):
-        correct_answers = ["+79999999901"]
         data = {
             "organization": self.organization.id,
             "employee_profile": self.employees[0].employee_profile.id
         }
-
-        self.get_employees_test(correct_answers, data)
+        response = self.client.get(self.get_employees_url, data=data)
+        self.assertEqual(response.status_code, 403)
 
     def test_get_one_employee_by_several_parameters(self):
         correct_answers = ["+79999999901"]

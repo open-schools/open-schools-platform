@@ -1,5 +1,6 @@
+import typing
+
 from django.contrib.contenttypes.models import ContentType
-from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import ValidationError, ErrorDetail
 from rest_framework.generics import ListAPIView
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
+from open_schools_platform.common.services import get_object_by_id_in_field_with_checks
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.employees.filters import EmployeeFilter
 from open_schools_platform.organization_management.employees.models import Employee
@@ -33,20 +35,29 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Return paginated list of employees.",
-        manual_parameters=[
-            Parameter('organization', IN_QUERY, required=True, type=TYPE_STRING),  # type:ignore
-        ],
     )
     def get(self, request, *args, **kwargs):
         filters = request.GET.dict()
-        if "organization" not in filters.keys():
-            raise ValidationError(
-                {'organization': ErrorDetail('Your request should contain organization field.', code='required')})
-        get_organization(filters={"id": filters["organization"]}, user=request.user)
+        organization, employee_profile = get_object_by_id_in_field_with_checks(
+            filters,
+            request,
+            {"organization": get_organization, "employee_profile": get_employee_profile}
+        )
+        if not organization and not employee_profile:
+            raise ValidationError({'non_field_errors': 'You should define organization or employee_profile',
+                                   'organization': ErrorDetail('', code='required'),
+                                   'employee_profile': ErrorDetail('', code='required')})
+
+        @typing.no_type_check
+        def convert(x: Employee):
+            x.phone = x.employee_profile.user.phone
+            x.organization__name = x.organization.name
+            return x
+
         response = get_paginated_response(
             pagination_class=EmployeeApiListPagination,
             serializer_class=GetListEmployeeSerializer,
-            queryset=get_employees(filters=request.GET.dict()),
+            queryset=list(map(convert, get_employees(filters=request.GET.dict()))),
             request=request,
             view=self
         )
