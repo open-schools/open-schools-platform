@@ -1,4 +1,3 @@
-import datetime
 import pytz
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -13,6 +12,7 @@ from open_schools_platform.user_management.users.models import User, FirebaseNot
 from open_schools_platform.user_management.users.services import is_token_alive, verify_token, \
      user_update, get_jwt_token, update_token_session, generate_user_password, set_new_password_for_user
 from open_schools_platform.user_management.users.tests.utils import create_test_user, create_test_token
+from datetime import timezone, datetime, timedelta
 
 
 class UserCreateTests(TestCase):
@@ -43,14 +43,14 @@ class UserCreateTests(TestCase):
 class IsTokenAliveTests(TestCase):
     def test_token_with_old_date_of_creation_is_not_alive(self):
         token = create_test_token()
-        token.created_at = datetime.datetime(2000, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
+        token.created_at = datetime(2000, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
         token.save()
         result = is_token_alive(token)
         self.assertFalse(result)
 
     def test_token_with_recent_date_of_creation_is_alive(self):
         token = create_test_token()
-        token.created_at = datetime.datetime(2023, 9, 19, 10, 40, 23, 944737, tzinfo=pytz.UTC)
+        token.created_at = datetime.now(timezone.utc) - timedelta(seconds=132)
         token.save()
         result = is_token_alive(token)
         self.assertTrue(result)
