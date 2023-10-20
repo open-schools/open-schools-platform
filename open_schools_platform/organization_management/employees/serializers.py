@@ -25,7 +25,7 @@ class GetEmployeeProfileWithUserSerializer(serializers.ModelSerializer):
 class GetEmployeeProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeProfile
-        fields = ("id", "name", "user")
+        fields = ("id", "name", "email", "user")
 
 
 class GetEmployeeProfileRecipientSerializer(serializers.ModelSerializer):
@@ -74,3 +74,9 @@ class CreateOrganizationInviteEmployeeSerializer(serializers.Serializer):
 class UpdateOrganizationInviteEmployeeSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
     body = GetEmployeeBodySerializer(required=True)
+
+
+class UpdateEmployeeProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeProfile
+        fields = ("name", "email")
