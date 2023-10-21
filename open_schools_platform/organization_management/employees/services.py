@@ -68,3 +68,14 @@ def update_employee(*, employee: Employee, data) -> Employee:
         data=filtered_data
     )
     return employee
+
+
+def update_employee_profile(*, employee_profile: EmployeeProfile, data) -> EmployeeProfile:
+    non_side_effect_fields = ['email', 'name']
+    filtered_data = filter_dict_from_none_values(data)
+    employee_profile, has_updated = model_update(
+        instance=employee_profile,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return employee_profile
