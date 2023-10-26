@@ -25,7 +25,7 @@ class GetEmployeeProfileWithUserSerializer(serializers.ModelSerializer):
 class GetEmployeeProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = EmployeeProfile
-        fields = ("id", "name", "user")
+        fields = ("id", "name", "email", "user")
 
 
 class GetEmployeeProfileRecipientSerializer(serializers.ModelSerializer):
@@ -56,17 +56,12 @@ class GetEmployeeBodySerializer(serializers.ModelSerializer):
 
 
 class GetListEmployeeSerializer(serializers.ModelSerializer):
-    employee_profile = GetEmployeeProfileWithUserSerializer()
-
-    def to_representation(self, instance):
-        ret = super().to_representation(instance)
-        ret['phone'] = ret['employee_profile']['user']['phone']
-        ret['employee_profile'] = ret['employee_profile']['id']
-        return ret
+    phone = PhoneNumberField()
+    organization__name = serializers.CharField()
 
     class Meta:
         model = Employee
-        fields = ("id", "name", 'employee_profile', "organization", "position")
+        fields = ("id", "name", "phone", "organization__name", "organization", "employee_profile", "position")
         read_only_fields = fields
 
 
@@ -79,3 +74,9 @@ class CreateOrganizationInviteEmployeeSerializer(serializers.Serializer):
 class UpdateOrganizationInviteEmployeeSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
     body = GetEmployeeBodySerializer(required=True)
+
+
+class UpdateEmployeeProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmployeeProfile
+        fields = ("name", "email")

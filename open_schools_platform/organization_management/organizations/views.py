@@ -22,7 +22,6 @@ from open_schools_platform.organization_management.employees.services import cre
     get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
-from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
     get_organization, get_organization_circle_queries
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
@@ -73,7 +72,7 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
 
 class OrganizationListApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
-    pagination_class = OrganizationApiListPagination
+    pagination_class = DefaultListPagination
     filterset_class = OrganizationFilter
     serializer_class = GetOrganizationSerializer
 
@@ -83,7 +82,7 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request, *args, **kwargs):
         response = get_paginated_response(
-            pagination_class=OrganizationApiListPagination,
+            pagination_class=DefaultListPagination,
             serializer_class=GetOrganizationSerializer,
             queryset=get_organizations_by_user(request.user, request.GET.dict()),
             request=request,

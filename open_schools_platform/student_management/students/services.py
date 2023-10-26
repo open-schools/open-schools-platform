@@ -116,7 +116,11 @@ class StudentProfileQueryHandler(BaseQueryHandler):
                         Query.Status.CANCELED]
     available_statuses = {
         (Query.Status.SENT, 'circles.circle_access'): (
-            Query.Status.DECLINED, Query.Status.IN_PROGRESS, Query.Status.ACCEPTED),
+            Query.Status.DECLINED, Query.Status.IN_PROGRESS, Query.Status.ACCEPTED
+        ),
+        (Query.Status.IN_PROGRESS, 'circles.circle_access'): (
+            Query.Status.DECLINED, Query.Status.ACCEPTED
+        ),
         (Query.Status.SENT, 'students.student_profile_access'): (Query.Status.CANCELED,),
     }
 
