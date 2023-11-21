@@ -59,6 +59,14 @@ class GetUserProfilesSerializer(serializers.ModelSerializer):
         fields = ("id", "phone", "name", "parent_profile", "employee_profile", "student_profile", "teacher_profile")
 
 
+class GetShallowUserProfilesSerializer(serializers.Serializer):
+    id = serializers.CharField(required=False)
+    parent_profile = serializers.SlugRelatedField(required=False, slug_field='id', read_only=True)  # type: ignore[var-annotated]  # noqa: E501
+    employee_profile = serializers.SlugRelatedField(required=False, slug_field='id', read_only=True)  # type: ignore[var-annotated]  # noqa: E501
+    student_profile = serializers.SlugRelatedField(required=False, slug_field='id', read_only=True)  # type: ignore[var-annotated]  # noqa: E501
+    teacher_profile = serializers.SlugRelatedField(required=False, slug_field='id', read_only=True)  # type: ignore[var-annotated]  # noqa: E501
+
+
 class PasswordUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
