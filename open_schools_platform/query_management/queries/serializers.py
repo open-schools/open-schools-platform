@@ -13,6 +13,7 @@ from open_schools_platform.parent_management.parents.serializers import ParentPr
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.serializers import GetStudentJoinCircleContext, \
     GetStudentProfileSenderForOrganizationSerializer, GetStudentBodySerializer, GetCircleInviteStudentContext
+from open_schools_platform.user_management.users.serializers import GetShallowUserProfilesSerializer
 
 
 class GetQueryStatusSerializer(serializers.Serializer):
@@ -26,6 +27,13 @@ class QuerySerializer(serializers.ModelSerializer):
     class Meta:
         model = Query
         fields = ('id', 'sender', 'recipient', 'status', 'body', 'additional', 'created_at')
+
+
+class QueryStatusChangesSerializer(serializers.Serializer):
+    date = serializers.DateTimeField()
+    user = GetShallowUserProfilesSerializer()
+    new_status = serializers.ChoiceField(choices=Query.Status.choices)
+    previous_status = serializers.ChoiceField(choices=Query.Status.choices)
 
 
 class GetOrganizationInviteEmployeeSerializer(QuerySerializer):

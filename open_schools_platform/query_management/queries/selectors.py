@@ -1,3 +1,5 @@
+from operator import attrgetter
+
 from django.db.models import QuerySet
 from rest_framework.exceptions import PermissionDenied
 
@@ -41,3 +43,21 @@ def get_queries(*, filters=None, prefetch_related_list=None) -> QuerySet:
     queries = QueryFilter(filters, qs).qs
 
     return queries
+
+
+def get_query_status_changes(query):
+    changes = []
+    if query:
+        previous_status = None
+        history = sorted(query.history.all(), key=attrgetter('history_date'))
+        for entry in history:
+            if entry.status != previous_status:
+                change = {
+                    "user": entry.history_user,
+                    "date": entry.history_date,
+                    "previous_status": previous_status,
+                    "new_status": entry.status
+                }
+                changes.append(change)
+            previous_status = entry.status
+    return changes

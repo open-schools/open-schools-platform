@@ -7,6 +7,7 @@ from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.history_management.filters import HistoryFilter
 from open_schools_platform.history_management.paginators import ApiHistoryListPagination
 from open_schools_platform.history_management.selectors import get_history
+from open_schools_platform.history_management.serializers.query_serializer import GetQueryHistorySerializer
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.employees.models import Employee, EmployeeProfile
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -14,6 +15,8 @@ from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.parent_management.parents.selectors import get_parent_profile
+from open_schools_platform.query_management.queries.models import Query
+from open_schools_platform.query_management.queries.selectors import get_query
 from open_schools_platform.student_management.students.models import Student, StudentProfile
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.user_management.users.selectors import get_user
@@ -246,6 +249,30 @@ class FamilyHistoryApi(ApiAuthMixin, ListAPIView):
             pagination_class=ApiHistoryListPagination,
             serializer_class=GetFamilyHistorySerializer,
             queryset=get_history(family, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
+
+
+class QueryHistoryApi(ApiAuthMixin, ListAPIView):
+    queryset = Query.objects.all()
+    filterset_class = HistoryFilter
+    pagination_class = ApiHistoryListPagination
+    serializer_class = GetQueryHistorySerializer
+
+    @swagger_auto_schema(
+        operation_description="Get query history",
+        tags=[SwaggerTags.HISTORY_MANAGEMENT],
+        responses={200: convert_dict_to_serializer({'results': GetQueryHistorySerializer()}),
+                   404: "No such query"},
+    )
+    def get(self, request, query_id):
+        query = get_query(filters={"id": query_id}, user=request.user, empty_exception=True)
+        response = get_paginated_response(
+            pagination_class=ApiHistoryListPagination,
+            serializer_class=GetQueryHistorySerializer,
+            queryset=get_history(query, request.GET.dict()),
             request=request,
             view=self
         )

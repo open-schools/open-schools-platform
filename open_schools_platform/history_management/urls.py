@@ -2,7 +2,7 @@ from django.urls import path
 
 from open_schools_platform.history_management.views import UserHistoryApi, OrganizationHistoryApi, EmployeeHistoryApi, \
     CircleHistoryApi, StudentHistoryApi, StudentProfileHistoryApi, EmployeeProfileHistoryApi, ParentProfileHistoryApi, \
-    FamilyHistoryApi
+    FamilyHistoryApi, QueryHistoryApi
 
 urlpatterns = [
     path('/user/<uuid:user_id>', UserHistoryApi.as_view(), name='user-history'),
@@ -16,4 +16,5 @@ urlpatterns = [
          name='student-profile-history'),
     path('/parent-profile/<uuid:parent_profile_id>', ParentProfileHistoryApi.as_view(), name='parent-profile-history'),
     path('/family/<uuid:family_id>', FamilyHistoryApi.as_view(), name='family-history'),
+    path('/query/<uuid:query_id>', QueryHistoryApi.as_view(), name='query-history'),
 ]
