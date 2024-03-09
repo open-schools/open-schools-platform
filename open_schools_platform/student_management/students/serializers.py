@@ -112,3 +112,9 @@ class CreateStudentJoinCircleSerializer(serializers.Serializer):
 class UpdateStudentJoinCircleSerializer(serializers.Serializer):
     query = serializers.UUIDField(required=True)
     body = CreateStudentBodySerializer()
+
+
+class UpdateStudentSerializer(BaseModelSerializer):
+    class Meta:
+        model = Student
+        fields = ("name", )
