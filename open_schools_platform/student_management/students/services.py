@@ -178,3 +178,14 @@ def export_students(students: QuerySet, export_format: str):
     data = StudentExport().export(students)
     file = data.export(export_format)
     return file
+
+
+def update_student(*, student: Student, data) -> Student:
+    non_side_effect_fields = ['name']
+    filtered_data = filter_dict_from_none_values(data)
+    student, has_updated = model_update(
+        instance=student,
+        fields=non_side_effect_fields,
+        data=filtered_data
+    )
+    return student

@@ -60,4 +60,5 @@ def get_query_status_changes(query):
                 }
                 changes.append(change)
             previous_status = entry.status
+    changes.reverse()
     return changes
