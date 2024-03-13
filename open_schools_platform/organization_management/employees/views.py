@@ -148,4 +148,6 @@ class EmployeeGetApi(ApiAuthMixin, APIView):
             empty_exception=True,
         )
         employee.phone = employee.employee_profile.user.phone
+        employee.email = employee.employee_profile.email
+
         return Response({"employee": GetEmployeeSerializer(employee, context={'request': request}).data}, status=200)
