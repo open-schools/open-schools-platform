@@ -134,3 +134,17 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
         employee = get_employee(filters={'id': employee_id}, empty_exception=True, user=request.user)
         employee.delete()
         return Response(status=204)
+
+
+class EmployeeGetApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get employee with provided UUID",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
+        responses={200: convert_dict_to_serializer({"employee": GetEmployeeSerializer()}), 404: "No such employee"}
+    )
+    def get(self, request, employee_id):
+        employee = get_employee(
+            filters={"id": str(employee_id)}, user=request.user,
+            empty_exception=True,
+        )
+        return Response({"employee": GetEmployeeSerializer(employee, context={'request': request}).data}, status=200)
