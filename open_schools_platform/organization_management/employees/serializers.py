@@ -52,7 +52,7 @@ class GetEmployeeSerializer(serializers.ModelSerializer):
 class UpdateEmployeeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
-        fields = ("name",)
+        fields = ("name", "position")
 
 
 class GetEmployeeBodySerializer(serializers.ModelSerializer):
