@@ -60,7 +60,7 @@ def get_employee_profile_or_create_new_user(phone: str, email: str, name: str,
 
 
 def update_employee(*, employee: Employee, data) -> Employee:
-    non_side_effect_fields = ['name']
+    non_side_effect_fields = ['name', 'position']
     filtered_data = filter_dict_from_none_values(data)
     employee, has_updated = model_update(
         instance=employee,
