@@ -1,6 +1,7 @@
 from django.db.models import QuerySet
 import typing
 
+from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.common.services import BaseQueryHandler, ComplexFilter, ComplexMultipleFilter
 from open_schools_platform.common.utils import convert_str_date_to_datetime
 from open_schools_platform.errors.exceptions import QueryCorrupted
@@ -75,6 +76,7 @@ def get_organization_circle_query_filter():
                 ids_field="body_ids",
                 prefix="student",
                 include_list=["id", "name", "student_profile__phone"],
+                advance_filters_delegate=lambda: {"DELETED": SoftCondition.ALL}
             ),
             ComplexFilter(
                 filterset_type=StudentProfileCircleAdditionalFilter,

@@ -5,6 +5,8 @@ import uuid
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.db import models
+from simple_history.models import HistoricalRecords
+
 from open_schools_platform.common.models import BaseModel
 
 
@@ -44,6 +46,8 @@ class Query(BaseModel):
         choices=Status.choices,
         default=Status.SENT,
     )
+
+    history = HistoricalRecords()
 
     def __str__(self):
         return self.id.__str__()

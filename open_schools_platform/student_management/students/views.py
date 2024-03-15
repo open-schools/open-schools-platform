@@ -21,10 +21,11 @@ from open_schools_platform.query_management.queries.serializers import GetStuden
 from open_schools_platform.student_management.students.selectors import get_student_profile, get_students, get_student
 from open_schools_platform.student_management.students.serializers import GetStudentProfileSerializer, \
     CreateAutoStudentJoinCircleSerializer, UpdateStudentJoinCircleSerializer, \
-    CreateStudentJoinCircleSerializer, UpdateStudentProfileSerializer, CreateStudentProfileSerializer
+    CreateStudentJoinCircleSerializer, UpdateStudentProfileSerializer, CreateStudentProfileSerializer, \
+    GetStudentSerializer, UpdateStudentSerializer
 from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, update_student_join_circle_body, \
-    autogenerate_family_logic, query_creation_logic
+    autogenerate_family_logic, query_creation_logic, update_student
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
@@ -234,6 +235,8 @@ class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
 
 
 class StudentDeleteApi(ApiAuthMixin, APIView):
+    serializer_class = UpdateStudentSerializer
+
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student.",
@@ -243,3 +246,19 @@ class StudentDeleteApi(ApiAuthMixin, APIView):
         student = get_student(filters={'id': student_id}, empty_exception=True, user=request.user)
         student.delete()
         return Response(status=204)
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
+        operation_description="Patch student.",
+        request_body=UpdateStudentSerializer,
+        responses={200: convert_dict_to_serializer({"student": GetStudentSerializer()}), 404: "No such student"}
+    )
+    def patch(self, request, student_id):
+        update_student_serializer = UpdateStudentSerializer(data=request.data)
+        update_student_serializer.is_valid(raise_exception=True)
+
+        student = get_student(filters={'id': student_id}, empty_exception=True, user=request.user)
+
+        student = update_student(student=student, data=update_student_serializer.validated_data)
+
+        return Response({"student": GetStudentSerializer(student, context={'request': request}).data}, status=200)
