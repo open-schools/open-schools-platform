@@ -210,7 +210,7 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         family = get_parent_family_or_create_new(parent_profile=parent_profile)
         student_profile = get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
                                                                       families=parent_profile.families.all())
-        student = create_student(**invite_serializer.validated_data["body"])
+        student = create_student(**invite_serializer.validated_data["body"], circle=circle)
         get_families()
 
         query = create_query(sender_model_name="circle", sender_id=circle_id,
