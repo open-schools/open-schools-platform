@@ -34,5 +34,14 @@ def has_access_for_circle(user: User, student: Student):
     return user.has_perm("circles.circle_access", student.circle)
 
 
+@rules.predicate
+def has_access_to_invite(user: User, student: Student):
+    from open_schools_platform.query_management.queries.selectors import get_queries
+    invites = get_queries(filters={"body_ids": str(student.id)})
+    for invite in invites.all():
+        return user.has_perm("queries.query_access", invite)
+
+
 rules.add_perm("students.student_profile_access", is_student_profile_owner | has_family_with_this_student_profile)
-rules.add_perm("students.student_access", is_student_owner | is_parent_for_student | has_access_for_circle)
+rules.add_perm("students.student_access",
+               is_student_owner | is_parent_for_student | has_access_for_circle | has_access_to_invite)
