@@ -1,9 +1,16 @@
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 
-from open_schools_platform.common.models import BaseModel
+from open_schools_platform.common.models import BaseModel, BaseManager
 from django.db import models
 import uuid
+
+class TicketManager(BaseManager):
+    pass
+
+
+class TicketCommentManager(BaseManager):
+    pass
 
 
 class Ticket(BaseModel):
@@ -24,6 +31,8 @@ class Ticket(BaseModel):
 
     sender = GenericForeignKey("sender_ct", "sender_id")
 
+    objects = TicketManager()  # type: ignore[assignment]
+
     def __str__(self):
         return self.id.__str__()
 
@@ -36,6 +45,8 @@ class TicketComment(BaseModel):
     is_sender = models.BooleanField(default=True)
     is_seen = models.BooleanField()
     value = models.CharField(max_length=1400)
+
+    objects = TicketCommentManager()  # type: ignore[assignment]
 
     def __str__(self):
         return self.value[0:100]
