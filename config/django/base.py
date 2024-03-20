@@ -48,6 +48,7 @@ LOCAL_APPS = [
     'open_schools_platform.organization_management.circles.apps.CirclesConfig',
     'open_schools_platform.photo_management.photos.apps.PhotosConfig',
     'open_schools_platform.history_management.apps.HistoryConfig',
+    'open_schools_platform.ticket_management.tickets.apps.TicketsConfig',
     'open_schools_platform.organization_management.teachers.apps.TeachersConfig',
     'open_schools_platform.testing.apps.TestingConfig',
     'open_schools_platform.sms.apps.SmsConfig'

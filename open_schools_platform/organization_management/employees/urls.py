@@ -9,6 +9,8 @@ urlpatterns = [
     path('/employee-profile/<uuid:employee_profile_id>',
          MultipleViewManager({'patch': EmployeeProfileUpdateApi}).as_view(), name='employee-profile'),
     path('/<uuid:employee_id>',
-         MultipleViewManager({'get': EmployeeGetApi, 'patch': EmployeeUpdateApi, 'delete': EmployeeDeleteApi}).as_view(), name='employee'),
+         MultipleViewManager(
+             {'get': EmployeeGetApi, 'patch': EmployeeUpdateApi, 'delete': EmployeeDeleteApi}).as_view(),
+         name='employee'),
     path('/employee-profile/get-invitations', EmployeeQueriesListApi.as_view(), name='employee_query-list'),
 ]
