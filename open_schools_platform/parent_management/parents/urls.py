@@ -1,10 +1,12 @@
 from django.urls import path
 
 from open_schools_platform.parent_management.parents.views import InviteParentQueriesListApi, \
-    StudentJoinCircleQueriesListApi
+    StudentJoinCircleQueriesListApi, GetAccessibleOrganizationListApi
 
 urlpatterns = [
     path('/get-invitations', InviteParentQueriesListApi.as_view(), name='invite-parent-list'),
+    path('/get-accessible-organizations', GetAccessibleOrganizationListApi.as_view(),
+         name='accessible-organizations-list'),
     path('/student-join-circle-queries', StudentJoinCircleQueriesListApi.as_view(),
          name='student-join-circle-queries-list'),
 ]

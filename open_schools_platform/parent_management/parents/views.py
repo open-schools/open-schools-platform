@@ -7,11 +7,13 @@ from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
 from rest_framework.response import Response
 
+from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSerializer
 from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.query_management.queries.serializers import GetFamilyInviteParentSerializer, \
     GetStudentJoinCircleSerializer
-from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families
+from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families, get_students
 
 
 class InviteParentQueriesListApi(ApiAuthMixin, APIView):
@@ -26,6 +28,28 @@ class InviteParentQueriesListApi(ApiAuthMixin, APIView):
             filters={'recipient_id': str(request.user.parent_profile.id)}
         )
         return Response({"results": GetFamilyInviteParentSerializer(queries, many=True).data}, status=200)
+
+
+class GetAccessibleOrganizationListApi(ApiAuthMixin, APIView):
+    queryset = Organization.objects.all()
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
+        responses={200: convert_dict_to_serializer({"results": GetOrganizationSerializer(many=True)})},
+        operation_description="Get all organization which users can interact",
+    )
+    def get(self, request):
+        families = get_families(
+            filters={"parent_profiles": str(request.user.parent_profile.id)},
+        )
+        student_profiles = get_student_profiles_by_families(families)
+        students = get_students(filters={"student_profile": request.user.student_profile.id})
+        for student_profile in student_profiles:
+            students |= get_students(filters={"student_profile": student_profile.id})
+
+        return Response(
+            {"results": GetOrganizationSerializer(set(map(lambda x: x.circle.organization, students)), many=True).data},
+            status=200)
 
 
 class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
