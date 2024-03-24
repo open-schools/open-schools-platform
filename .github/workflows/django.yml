@@ -161,6 +161,8 @@ jobs:
           sudo apt-get install libgeos++
           sudo apt-get install proj-bin
           sudo apt install gdal-bin
+      - name: Lint check
+        run: flake8 open_schools_platform/
       - name: Type check
         run: mypy open_schools_platform/
       - name: Run migrations
