@@ -29,4 +29,4 @@ class TicketCommentFilter(BaseFilterSet):
 
     class Meta:
         model = TicketComment
-        fields = ('id', 'created_at', 'updated_at', 'is_seen', 'is_sender', 'value')
+        fields = ('id', 'created_at', 'updated_at', 'is_seen', 'is_sender', 'value', 'ticket')
