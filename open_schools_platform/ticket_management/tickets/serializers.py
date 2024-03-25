@@ -7,3 +7,10 @@ class GetTicketCommentSerializer(BaseModelSerializer):
     class Meta:
         model = TicketComment
         fields = ("id", "is_sender", "is_seen", "value", "created_at")
+
+
+class CreateTicketCommentSerializer(BaseModelSerializer):
+
+    class Meta:
+        model = TicketComment
+        fields = ("value", )

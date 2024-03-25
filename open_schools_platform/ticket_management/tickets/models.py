@@ -43,8 +43,8 @@ class TicketComment(BaseModel):
 
     ticket = models.ForeignKey(Ticket, related_name="comments", on_delete=models.CASCADE)
 
-    is_sender = models.BooleanField(default=True)
-    is_seen = models.BooleanField()
+    is_sender = models.BooleanField()
+    is_seen = models.BooleanField(default=False)
     value = models.CharField(max_length=1400)
 
     objects = TicketCommentManager()  # type: ignore[assignment]
