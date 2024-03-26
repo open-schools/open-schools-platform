@@ -30,6 +30,14 @@ class Ticket(BaseModel):
     def last_comment(self):
         return self.comments.first()
 
+    @property
+    def unread_sender_comments_count(self):
+        return len(self.comments.filter(is_seen=False, is_sender=True))
+
+    @property
+    def unread_recipient_comments_count(self):
+        return len(self.comments.filter(is_seen=False, is_sender=False))
+
     sender = GenericForeignKey("sender_ct", "sender_id")
 
     objects = TicketManager()  # type: ignore[assignment]
