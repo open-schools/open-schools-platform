@@ -37,7 +37,7 @@ def get_comments(*, filters=None, prefetch_related_list=None) -> QuerySet:
     qs = TicketComment.objects.prefetch_related(*prefetch_related_list).all()
     ticket_comments = TicketCommentFilter(filters, qs).qs
 
-    return ticket_comments
+    return ticket_comments.order_by('created_at')
 
 
 @selector_factory(TicketComment)

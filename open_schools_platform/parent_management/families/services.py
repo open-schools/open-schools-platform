@@ -4,11 +4,14 @@ from django.contrib.contenttypes.models import ContentType
 
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.common.utils import form_ids_string_from_queryset
+from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.query_management.queries.selectors import get_queries
+from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families, get_students
 from open_schools_platform.user_management.users.models import User
 
 
@@ -62,6 +65,18 @@ def get_all_student_invites_for_current_user_families(user: User):
             "recipient_ids": form_ids_string_from_queryset(user.parent_profile.families.all())
         }
     )
+
+
+def get_accessible_organizations(user: User) -> typing.List[Organization]:
+    families = get_families(
+        filters={"parent_profiles": str(user.parent_profile.id)},
+    )
+    student_profiles = get_student_profiles_by_families(families)
+    students = get_students(filters={"student_profile": user.student_profile.id})
+    for student_profile in student_profiles:
+        students |= get_students(filters={"student_profile": student_profile.id})
+
+    return list(set(map(lambda x: x.circle.organization, students)))
 
 
 setattr(Family, "query_handler", FamilyQueryHandler())
