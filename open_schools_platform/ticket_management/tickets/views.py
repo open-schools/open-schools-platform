@@ -11,7 +11,7 @@ from open_schools_platform.parent_management.families.services import get_access
 from open_schools_platform.ticket_management.tickets.filters import TicketCommentFilter
 from open_schools_platform.ticket_management.tickets.models import TicketComment, Ticket
 from open_schools_platform.ticket_management.tickets.paginators import ApiTicketCommentsListPagination
-from open_schools_platform.ticket_management.tickets.rules import parent_profile_access
+from open_schools_platform.ticket_management.tickets.rules import parent_profile_access, organization_access
 from open_schools_platform.ticket_management.tickets.selectors import get_ticket, get_comments
 from open_schools_platform.ticket_management.tickets.serializers import GetTicketCommentSerializer, \
     CreateTicketCommentSerializer, CreateParentProfileOrganizationTicketSerializer, \
@@ -68,9 +68,10 @@ class TicketCommentCreateApi(ApiAuthMixin, CreateAPIView):
             user=request.user,
             empty_exception=True,
         )
+
         ticket_comment = create_ticket_comment(
-            is_sender=parent_profile_access(request.user, ticket),
             ticket=ticket,
+            user=request.user,
             **create_ticket_comment_serializer.validated_data
         )
         return Response(
@@ -105,7 +106,7 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
             organization=organization
         )
 
-        create_ticket_comment(**create_ticket_serializer.validated_data['first_message'], is_sender=True, ticket=ticket)
+        create_ticket_comment(**create_ticket_serializer.validated_data['first_message'], is_sender=True, ticket=ticket, user=request.user)
 
         return Response(
             {"ticket": GetParentProfileOrganizationTicketSerializer(ticket, context={'request': request}).data},

@@ -1,12 +1,20 @@
 import uuid
 
+from rest_framework.exceptions import PermissionDenied
+
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from django.contrib.contenttypes.models import ContentType
 
+from open_schools_platform.ticket_management.tickets.rules import parent_profile_access, organization_access
+from open_schools_platform.user_management.users.models import User
 
-def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, ) -> TicketComment:
+
+def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User) -> TicketComment:
+    if is_sender and not parent_profile_access(user, ticket) or not is_sender and not organization_access(user, ticket):
+        raise PermissionDenied("You can't create a ticket with that is_sender value.")
+
     ticket_comment = TicketComment.objects.create(
         value=value,
         is_sender=is_sender,

@@ -14,7 +14,7 @@ class GetTicketCommentSerializer(BaseModelSerializer):
 class CreateTicketCommentSerializer(BaseModelSerializer):
     class Meta:
         model = TicketComment
-        fields = ("value",)
+        fields = ("value", "is_sender")
 
 
 class GetParentProfileOrganizationTicketSerializer(BaseModelSerializer):
