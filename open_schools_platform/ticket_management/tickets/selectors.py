@@ -41,7 +41,7 @@ def get_comments(*, filters=None, prefetch_related_list=None) -> QuerySet:
 
 
 @selector_factory(TicketComment)
-def get_comment(*, filters=None, user: User = None, prefetch_related_list=None) -> Ticket:
+def get_comment(*, filters=None, user: User = None, prefetch_related_list=None) -> TicketComment:
     filters = filters or {}
 
     qs = TicketComment.objects.all()
