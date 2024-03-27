@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from open_schools_platform.common.serializers import BaseModelSerializer
+from open_schools_platform.common.validators import only_true_value
 from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSerializer
 from open_schools_platform.ticket_management.tickets.models import TicketComment, Ticket
 
@@ -14,7 +15,7 @@ class GetTicketCommentSerializer(BaseModelSerializer):
 class CreateTicketCommentSerializer(BaseModelSerializer):
     class Meta:
         model = TicketComment
-        fields = ("value",)
+        fields = ("value", "is_sender")
 
 
 class GetParentProfileOrganizationTicketSerializer(BaseModelSerializer):
@@ -34,3 +35,11 @@ class CreateParentProfileOrganizationTicketSerializer(BaseModelSerializer):
     class Meta:
         model = Ticket
         fields = ('organization', 'first_message')
+
+
+class UpdateTicketCommentSerializer(BaseModelSerializer):
+    is_seen = serializers.BooleanField(validators=[only_true_value])
+
+    class Meta:
+        model = TicketComment
+        fields = ('is_seen', )
