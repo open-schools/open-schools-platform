@@ -109,8 +109,8 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
             organization=organization
         )
 
-        create_ticket_comment(**create_ticket_serializer.validated_data['first_message'], is_sender=True, ticket=ticket,
-                              user=request.user)
+        create_ticket_comment(ticket=ticket, user=request.user,
+                              **create_ticket_serializer.validated_data['first_message'])
 
         return Response(
             {"ticket": GetParentProfileOrganizationTicketSerializer(ticket, context={'request': request}).data},
