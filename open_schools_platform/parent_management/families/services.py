@@ -39,10 +39,13 @@ def create_family(parent: ParentProfile, name: str = None) -> Family:
 
 class FamilyQueryHandler(BaseQueryHandler):
     without_body = True
-    allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.CANCELED]
+    allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
+                        Query.Status.CANCELED]
     available_statuses = {
         (Query.Status.SENT, 'parents.parent_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'families.family_access'): (Query.Status.CANCELED,),
+        (Query.Status.IN_PROGRESS, 'families.family_access'): (Query.Status.CANCELED,),
+        (Query.Status.SENT, 'families.organization_access'): (Query.Status.IN_PROGRESS,),
     }
 
     @typing.no_type_check
@@ -50,8 +53,13 @@ class FamilyQueryHandler(BaseQueryHandler):
         if query.status == Query.Status.ACCEPTED:
             add_parent_profile_to_family(query.sender, query.recipient)
 
+    @typing.no_type_check
+    def ticket_to_organization(self, query: Query):
+        pass
+
     change_query = {
-        ParentProfile: query_to_parent_profile
+        ParentProfile: query_to_parent_profile,
+        Organization: ticket_to_organization,
     }
 
 

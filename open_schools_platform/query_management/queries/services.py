@@ -38,7 +38,7 @@ def create_query(sender_model_name: str, sender_id: uuid.UUID,
 
 
 def query_update(*, query: Query, data) -> Query:
-    fields = ["status"]
+    fields = ["status", "recipient_ct", "recipient_id", "sender_ct", "sender_id"]
 
     user, has_updated = model_update(
         instance=query,

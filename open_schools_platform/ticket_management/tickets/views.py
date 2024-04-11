@@ -9,6 +9,7 @@ from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.organizations.selectors import get_organization
+from open_schools_platform.parent_management.families.selectors import get_family
 from open_schools_platform.parent_management.families.services import get_accessible_organizations
 from open_schools_platform.ticket_management.tickets.filters import TicketCommentFilter
 from open_schools_platform.ticket_management.tickets.models import TicketComment, Ticket
@@ -18,7 +19,7 @@ from open_schools_platform.ticket_management.tickets.serializers import GetTicke
     CreateTicketCommentSerializer, CreateParentProfileOrganizationTicketSerializer, \
     GetParentProfileOrganizationTicketSerializer, UpdateTicketCommentSerializer
 from open_schools_platform.ticket_management.tickets.services import create_ticket_comment, \
-    create_parent_profile_organization_ticket, update_ticket_comment
+    create_family_organization_ticket, update_ticket_comment
 from rest_framework.response import Response
 
 
@@ -96,7 +97,13 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
 
         organization = get_organization(
             filters={"id": create_ticket_serializer.validated_data['organization']},
-            empty_exception=True
+            empty_exception=True,
+        )
+
+        family = get_family(
+            filters={"id": create_ticket_serializer.validated_data['family']},
+            empty_exception=True,
+            user=request.user
         )
 
         if organization not in get_accessible_organizations(request.user):
@@ -104,8 +111,8 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
                 "This organization is not related to this parent_profile. "
                 "Your parent_profile should be connected at least with one circle of provided organization.")
 
-        ticket = create_parent_profile_organization_ticket(
-            parent_profile=request.user.parent_profile,
+        ticket = create_family_organization_ticket(
+            family=family,
             organization=organization
         )
 
