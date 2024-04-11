@@ -1,11 +1,10 @@
-import uuid
-
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.organizations.models import Organization
-from open_schools_platform.parent_management.parents.models import ParentProfile
+from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from django.contrib.contenttypes.models import ContentType
 
@@ -17,7 +16,7 @@ from open_schools_platform.user_management.users.models import User
 def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User) -> TicketComment:
     if (is_sender and not ticket_sender_access()(user, ticket) or
             not is_sender and not ticket_recipient_access()(user, ticket)):
-        raise PermissionDenied("You can't create a ticket with that is_sender value.")
+        raise PermissionDenied("You can't create a comment ticket with that is_sender value.")
 
     ticket_comment = TicketComment.objects.create(
         value=value,
@@ -44,19 +43,20 @@ def update_ticket_comment(*, ticket_comment: TicketComment, data, user: User = N
     return ticket_comment
 
 
-def create_ticket(sender_model_name: str, sender_id: uuid.UUID,
-                  recipient_model_name: str, recipient_id: uuid.UUID) -> Ticket:
+def create_ticket(*, sender_model_name, recipient_model_name, **kwargs) -> Ticket:
     recipient_ct = ContentType.objects.get(model=recipient_model_name)
     sender_ct = ContentType.objects.get(model=sender_model_name)
 
-    ticket = Ticket.objects.create(recipient_ct=recipient_ct, recipient_id=recipient_id,
-                                   sender_ct=sender_ct, sender_id=sender_id)
+    kwargs.update({"recipient_ct": recipient_ct})
+    kwargs.update({"sender_ct": sender_ct})
 
+    ticket = Ticket.objects.create()
+    query_update(query=ticket, data=kwargs)
     return ticket
 
 
-def create_parent_profile_organization_ticket(parent_profile: ParentProfile, organization: Organization) -> Ticket:
+def create_family_organization_ticket(family: Family, organization: Organization) -> Ticket:
     return create_ticket(
-        sender_model_name="parentprofile", sender_id=parent_profile.id,
+        sender_model_name="family", sender_id=family.id,
         recipient_model_name="organization", recipient_id=organization.id,
     )

@@ -10,7 +10,7 @@ def ticket_sender_access():
     @rules.predicate
     @predicate_input_type_check
     def parent_profile_access(user: User, ticket: Ticket):
-        return ticket.sender == user.parent_profile
+        return ticket.sender in user.parent_profile.families.all()
 
     return parent_profile_access
 
