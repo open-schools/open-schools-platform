@@ -18,7 +18,7 @@ class CreateTicketCommentSerializer(BaseModelSerializer):
         fields = ("value", "is_sender")
 
 
-class GetParentProfileOrganizationTicketSerializer(BaseModelSerializer):
+class GetFamilyOrganizationTicketSerializer(BaseModelSerializer):
     last_comment = GetTicketCommentSerializer()
     recipient = GetOrganizationSerializer()
 
@@ -28,7 +28,7 @@ class GetParentProfileOrganizationTicketSerializer(BaseModelSerializer):
                   "unread_recipient_comments_count")
 
 
-class CreateParentProfileOrganizationTicketSerializer(BaseModelSerializer):
+class CreateFamilyOrganizationTicketSerializer(BaseModelSerializer):
     family = serializers.UUIDField(required=True)
     organization = serializers.UUIDField(required=True)
     first_message = CreateTicketCommentSerializer(required=True)

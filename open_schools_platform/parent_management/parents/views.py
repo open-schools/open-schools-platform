@@ -21,7 +21,7 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.ticket_management.tickets.models import Ticket
 from open_schools_platform.ticket_management.tickets.paginators import ApiTicketListPagination
 from open_schools_platform.ticket_management.tickets.selectors import get_tickets
-from open_schools_platform.ticket_management.tickets.serializers import GetParentProfileOrganizationTicketSerializer
+from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
 
 
 class InviteParentQueriesListApi(ApiAuthMixin, APIView):
@@ -71,7 +71,7 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
 class ParentProfileOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     queryset = Ticket.objects.all()
     pagination_class = ApiTicketListPagination
-    serializer_class = GetParentProfileOrganizationTicketSerializer
+    serializer_class = GetFamilyOrganizationTicketSerializer
 
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
@@ -79,13 +79,13 @@ class ParentProfileOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     )
     def get(self, request):
         tickets = get_tickets(
-            filters={'sender_id': str(request.user.parent_profile.id),
+            filters={'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all()),
                      'recipient_ct': ContentType.objects.get(model="organization")}
         )
 
         response = get_paginated_response(
             pagination_class=ApiTicketListPagination,
-            serializer_class=GetParentProfileOrganizationTicketSerializer,
+            serializer_class=GetFamilyOrganizationTicketSerializer,
             queryset=tickets,
             request=request,
             view=self

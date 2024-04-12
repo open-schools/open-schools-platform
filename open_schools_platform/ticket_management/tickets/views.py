@@ -16,8 +16,8 @@ from open_schools_platform.ticket_management.tickets.models import TicketComment
 from open_schools_platform.ticket_management.tickets.paginators import ApiTicketCommentsListPagination
 from open_schools_platform.ticket_management.tickets.selectors import get_ticket, get_comments, get_comment
 from open_schools_platform.ticket_management.tickets.serializers import GetTicketCommentSerializer, \
-    CreateTicketCommentSerializer, CreateParentProfileOrganizationTicketSerializer, \
-    GetParentProfileOrganizationTicketSerializer, UpdateTicketCommentSerializer
+    CreateTicketCommentSerializer, CreateFamilyOrganizationTicketSerializer, \
+    GetFamilyOrganizationTicketSerializer, UpdateTicketCommentSerializer
 from open_schools_platform.ticket_management.tickets.services import create_ticket_comment, \
     create_family_organization_ticket, update_ticket_comment
 from rest_framework.response import Response
@@ -84,15 +84,15 @@ class TicketCommentCreateApi(ApiAuthMixin, CreateAPIView):
 
 class TicketCreateApi(ApiAuthMixin, CreateAPIView):
     queryset = Ticket.objects.all()
-    serializer_class = CreateParentProfileOrganizationTicketSerializer
+    serializer_class = CreateFamilyOrganizationTicketSerializer
 
     @swagger_auto_schema(
         operation_description="Create a ticket for provided organization and user parent profile with first message.",
-        responses={201: convert_dict_to_serializer({"ticket_comment": GetParentProfileOrganizationTicketSerializer()})},
+        responses={201: convert_dict_to_serializer({"ticket_comment": GetFamilyOrganizationTicketSerializer()})},
         tags=[SwaggerTags.TICKET_MANAGEMENT_TICKET]
     )
     def post(self, request):
-        create_ticket_serializer = CreateParentProfileOrganizationTicketSerializer(data=request.data)
+        create_ticket_serializer = CreateFamilyOrganizationTicketSerializer(data=request.data)
         create_ticket_serializer.is_valid(raise_exception=True)
 
         organization = get_organization(
@@ -120,7 +120,7 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
                               **create_ticket_serializer.validated_data['first_message'])
 
         return Response(
-            {"ticket": GetParentProfileOrganizationTicketSerializer(ticket, context={'request': request}).data},
+            {"ticket": GetFamilyOrganizationTicketSerializer(ticket, context={'request': request}).data},
             status=201)
 
 
