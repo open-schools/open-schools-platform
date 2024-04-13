@@ -1,15 +1,16 @@
 import typing
 
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.selectors import get_organizations
 from open_schools_platform.parent_management.families.models import Family
-from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
-from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families, get_students
 from open_schools_platform.user_management.users.models import User
@@ -75,16 +76,33 @@ def get_all_student_invites_for_current_user_families(user: User):
     )
 
 
-def get_accessible_organizations(user: User) -> typing.List[Organization]:
-    families = get_families(
-        filters={"parent_profiles": str(user.parent_profile.id)},
-    )
+def get_accessible_students(user: User) -> QuerySet[Student]:
+    families = user.parent_profile.families.all()
     student_profiles = get_student_profiles_by_families(families)
     students = get_students(filters={"student_profile": user.student_profile.id})
     for student_profile in student_profiles:
         students |= get_students(filters={"student_profile": student_profile.id})
+    return students
 
-    return list(set(map(lambda x: x.circle.organization, students)))
+
+def get_accessible_organizations(user: User, filters=None) -> typing.List[Organization]:
+    if filters is None:
+        filters = {}
+
+    accessible_organizations_str = ','.join(
+        set(map(lambda x: str(x.circle.organization.id) if x.circle else "", get_accessible_students(user))))
+    filters.update({"ids": accessible_organizations_str})
+    organizations = get_organizations(filters=filters)
+    return list(organizations)
+
+
+def get_families_that_interact_with_organization(user: User, organization: Organization) -> typing.List[Family]:
+    students = get_accessible_students(user).filter(circle__organization=organization).all()
+    families = Family.objects.none()
+    for student in students:
+        if student.student_profile:
+            families |= student.student_profile.families.all()
+    return list(families)
 
 
 setattr(Family, "query_handler", FamilyQueryHandler())

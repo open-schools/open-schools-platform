@@ -29,13 +29,12 @@ class GetFamilyOrganizationTicketSerializer(BaseModelSerializer):
 
 
 class CreateFamilyOrganizationTicketSerializer(BaseModelSerializer):
-    family = serializers.UUIDField(required=True)
     organization = serializers.UUIDField(required=True)
     first_message = CreateTicketCommentSerializer(required=True)
 
     class Meta:
         model = Ticket
-        fields = ('family', 'organization', 'first_message')
+        fields = ('organization', 'first_message')
 
 
 class UpdateTicketCommentSerializer(BaseModelSerializer):

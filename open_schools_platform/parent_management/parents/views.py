@@ -10,7 +10,9 @@ from open_schools_platform.common.utils import form_ids_string_from_queryset
 from open_schools_platform.common.views import convert_dict_to_serializer
 from rest_framework.response import Response
 
+from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSerializer
 from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.parent_management.families.services import get_accessible_organizations
@@ -38,17 +40,25 @@ class InviteParentQueriesListApi(ApiAuthMixin, APIView):
         return Response({"results": GetFamilyInviteParentSerializer(queries, many=True).data}, status=200)
 
 
-class GetAccessibleOrganizationListApi(ApiAuthMixin, APIView):
+class GetAccessibleOrganizationListApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
+    filterset_class = OrganizationFilter
+    pagination_class = OrganizationApiListPagination
+    serializer_class = GetOrganizationSerializer
 
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
-        responses={200: convert_dict_to_serializer({"results": GetOrganizationSerializer(many=True)})},
         operation_description="Get all organization which users can interact",
     )
     def get(self, request):
-        organizations = get_accessible_organizations(request.user)
-        return Response({"results": GetOrganizationSerializer(organizations, many=True).data}, status=200)
+        response = get_paginated_response(
+            pagination_class=OrganizationApiListPagination,
+            serializer_class=GetOrganizationSerializer,
+            queryset=get_accessible_organizations(request.user, request.GET.dict()),
+            request=request,
+            view=self
+        )
+        return response
 
 
 class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):

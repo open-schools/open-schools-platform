@@ -9,8 +9,8 @@ from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.organizations.selectors import get_organization
-from open_schools_platform.parent_management.families.selectors import get_family
-from open_schools_platform.parent_management.families.services import get_accessible_organizations
+from open_schools_platform.parent_management.families.services import \
+    get_families_that_interact_with_organization
 from open_schools_platform.ticket_management.tickets.filters import TicketCommentFilter
 from open_schools_platform.ticket_management.tickets.models import TicketComment, Ticket
 from open_schools_platform.ticket_management.tickets.paginators import ApiTicketCommentsListPagination
@@ -100,19 +100,15 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
             empty_exception=True,
         )
 
-        family = get_family(
-            filters={"id": create_ticket_serializer.validated_data['family']},
-            empty_exception=True,
-            user=request.user
-        )
+        families = get_families_that_interact_with_organization(request.user, organization)
 
-        if organization not in get_accessible_organizations(request.user):
+        if len(families) == 0:
             raise PermissionDenied(
-                "This organization is not related to this parent_profile. "
-                "Your parent_profile should be connected at least with one circle of provided organization.")
+                "This organization is not related to user families. "
+                "Your user families should be connected at least with one circle of provided organization.")
 
         ticket = create_family_organization_ticket(
-            family=family,
+            family=families[0],
             organization=organization
         )
 
