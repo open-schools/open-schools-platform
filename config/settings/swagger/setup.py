@@ -51,7 +51,7 @@ class SwaggerSetup:
                 title="Open Schools Platform API",
                 default_version='v1',
                 description="Backend for open source schools management platform",
-                contact=openapi.Contact(email="inbox@lamart.site"),
+                contact=openapi.Contact(email="inbox@openschools.education"),
                 license=openapi.License(name="MIT License"),
             ),
             public=True,
