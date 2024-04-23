@@ -457,7 +457,7 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     serializer_class = GetFamilyOrganizationTicketSerializer
 
     @swagger_auto_schema(
-        tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Get all tickets from families of current organizations.",
     )
     def get(self, request, organization_id):
