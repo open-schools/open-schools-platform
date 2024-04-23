@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
@@ -22,6 +23,7 @@ from open_schools_platform.organization_management.employees.services import cre
     get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
     get_organization, get_organization_circle_queries
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
@@ -46,6 +48,9 @@ from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.student_management.students.selectors import get_students, get_student, get_student_profile
 from open_schools_platform.student_management.students.serializers import GetStudentSerializer
 from open_schools_platform.student_management.students.services import export_students
+from open_schools_platform.ticket_management.tickets.models import Ticket
+from open_schools_platform.ticket_management.tickets.selectors import get_tickets
+from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
@@ -443,4 +448,35 @@ class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
             view=self
         )
 
+        return response
+
+
+class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
+    queryset = Ticket.objects.all()
+    pagination_class = OrganizationApiListPagination
+    serializer_class = GetFamilyOrganizationTicketSerializer
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
+        operation_description="Get all tickets from families of current organizations.",
+    )
+    def get(self, request, organization_id):
+        get_organization(
+            filters={'id': str(organization_id)},
+            user=request.user,
+            empty_exception=True,
+        )
+
+        tickets = get_tickets(
+            filters={'recipient_id': organization_id,
+                     'recipient_ct': ContentType.objects.get(model="organization")}
+        )
+
+        response = get_paginated_response(
+            pagination_class=OrganizationApiListPagination,
+            serializer_class=GetFamilyOrganizationTicketSerializer,
+            queryset=tickets,
+            request=request,
+            view=self
+        )
         return response
