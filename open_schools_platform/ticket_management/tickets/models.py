@@ -1,3 +1,6 @@
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
 from open_schools_platform.common.models import BaseModel, BaseManager
 from django.db import models
 import uuid
@@ -40,6 +43,12 @@ class TicketComment(BaseModel):
     is_sender = models.BooleanField()
     is_seen = models.BooleanField(default=False)
     value = models.CharField(max_length=1400)
+
+    sender_ct = models.ForeignKey(ContentType, related_name="ticket_comment_sender_ct",
+                                  null=True, on_delete=models.CASCADE)
+    sender_id = models.UUIDField(default=uuid.uuid4)
+
+    sender = GenericForeignKey("sender_ct", "sender_id")
 
     objects = TicketCommentManager()  # type: ignore[assignment]
 
