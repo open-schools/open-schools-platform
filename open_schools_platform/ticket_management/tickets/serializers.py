@@ -20,7 +20,7 @@ class GetTicketCommentSerializer(BaseModelSerializer):
 
 
 class CreateTicketCommentSerializer(BaseModelSerializer):
-    sender_ct = serializers.CharField()
+    sender_ct = serializers.CharField(required=False)
 
     class Meta:
         model = TicketComment
