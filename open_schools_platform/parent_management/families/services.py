@@ -92,7 +92,7 @@ def get_accessible_organizations(user: User, filters=None) -> typing.List[Organi
     accessible_organizations_str = ','.join(
         set(map(lambda x: str(x.circle.organization.id) if x.circle else "", get_accessible_students(user))))
     filters.update({"ids": accessible_organizations_str})
-    organizations = get_organizations(filters=filters)
+    organizations = get_organizations(filters=filters, empty_filters=True)
     return list(organizations)
 
 

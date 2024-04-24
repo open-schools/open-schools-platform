@@ -1,5 +1,6 @@
 from rest_framework.exceptions import PermissionDenied
 
+from open_schools_platform.common.selectors import generic_selector
 from open_schools_platform.common.services import model_update
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.organizations.models import Organization
@@ -13,7 +14,8 @@ from open_schools_platform.ticket_management.tickets.rules import \
 from open_schools_platform.user_management.users.models import User
 
 
-def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User) -> TicketComment:
+def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User,
+                          sender_ct: str = None, sender_id: str = None) -> TicketComment:
     if (is_sender and not ticket_sender_access()(user, ticket) or
             not is_sender and not ticket_recipient_access()(user, ticket)):
         raise PermissionDenied("You can't create a comment ticket with that is_sender value.")
@@ -23,6 +25,12 @@ def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: Use
         is_sender=is_sender,
         ticket=ticket,
     )
+
+    if sender_id and sender_ct:
+        sender = generic_selector(model_name=sender_ct, object_id=sender_id, user=user)
+        ticket_comment.sender = sender
+        ticket_comment.save()
+
     return ticket_comment
 
 
