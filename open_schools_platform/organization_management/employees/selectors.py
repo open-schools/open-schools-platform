@@ -37,7 +37,7 @@ def get_employee_profile(*, filters=None, user: User = None, prefetch_related_li
     qs = EmployeeProfile.objects.all()
     employee_profile = EmployeeProfileFilter(filters, qs).qs.first()
 
-    if user and employee_profile and not user.has_perm("employees.employee_profile_access", employee_profile):
+    if user and employee_profile and not user.has_perm("employees.employeeprofile_access", employee_profile):
         raise PermissionDenied
 
     return employee_profile

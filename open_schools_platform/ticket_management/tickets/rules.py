@@ -9,10 +9,10 @@ from open_schools_platform.user_management.users.models import User
 def ticket_sender_access():
     @rules.predicate
     @predicate_input_type_check
-    def parent_profile_access(user: User, ticket: Ticket):
+    def parentprofile_access(user: User, ticket: Ticket):
         return ticket.sender in user.parent_profile.families.all()
 
-    return parent_profile_access
+    return parentprofile_access
 
 
 def ticket_recipient_access():
@@ -31,4 +31,4 @@ def ticket_comment_profile_access(user: User, ticket_comment: TicketComment):
 
 
 rules.add_perm("tickets.ticket_access", ticket_sender_access() | ticket_recipient_access())
-rules.add_perm("tickets.ticket_comment_access", ticket_comment_profile_access)
+rules.add_perm("tickets.ticketcomment_access", ticket_comment_profile_access)

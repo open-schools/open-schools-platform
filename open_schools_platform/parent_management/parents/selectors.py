@@ -13,7 +13,7 @@ def get_parent_profile(*, filters=None, user: User = None, prefetch_related_list
     qs = ParentProfile.objects.all()
     parent_profile = ParentProfileFilter(filters, qs).qs.first()
 
-    if user and parent_profile and not user.has_perm('parents.parent_profile_access', parent_profile):
+    if user and parent_profile and not user.has_perm('parents.parentprofile_access', parent_profile):
         raise PermissionDenied
 
     return parent_profile

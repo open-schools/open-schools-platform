@@ -19,7 +19,7 @@ def get_student_profile(*, filters=None, user: User = None, prefetch_related_lis
     qs = StudentProfile.objects.all()
     student_profile = StudentProfileFilter(filters, qs).qs.first()
 
-    if user and student_profile and not user.has_perm('students.student_profile_access', student_profile):
+    if user and student_profile and not user.has_perm('students.studentprofile_access', student_profile):
         raise PermissionDenied
 
     return student_profile

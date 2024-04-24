@@ -26,7 +26,7 @@ def get_token(*, filters=None, user: User = None, prefetch_related_list=None) ->
     qs = CreationToken.objects.all().order_by('created_at')
     token = CreationTokenFilter(filters, qs).qs.last()
 
-    if user and token and not user.has_perm('users.creation_token_access', token):
+    if user and token and not user.has_perm('users.creationtoken_access', token):
         raise PermissionDenied
 
     return token

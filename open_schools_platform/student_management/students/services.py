@@ -121,7 +121,7 @@ class StudentProfileQueryHandler(BaseQueryHandler):
         (Query.Status.IN_PROGRESS, 'circles.circle_access'): (
             Query.Status.DECLINED, Query.Status.ACCEPTED
         ),
-        (Query.Status.SENT, 'students.student_profile_access'): (Query.Status.CANCELED,),
+        (Query.Status.SENT, 'students.studentprofile_access'): (Query.Status.CANCELED,),
     }
 
     @typing.no_type_check

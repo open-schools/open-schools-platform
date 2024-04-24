@@ -43,7 +43,7 @@ class FamilyQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
                         Query.Status.CANCELED]
     available_statuses = {
-        (Query.Status.SENT, 'parents.parent_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'parents.parentprofile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'families.family_access'): (Query.Status.CANCELED,),
         (Query.Status.IN_PROGRESS, 'families.family_access'): (Query.Status.CANCELED,),
         (Query.Status.SENT, 'families.organization_access'): (Query.Status.IN_PROGRESS,),

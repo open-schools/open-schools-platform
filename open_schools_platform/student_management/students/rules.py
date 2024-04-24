@@ -42,6 +42,6 @@ def has_access_to_invite(user: User, student: Student):
         return user.has_perm("queries.query_access", invite)
 
 
-rules.add_perm("students.student_profile_access", is_student_profile_owner | has_family_with_this_student_profile)
+rules.add_perm("students.studentprofile_access", is_student_profile_owner | has_family_with_this_student_profile)
 rules.add_perm("students.student_access",
                is_student_owner | is_parent_for_student | has_access_for_circle | has_access_to_invite)

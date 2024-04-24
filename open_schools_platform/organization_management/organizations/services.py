@@ -32,7 +32,7 @@ def create_organization(name: str, inn: str = "") -> Organization:
 class OrganizationQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED, Query.Status.DECLINED]
     available_statuses = {
-        (Query.Status.SENT, 'employees.employee_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'employees.employeeprofile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'organizations.organization_access'): (Query.Status.CANCELED,),
     }
 
