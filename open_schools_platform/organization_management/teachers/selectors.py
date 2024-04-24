@@ -38,7 +38,7 @@ def get_teacher_profile(*, filters=None, user: User = None, prefetch_related_lis
     qs = TeacherProfile.objects.all()
     teacher_profile = TeacherProfileFilter(filters, qs).qs.first()
 
-    if user and teacher_profile and not user.has_perm('teachers.teacher_profile_access', teacher_profile):
+    if user and teacher_profile and not user.has_perm('teachers.teacherprofile_access', teacher_profile):
         raise PermissionDenied
 
     return teacher_profile

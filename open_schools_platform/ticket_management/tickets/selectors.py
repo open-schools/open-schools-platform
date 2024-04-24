@@ -47,7 +47,7 @@ def get_comment(*, filters=None, user: User = None, prefetch_related_list=None) 
     qs = TicketComment.objects.all()
     ticket_comment = TicketCommentFilter(filters, qs).qs.first()
 
-    if user and ticket_comment and not user.has_perm("tickets.ticket_comment_access", ticket_comment):
+    if user and ticket_comment and not user.has_perm("tickets.ticketcomment_access", ticket_comment):
         raise PermissionDenied
 
     return ticket_comment

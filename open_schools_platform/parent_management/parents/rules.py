@@ -11,4 +11,4 @@ def is_parent_profile_owner(user: User, parent_profile: ParentProfile):
     return parent_profile.user == user
 
 
-rules.add_perm("parents.parent_profile_access", is_parent_profile_owner)
+rules.add_perm("parents.parentprofile_access", is_parent_profile_owner)
