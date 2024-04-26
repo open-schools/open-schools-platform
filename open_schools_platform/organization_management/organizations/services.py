@@ -20,8 +20,8 @@ from open_schools_platform.student_management.students.selectors import get_stud
     get_student_profiles_circle_additional
 from django.contrib.contenttypes.models import ContentType
 
-from open_schools_platform.ticket_management.tickets.filters import TicketFilter
-from open_schools_platform.ticket_management.tickets.selectors import get_tickets
+from open_schools_platform.ticket_management.tickets.filters import TicketFilter, TicketCommentFilter
+from open_schools_platform.ticket_management.tickets.selectors import get_tickets, get_comments
 
 
 def create_organization(name: str, inn: str = "") -> Organization:
@@ -161,6 +161,13 @@ def get_family_organization_ticket_filter():
                 ids_field="sender_ids",
                 prefix="family",
                 include_list=["id", "name", "parent_phone"],
+            ),
+            ComplexFilter(
+                filterset_type=TicketCommentFilter,
+                selector=get_comments,
+                ids_field="last_comment_ids",
+                prefix="ticket_comment",
+                include_list=["id", "value"],
             ),
         ],
         filterset_type=TicketFilter,
