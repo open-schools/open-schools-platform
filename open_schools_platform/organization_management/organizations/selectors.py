@@ -8,6 +8,8 @@ from open_schools_platform.organization_management.employees.selectors import ge
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.query_management.queries.selectors import get_queries
+from open_schools_platform.ticket_management.tickets.models import Ticket
+from open_schools_platform.ticket_management.tickets.selectors import get_tickets
 from open_schools_platform.user_management.users.models import User
 
 
@@ -47,6 +49,13 @@ def get_organization_circle_queries(organization: Organization):
                                    "sender_ct": ContentType.objects.get(model="studentprofile")},
                           empty_filters=True)
     return queries
+
+
+def get_family_organization_tickets(organization: Organization) -> QuerySet[Ticket]:
+    tickets = get_tickets(filters={"recipient_id": organization.id,
+                                   "sender_ct": ContentType.objects.get(model="family")},
+                          empty_filters=True)
+    return tickets
 
 
 def get_organization_students_invitations(organization: Organization):

@@ -25,13 +25,14 @@ from open_schools_platform.organization_management.organizations.filters import 
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
-    get_organization, get_organization_circle_queries
+    get_organization, get_organization_circle_queries, get_family_organization_tickets
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
     GetAnalyticsSerializer, GetOrganizationSerializer, GetOrganizationCircleListSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    get_organization_circle_query_filter, filter_organization_circle_queries_by_dates, \
+    get_organization_circle_query_filter, \
     get_organization_students_invitations_filter, get_family_organization_ticket_filter
-from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
+from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter, \
+    filter_queryset_by_dates
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
 from open_schools_platform.organization_management.teachers.paginators import ApiTeachersListPagination
@@ -300,7 +301,7 @@ class GetAnalytics(ApiAuthMixin, APIView):
         organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
         queries = get_organization_circle_queries(organization)
         if all(arg in dates for arg in ("date_from", "date_to")):
-            queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
+            queries = filter_queryset_by_dates(queries, dates["date_from"], dates["date_to"])
         return Response({"analytics": GetAnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
 
 
@@ -483,3 +484,24 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
             view=self
         )
         return response
+
+
+class GetTicketsAnalytics(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Get ticket analytics for this organization",
+        manual_parameters=[
+            Parameter('date_from', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+            Parameter('date_to', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+        ],
+        responses={200: convert_dict_to_serializer({"ticket-analytics": GetAnalyticsSerializer()}),
+                   404: "There is no such organization"}
+    )
+    def get(self, request, organization_id):
+        dates = request.GET.dict()
+        organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
+        tickets = get_family_organization_tickets(organization)
+        if all(arg in dates for arg in ("date_from", "date_to")):
+            tickets = filter_queryset_by_dates(tickets, dates["date_from"], dates["date_to"])
+        return Response({"ticket-analytics": GetAnalyticsSerializer(count_queries_by_statuses(tickets)).data},
+                        status=200)
