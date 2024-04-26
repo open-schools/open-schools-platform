@@ -1,9 +1,7 @@
-from django.db.models import QuerySet
 import typing
 
 from open_schools_platform.common.filters import SoftCondition
 from open_schools_platform.common.services import BaseQueryHandler, ComplexFilter, ComplexMultipleFilter
-from open_schools_platform.common.utils import convert_str_date_to_datetime
 from open_schools_platform.errors.exceptions import QueryCorrupted
 from open_schools_platform.organization_management.circles.filters import CircleFilter
 from open_schools_platform.organization_management.circles.selectors import get_circles
@@ -145,11 +143,6 @@ def get_organization_students_invitations_filter():
         },
         is_has_or_search_field=True,
     )
-
-
-def filter_organization_circle_queries_by_dates(queries: QuerySet, date_from, date_to):
-    return queries.filter(created_at__range=[convert_str_date_to_datetime(date_from, "00:00:00"),
-                                             convert_str_date_to_datetime(date_to, "23:59:59")])
 
 
 def get_family_organization_ticket_filter():
