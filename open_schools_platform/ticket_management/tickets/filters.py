@@ -11,8 +11,6 @@ class TicketFilter(BaseFilterSet):
     recipient_ct_search = CharFilter(field_name="recipient_ct", method="recipient_ct_filter")
     recipient_ids = CharFilter(method=filter_by_object_ids("recipient_id"))
     sender_ids = CharFilter(method=filter_by_object_ids("sender_id"))
-    body_ids = CharFilter(method=filter_by_object_ids("body_id"))
-    additional_ids = CharFilter(method=filter_by_object_ids("additional_id"))
 
     def sender_ct_filter(self, queryset, name, value):
         return queryset.filter(sender_ct__model=value.replace(" ", ""))
@@ -22,7 +20,7 @@ class TicketFilter(BaseFilterSet):
 
     class Meta:
         model = Ticket
-        fields = ('id', 'created_at', 'updated_at', 'sender_id', 'recipient_id', 'recipient_ct', 'sender_ct')
+        fields = ('id', 'created_at', 'updated_at', 'sender_id', 'recipient_id', 'recipient_ct', 'sender_ct', 'status')
 
 
 class TicketCommentFilter(BaseFilterSet):

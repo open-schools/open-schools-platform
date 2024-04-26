@@ -30,7 +30,7 @@ from open_schools_platform.organization_management.organizations.serializers imp
     GetAnalyticsSerializer, GetOrganizationSerializer, GetOrganizationCircleListSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     get_organization_circle_query_filter, filter_organization_circle_queries_by_dates, \
-    get_organization_students_invitations_filter
+    get_organization_students_invitations_filter, get_family_organization_ticket_filter
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
@@ -49,7 +49,6 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.student_management.students.serializers import GetStudentSerializer
 from open_schools_platform.student_management.students.services import export_students
 from open_schools_platform.ticket_management.tickets.models import Ticket
-from open_schools_platform.ticket_management.tickets.selectors import get_tickets
 from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
 
 
@@ -454,6 +453,8 @@ class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
 class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     queryset = Ticket.objects.all()
     pagination_class = OrganizationApiListPagination
+    complex_filter = get_family_organization_ticket_filter()
+    visible_filter_fields = complex_filter.get_dict_filters()
     serializer_class = GetFamilyOrganizationTicketSerializer
 
     @swagger_auto_schema(
@@ -461,16 +462,18 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
         operation_description="Get all tickets from families of current organizations.",
     )
     def get(self, request, organization_id):
+        filters = request.GET.dict()
+
         get_organization(
             filters={'id': str(organization_id)},
             user=request.user,
             empty_exception=True,
         )
 
-        tickets = get_tickets(
-            filters={'recipient_id': organization_id,
-                     'recipient_ct': ContentType.objects.get(model="organization")}
-        )
+        filters.update({"recipient_id": organization_id})
+        filters.update({"recipient_ct": ContentType.objects.get(model="organization")})
+
+        tickets = self.complex_filter.get_objects(filters)
 
         response = get_paginated_response(
             pagination_class=OrganizationApiListPagination,

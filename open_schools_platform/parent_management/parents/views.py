@@ -78,7 +78,7 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
             status=200)
 
 
-class ParentProfileOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
+class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     queryset = Ticket.objects.all()
     pagination_class = ApiTicketListPagination
     serializer_class = GetFamilyOrganizationTicketSerializer

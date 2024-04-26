@@ -20,6 +20,9 @@ from open_schools_platform.student_management.students.selectors import get_stud
     get_student_profiles_circle_additional
 from django.contrib.contenttypes.models import ContentType
 
+from open_schools_platform.ticket_management.tickets.filters import TicketFilter
+from open_schools_platform.ticket_management.tickets.selectors import get_tickets
+
 
 def create_organization(name: str, inn: str = "") -> Organization:
     organization = Organization.objects.create(
@@ -147,3 +150,25 @@ def get_organization_students_invitations_filter():
 def filter_organization_circle_queries_by_dates(queries: QuerySet, date_from, date_to):
     return queries.filter(created_at__range=[convert_str_date_to_datetime(date_from, "00:00:00"),
                                              convert_str_date_to_datetime(date_to, "23:59:59")])
+
+
+def get_family_organization_ticket_filter():
+    return ComplexMultipleFilter(
+        complex_filter_list=[
+            ComplexFilter(
+                filterset_type=FamilyFilter,
+                selector=get_families,
+                ids_field="sender_ids",
+                prefix="family",
+                include_list=["id", "name", "parent_phone"],
+            ),
+        ],
+        filterset_type=TicketFilter,
+        selector=get_tickets,
+        include_list=["status", "id", "created_at", "recipient_id", "recipient_ct"],
+        advance_filters_delegate=lambda: {
+            "sender_ct": ContentType.objects.get(model="family"),
+            "recipient_ct": ContentType.objects.get(model="organization"),
+        },
+        is_has_or_search_field=True,
+    )
