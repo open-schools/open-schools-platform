@@ -21,10 +21,11 @@ from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.query_management.queries.serializers import GetFamilyInviteParentSerializer, \
     GetStudentJoinCircleSerializer
 from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families
-from open_schools_platform.ticket_management.tickets.models import Ticket
+from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from open_schools_platform.ticket_management.tickets.paginators import ApiTicketListPagination
-from open_schools_platform.ticket_management.tickets.selectors import get_tickets
-from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
+from open_schools_platform.ticket_management.tickets.selectors import get_tickets, get_comments
+from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer, \
+    GetTicketCommentSerializer
 
 
 class InviteParentQueriesListApi(ApiAuthMixin, APIView):
@@ -98,6 +99,36 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
             pagination_class=ApiTicketListPagination,
             serializer_class=GetFamilyOrganizationTicketSerializer,
             queryset=get_last_organization_tickets(tickets),
+            request=request,
+            view=self
+        )
+        return response
+
+
+class FamilyOrganizationTicketCommentsListApi(ApiAuthMixin, ListAPIView):
+    queryset = TicketComment.objects.all()
+    pagination_class = ApiTicketListPagination
+    serializer_class = GetTicketCommentSerializer
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
+        operation_description="Get all comments for ticket organization",
+    )
+    def get(self, request, organization_id):
+        tickets = get_tickets(
+            filters={'recipient_id': organization_id,
+                     'sender_ct': ContentType.objects.get(model="family")}
+        )
+
+        ticket_comments = get_comments(
+            filters={'ticket_ids': form_ids_string_from_queryset(tickets)},
+            empty_filters=True
+        )
+
+        response = get_paginated_response(
+            pagination_class=ApiTicketListPagination,
+            serializer_class=GetTicketCommentSerializer,
+            queryset=ticket_comments,
             request=request,
             view=self
         )

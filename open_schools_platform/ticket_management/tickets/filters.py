@@ -21,6 +21,7 @@ def last_comment_id(queryset, name, value):
 
 class TicketCommentFilter(BaseFilterSet):
     or_search = CharFilter(field_name="or_search", method="OR")
+    ticket_ids = CharFilter(method=filter_by_object_ids("ticket"))
 
     class Meta(MetaCharIContainsMixin):
         model = TicketComment
