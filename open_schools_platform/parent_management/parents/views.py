@@ -16,6 +16,7 @@ from open_schools_platform.organization_management.organizations.paginators impo
 from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSerializer
 from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.parent_management.families.services import get_accessible_organizations
+from open_schools_platform.parent_management.parents.services import get_last_organization_tickets
 from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.query_management.queries.serializers import GetFamilyInviteParentSerializer, \
     GetStudentJoinCircleSerializer
@@ -85,7 +86,7 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
 
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
-        operation_description="Get all tickets to organizations of current parent profile.",
+        operation_description="Get all last tickets to organizations of current parent profile.",
     )
     def get(self, request):
         tickets = get_tickets(
@@ -96,7 +97,7 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
         response = get_paginated_response(
             pagination_class=ApiTicketListPagination,
             serializer_class=GetFamilyOrganizationTicketSerializer,
-            queryset=tickets,
+            queryset=get_last_organization_tickets(tickets),
             request=request,
             view=self
         )
