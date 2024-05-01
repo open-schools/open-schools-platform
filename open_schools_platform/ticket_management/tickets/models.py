@@ -19,14 +19,14 @@ class TicketCommentManager(BaseManager):
 class Ticket(Query):
     @property
     def last_comment(self):
-        return self.comments.first()
+        return self.comments.filter(is_internal_recipient=False).order_by('-created_at').first()
 
     @property
-    def unread_sender_comments_count(self):
+    def unread_sender_comments_count(self) -> int:
         return len(self.comments.filter(is_seen=False, is_sender=True))
 
     @property
-    def unread_recipient_comments_count(self):
+    def unread_recipient_comments_count(self) -> int:
         return len(self.comments.filter(is_seen=False, is_sender=False))
 
     objects = TicketManager()  # type: ignore[assignment]
@@ -42,6 +42,8 @@ class TicketComment(BaseModel):
 
     is_sender = models.BooleanField()
     is_seen = models.BooleanField(default=False)
+    is_internal_recipient = models.BooleanField(default=False)
+
     value = models.CharField(max_length=1400)
 
     sender_ct = models.ForeignKey(ContentType, related_name="ticket_comment_sender_ct",

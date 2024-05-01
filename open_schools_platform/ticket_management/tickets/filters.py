@@ -25,7 +25,7 @@ class TicketCommentFilter(BaseFilterSet):
 
     class Meta(MetaCharIContainsMixin):
         model = TicketComment
-        fields = ('id', 'created_at', 'updated_at', 'is_seen', 'is_sender', 'value', 'ticket')
+        fields = ('id', 'created_at', 'updated_at', 'is_seen', 'is_sender', 'value', 'ticket', 'is_internal_recipient')
 
 
 class TicketFilter(BaseFilterSet):

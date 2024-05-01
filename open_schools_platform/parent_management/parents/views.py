@@ -121,7 +121,7 @@ class FamilyOrganizationTicketCommentsListApi(ApiAuthMixin, ListAPIView):
         )
 
         ticket_comments = get_comments(
-            filters={'ticket_ids': form_ids_string_from_queryset(tickets)},
+            filters={'ticket_ids': form_ids_string_from_queryset(tickets), 'is_internal_recipient': False},
             empty_filters=True
         )
 
