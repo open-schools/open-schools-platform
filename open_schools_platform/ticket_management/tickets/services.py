@@ -14,16 +14,21 @@ from open_schools_platform.ticket_management.tickets.rules import \
 from open_schools_platform.user_management.users.models import User
 
 
-def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User,
+def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User, is_internal_recipient=False,
                           sender_ct: str = None, sender_id: str = None) -> TicketComment:
     if (is_sender and not ticket_sender_access()(user, ticket) or
             not is_sender and not ticket_recipient_access()(user, ticket)):
         raise PermissionDenied("You can't create a comment ticket with that is_sender value.")
 
+    if is_sender and is_internal_recipient:
+        raise PermissionDenied("Sender can't create ticket comment with is_internal_recipient true value.")
+
     ticket_comment = TicketComment.objects.create(
         value=value,
         is_sender=is_sender,
+        is_internal_recipient=is_internal_recipient,
         ticket=ticket,
+        is_seen=is_internal_recipient,
     )
 
     if sender_id and sender_ct:

@@ -17,7 +17,7 @@ class GetTicketCommentSerializer(BaseModelSerializer):
 
     class Meta:
         model = TicketComment
-        fields = ("id", "is_sender", "is_seen", "value", "created_at", "sender")
+        fields = ("id", "is_sender", "is_seen", "value", "created_at", "sender", "is_internal_recipient")
 
 
 class CreateTicketCommentSerializer(BaseModelSerializer):
@@ -25,7 +25,7 @@ class CreateTicketCommentSerializer(BaseModelSerializer):
 
     class Meta:
         model = TicketComment
-        fields = ("value", "is_sender", "sender_id", "sender_ct")
+        fields = ("value", "is_sender", "sender_id", "sender_ct", "is_internal_recipient")
 
 
 class GetFamilyOrganizationTicketSerializer(BaseModelSerializer):

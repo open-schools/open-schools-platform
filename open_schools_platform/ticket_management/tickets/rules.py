@@ -1,7 +1,6 @@
 import rules
 
 from open_schools_platform.common.rules import predicate_input_type_check
-from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from open_schools_platform.user_management.users.models import User
 
@@ -19,6 +18,7 @@ def ticket_recipient_access():
     @rules.predicate
     @predicate_input_type_check
     def organization_access(user: User, ticket: Ticket):
+        from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user
         return ticket.recipient in get_organizations_by_user(user)
 
     return organization_access
