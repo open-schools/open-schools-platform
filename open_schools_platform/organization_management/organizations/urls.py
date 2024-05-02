@@ -6,7 +6,8 @@ from open_schools_platform.organization_management.organizations.views import Or
     OrganizationEmployeeQueriesListApi, OrganizationCircleQueriesListApi, OrganizationStudentsListApi, \
     OrganizationDeleteApi, GetStudentApi, OrganizationStudentProfilesExportApi, GetAnalytics, \
     OrganizationTeachersListApi, GetTeacherApi, OrganizationStudentProfileQueriesApi, OrganizationInvitedStudentsApi, \
-    OrganizationCirclesListApi, OrganizationCirclesApi, FamilyOrganizationTicketsListApi, GetTicketsAnalytics
+    OrganizationCirclesListApi, OrganizationCirclesApi, FamilyOrganizationTicketsListApi, GetTicketsAnalytics, \
+    GetFamilyOrganizationTicketApi
 
 urlpatterns = [
     path('', MultipleViewManager({'get': OrganizationListApi,
@@ -30,6 +31,8 @@ urlpatterns = [
     path('/<uuid:organization_id>/circles', OrganizationCirclesListApi.as_view(), name='organization-circles-list'),
     path('/<uuid:organization_id>/family-tickets', FamilyOrganizationTicketsListApi.as_view(),
          name='organization-family-tickets-list'),
+    path('/<uuid:organization_id>/family-tickets/<uuid:ticket_id>', GetFamilyOrganizationTicketApi.as_view(),
+         name='organization-family-ticket'),
     path('/<uuid:organization_id>/circles/<uuid:circle_id>',
          OrganizationCirclesApi.as_view(), name='organization-circle'),
     path('/teachers/<uuid:teacher_id>', GetTeacherApi.as_view(), name='get-teacher')

@@ -50,6 +50,7 @@ from open_schools_platform.student_management.students.selectors import get_stud
 from open_schools_platform.student_management.students.serializers import GetStudentSerializer
 from open_schools_platform.student_management.students.services import export_students
 from open_schools_platform.ticket_management.tickets.models import Ticket
+from open_schools_platform.ticket_management.tickets.selectors import get_ticket
 from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
 
 
@@ -505,3 +506,27 @@ class GetTicketsAnalytics(ApiAuthMixin, APIView):
             tickets = filter_queryset_by_dates(tickets, dates["date_from"], dates["date_to"])
         return Response({"ticket-analytics": GetAnalyticsSerializer(count_queries_by_statuses(tickets)).data},
                         status=200)
+
+
+class GetFamilyOrganizationTicketApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get ticket comment",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"ticket": GetFamilyOrganizationTicketSerializer()}),
+                   404: "No such ticket comment"}
+    )
+    def get(self, request, organization_id, ticket_id):
+        get_organization(
+            filters={"id": organization_id},
+            empty_exception=True,
+            user=request.user
+        )
+        ticket = get_ticket(
+            filters={"id": ticket_id},
+            empty_exception=True,
+            user=request.user
+        )
+
+        return Response(
+            {"ticket": GetFamilyOrganizationTicketSerializer(ticket, context={'request': request}).data},
+            status=200)
