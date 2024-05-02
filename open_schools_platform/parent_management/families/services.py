@@ -46,7 +46,8 @@ class FamilyQueryHandler(BaseQueryHandler):
         (Query.Status.SENT, 'parents.parentprofile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'families.family_access'): (Query.Status.CANCELED,),
         (Query.Status.IN_PROGRESS, 'families.family_access'): (Query.Status.CANCELED,),
-        (Query.Status.SENT, 'families.organization_access'): (Query.Status.IN_PROGRESS,),
+        (Query.Status.SENT, 'organization.organization_access'): (Query.Status.IN_PROGRESS,),
+        (Query.Status.IN_PROGRESS, 'organization.organization_access'): (Query.Status.ACCEPTED,),
     }
 
     @typing.no_type_check
