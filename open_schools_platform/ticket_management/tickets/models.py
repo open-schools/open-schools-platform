@@ -47,7 +47,7 @@ class TicketComment(BaseModel):
     value = models.CharField(max_length=1400)
 
     sender_ct = models.ForeignKey(ContentType, related_name="ticket_comment_sender_ct",
-                                  null=True, on_delete=models.CASCADE)
+                                  null=True, blank=True, on_delete=models.CASCADE)
     sender_id = models.UUIDField(default=uuid.uuid4)
 
     sender = GenericForeignKey("sender_ct", "sender_id")
