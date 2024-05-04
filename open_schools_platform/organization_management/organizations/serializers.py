@@ -38,6 +38,7 @@ class GetAnalyticsSerializer(serializers.Serializer):
     ACCEPTED = serializers.IntegerField()
     DECLINED = serializers.IntegerField()
     CANCELED = serializers.IntegerField()
+    CLOSED = serializers.IntegerField()
 
 
 class GetOrganizationCircleListSerializer(serializers.ModelSerializer):

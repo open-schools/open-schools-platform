@@ -3,10 +3,12 @@ from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.common.selectors import generic_selector
 from open_schools_platform.common.services import model_update, ComplexMultipleFilter, ComplexFilter
 from open_schools_platform.common.utils import filter_dict_from_none_values
+from open_schools_platform.errors.exceptions import TicketIsClosed
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.parent_management.families.filters import FamilyFilter
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.selectors import get_families
+from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.query_management.queries.services import query_update
 from open_schools_platform.ticket_management.tickets.filters import TicketCommentFilter, TicketFilter
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
@@ -18,8 +20,15 @@ from open_schools_platform.ticket_management.tickets.selectors import get_commen
 from open_schools_platform.user_management.users.models import User
 
 
+def is_ticket_available_to_change(ticket: Ticket):
+    return ticket.status in [Query.Status.SENT, Query.Status.IN_PROGRESS]
+
+
 def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: User, is_internal_recipient=False,
                           sender_ct: str = None, sender_id: str = None) -> TicketComment:
+    if not is_ticket_available_to_change(ticket):
+        raise TicketIsClosed()
+
     if (is_sender and not ticket_sender_access()(user, ticket) or
             not is_sender and not ticket_recipient_access()(user, ticket)):
         raise PermissionDenied("You can't create a comment ticket with that is_sender value.")
