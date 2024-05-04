@@ -1,16 +1,20 @@
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import generic_selector
-from open_schools_platform.common.services import model_update
+from open_schools_platform.common.services import model_update, ComplexMultipleFilter, ComplexFilter
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.parent_management.families.filters import FamilyFilter
 from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.query_management.queries.services import query_update
+from open_schools_platform.ticket_management.tickets.filters import TicketCommentFilter, TicketFilter
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from django.contrib.contenttypes.models import ContentType
 
 from open_schools_platform.ticket_management.tickets.rules import \
     ticket_sender_access, ticket_recipient_access
+from open_schools_platform.ticket_management.tickets.selectors import get_comments, get_tickets
 from open_schools_platform.user_management.users.models import User
 
 
@@ -72,4 +76,33 @@ def create_family_organization_ticket(family: Family, organization: Organization
     return create_ticket(
         sender_model_name="family", sender_id=family.id,
         recipient_model_name="organization", recipient_id=organization.id,
+    )
+
+
+def get_family_organization_ticket_filter():
+    return ComplexMultipleFilter(
+        complex_filter_list=[
+            ComplexFilter(
+                filterset_type=FamilyFilter,
+                selector=get_families,
+                ids_field="sender_ids",
+                prefix="family",
+                include_list=["id", "name", "parent_phone"],
+            ),
+            ComplexFilter(
+                filterset_type=TicketCommentFilter,
+                selector=get_comments,
+                ids_field="last_comment_ids",
+                prefix="ticket_comment",
+                include_list=["id", "value"],
+            ),
+        ],
+        filterset_type=TicketFilter,
+        selector=get_tickets,
+        include_list=["status", "id", "created_at", "recipient_id", "recipient_ct", "sender_ids"],
+        advance_filters_delegate=lambda: {
+            "sender_ct": ContentType.objects.get(model="family"),
+            "recipient_ct": ContentType.objects.get(model="organization"),
+        },
+        is_has_or_search_field=True,
     )

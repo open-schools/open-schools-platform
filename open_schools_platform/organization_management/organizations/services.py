@@ -18,9 +18,6 @@ from open_schools_platform.student_management.students.selectors import get_stud
     get_student_profiles_circle_additional
 from django.contrib.contenttypes.models import ContentType
 
-from open_schools_platform.ticket_management.tickets.filters import TicketFilter, TicketCommentFilter
-from open_schools_platform.ticket_management.tickets.selectors import get_tickets, get_comments
-
 
 def create_organization(name: str, inn: str = "") -> Organization:
     organization = Organization.objects.create(
@@ -140,35 +137,6 @@ def get_organization_students_invitations_filter():
             "recipient_ct": ContentType.objects.get(model="family"),
             "body_ct": ContentType.objects.get(model="student"),
             "additional_ct": ContentType.objects.get(model="studentprofile")
-        },
-        is_has_or_search_field=True,
-    )
-
-
-def get_family_organization_ticket_filter():
-    return ComplexMultipleFilter(
-        complex_filter_list=[
-            ComplexFilter(
-                filterset_type=FamilyFilter,
-                selector=get_families,
-                ids_field="sender_ids",
-                prefix="family",
-                include_list=["id", "name", "parent_phone"],
-            ),
-            ComplexFilter(
-                filterset_type=TicketCommentFilter,
-                selector=get_comments,
-                ids_field="last_comment_ids",
-                prefix="ticket_comment",
-                include_list=["id", "value"],
-            ),
-        ],
-        filterset_type=TicketFilter,
-        selector=get_tickets,
-        include_list=["status", "id", "created_at", "recipient_id", "recipient_ct"],
-        advance_filters_delegate=lambda: {
-            "sender_ct": ContentType.objects.get(model="family"),
-            "recipient_ct": ContentType.objects.get(model="organization"),
         },
         is_has_or_search_field=True,
     )

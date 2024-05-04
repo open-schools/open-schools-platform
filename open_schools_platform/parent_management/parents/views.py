@@ -1,4 +1,3 @@
-from django.contrib.contenttypes.models import ContentType
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
@@ -26,6 +25,7 @@ from open_schools_platform.ticket_management.tickets.paginators import ApiTicket
 from open_schools_platform.ticket_management.tickets.selectors import get_tickets, get_comments
 from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer, \
     GetTicketCommentSerializer
+from open_schools_platform.ticket_management.tickets.services import get_family_organization_ticket_filter
 
 
 class InviteParentQueriesListApi(ApiAuthMixin, APIView):
@@ -83,6 +83,8 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
 class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
     queryset = Ticket.objects.all()
     pagination_class = ApiTicketListPagination
+    complex_filter = get_family_organization_ticket_filter()
+    visible_filter_fields = complex_filter.get_dict_filters()
     serializer_class = GetFamilyOrganizationTicketSerializer
 
     @swagger_auto_schema(
@@ -90,10 +92,11 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
         operation_description="Get all last tickets to organizations of current parent profile.",
     )
     def get(self, request):
-        tickets = get_tickets(
-            filters={'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all()),
-                     'recipient_ct': ContentType.objects.get(model="organization")}
-        )
+        filters = request.GET.dict()
+
+        filters.update({"sender_ids": form_ids_string_from_queryset(request.user.parent_profile.families.all())})
+
+        tickets = self.complex_filter.get_objects(filters)
 
         response = get_paginated_response(
             pagination_class=ApiTicketListPagination,

@@ -30,7 +30,7 @@ from open_schools_platform.organization_management.organizations.serializers imp
     GetAnalyticsSerializer, GetOrganizationSerializer, GetOrganizationCircleListSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
     get_organization_circle_query_filter, \
-    get_organization_students_invitations_filter, get_family_organization_ticket_filter
+    get_organization_students_invitations_filter
 from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter, \
     filter_queryset_by_dates
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
@@ -52,6 +52,7 @@ from open_schools_platform.student_management.students.services import export_st
 from open_schools_platform.ticket_management.tickets.models import Ticket
 from open_schools_platform.ticket_management.tickets.selectors import get_ticket
 from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
+from open_schools_platform.ticket_management.tickets.services import get_family_organization_ticket_filter
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
