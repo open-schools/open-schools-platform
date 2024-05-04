@@ -8,6 +8,7 @@ from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import StudentProfile
+from open_schools_platform.ticket_management.tickets.rules import ticket_sender_access, ticket_recipient_access
 from open_schools_platform.user_management.users.models import User
 
 
@@ -52,4 +53,5 @@ def teacherprofile_access(user: User, query: Query):
 
 
 rules.add_perm("queries.query_access", employee_profile_or_organization_access | student_profile_or_circle_access |
-               parent_profile_or_family_access | circle_or_family_access | teacherprofile_access)
+               parent_profile_or_family_access | circle_or_family_access | teacherprofile_access |
+               ticket_sender_access() | ticket_recipient_access())
