@@ -4,7 +4,9 @@ from open_schools_platform.common.selectors import generic_selector
 from open_schools_platform.common.services import model_update, ComplexMultipleFilter, ComplexFilter
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.errors.exceptions import TicketIsClosed
+from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.selectors import get_organizations
 from open_schools_platform.parent_management.families.filters import FamilyFilter
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.families.selectors import get_families
@@ -97,6 +99,13 @@ def get_family_organization_ticket_filter():
                 ids_field="sender_ids",
                 prefix="family",
                 include_list=["id", "name", "parent_phone"],
+            ),
+            ComplexFilter(
+                filterset_type=OrganizationFilter,
+                selector=get_organizations,
+                ids_field="recipient_ids",
+                prefix="organization",
+                include_list=["id", "name", "inn"],
             ),
             ComplexFilter(
                 filterset_type=TicketCommentFilter,
