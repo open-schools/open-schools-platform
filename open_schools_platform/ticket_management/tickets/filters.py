@@ -10,7 +10,7 @@ def last_comment_id(queryset, name, value):
 
     latest_comment_subquery = TicketComment.objects.filter(
         ticket_id=OuterRef('id'),
-        is_internal_recipient = False
+        is_internal_recipient=False
     ).order_by('-created_at').values('id')[:1]
 
     tickets_with_latest_comment = Ticket.objects.annotate(
