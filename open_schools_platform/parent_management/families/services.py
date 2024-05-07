@@ -41,7 +41,7 @@ def create_family(parent: ParentProfile, name: str = None) -> Family:
 class FamilyQueryHandler(BaseQueryHandler):
     without_body = True
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.DECLINED, Query.Status.SENT, Query.Status.IN_PROGRESS,
-                        Query.Status.CANCELED]
+                        Query.Status.CANCELED, Query.Status.CLOSED]
     available_statuses = {
         (Query.Status.SENT, 'parents.parentprofile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'families.family_access'): (Query.Status.CANCELED,),
