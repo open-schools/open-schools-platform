@@ -12,7 +12,7 @@ from rest_framework.response import Response
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
-from open_schools_platform.organization_management.organizations.serializers import GetOrganizationSerializer
+from open_schools_platform.organization_management.organizations.serializers import GetOrganizationDetailedSerializer
 from open_schools_platform.parent_management.families.selectors import get_families
 from open_schools_platform.parent_management.families.services import get_accessible_organizations
 from open_schools_platform.parent_management.parents.services import get_last_organization_tickets
@@ -46,7 +46,7 @@ class GetAccessibleOrganizationListApi(ApiAuthMixin, ListAPIView):
     queryset = Organization.objects.all()
     filterset_class = OrganizationFilter
     pagination_class = OrganizationApiListPagination
-    serializer_class = GetOrganizationSerializer
+    serializer_class = GetOrganizationDetailedSerializer
 
     @swagger_auto_schema(
         tags=[SwaggerTags.PARENT_MANAGEMENT_PARENTS],
@@ -55,7 +55,7 @@ class GetAccessibleOrganizationListApi(ApiAuthMixin, ListAPIView):
     def get(self, request):
         response = get_paginated_response(
             pagination_class=OrganizationApiListPagination,
-            serializer_class=GetOrganizationSerializer,
+            serializer_class=GetOrganizationDetailedSerializer,
             queryset=get_accessible_organizations(request.user, request.GET.dict()),
             request=request,
             view=self

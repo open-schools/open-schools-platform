@@ -5,6 +5,7 @@ from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.common.utils import form_ids_string_from_queryset, filter_list_from_empty_strings
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.parent_management.families.models import Family
+from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.student_management.students.filters import StudentProfileFilter, StudentFilter, \
     StudentProfileCircleAdditionalFilter
 from open_schools_platform.student_management.students.models import StudentProfile, Student, \
@@ -86,3 +87,20 @@ def get_student_profiles_from_family_with_filters(family: Family, filters: dict)
 
 def get_students_from_circle_with_filters(circle: Circle, filters: dict) -> QuerySet:
     return StudentFilter(filters, circle.students.all()).qs
+
+
+def get_all_related_student_profiles(parent_profile: ParentProfile, filters: dict = None) -> QuerySet[StudentProfile]:
+    filters = filters or {}
+    families = parent_profile.families.all()
+    student_profiles = get_student_profiles(
+        filters=filters | {"families": form_ids_string_from_queryset(families)}) | get_student_profiles(
+        filters=filters | {"id": parent_profile.user.student_profile.id})
+
+    return student_profiles
+
+
+def get_all_related_students(parent_profile: ParentProfile, filters: dict = None) -> QuerySet[Student]:
+    filters = filters or {}
+    student_profiles = get_all_related_student_profiles(parent_profile)
+    students = get_students(filters=filters | {"student_profiles": form_ids_string_from_queryset(student_profiles)})
+    return students
