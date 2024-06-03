@@ -6,6 +6,7 @@ from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.organization_management.circles.filters import CircleFilter
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.services import convert_str_to_point
+from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.user_management.users.models import User
 
 
@@ -33,7 +34,8 @@ def get_circle(*, filters=None, user: User = None, prefetch_related_list=None) -
     return circle
 
 
-def get_circles_by_students(students: QuerySet, filters: dict = None) -> QuerySet:
+def get_circles_by_students(students: QuerySet[Student], filters: dict = None) -> QuerySet[Circle]:
     filters = filters or {}
     return students if len(students) == 0 else \
-        get_circles(filters=filters | {"ids": ','.join(list(map(lambda x: str(x.circle.id), list(students))))})
+        get_circles(filters=filters | {
+            "ids": ','.join(list(map(lambda x: str(x.circle.id if x.circle else ""), list(students))))})

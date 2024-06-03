@@ -5,6 +5,7 @@ from django.db.models import QuerySet
 
 from open_schools_platform.common.services import BaseQueryHandler
 from open_schools_platform.common.utils import form_ids_string_from_queryset
+from open_schools_platform.organization_management.circles.selectors import get_circles_by_students
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.organizations.selectors import get_organizations
 from open_schools_platform.parent_management.families.models import Family
@@ -12,7 +13,8 @@ from open_schools_platform.parent_management.parents.models import ParentProfile
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import StudentProfile, Student
 from open_schools_platform.query_management.queries.selectors import get_queries
-from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families, get_students
+from open_schools_platform.student_management.students.selectors import get_student_profiles_by_families, \
+    get_students, get_all_related_students
 from open_schools_platform.user_management.users.models import User
 
 
@@ -87,14 +89,20 @@ def get_accessible_students(user: User) -> QuerySet[Student]:
 
 
 def get_accessible_organizations(user: User, filters=None) -> typing.List[Organization]:
-    if filters is None:
-        filters = {}
+    filters = filters or {}
 
     accessible_organizations_str = ','.join(
         set(map(lambda x: str(x.circle.organization.id) if x.circle else "", get_accessible_students(user))))
     filters.update({"ids": accessible_organizations_str})
     organizations = get_organizations(filters=filters, empty_filters=True)
-    return list(organizations)
+
+    def add_circle_names_to_qs(org: Organization):
+        org.circle_names = ", ".join(map(lambda circle: str(circle.name),
+                                         get_circles_by_students(get_all_related_students(user.parent_profile),
+                                                                 filters={"organization": org})))
+        return org
+
+    return list(map(add_circle_names_to_qs, (list(organizations))))
 
 
 def get_families_that_interact_with_organization(user: User, organization: Organization) -> typing.List[Family]:
