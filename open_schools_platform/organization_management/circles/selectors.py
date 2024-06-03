@@ -37,4 +37,5 @@ def get_circle(*, filters=None, user: User = None, prefetch_related_list=None) -
 def get_circles_by_students(students: QuerySet[Student], filters: dict = None) -> QuerySet[Circle]:
     filters = filters or {}
     return students if len(students) == 0 else \
-        get_circles(filters=filters | {"ids": ','.join(list(map(lambda x: str(x.circle.id if x.circle else ""), list(students))))})
+        get_circles(filters=filters | {
+            "ids": ','.join(list(map(lambda x: str(x.circle.id if x.circle else ""), list(students))))})
