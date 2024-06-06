@@ -1,3 +1,4 @@
+from django.db.models import QuerySet, Max, Subquery
 from rest_framework.exceptions import PermissionDenied
 
 from open_schools_platform.common.selectors import generic_selector
@@ -123,4 +124,11 @@ def get_family_organization_ticket_filter():
             "recipient_ct": ContentType.objects.get(model="organization"),
         },
         is_has_or_search_field=True,
+    )
+
+
+def get_last_recipient_tickets(qs: QuerySet[Ticket]) -> QuerySet[Ticket]:
+    max_dates = qs.values('recipient_id').annotate(max_created_at=Max('created_at')).values('max_created_at')
+    return qs.filter(
+        created_at__in=Subquery(max_dates)
     )

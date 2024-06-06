@@ -1,5 +1,3 @@
-from django.db.models import QuerySet, Max, Subquery
-
 from open_schools_platform.common.constants import EmailConstants, CommonConstants, NewUserMessageType
 from open_schools_platform.common.services import email_service
 from open_schools_platform.organization_management.circles.models import Circle
@@ -8,7 +6,6 @@ from open_schools_platform.parent_management.families.services import create_fam
 from open_schools_platform.parent_management.parents.models import ParentProfile
 from django.utils.translation import gettext_lazy as _
 
-from open_schools_platform.ticket_management.tickets.models import Ticket
 from open_schools_platform.user_management.users.selectors import get_user
 from open_schools_platform.user_management.users.services import generate_user_password, create_user
 from open_schools_platform.tasks.tasks import send_message_to_new_user_with_celery
@@ -45,10 +42,3 @@ def get_parent_family_or_create_new(parent_profile: ParentProfile):
         family = create_family(parent=parent_profile)
 
     return family
-
-
-def get_last_organization_tickets(qs: QuerySet[Ticket]) -> QuerySet[Ticket]:
-    max_dates = qs.values('recipient_id').annotate(max_created_at=Max('created_at')).values('max_created_at')
-    return qs.filter(
-        created_at__in=Subquery(max_dates)
-    )
