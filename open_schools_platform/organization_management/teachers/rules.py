@@ -21,5 +21,5 @@ def has_access_for_circle(user: User, teacher: Teacher):
     return user.has_perm("circles.circle_access", teacher.circle)
 
 
-rules.add_perm("teachers.teacher_profile_access", is_teacher_profile_owner)
+rules.add_perm("teachers.teacherprofile_access", is_teacher_profile_owner)
 rules.add_perm("teachers.teacher_access", is_teacher_owner | has_access_for_circle)

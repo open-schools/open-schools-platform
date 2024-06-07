@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.models import ContentType
 from drf_yasg import openapi
 from drf_yasg.openapi import Parameter, IN_QUERY, TYPE_STRING, FORMAT_DATE
 from drf_yasg.utils import swagger_auto_schema
@@ -22,14 +23,16 @@ from open_schools_platform.organization_management.employees.services import cre
     get_employee_profile_or_create_new_user, update_invite_employee_body
 from open_schools_platform.organization_management.organizations.filters import OrganizationFilter
 from open_schools_platform.organization_management.organizations.models import Organization
+from open_schools_platform.organization_management.organizations.paginators import OrganizationApiListPagination
 from open_schools_platform.organization_management.organizations.selectors import get_organizations_by_user, \
-    get_organization, get_organization_circle_queries
+    get_organization, get_organization_circle_queries, get_family_organization_tickets
 from open_schools_platform.organization_management.organizations.serializers import CreateOrganizationSerializer, \
     GetAnalyticsSerializer, GetOrganizationSerializer, GetOrganizationCircleListSerializer
 from open_schools_platform.organization_management.organizations.services import create_organization, \
-    get_organization_circle_query_filter, filter_organization_circle_queries_by_dates, \
+    get_organization_circle_query_filter, \
     get_organization_students_invitations_filter
-from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter
+from open_schools_platform.common.services import get_object_by_id_in_field_with_checks, ComplexFilter, \
+    filter_queryset_by_dates
 from open_schools_platform.organization_management.teachers.filters import TeacherFilter
 from open_schools_platform.organization_management.teachers.models import Teacher
 from open_schools_platform.organization_management.teachers.paginators import ApiTeachersListPagination
@@ -46,6 +49,10 @@ from open_schools_platform.student_management.students.models import Student
 from open_schools_platform.student_management.students.selectors import get_students, get_student, get_student_profile
 from open_schools_platform.student_management.students.serializers import GetStudentSerializer
 from open_schools_platform.student_management.students.services import export_students
+from open_schools_platform.ticket_management.tickets.models import Ticket
+from open_schools_platform.ticket_management.tickets.selectors import get_ticket
+from open_schools_platform.ticket_management.tickets.serializers import GetFamilyOrganizationTicketSerializer
+from open_schools_platform.ticket_management.tickets.services import get_family_organization_ticket_filter
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
@@ -296,7 +303,7 @@ class GetAnalytics(ApiAuthMixin, APIView):
         organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
         queries = get_organization_circle_queries(organization)
         if all(arg in dates for arg in ("date_from", "date_to")):
-            queries = filter_organization_circle_queries_by_dates(queries, dates["date_from"], dates["date_to"])
+            queries = filter_queryset_by_dates(queries, dates["date_from"], dates["date_to"])
         return Response({"analytics": GetAnalyticsSerializer(count_queries_by_statuses(queries)).data}, status=200)
 
 
@@ -444,3 +451,83 @@ class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
         )
 
         return response
+
+
+class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
+    queryset = Ticket.objects.all()
+    pagination_class = OrganizationApiListPagination
+    complex_filter = get_family_organization_ticket_filter()
+    visible_filter_fields = complex_filter.get_dict_filters()
+    serializer_class = GetFamilyOrganizationTicketSerializer
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Get all tickets from families of current organizations.",
+    )
+    def get(self, request, organization_id):
+        filters = request.GET.dict()
+
+        get_organization(
+            filters={'id': str(organization_id)},
+            user=request.user,
+            empty_exception=True,
+        )
+
+        filters.update({"recipient_id": organization_id})
+        filters.update({"recipient_ct": ContentType.objects.get(model="organization")})
+
+        tickets = self.complex_filter.get_objects(filters)
+
+        response = get_paginated_response(
+            pagination_class=OrganizationApiListPagination,
+            serializer_class=GetFamilyOrganizationTicketSerializer,
+            queryset=tickets,
+            request=request,
+            view=self
+        )
+        return response
+
+
+class GetTicketsAnalytics(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        operation_description="Get ticket analytics for this organization",
+        manual_parameters=[
+            Parameter('date_from', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+            Parameter('date_to', IN_QUERY, type=TYPE_STRING, format=FORMAT_DATE),
+        ],
+        responses={200: convert_dict_to_serializer({"ticket-analytics": GetAnalyticsSerializer()}),
+                   404: "There is no such organization"}
+    )
+    def get(self, request, organization_id):
+        dates = request.GET.dict()
+        organization = get_organization(filters={"id": str(organization_id)}, empty_exception=True, user=request.user)
+        tickets = get_family_organization_tickets(organization)
+        if all(arg in dates for arg in ("date_from", "date_to")):
+            tickets = filter_queryset_by_dates(tickets, dates["date_from"], dates["date_to"])
+        return Response({"ticket-analytics": GetAnalyticsSerializer(count_queries_by_statuses(tickets)).data},
+                        status=200)
+
+
+class GetFamilyOrganizationTicketApi(ApiAuthMixin, APIView):
+    @swagger_auto_schema(
+        operation_description="Get ticket comment",
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
+        responses={200: convert_dict_to_serializer({"ticket": GetFamilyOrganizationTicketSerializer()}),
+                   404: "No such ticket comment"}
+    )
+    def get(self, request, organization_id, ticket_id):
+        get_organization(
+            filters={"id": organization_id},
+            empty_exception=True,
+            user=request.user
+        )
+        ticket = get_ticket(
+            filters={"id": ticket_id},
+            empty_exception=True,
+            user=request.user
+        )
+
+        return Response(
+            {"ticket": GetFamilyOrganizationTicketSerializer(ticket, context={'request': request}).data},
+            status=200)

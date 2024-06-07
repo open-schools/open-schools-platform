@@ -21,6 +21,12 @@ class WrongStatusChange(APIException):
     default_code = 'wrong_status_change'
 
 
+class TicketIsClosed(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('Failed to perform this action because ticket is closed.')
+    default_code = 'ticket_is_closed'
+
+
 class EmailServiceUnavailable(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _('Email service is currently unavailable.')

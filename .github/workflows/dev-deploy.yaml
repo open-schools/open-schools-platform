@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    uses: LamArt/open-schools-platform/.github/workflows/django.yml@dev
+    uses: open-schools/open-schools-platform/.github/workflows/django.yml@dev
     secrets:
       GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
       SMS_API_KEY: ${{ secrets.SMS_API_KEY }}

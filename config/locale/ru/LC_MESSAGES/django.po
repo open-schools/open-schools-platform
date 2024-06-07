@@ -2,7 +2,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: open-schools-platform\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-08-16 15:21+0500\n"
+"POT-Creation-Date: 2024-05-04 15:50+0500\n"
 "Language: ru\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -24,14 +24,26 @@ msgid "Failed to set this status in the current context."
 msgstr "Невозможно установить этот статус в данном контексте"
 
 #: .\open_schools_platform\errors\exceptions.py:26
+#, fuzzy
+#| msgid "Failed to set this status in the current context."
+msgid "Failed to perform this action because ticket is closed."
+msgstr "Невозможно выполнить это действие, так как тикет закрыт"
+
+#: .\open_schools_platform\errors\exceptions.py:32
 msgid "Email service is currently unavailable."
 msgstr "Почтовый сервис не доступен"
 
-#: .\open_schools_platform\errors\exceptions.py:32
+#: .\open_schools_platform\errors\exceptions.py:38
+#, fuzzy
+#| msgid "Email service is currently unavailable."
+msgid "SMS service is currently unavailable."
+msgstr "Почтовый сервис не доступен"
+
+#: .\open_schools_platform\errors\exceptions.py:44
 msgid "This object already exists"
 msgstr "Этот объект уже существует"
 
-#: .\open_schools_platform\errors\exceptions.py:38
+#: .\open_schools_platform\errors\exceptions.py:50
 msgid "Server cannot handle address"
 msgstr "Сервер не может обработать адрес"
 
@@ -44,7 +56,7 @@ msgstr "имя организации"
 msgid "address"
 msgstr "адрес"
 
-#: .\open_schools_platform\organization_management\circles\constants.py:12
+#: .\open_schools_platform\organization_management\circles\constants.py:13
 msgid "Lesson reminder."
 msgstr "Напоминание об уроке"
 
@@ -56,7 +68,7 @@ msgstr "номер телефона профиля сотрудника"
 msgid "position"
 msgstr "позиция"
 
-#: .\open_schools_platform\organization_management\employees\services.py:49
+#: .\open_schools_platform\organization_management\employees\services.py:48
 msgid "Invite to organization"
 msgstr "Приглашение в организацию"
 
@@ -93,27 +105,31 @@ msgstr "Вы были приглашены в семью!"
 msgid "The {family} family invites you"
 msgstr "Семья {family} приглашает вас к себе"
 
-#: .\open_schools_platform\parent_management\parents\services.py:26
+#: .\open_schools_platform\parent_management\parents\services.py:29
 msgid "Circle invitation"
 msgstr "Приглашение в кружок"
 
-#: .\open_schools_platform\parent_management\parents\services.py:27
+#: .\open_schools_platform\parent_management\parents\services.py:30
 msgid "Parent"
 msgstr "Родитель"
 
 #: .\open_schools_platform\query_management\queries\admin.py:10
+#: .\open_schools_platform\ticket_management\tickets\admin.py:10
 msgid "sender CT model"
 msgstr "sender CT model"
 
 #: .\open_schools_platform\query_management\queries\admin.py:21
+#: .\open_schools_platform\ticket_management\tickets\admin.py:21
 msgid "recipient CT model"
 msgstr "recipient CT model"
 
 #: .\open_schools_platform\query_management\queries\admin.py:32
+#: .\open_schools_platform\ticket_management\tickets\admin.py:32
 msgid "sender UUID"
 msgstr "UUID отправителя"
 
 #: .\open_schools_platform\query_management\queries\admin.py:43
+#: .\open_schools_platform\ticket_management\tickets\admin.py:43
 msgid "recipient UUID"
 msgstr "UUID получателя"
 
@@ -121,11 +137,11 @@ msgstr "UUID получателя"
 msgid "student profile name"
 msgstr "имя профиля студента"
 
-#: .\open_schools_platform\tasks\tasks.py:14
+#: .\open_schools_platform\tasks\tasks.py:23
 msgid "Open Schools"
 msgstr "Открытые Школы"
 
-#: .\open_schools_platform\tasks\tasks.py:15
+#: .\open_schools_platform\tasks\tasks.py:24
 msgid "Dear user"
 msgstr "Дорогой пользователь"
 
@@ -153,7 +169,13 @@ msgstr "Кружок <b> %(circle_name)s </b> приглашает вас на �
 msgid "Login and password to enter your personal account on"
 msgstr "Логин и пароль для входа в личный кабинет на"
 
-#: .\templates\new_user_circle_invite_mail_form.html:14
+#: .\templates\new_user_circle_invite_mail_form.html:13
+#: .\templates\new_user_invite_mail_form.html:13
+#, python-format
+msgid "<a href=\"https://%(dom)s\">%(dom)s:</a>"
+msgstr ""
+
+#: .\templates\new_user_circle_invite_mail_form.html:15
 #: .\templates\new_user_invite_mail_form.html:15
 #, python-format
 msgid "Your login: %(lgn)s"
@@ -175,7 +197,8 @@ msgstr "С уважением,<br> \"Открытые Школы\""
 msgid ""
 "The <b>%(org_name)s</b> organization invites you to join us as an employee."
 msgstr ""
-"Организация <b> %(org_name)s </b> приглашает вас к себе в качестве сотрудника. "
+"Организация <b> %(org_name)s </b> приглашает вас к себе в качестве "
+"сотрудника. "
 
 #: .\templates\templates\input_filter.html:3
 #, python-format

@@ -38,6 +38,7 @@ class GetEmployeeSerializer(serializers.ModelSerializer):
     organization = GetOrganizationSerializer(read_only=True)
     phone = PhoneNumberField()
     email = serializers.EmailField()
+
     class Meta:
         model = Employee
         fields = ("id", "name", "organization", "position", 'phone', 'email')
@@ -45,7 +46,7 @@ class GetEmployeeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         instance.phone = instance.employee_profile.user.phone
-        instance.email  = instance.employee_profile.email
+        instance.email = instance.employee_profile.email
         return super().to_representation(instance)
 
 

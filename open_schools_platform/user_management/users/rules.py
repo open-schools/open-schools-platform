@@ -10,4 +10,4 @@ def is_that_user(user: User, retrieving_user: User):
 
 
 rules.add_perm("users.user_access", is_that_user)
-rules.add_perm("users.creation_token_access", always_deny)
+rules.add_perm("users.creationtoken_access", always_deny)

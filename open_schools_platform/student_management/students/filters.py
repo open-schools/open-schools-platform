@@ -53,12 +53,13 @@ class StudentFilter(BaseFilterSet):
     or_search = CharFilter(field_name="or_search", method="OR")
     parent_phone = CharFilter(field_name="parent_phone", method=student_parent_phone_filter)
     parent_name = CharFilter(field_name="parent_name", method=student_parent_name_filter)
+    student_profiles = UUIDInFilter(field_name="student_profile", lookup_expr="in")
 
     class Meta(MetaCharIContainsMixin):
         model = Student
         fields = ('id', 'name', 'circle', 'student_profile', 'student_profile__phone',
                   'circle__name', 'student_profile__name', "circle__organization",
-                  "parent_phone", "parent_name")
+                  "parent_phone", "parent_name", "student_profiles")
 
 
 class StudentProfileCircleAdditionalFilter(BaseFilterSet):

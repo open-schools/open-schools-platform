@@ -1,6 +1,7 @@
 from typing import List, Dict, Any, Tuple, Callable, Type
 
 import django_filters
+from django.db.models import QuerySet
 from django_filters import Filter, CharFilter
 
 from rest_framework.exceptions import ValidationError
@@ -9,7 +10,8 @@ from config.settings.email import EMAIL_TRANSPORT
 from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
 from open_schools_platform.common.types import DjangoModelType
-from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, form_ids_string_from_queryset
+from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, \
+    form_ids_string_from_queryset, convert_str_date_to_datetime
 from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
     ApplicationError
 from open_schools_platform.query_management.queries.models import Query
@@ -313,8 +315,8 @@ class ComplexMultipleFilter(ComplexFilter):
 
     def _union_condition(self, crossed_filters):
         return self.is_has_or_search_field and \
-               BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
-               len(crossed_filters.keys()) == 1
+            BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
+            len(crossed_filters.keys()) == 1
 
     def get_objects(self, filters, empty_filters=False):
         if self.is_has_or_search_field and \
@@ -372,3 +374,8 @@ class ComplexMultipleFilter(ComplexFilter):
 
         return {key if not self.prefix else self.prefix + "__" + key: value
                 for key, value in dict_filters.items()}
+
+
+def filter_queryset_by_dates(queryset: QuerySet, date_from, date_to):
+    return queryset.filter(created_at__range=[convert_str_date_to_datetime(date_from, "00:00:00"),
+                                              convert_str_date_to_datetime(date_to, "23:59:59")])

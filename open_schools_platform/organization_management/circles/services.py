@@ -73,7 +73,7 @@ def create_circle(name: str, organization: Organization, address: str, descripti
 class CircleQueryHandler(BaseQueryHandler):
     allowed_statuses = [Query.Status.ACCEPTED, Query.Status.SENT, Query.Status.CANCELED, Query.Status.DECLINED]
     available_statuses: Dict[Tuple[str, str], Tuple] = {
-        (Query.Status.SENT, 'teachers.teacher_profile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
+        (Query.Status.SENT, 'teachers.teacherprofile_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'families.family_access'): (Query.Status.DECLINED, Query.Status.ACCEPTED),
         (Query.Status.SENT, 'circles.circle_access'): (Query.Status.CANCELED,),
     }

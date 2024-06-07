@@ -17,6 +17,7 @@ class Query(BaseModel):
         IN_PROGRESS = "IN_PROGRESS"
         DECLINED = "DECLINED"
         CANCELED = "CANCELED"
+        CLOSED = "CLOSED"
 
     id = models.UUIDField(default=uuid.uuid4, primary_key=True)
 

@@ -6,7 +6,8 @@ from open_schools_platform.organization_management.organizations.views import Or
     OrganizationEmployeeQueriesListApi, OrganizationCircleQueriesListApi, OrganizationStudentsListApi, \
     OrganizationDeleteApi, GetStudentApi, OrganizationStudentProfilesExportApi, GetAnalytics, \
     OrganizationTeachersListApi, GetTeacherApi, OrganizationStudentProfileQueriesApi, OrganizationInvitedStudentsApi, \
-    OrganizationCirclesListApi, OrganizationCirclesApi
+    OrganizationCirclesListApi, OrganizationCirclesApi, FamilyOrganizationTicketsListApi, GetTicketsAnalytics, \
+    GetFamilyOrganizationTicketApi
 
 urlpatterns = [
     path('', MultipleViewManager({'get': OrganizationListApi,
@@ -23,10 +24,15 @@ urlpatterns = [
     path('/<uuid:organization_id>/students/export', OrganizationStudentProfilesExportApi.as_view(),
          name='export-organization-students'),
     path('/<uuid:organization_id>/analytics', GetAnalytics.as_view(), name='analytics'),
+    path('/<uuid:organization_id>/ticket-analytics', GetTicketsAnalytics.as_view(), name='ticket-analytics'),
     path('/<uuid:organization>/student-profiles/<uuid:student_profile>/queries',
          OrganizationStudentProfileQueriesApi.as_view(), name='queries-organization-student-profile'),
     path('/<uuid:organization_id>/teachers', OrganizationTeachersListApi.as_view(), name='teachers-list'),
     path('/<uuid:organization_id>/circles', OrganizationCirclesListApi.as_view(), name='organization-circles-list'),
+    path('/<uuid:organization_id>/family-tickets', FamilyOrganizationTicketsListApi.as_view(),
+         name='organization-family-tickets-list'),
+    path('/<uuid:organization_id>/family-tickets/<uuid:ticket_id>', GetFamilyOrganizationTicketApi.as_view(),
+         name='organization-family-ticket'),
     path('/<uuid:organization_id>/circles/<uuid:circle_id>',
          OrganizationCirclesApi.as_view(), name='organization-circle'),
     path('/teachers/<uuid:teacher_id>', GetTeacherApi.as_view(), name='get-teacher')

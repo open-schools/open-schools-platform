@@ -41,6 +41,10 @@ history_management_urls = [
     path('history', include(('open_schools_platform.history_management.urls', 'history'))),
 ]
 
+ticket_management_urls = [
+    path('ticket', include(('open_schools_platform.ticket_management.tickets.urls', 'ticket'))),
+]
+
 urlpatterns = [
     path('user-management/', include((user_management_urls, 'user-management'))),
     path('organization-management/', include((organization_management_urls, 'organization-management'))),
@@ -48,7 +52,8 @@ urlpatterns = [
     path('parent-management/', include((parent_management_urls, 'parent-management'))),
     path('students-management/', include((students_management_urls, 'students-management'))),
     path('photos-management/', include((photos_management_urls, 'photo-management'))),
-    path('history-management/', include((history_management_urls, 'history-management')))
+    path('history-management/', include((history_management_urls, 'history-management'))),
+    path('ticket-management/', include((ticket_management_urls, 'ticket-management')))
 ]
 
 if settings.SWAGGER_ENABLED:

@@ -10,7 +10,7 @@ def predicate_input_type_check(function):
             return False
 
         for i in range(len(args)):
-            if type(args[i]) != param_list[i][1].annotation:
+            if not isinstance(args[i], param_list[i][1].annotation):
                 return False
 
         for kwarg in kwargs.items():

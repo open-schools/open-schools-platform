@@ -12,3 +12,4 @@ class SwaggerTags:
     QUERY_MANAGEMENT_QUERIES = "Query management. Queries"
     PHOTO_MANAGEMENT_PHOTOS = "Photos management. Photos"
     HISTORY_MANAGEMENT = "History management"
+    TICKET_MANAGEMENT_TICKET = "Ticket management. Tickets"

@@ -11,14 +11,26 @@ msgid "Failed to set this status in the current context."
 msgstr "Failed to set this status in the current context."
 
 #: .\open_schools_platform\errors\exceptions.py:26
+#, fuzzy
+#| msgid "Failed to set this status in the current context."
+msgid "Failed to perform this action because ticket is closed."
+msgstr "Failed to perform this action because ticket is closed."
+
+#: .\open_schools_platform\errors\exceptions.py:32
 msgid "Email service is currently unavailable."
 msgstr "Email service is currently unavailable."
 
-#: .\open_schools_platform\errors\exceptions.py:32
+#: .\open_schools_platform\errors\exceptions.py:38
+#, fuzzy
+#| msgid "Email service is currently unavailable."
+msgid "SMS service is currently unavailable."
+msgstr "Email service is currently unavailable."
+
+#: .\open_schools_platform\errors\exceptions.py:44
 msgid "This object already exists"
 msgstr "This object already exists"
 
-#: .\open_schools_platform\errors\exceptions.py:38
+#: .\open_schools_platform\errors\exceptions.py:50
 msgid "Server cannot handle address"
 msgstr "Server cannot handle address"
 
@@ -31,7 +43,7 @@ msgstr "organization name"
 msgid "address"
 msgstr "address"
 
-#: .\open_schools_platform\organization_management\circles\constants.py:12
+#: .\open_schools_platform\organization_management\circles\constants.py:13
 msgid "Lesson reminder."
 msgstr "Lesson reminder."
 
@@ -43,7 +55,7 @@ msgstr "employee profile phone"
 msgid "position"
 msgstr "position"
 
-#: .\open_schools_platform\organization_management\employees\services.py:49
+#: .\open_schools_platform\organization_management\employees\services.py:48
 msgid "Invite to organization"
 msgstr "Invite to organization"
 
@@ -51,11 +63,12 @@ msgstr "Invite to organization"
 msgid "INN"
 msgstr "INN"
 
-#: .\open_schools_platform\organization_management\organizations\constants.py:9
+#: .\open_schools_platform\organization_management\organizations\constants.py:10
+#, python-brace-format
 msgid "Phone: +{phone}\n"
 msgstr "Phone: +{phone}\n"
 
-#: .\open_schools_platform\organization_management\organizations\constants.py:9
+#: .\open_schools_platform\organization_management\organizations\constants.py:10
 #, fuzzy, python-brace-format
 #| msgid "Your password: %(pswd)s"
 msgid "Password: {pwd}\n"
@@ -70,36 +83,40 @@ msgstr "circle name"
 msgid "teacher profile name"
 msgstr "teacher profile name"
 
-#: .\open_schools_platform\parent_management\families\constants.py:4
+#: .\open_schools_platform\parent_management\families\constants.py:5
 msgid "You have been invited into the family!"
 msgstr "You have been invited into the family!"
 
-#: .\open_schools_platform\parent_management\families\constants.py:8
+#: .\open_schools_platform\parent_management\families\constants.py:9
 #, python-brace-format
 msgid "The {family} family invites you"
 msgstr "The {family} family invites you"
 
-#: .\open_schools_platform\parent_management\parents\services.py:26
+#: .\open_schools_platform\parent_management\parents\services.py:29
 msgid "Circle invitation"
 msgstr "Circle invitation"
 
-#: .\open_schools_platform\parent_management\parents\services.py:27
+#: .\open_schools_platform\parent_management\parents\services.py:30
 msgid "Parent"
 msgstr "Parent"
 
 #: .\open_schools_platform\query_management\queries\admin.py:10
+#: .\open_schools_platform\ticket_management\tickets\admin.py:10
 msgid "sender CT model"
 msgstr "sender CT model"
 
 #: .\open_schools_platform\query_management\queries\admin.py:21
+#: .\open_schools_platform\ticket_management\tickets\admin.py:21
 msgid "recipient CT model"
 msgstr "recipient CT model"
 
 #: .\open_schools_platform\query_management\queries\admin.py:32
+#: .\open_schools_platform\ticket_management\tickets\admin.py:32
 msgid "sender UUID"
 msgstr "sender UUID"
 
 #: .\open_schools_platform\query_management\queries\admin.py:43
+#: .\open_schools_platform\ticket_management\tickets\admin.py:43
 msgid "recipient UUID"
 msgstr "recipient UUID"
 
@@ -107,11 +124,11 @@ msgstr "recipient UUID"
 msgid "student profile name"
 msgstr "student profile name"
 
-#: .\open_schools_platform\tasks\tasks.py:14
+#: .\open_schools_platform\tasks\tasks.py:23
 msgid "Open Schools"
 msgstr "Open Schools"
 
-#: .\open_schools_platform\tasks\tasks.py:15
+#: .\open_schools_platform\tasks\tasks.py:24
 msgid "Dear user"
 msgstr "Dear user"
 
@@ -123,35 +140,41 @@ msgstr "No such user."
 msgid "Incorrect password."
 msgstr "Incorrect password."
 
-#: .\templates\new_user_circle_invite_mail_form.html:7
+#: .\templates\new_user_circle_invite_mail_form.html:8
 #: .\templates\new_user_invite_mail_form.html:8
 #, python-format
 msgid "Hello, %(username)s!"
 msgstr "Hello, %(username)s!"
 
-#: .\templates\new_user_circle_invite_mail_form.html:9
+#: .\templates\new_user_circle_invite_mail_form.html:10
 #, python-format
 msgid "The <b>%(circle_name)s</b> circle invites you to its classes."
 msgstr "The <b> %(circle_name)s </b> circle invites you to its classes."
 
-#: .\templates\new_user_circle_invite_mail_form.html:11
+#: .\templates\new_user_circle_invite_mail_form.html:12
 #: .\templates\new_user_invite_mail_form.html:12
 msgid "Login and password to enter your personal account on"
 msgstr "Login and password to enter your personal account on"
 
-#: .\templates\new_user_circle_invite_mail_form.html:14
+#: .\templates\new_user_circle_invite_mail_form.html:13
+#: .\templates\new_user_invite_mail_form.html:13
+#, python-format
+msgid "<a href=\"https://%(dom)s\">%(dom)s:</a>"
+msgstr ""
+
+#: .\templates\new_user_circle_invite_mail_form.html:15
 #: .\templates\new_user_invite_mail_form.html:15
 #, python-format
 msgid "Your login: %(lgn)s"
 msgstr "Your login: %(lgn)s"
 
-#: .\templates\new_user_circle_invite_mail_form.html:16
+#: .\templates\new_user_circle_invite_mail_form.html:17
 #: .\templates\new_user_invite_mail_form.html:17
 #, python-format
 msgid "Your password: %(pswd)s"
 msgstr "Your password: %(pswd)s"
 
-#: .\templates\new_user_circle_invite_mail_form.html:18
+#: .\templates\new_user_circle_invite_mail_form.html:19
 #: .\templates\new_user_invite_mail_form.html:19
 msgid "Sincerely,<br> \"Open Schools\""
 msgstr "Sincerely,<br> \"Open Schools\""

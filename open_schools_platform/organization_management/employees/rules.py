@@ -18,4 +18,4 @@ def is_employee_profile_owner(user: User, employee_profile: EmployeeProfile):
 
 
 rules.add_perm("employees.employee_access", has_common_organization)
-rules.add_perm("employees.employee_profile_access", is_employee_profile_owner)
+rules.add_perm("employees.employeeprofile_access", is_employee_profile_owner)
