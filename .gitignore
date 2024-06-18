@@ -146,7 +146,6 @@ media
 
 # User-specific stuff
 .idea/
-!.idea/workspace.xml
 
 # File-based project format
 *.iws
