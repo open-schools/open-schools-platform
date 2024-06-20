@@ -1,6 +1,6 @@
 import rules
 
-from open_schools_platform.common.rules import predicate_input_type_check, has_related_organization
+from open_schools_platform.common.rules import predicate_input_type_check
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.ticket_management.tickets.models import TicketComment
 from open_schools_platform.user_management.users.models import User
@@ -19,7 +19,7 @@ def ticket_recipient_access():
     @rules.predicate
     @predicate_input_type_check
     def organization_access(user: User, ticket: Query):
-        return has_related_organization(user, ticket.recipient)
+        return user.has_perm("orgniazations.organization_access", ticket.recipient)
 
     return organization_access
 
