@@ -6,52 +6,26 @@ from open_schools_platform.organization_management.organizations.models import O
 from open_schools_platform.organization_management.teachers.models import TeacherProfile
 from open_schools_platform.parent_management.families.models import Family
 from open_schools_platform.parent_management.parents.models import ParentProfile
-from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.student_management.students.models import StudentProfile
 from open_schools_platform.ticket_management.tickets.rules import ticket_sender_access, ticket_recipient_access
-from open_schools_platform.user_management.users.models import User
+
+access_name = {
+    Organization: 'organizations.organization_access',
+    EmployeeProfile: 'employees.employeeprofile_access',
+    StudentProfile: 'students.studentprofile_access',
+    Circle: 'circles.circle_access',
+    Family: 'families.family_access',
+    ParentProfile: 'parents.parentprofile_access',
+    TeacherProfile: 'teachers.teacherprofile_access'
+}
 
 
 @rules.predicate
-def employee_profile_or_organization_access(user: User, query: Query):
-    if type(query.sender) == Organization and type(query.recipient) == EmployeeProfile:
-        return user.has_perm("organizations.organization_access", query.sender) or \
-               user.has_perm("employees.employeeprofile_access", query.recipient)
-    return False
+def has_sender_or_recipient_access(user, query):
+    sender_access_name = access_name[type(query.sender)]
+    recipient_access_name = access_name[type(query.recipient)]
+    return user.has_perm(sender_access_name, query.sender) or user.has_perm(recipient_access_name, query.recipient)
 
 
-@rules.predicate
-def student_profile_or_circle_access(user: User, query: Query):
-    if type(query.sender) == StudentProfile and type(query.recipient) == Circle:
-        return user.has_perm("students.studentprofile_access", query.sender) or \
-               user.has_perm("circles.circle_access", query.recipient)
-    return False
-
-
-@rules.predicate
-def parent_profile_or_family_access(user: User, query: Query):
-    if type(query.sender) == Family and type(query.recipient) == ParentProfile:
-        return user.has_perm("parents.parentprofile_access", query.recipient) or \
-               user.has_perm("families.family_access", query.sender)
-    return False
-
-
-@rules.predicate
-def circle_or_family_access(user: User, query: Query):
-    if type(query.sender) == Circle and type(query.recipient) == Family:
-        return user.has_perm("families.family_access", query.recipient) or \
-               user.has_perm("circles.circle_access", query.sender)
-    return False
-
-
-@rules.predicate
-def teacherprofile_access(user: User, query: Query):
-    if type(query.sender) == Circle and type(query.recipient) == TeacherProfile:
-        return user.has_perm("teachers.teacherprofile_access", query.recipient) or \
-               user.has_perm("circles.circle_access", query.sender)
-    return False
-
-
-rules.add_perm("queries.query_access", employee_profile_or_organization_access | student_profile_or_circle_access |
-               parent_profile_or_family_access | circle_or_family_access | teacherprofile_access |
+rules.add_perm("queries.query_access", has_sender_or_recipient_access |
                ticket_sender_access() | ticket_recipient_access())
