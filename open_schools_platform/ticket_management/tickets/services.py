@@ -56,8 +56,10 @@ def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: Use
 def update_ticket_comment(*, ticket_comment: TicketComment, data, user: User = None) -> TicketComment:
     is_seen = data.get('is_seen', None)
 
-    if is_seen and (ticket_comment.is_sender and not user.has_perm("tickets.recipient_access", ticket_comment.ticket) or
-                    not ticket_comment.is_sender and not user.has_perm("tickets.sender_access", ticket_comment.ticket)):
+    if user and is_seen and (ticket_comment.is_sender
+                             and not user.has_perm("tickets.recipient_access", ticket_comment.ticket)
+                             or not ticket_comment.is_sender
+                             and not user.has_perm("tickets.sender_access", ticket_comment.ticket)):
         raise PermissionDenied("You can change is_seen, it can do only your interlocutor.")
 
     non_side_effect_fields = ['is_seen']
