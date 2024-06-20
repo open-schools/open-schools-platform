@@ -41,7 +41,9 @@ def has_access_for_circle(user: User, student: Student):
 def has_access_to_invite(user: User, student: Student):
     invites = Query.objects.filter(body_id__in=(student.id,))
     for invite in invites:
-        return user.has_perm("queries.query_access", invite)
+        if user.has_perm("queries.query_access", invite):
+            return True
+    return False
 
 
 rules.add_perm("students.studentprofile_access", is_student_profile_owner | has_family_with_this_student_profile)

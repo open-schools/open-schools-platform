@@ -17,8 +17,6 @@ from open_schools_platform.ticket_management.tickets.filters import TicketCommen
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
 from django.contrib.contenttypes.models import ContentType
 
-from open_schools_platform.ticket_management.tickets.rules import \
-    ticket_sender_access, ticket_recipient_access
 from open_schools_platform.ticket_management.tickets.selectors import get_comments, get_tickets
 from open_schools_platform.user_management.users.models import User
 
@@ -32,8 +30,8 @@ def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: Use
     if not is_ticket_available_to_change(ticket):
         raise TicketIsClosed()
 
-    if (is_sender and not ticket_sender_access()(user, ticket) or
-            not is_sender and not ticket_recipient_access()(user, ticket)):
+    if (is_sender and not user.has_perm("tickets.sender_access", ticket) or
+            not is_sender and not user.has_perm("tickets.recipient_access", ticket)):
         raise PermissionDenied("You can't create a comment ticket with that is_sender value.")
 
     if is_sender and is_internal_recipient:
@@ -58,8 +56,8 @@ def create_ticket_comment(value: str, is_sender: bool, ticket: Ticket, user: Use
 def update_ticket_comment(*, ticket_comment: TicketComment, data, user: User = None) -> TicketComment:
     is_seen = data.get('is_seen', None)
 
-    if is_seen and (ticket_comment.is_sender and not ticket_recipient_access()(user, ticket_comment.ticket) or
-                    not ticket_comment.is_sender and not ticket_sender_access()(user, ticket_comment.ticket)):
+    if is_seen and (ticket_comment.is_sender and not user.has_perm("tickets.recipient_access", ticket_comment.ticket) or
+                    not ticket_comment.is_sender and not user.has_perm("tickets.sender_access", ticket_comment.ticket)):
         raise PermissionDenied("You can change is_seen, it can do only your interlocutor.")
 
     non_side_effect_fields = ['is_seen']

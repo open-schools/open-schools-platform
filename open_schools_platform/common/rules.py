@@ -26,7 +26,7 @@ def predicate_input_type_check(function):
 
 def has_related_organization(user, organization):
     employees = Employee.objects.filter(employee_profile=user.employee_profile)
-    if len(employees) == 0:
+    if not employees:
         return False
 
     organizations_ids = list(map(lambda e: e.organization.id, employees))

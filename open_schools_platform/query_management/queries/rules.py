@@ -21,11 +21,20 @@ access_name = {
 
 
 @rules.predicate
-def has_sender_or_recipient_access(user, query):
-    sender_access_name = access_name[type(query.sender)]
-    recipient_access_name = access_name[type(query.recipient)]
-    return user.has_perm(sender_access_name, query.sender) or user.has_perm(recipient_access_name, query.recipient)
+def has_query_sender_access(user, query):
+    sender_access_name = access_name.get(type(query.sender))
+    if sender_access_name:
+        return user.has_perm(sender_access_name, query.sender)
+    return False
 
 
-rules.add_perm("queries.query_access", has_sender_or_recipient_access |
+@rules.predicate
+def has_query_recipient_access(user, query):
+    recipient_access_name = access_name.get(type(query.recipient))
+    if recipient_access_name:
+        return user.has_perm(recipient_access_name, query.recipient)
+    return False
+
+
+rules.add_perm("queries.query_access", has_query_sender_access | has_query_recipient_access |
                ticket_sender_access() | ticket_recipient_access())

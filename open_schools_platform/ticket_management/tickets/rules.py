@@ -31,4 +31,6 @@ def ticket_comment_profile_access(user: User, ticket_comment: TicketComment):
 
 
 rules.add_perm("tickets.ticket_access", ticket_sender_access() | ticket_recipient_access())
+rules.add_perm("tickets.sender_access", ticket_sender_access())
+rules.add_perm("tickets.recipient_access", ticket_recipient_access())
 rules.add_perm("tickets.ticketcomment_access", ticket_comment_profile_access)
