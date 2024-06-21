@@ -42,4 +42,4 @@ def has_query_recipient_access(user, query):
 
 
 rules.add_perm("queries.query_access", has_query_sender_access | has_query_recipient_access |
-               ticket_sender_access() | ticket_recipient_access())
+               ticket_sender_access | ticket_recipient_access)
