@@ -1,6 +1,9 @@
 from inspect import signature, Parameter
 from typing import Tuple
 
+from open_schools_platform.organization_management.employees.models import Employee
+from open_schools_platform.organization_management.organizations.models import Organization
+
 
 def predicate_input_type_check(function):
     def wrapper(*args, **kwargs):
@@ -19,3 +22,13 @@ def predicate_input_type_check(function):
         return function(*args, **kwargs)
 
     return wrapper
+
+
+def has_related_organization(user, organization):
+    employees = Employee.objects.filter(employee_profile=user.employee_profile)
+    if not employees:
+        return False
+
+    organizations_ids = list(map(lambda e: e.organization.id, employees))
+    organizations = Organization.objects.filter(id__in=organizations_ids)
+    return organization in organizations

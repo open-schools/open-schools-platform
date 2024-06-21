@@ -4,7 +4,6 @@ from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.common.selectors import selector_factory
 from open_schools_platform.ticket_management.tickets.filters import TicketFilter, TicketCommentFilter
 from open_schools_platform.ticket_management.tickets.models import Ticket, TicketComment
-from open_schools_platform.ticket_management.tickets.rules import ticket_recipient_access
 from open_schools_platform.user_management.users.models import User
 
 
@@ -55,6 +54,6 @@ def get_comment(*, filters=None, user: User = None, prefetch_related_list=None) 
 
 
 def get_ticket_comments_with_user(*, ticket: Ticket, user: User):
-    if ticket_recipient_access()(user, ticket):
+    if user.has_perm("tickets.recipient_access", ticket):
         return get_comments(filters={'ticket': ticket})
     return get_comments(filters={'ticket': ticket, 'is_internal_recipient': False})
