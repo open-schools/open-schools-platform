@@ -15,7 +15,7 @@ def ticket_sender_access(user: User, ticket: Query):
 @rules.predicate
 @predicate_input_type_check
 def ticket_recipient_access(user: User, ticket: Query):
-    return user.has_perm("orgniazations.organization_access", ticket.recipient)
+    return user.has_perm("organizations.organization_access", ticket.recipient)
 
 
 @rules.predicate
