@@ -4,6 +4,7 @@ import requests
 from sendbox_sdk.api import SendBoxApi
 
 from open_schools_platform.common.constants import EmailConstants
+from django.core.mail import send_mail
 
 
 class BaseEmailService(ABC):
@@ -56,3 +57,18 @@ class VKEmailService(BaseEmailService):
         sdk = SendBoxApi(self.vk_email_id, self.vk_api_key)
         response = sdk.send_html_email(subject, from_email, from_name, to_email, to_name, html, text)
         return response
+
+
+class LocalEmailService(BaseEmailService):
+    def send_html_email(self, subject: str,
+                        from_email: str, from_name: str,
+                        to_email: str, to_name: str,
+                        html: str, text: str = None):
+        send_mail(
+            subject,
+            html,
+            from_email,
+            [to_email],
+            fail_silently=False
+        )
+

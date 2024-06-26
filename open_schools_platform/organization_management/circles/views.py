@@ -2,6 +2,7 @@ from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.exceptions import ValidationError, PermissionDenied
 from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.parsers import MultiPartParser
 from rest_framework.views import APIView
 
 from open_schools_platform.api.pagination import get_paginated_response
@@ -13,9 +14,10 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer, \
+    CreateCircleInviteStudentByXlsxSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
-    is_organization_related_to_student_profile, generate_ical, update_circle
+    is_organization_related_to_student_profile, generate_ical, update_circle, create_invites_by_xlsx
 from open_schools_platform.organization_management.organizations.selectors import get_organization
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
@@ -38,6 +40,22 @@ from ...student_management.students.selectors import get_students, get_students_
 from ...student_management.students.serializers import GetStudentSerializer
 from ...student_management.students.services import create_student, get_student_profile_by_family_or_create_new, \
     export_students
+
+
+def create_invites_for_students(circle_id, user, data):
+    circle = get_circle(filters={"id": circle_id}, user=user, empty_exception=True)
+    parent_phone = data["parent_phone"]
+    student_phone = data["student_phone"]
+    email = data["email"]
+    name = data["body"]["name"]
+
+    parent_profile = get_parent_profile_or_create_new_user(phone=str(parent_phone), email=str(email),
+                                                           circle=circle, student_name=name)
+    family = get_parent_family_or_create_new(parent_profile=parent_profile)
+    get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
+                                                families=parent_profile.families.all())
+    student = create_student(data["body"])
+    return student, family
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
@@ -199,26 +217,43 @@ class InviteStudentApi(ApiAuthMixin, APIView):
         invite_serializer = CreateCircleInviteStudentSerializer(data=request.data)
         invite_serializer.is_valid(raise_exception=True)
 
-        circle = get_circle(filters={"id": circle_id}, user=request.user, empty_exception=True)
-        parent_phone = invite_serializer.validated_data["parent_phone"]
-        student_phone = invite_serializer.validated_data.get("student_phone")
-        email = invite_serializer.validated_data.get("email") or ''
-        name = invite_serializer.validated_data["body"]["name"]
-
-        parent_profile = get_parent_profile_or_create_new_user(phone=str(parent_phone), email=str(email),
-                                                               circle=circle, student_name=name)
-        family = get_parent_family_or_create_new(parent_profile=parent_profile)
-        student_profile = get_student_profile_by_family_or_create_new(student_phone=student_phone, student_name=name,
-                                                                      families=parent_profile.families.all())
-        student = create_student(**invite_serializer.validated_data["body"])
-        get_families()
+        student, family = create_invites_for_students(
+            circle_id, request.user, invite_serializer.validated_data
+        )
 
         query = create_query(sender_model_name="circle", sender_id=circle_id,
                              recipient_model_name="family", recipient_id=family.id,
                              body_model_name="student", body_id=student.id,
-                             additional_model_name="studentprofile", additional_id=student_profile.id)
+                             additional_model_name="studentprofile", additional_id=student.student_profile.id)
 
         return Response({"query": GetQueryStatusSerializer(query).data}, status=201)
+
+
+class InvitesStudentByXlsxApi(ApiAuthMixin, APIView):
+    parser_classes = (MultiPartParser,)
+
+    @swagger_auto_schema(
+        tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
+        manual_parameters=[openapi.Parameter(
+            name="sheet",
+            in_=openapi.IN_FORM,
+            type=openapi.TYPE_FILE,
+            required=True,
+            description="Excel Document with student invites"
+        )],
+        responses={201: convert_dict_to_serializer({"query": GetQueryStatusSerializer()})},
+        operation_description="Creates invite student by xlsx query.",
+    )
+    def post(self, request, circle_id) -> Response:
+        file = request.FILES["sheet"]
+        invites = create_invites_by_xlsx(file)
+        for invite in invites:
+            invite_serializer = CreateCircleInviteStudentSerializer(data=invite)
+            invite_serializer.is_valid(raise_exception=True)
+            create_invites_for_students(
+                circle_id, request.user, invite_serializer.validated_data
+            )
+        return Response({"query": GetQueryStatusSerializer().data}, status=201)
 
 
 class InviteTeacherApi(ApiAuthMixin, APIView):

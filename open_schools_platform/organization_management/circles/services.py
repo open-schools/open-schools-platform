@@ -2,6 +2,7 @@ import calendar
 from datetime import timedelta, datetime
 import typing
 from typing import Dict, Callable, Tuple, Type
+import pandas as pd
 
 import pytz
 from django.contrib.gis.geos import Point
@@ -203,3 +204,27 @@ def generate_ical(queryset):
         event.add('geo', (circle.latitude, circle.longitude))
         cal.add_component(event)
     return cal.to_ical()
+
+
+def create_invites_by_xlsx(file):
+    ds = pd.read_excel(file)
+    invites = []
+    for row in ds.iterrows():
+        name, student_phone, parent_phone, email = row[1].values
+        invite = {
+            'body': {
+                'name': name
+            },
+            "student_phone": format_phones(str(student_phone)),
+            "parent_phone": format_phones(str(parent_phone)),
+            "email": email,
+        }
+        invites.append(invite)
+    return invites
+
+
+def format_phones(phone):
+    if "+7" not in phone and '8' == phone[0]:
+        phone = '+7' + phone[1:]
+    return phone
+

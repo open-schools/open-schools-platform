@@ -71,3 +71,7 @@ class CreateCircleInviteStudentSerializer(serializers.Serializer):
     student_phone = PhoneNumberField(max_length=17, required=False)
     parent_phone = PhoneNumberField(max_length=17, required=True)
     email = serializers.EmailField(max_length=255, required=False)
+
+
+class CreateCircleInviteStudentByXlsxSerializer(serializers.Serializer):
+    file = serializers.FileField(required=True)
