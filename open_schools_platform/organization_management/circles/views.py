@@ -20,11 +20,12 @@ from open_schools_platform.organization_management.organizations.selectors impor
 from .filters import CircleFilter
 from .paginators import ApiCircleListPagination
 from .selectors import get_circle, get_circles
+from ..employees.roles import EmployeeRole
 from ..teachers.selectors import get_teacher_profile
 from ..teachers.serializers import CreateCircleInviteTeacherSerializer
 from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
-from ...common.views import convert_dict_to_serializer
+from ...common.views import convert_dict_to_serializer, ensure_role_permission
 from ...parent_management.families.selectors import get_families
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
@@ -53,6 +54,7 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
         responses={201: convert_dict_to_serializer({"circle": GetCircleSerializer()}), 404: "No such organization"},
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
     )
+    @ensure_role_permission('organization', 'employees', 'employee_profile', EmployeeRole.employee)
     def post(self, request):
         create_circle_serializer = CreateCircleSerializer(data=request.data)
         create_circle_serializer.is_valid(raise_exception=True)
@@ -101,6 +103,7 @@ class GetCircleApi(ApiAuthMixin, APIView):
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         responses={200: convert_dict_to_serializer({"circle": GetCircleSerializer()})}
     )
+    @ensure_role_permission('circle', 'organization.employees', 'employee_profile', EmployeeRole.view_only)
     def get(self, request, circle_id):
         circle = get_circle(
             filters={"id": str(circle_id)},

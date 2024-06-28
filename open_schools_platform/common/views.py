@@ -1,10 +1,14 @@
+from operator import attrgetter
 from typing import Type, Dict, Union, List, Any
 
+from django.contrib.contenttypes.models import ContentType
 from django.views import View
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.fields import ChoiceField, Field
 from rest_framework.serializers import Serializer as RestFrameworkSerializer
 
 from open_schools_platform.common.types import DjangoViewType
+from open_schools_platform.organization_management.employees.roles import role_hierarchy
 
 
 def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[DjangoViewType]:
@@ -30,7 +34,7 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
     return BaseManageView
 
 
-def convert_dict_to_serializer(dictionary: Dict[str, Union[RestFrameworkSerializer, List[str]]])\
+def convert_dict_to_serializer(dictionary: Dict[str, Union[RestFrameworkSerializer, List[str]]]) \
         -> Type[RestFrameworkSerializer]:
     class Serializer(RestFrameworkSerializer):  # type: ignore
         pass
@@ -45,3 +49,31 @@ def convert_dict_to_serializer(dictionary: Dict[str, Union[RestFrameworkSerializ
 
     Serializer._declared_fields = fields
     return Serializer
+
+
+def ensure_role_permission(target_model, relation, target_profile, role):
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            if len(args) > 1:
+                request = args[1]
+                related_entities = {}
+                related_entities.update(request.data)
+                related_entities.update(request.query_params)
+                related_entities.update(request.parser_context.get('kwargs', {}))
+
+                pk = related_entities.get(f'{target_model}_id') or related_entities.get(target_model)
+                if pk:
+                    target_object = ContentType.objects.get(model=target_model).get_object_for_this_type(pk=pk)
+                    retriever = attrgetter(relation)
+                    profile = getattr(request.user, target_profile)
+                    if profile:
+                        relation_object = retriever(target_object).filter(**{target_profile: profile.id}).first()
+
+                        if hasattr(relation_object, 'role'):
+                            if relation_object.role in role_hierarchy.get(role, ()):
+                                return func(*args, **kwargs)
+            raise PermissionDenied
+
+        return wrapper
+
+    return decorator
