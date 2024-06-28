@@ -194,3 +194,19 @@ msgstr " By %(filter_title)s "
 #: .\templates\templates\input_filter.html:18
 msgid "Remove"
 msgstr "Remove"
+
+
+msgid "creator"
+msgstr "creator"
+
+
+msgid "director"
+msgstr "director"
+
+
+msgid "employee"
+msgstr "employee"
+
+
+msgid "view only"
+msgstr "view only"

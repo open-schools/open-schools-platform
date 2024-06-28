@@ -208,3 +208,19 @@ msgstr " От %(filter_title)s "
 #: .\templates\templates\input_filter.html:18
 msgid "Remove"
 msgstr "Удалить"
+
+
+msgid "creator"
+msgstr "создатель"
+
+
+msgid "director"
+msgstr "директор"
+
+
+msgid "employee"
+msgstr "сотрудник"
+
+
+msgid "view only"
+msgstr "только просмотр"

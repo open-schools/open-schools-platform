@@ -17,6 +17,7 @@ from open_schools_platform.organization_management.circles.filters import Circle
 from open_schools_platform.organization_management.circles.models import Circle
 from open_schools_platform.organization_management.circles.paginators import ApiCircleListPagination
 from open_schools_platform.organization_management.circles.selectors import get_circle, get_circles
+from open_schools_platform.organization_management.employees.roles import EmployeeRole
 from open_schools_platform.organization_management.employees.serializers import GetEmployeeSerializer, \
     UpdateOrganizationInviteEmployeeSerializer, CreateOrganizationInviteEmployeeSerializer
 from open_schools_platform.organization_management.employees.services import create_employee, \
@@ -71,7 +72,8 @@ class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
         employee = create_employee(name=request.user.name,
                                    user=request.user,
                                    organization=org,
-                                   position="Creator")
+                                   position="Creator",
+                                   role=EmployeeRole.creator)
 
         return Response({"creator_employee": GetEmployeeSerializer(employee).data},
                         status=201)
