@@ -14,8 +14,7 @@ from .models import Circle
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
-    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer, \
-    CreateCircleInviteStudentByXlsxSerializer
+    GetCircleSerializer, CreateCircleInviteStudentSerializer, GetListCircleSerializer, UpdateCircleSerializer
 from open_schools_platform.organization_management.circles.services import create_circle, \
     is_organization_related_to_student_profile, generate_ical, update_circle, create_invites_by_xlsx
 from open_schools_platform.organization_management.organizations.selectors import get_organization
@@ -27,7 +26,6 @@ from ..teachers.serializers import CreateCircleInviteTeacherSerializer
 from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import convert_dict_to_serializer
-from ...parent_management.families.selectors import get_families
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
 from ...query_management.queries.selectors import get_queries
@@ -247,9 +245,13 @@ class InvitesStudentByXlsxApi(ApiAuthMixin, APIView):
     def post(self, request, circle_id) -> Response:
         file = request.FILES["sheet"]
         invites = create_invites_by_xlsx(file)
-        for invite in invites:
+        for index, invite in enumerate(invites):
             invite_serializer = CreateCircleInviteStudentSerializer(data=invite)
-            invite_serializer.is_valid(raise_exception=True)
+            invite_serializer.is_valid(raise_exception=False)
+
+            if len(invite_serializer.errors) > 0:
+                raise ValidationError({f'string {index}': invite_serializer.errors})
+
             create_invites_for_students(
                 circle_id, request.user, invite_serializer.validated_data
             )

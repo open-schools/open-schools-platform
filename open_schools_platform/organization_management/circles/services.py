@@ -226,5 +226,7 @@ def create_invites_by_xlsx(file):
 def format_phones(phone):
     if "+7" not in phone and '8' == phone[0]:
         phone = '+7' + phone[1:]
+    elif "+" not in phone and '7' == phone[0]:
+        phone = "+" + phone
     return phone
 

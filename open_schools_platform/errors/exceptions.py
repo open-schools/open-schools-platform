@@ -51,6 +51,12 @@ class MapServiceUnavailable(APIException):
     default_code = 'map_service_unavailable'
 
 
+class ExcelValidationError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('Excel row validation error')
+    default_code = 'excel_row_error'
+
+
 class ApplicationError(Exception):
     def __init__(self, message, extra=None):
         super().__init__(message)
