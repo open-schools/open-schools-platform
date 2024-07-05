@@ -26,6 +26,7 @@ from ..teachers.serializers import CreateCircleInviteTeacherSerializer
 from ..teachers.services import create_teacher
 from ...common.utils import get_dict_excluding_fields
 from ...common.views import convert_dict_to_serializer
+from ...errors.exceptions import ExcelValidationError, WrongFileType
 from ...parent_management.parents.services import get_parent_profile_or_create_new_user, \
     get_parent_family_or_create_new
 from ...query_management.queries.selectors import get_queries
@@ -244,16 +245,27 @@ class InvitesStudentByXlsxApi(ApiAuthMixin, APIView):
     )
     def post(self, request, circle_id) -> Response:
         file = request.FILES["sheet"]
+        if file.name.split('.')[-1] != 'xlsx':
+            raise WrongFileType()
         invites = create_invites_by_xlsx(file)
+        validated_invites = []
+
+        errors = []
         for index, invite in enumerate(invites):
             invite_serializer = CreateCircleInviteStudentSerializer(data=invite)
             invite_serializer.is_valid(raise_exception=False)
 
             if len(invite_serializer.errors) > 0:
-                raise ValidationError({f'string {index}': invite_serializer.errors})
+                errors.append({str(index+1): invite_serializer.errors})
+            else:
+                validated_invites.append(invite_serializer)
 
+        if len(errors) > 0:
+            raise ExcelValidationError(errors)
+
+        for invite in invites:
             create_invites_for_students(
-                circle_id, request.user, invite_serializer.validated_data
+                circle_id, request.user, invite.validated_data
             )
         return Response({"query": GetQueryStatusSerializer().data}, status=201)
 

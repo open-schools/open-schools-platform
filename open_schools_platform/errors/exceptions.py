@@ -57,6 +57,12 @@ class ExcelValidationError(APIException):
     default_code = 'excel_row_error'
 
 
+class WrongFileType(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _('Wrong file type')
+    default_code = 'wrong_file_type'
+
+
 class ApplicationError(Exception):
     def __init__(self, message, extra=None):
         super().__init__(message)

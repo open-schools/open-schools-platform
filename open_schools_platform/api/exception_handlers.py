@@ -8,7 +8,7 @@ from rest_framework import exceptions, status
 from rest_framework.serializers import as_serializer_error
 from rest_framework.response import Response
 
-from open_schools_platform.errors.exceptions import ApplicationError
+from open_schools_platform.errors.exceptions import ApplicationError, ExcelValidationError
 from open_schools_platform.errors.codes import error_codes
 
 
@@ -28,9 +28,44 @@ def drf_default_with_modifications_exception_handler(exc, ctx):
     # If unexpected error occurs (server error, etc.)
     if response is None:
         return response
+
+    # ExcelErrorDetail
+    if isinstance(exc, ExcelValidationError):
+        response.data = {'error': create_excel_error(exc).data}
+        return response
+
     # ErrorDetail
     response.data = {'error': create_error(exc).data}
     return response
+
+
+def create_excel_error(exception):
+    violations = None
+    violations_dict = {}
+    message = 'There are errors in the provided Excel file.'
+
+    code = None
+    if exception.status_code in error_codes and type(exception) in error_codes[exception.status_code]:
+        code = type(exception).__name__
+
+    # if isinstance(exception.detail, dict):
+    #     for row_number, exc in exception.detail.items():
+    #         violations_dict[row_number] = exc
+
+    if isinstance(exception.detail, list):
+        for row in exception.detail:
+            for row_number, exc in row.items():
+                violations_dict[row_number] = exc
+
+    if len(violations_dict.keys()) == 1:
+        error_row = list(violations_dict.items())[0][0]
+        message += f' Error in line {error_row}.'
+    elif len(violations_dict.keys()) > 1:
+        message += f' Errors in lines {", ".join(violations_dict.keys())}.'
+
+    from open_schools_platform.common.serializers import ErrorSerializer
+    return ErrorSerializer(
+        {'message': message, 'violation_fields': violations_dict, 'code': code, 'violations': violations})
 
 
 def create_error(exception):
