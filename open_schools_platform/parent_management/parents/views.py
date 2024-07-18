@@ -74,7 +74,8 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
             filters={"parent_profiles": str(request.user.parent_profile.id)},
         )
         student_profiles = get_student_profiles_by_families(families)
-        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)})
+        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)},
+                              empty_filters=True)
         return Response(
             {"results": GetStudentJoinCircleSerializer(queries, many=True, context={'request': request}).data},
             status=200)
