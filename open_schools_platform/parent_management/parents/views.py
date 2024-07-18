@@ -96,7 +96,7 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
 
         filters.update({"sender_ids": form_ids_string_from_queryset(request.user.parent_profile.families.all())})
 
-        tickets = self.complex_filter.get_objects(filters)
+        tickets = self.complex_filter.get_objects(filters, empty_filters=True)
 
         response = get_paginated_response(
             pagination_class=ApiTicketListPagination,
