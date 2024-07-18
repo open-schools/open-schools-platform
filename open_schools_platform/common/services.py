@@ -318,7 +318,10 @@ class ComplexMultipleFilter(ComplexFilter):
             BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
             len(crossed_filters.keys()) == 1
 
-    def get_objects(self, filters, empty_filters=False):
+    def get_objects(self, filters, empty_filters=False, empty_filter=False):
+        if empty_filters and any(arg in filters.values() for arg in ("", None)) or empty_filter and filters == {}:
+            return self.selector(filters={}).none()
+
         if self.is_has_or_search_field and \
                 BaseFilterSet.OR_SEARCH_FIELD in filters and \
                 not or_search_filter_is_valid(filters[BaseFilterSet.OR_SEARCH_FIELD]):
