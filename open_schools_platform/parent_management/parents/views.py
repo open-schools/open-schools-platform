@@ -120,7 +120,8 @@ class FamilyOrganizationTicketCommentsListApi(ApiAuthMixin, ListAPIView):
     def get(self, request, organization_id):
         tickets = get_tickets(
             filters={'recipient_id': organization_id,
-                     'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all())}
+                     'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all())},
+            empty_filters=True
         )
 
         ticket_comments = get_comments(
