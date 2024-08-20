@@ -2,6 +2,7 @@ import warnings
 from enum import Enum
 
 from config.env import env
+from config.settings.email import EMAIL_SERVICE_TRANSPORT, EMAIL_DOMAIN
 from open_schools_platform.user_management.users.tests.constants.test_valid_api_key import is_google_api_key_valid
 
 
@@ -26,21 +27,8 @@ class CommonConstants:
 
 
 class EmailConstants:
-    EMAIL_SERVICE_TRANSPORT = env("EMAIL_SERVICE_TRANSPORT", default=None)
-    MAILGUN_SEND_EMAIL_URL = r"https://api.mailgun.net/v3/{}/messages"
-
-    VK_EMAIL_ID = ""
-    VK_EMAIL_PRIVATE_API_KEY = ""
-
-    if EMAIL_SERVICE_TRANSPORT == "VK":
-        VK_EMAIL_ID = env("VK_EMAIL_ID")
-        VK_EMAIL_PRIVATE_API_KEY = env("VK_EMAIL_PRIVATE_API_KEY")
-
-    MAILGUN_EMAIL_PRIVATE_API_KEY = ""
-    if EMAIL_SERVICE_TRANSPORT == "MAILGUN":
-        MAILGUN_EMAIL_PRIVATE_API_KEY = env("MAILGUN_EMAIL_PRIVATE_API_KEY")
-
-    EMAIL_DOMAIN = env("EMAIL_DOMAIN", default='openschools.education')
+    EMAIL_SERVICE_TRANSPORT = EMAIL_SERVICE_TRANSPORT
+    EMAIL_DOMAIN = EMAIL_DOMAIN
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     TEST_EMAIL = 'test.openschools.education@mail.ru'
 
