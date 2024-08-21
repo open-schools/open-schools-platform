@@ -7,9 +7,8 @@ from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.api.mixins import ApiAuthMixin
-from open_schools_platform.common.utils import get_dict_from_response
 from open_schools_platform.common.views import convert_dict_to_serializer
-from open_schools_platform.errors.exceptions import InvalidArgument
+from open_schools_platform.errors.exceptions import InvalidArgument, SmsServiceUnavailable
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
 from open_schools_platform.api.swagger_tags import SwaggerTags
 
@@ -20,9 +19,8 @@ from open_schools_platform.user_management.users.serializers \
     PasswordResetSerializer, FCMNotificationToken
 from open_schools_platform.user_management.users.services import is_token_alive, create_token, create_user, \
     verify_token, \
-    get_jwt_token, update_token_session, set_new_password_for_user, update_fcm_notification_token_entity
-from open_schools_platform.utils.firebase_requests import send_firebase_sms, check_otp_with_firebase, \
-    firebase_error_dict_with_additional_info
+    get_jwt_token, set_new_password_for_user, update_fcm_notification_token_entity, generate_otp, \
+    send_otp_sms, update_token_otp, check_token_otp_match
 
 
 class CreationTokenApi(CreateAPIView):
@@ -46,12 +44,13 @@ class CreationTokenApi(CreateAPIView):
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=200)
 
-        response = send_firebase_sms(**token_serializer.data)
+        otp = generate_otp()
+        is_sent = send_otp_sms(otp, token_serializer.validated_data["phone"])
 
-        if response.status_code != 200:
-            raise InvalidArgument(detail=firebase_error_dict_with_additional_info(response))
+        if not is_sent:
+            raise SmsServiceUnavailable()
 
-        token = create_token(token_serializer.validated_data["phone"], get_dict_from_response(response)["sessionInfo"])
+        token = create_token(token_serializer.validated_data["phone"], otp)
 
         return Response({"token": token.key}, status=201)
 
@@ -115,8 +114,9 @@ class VerificationApi(APIView):
 
         token = get_token_with_checks(key=token_key, verify_check=False)
 
-        response = check_otp_with_firebase(token.session, otp_serializer.validated_data["otp"])
-        if response.status_code != 200:
+        is_match = check_token_otp_match(token, otp_serializer.validated_data["otp"])
+
+        if not is_match:
             raise InvalidArgument(detail="Otp is incorrect.")
 
         verify_token(token)
@@ -140,12 +140,13 @@ class CodeResendApi(APIView):
 
         token = get_token_with_checks(key=token_key, verify_check=False)
 
-        response = send_firebase_sms(str(token.phone), recaptcha_serializer.validated_data["recaptcha"])
+        otp = generate_otp()
+        is_sent = send_otp_sms(otp, token.phone)
 
-        if response.status_code != 200:
-            raise InvalidArgument(detail=firebase_error_dict_with_additional_info(response))
+        if not is_sent:
+            raise SmsServiceUnavailable()
 
-        update_token_session(token, get_dict_from_response(response)["sessionInfo"])
+        update_token_otp(token, otp)
         return Response({"detail": "SMS was resent."}, status=200)
 
 

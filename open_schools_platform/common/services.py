@@ -7,13 +7,14 @@ from django_filters import Filter, CharFilter
 from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
+from config.settings.sms import SMS_TRANSPORT
 from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
 from open_schools_platform.common.types import DjangoModelType
 from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, \
     form_ids_string_from_queryset, convert_str_date_to_datetime
 from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
-    ApplicationError
+    ApplicationError, SmsServiceUnavailable
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -173,6 +174,13 @@ def get_object_by_id_in_field_with_checks(filters, request, fields: Dict[str, Ca
 class SendEmailService:
     def __init__(self):
         self.email_transport = EMAIL_TRANSPORT
+
+
+class SendSmsService:
+    def __init__(self):
+        if SMS_TRANSPORT is None:
+            raise SmsServiceUnavailable()
+        self.sms_transport = SMS_TRANSPORT
 
 
 class email_service:

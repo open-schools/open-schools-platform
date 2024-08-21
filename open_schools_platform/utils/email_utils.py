@@ -19,7 +19,7 @@ class BaseEmailService(ABC):
     def send_html_email(self, subject: str,
                         from_email: str, from_name: str,
                         to_email: str, to_name: str,
-                        html: str, text: str = None):
+                        html: str, text: str = None) -> requests.Response:
         pass
 
 

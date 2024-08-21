@@ -1,3 +1,5 @@
+import random
+
 import requests
 from django.contrib.auth import authenticate
 from django.db import transaction
@@ -8,8 +10,9 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
 from config.settings.push_notifications import app
-from open_schools_platform.common.constants import CommonConstants
-from open_schools_platform.common.services import model_update
+from config.settings.sms import SMS_TRANSPORT
+from open_schools_platform.common.constants import CommonConstants, SmsConstants
+from open_schools_platform.common.services import model_update, SendSmsService
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
 from open_schools_platform.organization_management.teachers.models import TeacherProfile
@@ -25,9 +28,23 @@ def is_token_alive(token: CreationToken) -> bool:
     return (datetime.now(timezone.utc) - token.created_at) < RegistrationConstants.LIVE_TIME
 
 
-def create_token(phone: str, session: str) -> CreationToken:
+def generate_otp() -> int:
+    return random.randint(10 ** (GenerateConstants.OTP_LENGTH - 1), 10 ** GenerateConstants.OTP_LENGTH - 1)
+
+
+def send_otp_sms(otp: int, phone_number: str):
+    return SendSmsService().sms_transport.send_sms([str(phone_number)], f"Код подтверждения: {str(otp)}",
+                                  sender=SmsConstants.DEFAULT_SENDER_SMS)
+
+
+def check_token_otp_match(token: CreationToken, otp: int) -> bool:
+    return token.otp == otp
+
+
+def create_token(phone: str, otp: int, session: str = "") -> CreationToken:
     token = CreationToken.objects.create_token(
         phone=phone,
+        otp=str(otp),
         session=session,
     )
     return token
@@ -110,6 +127,12 @@ def get_jwt_token(username_field: str, username: str, password: str, request=Non
 
 def update_token_session(token: CreationToken, new_session: str) -> CreationToken:
     token.session = new_session
+    token.save()
+    return token
+
+
+def update_token_otp(token: CreationToken, new_otp: int) -> CreationToken:
+    token.otp = str(new_otp)
     token.save()
     return token
 

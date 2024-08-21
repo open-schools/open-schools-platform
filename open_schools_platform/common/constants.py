@@ -3,6 +3,7 @@ from enum import Enum
 
 from config.env import env
 from config.settings.email import EMAIL_SERVICE_TRANSPORT, EMAIL_DOMAIN
+from config.settings.sms import SMS_SERVICE_TRANSPORT
 from open_schools_platform.user_management.users.tests.constants.test_valid_api_key import is_google_api_key_valid
 
 
@@ -14,8 +15,6 @@ class CommonConstants:
     FIREBASE_URL_TO_CHECK_OTP = r"https://www.googleapis.com/identitytoolkit/v3" \
                                 r"/relyingparty/verifyPhoneNumber?key="
     FCM_URL_TO_VALIDATE_NOTIFICATIONS_TOKEN = "https://fcm.googleapis.com/fcm/send"
-    SMS_PROVIDER_URL = r"https://sms.ru/sms/send"
-    SMS_API_KEY = env("SMS_API_KEY", default=None)
     FCM_SERVER_KEY = env("FCM_SERVER_KEY", default=None)
     OPEN_SCHOOLS_DOMAIN = env("OPEN_SCHOOLS_DOMAIN", default="v1.openschools.education")
     GEOPY_GEOCODE_TIMEOUT = 10
@@ -31,6 +30,11 @@ class EmailConstants:
     EMAIL_DOMAIN = EMAIL_DOMAIN
     DEFAULT_FROM_EMAIL = 'inbox@openschools.education'
     TEST_EMAIL = 'test.openschools.education@mail.ru'
+
+
+class SmsConstants:
+    SMS_SERVICE_TRANSPORT = SMS_SERVICE_TRANSPORT
+    DEFAULT_SENDER_SMS = 'Открытые школы'
 
 
 class NotificationType(str, Enum):

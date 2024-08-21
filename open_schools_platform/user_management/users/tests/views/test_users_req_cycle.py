@@ -15,14 +15,9 @@ class UserRequestsCycleTests(TestCase):
         self.token_verification_url = lambda pk: reverse(
             'api:user-management:users:verification-phone-by-token', args=[pk])
 
-    def test_user_token_creation(self):
-        # make sure this number is listed in firebase
-        data = {
-            "phone": "+79025456481",
-            "recaptcha": "123456"
-        }
-        response = self.client.post(self.token_creation_url, data)
-        self.assertEqual(201, response.status_code)
+
+    # TODO: write this test using some mock lib
+    # def test_user_token_creation(self):
 
     def test_user_token_verification(self):
         data = {

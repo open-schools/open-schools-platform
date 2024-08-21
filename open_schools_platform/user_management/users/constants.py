@@ -7,5 +7,6 @@ class RegistrationConstants:
 
 
 class GenerateConstants:
+    OTP_LENGTH = 6
     ALPHABET = string.ascii_letters + string.digits
     PASSWORD_LENGTH = 8
