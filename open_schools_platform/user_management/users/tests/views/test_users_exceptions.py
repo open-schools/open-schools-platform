@@ -20,7 +20,6 @@ class UserExceptionsTests(TestCase):
         self.sms_resend_url = lambda pk: reverse("api:user-management:users:resend", args=[pk])
         self.user_reset_password_url = reverse("api:user-management:users:reset-password")
 
-
     def test_token_does_not_exist(self):
         user_creation_data = {
             "token": "99999999-9999-9999-9999-999999999999",

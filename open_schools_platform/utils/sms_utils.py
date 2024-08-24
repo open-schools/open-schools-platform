@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Optional
 
 from open_schools_platform.utils.sms_center_utils import SMSC
 
@@ -16,16 +16,17 @@ class BaseSmsService(ABC):
         3. Put your new class in project settings for sms.
     """
     @abstractmethod
-    def send_sms(self, phones: List[str], message: str, sender: str) -> bool:
+    def send_sms(self, phones: List[str], message: str) -> bool:
         pass
 
 
 class SmsCenter(BaseSmsService):
-    def __init__(self, username: str, password: str):
+    def __init__(self, username: str, password: str, sender_name_id: Optional[str]):
         self.username = username
         self.password = password
+        self.sender_name_id = sender_name_id
         self.smsc_provider = SMSC(self.username, self.password)
 
-    def send_sms(self, phones: List[str], message: str, sender: str):
-        response = self.smsc_provider.send_sms(",".join(phones), message)
+    def send_sms(self, phones: List[str], message: str):
+        response = self.smsc_provider.send_sms(",".join(phones), message, sender=self.sender_name_id)
         return response[1] > "0"

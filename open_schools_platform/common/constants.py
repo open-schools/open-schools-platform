@@ -34,7 +34,7 @@ class EmailConstants:
 
 class SmsConstants:
     SMS_SERVICE_TRANSPORT = SMS_SERVICE_TRANSPORT
-    DEFAULT_SENDER_SMS = 'Открытые школы'
+    DEFAULT_SENDER_SMS_NAME = 'Открытые школы'
 
 
 class NotificationType(str, Enum):

@@ -10,8 +10,7 @@ from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 from rest_framework_jwt.utils import unix_epoch
 
 from config.settings.push_notifications import app
-from config.settings.sms import SMS_TRANSPORT
-from open_schools_platform.common.constants import CommonConstants, SmsConstants
+from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.services import model_update, SendSmsService
 from open_schools_platform.common.utils import filter_dict_from_none_values
 from open_schools_platform.organization_management.employees.models import EmployeeProfile
@@ -33,8 +32,7 @@ def generate_otp() -> int:
 
 
 def send_otp_sms(otp: int, phone_number: str):
-    return SendSmsService().sms_transport.send_sms([str(phone_number)], f"Код подтверждения: {str(otp)}",
-                                  sender=SmsConstants.DEFAULT_SENDER_SMS)
+    return SendSmsService().sms_transport.send_sms([str(phone_number)], f"Код подтверждения: {str(otp)}")
 
 
 def check_token_otp_match(token: CreationToken, otp: int) -> bool:

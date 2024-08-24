@@ -15,7 +15,6 @@ class UserRequestsCycleTests(TestCase):
         self.token_verification_url = lambda pk: reverse(
             'api:user-management:users:verification-phone-by-token', args=[pk])
 
-
     # TODO: write this test using some mock lib
     # def test_user_token_creation(self):
 
