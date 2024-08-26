@@ -3,7 +3,6 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from config.env import env
 from open_schools_platform.organization_management.employees.selectors import get_employee_profile, get_employee
 from open_schools_platform.organization_management.organizations.tests.utils import create_test_organization
 from open_schools_platform.query_management.queries.models import Query
@@ -16,10 +15,7 @@ class InviteEmployeeTests(TestCase):
         self.invite_employee_url = \
             lambda pk: reverse("api:organization-management:organizations:invite-employee", args=[pk])
 
-    @pytest.mark.skipif(
-        env("EMAIL_SERVICE_TRANSPORT", default=None) is None
-        or env("REGISTRATION_MESSAGES_TRANSPORT", default='email') == "sms",
-        reason="EMAIL_SERVICE_TRANSPORT is not set or SMS skip")
+    @pytest.mark.skip(reason="We should mock email and sms send method")
     def test_invite_employee_query_successfully_formed(self):
         create_logged_in_user(instance=self)
         organization = create_test_organization()

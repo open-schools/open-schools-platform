@@ -91,13 +91,13 @@ jobs:
       - name: Look up images
         run: docker image ls
       - name: Type check
-        run: docker-compose run django mypy open_schools_platform/
+        run: docker compose run django mypy open_schools_platform/
       - name: Run migrations
-        run: docker-compose run django python manage.py migrate
+        run: docker compose run django python manage.py migrate
       - name: Collectstatic
-        run: docker-compose run django python manage.py collectstatic
+        run: docker compose run django python manage.py collectstatic
       - name: Run tests
-        run: docker-compose run django py.test
+        run: docker compose run django py.test
       - name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache

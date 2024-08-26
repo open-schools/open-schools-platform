@@ -20,8 +20,8 @@ def send_message_to_new_user_with_celery(subject, html_kwargs, from_email, to_em
         template = EmailTemplateName.get(message_type)
         if template:
             html = render_to_string(template, html_kwargs)
-            SendEmailService().email_transport().send_html_email(subject, from_email, _('Open Schools'), to_email,
-                                                                 _('Dear user'), html, '')
+            SendEmailService().email_transport.send_html_email(subject, from_email, _('Open Schools'), to_email,
+                                                               _('Dear user'), html, '')
 
 
 @app.task

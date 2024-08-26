@@ -54,12 +54,13 @@ class UserManager(BaseManager, BUM):
 
 
 class CreationTokenManager(BaseManager):
-    def create_token(self, phone, session):
+    def create_token(self, phone, otp, session):
         if not phone:
             raise ValueError('Users must have a phone')
 
         token = self.model(
             phone=phone,
+            otp=otp,
             session=session,
         )
 
@@ -139,7 +140,8 @@ class CreationToken(BaseModel):
         blank=False,
         null=True,
     )
-    session = models.CharField(max_length=1000, null=True)
+    session = models.CharField(max_length=1000, null=True, blank=True)
+    otp = models.CharField(max_length=20, null=True)
     is_verified = models.BooleanField(default=False)
 
     objects = CreationTokenManager()  # type: ignore[assignment]
