@@ -7,6 +7,7 @@ from rest_framework_jwt.compat import set_cookie_with_token
 from rest_framework_jwt.settings import api_settings
 
 from open_schools_platform.api.mixins import ApiAuthMixin
+from open_schools_platform.common.utils import get_dict_excluding_fields
 from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.errors.exceptions import InvalidArgument, SmsServiceUnavailable
 from open_schools_platform.user_management.users.selectors import get_user, get_token, get_token_with_checks
@@ -40,7 +41,7 @@ class CreationTokenApi(CreateAPIView):
         token_serializer = CreateRegistrationTokenSerializer(data=request.data)
         token_serializer.is_valid(raise_exception=True)
 
-        token = get_token(filters=token_serializer.validated_data)
+        token = get_token(filters=get_dict_excluding_fields(token_serializer.validated_data, ["recaptcha"]))
         if token and is_token_alive(token):
             return Response({"token": token.key}, status=200)
 

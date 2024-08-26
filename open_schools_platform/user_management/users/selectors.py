@@ -23,8 +23,8 @@ def get_user(*, filters=None, user: User = None, prefetch_related_list=None) -> 
 def get_token(*, filters=None, user: User = None, prefetch_related_list=None) -> CreationToken:
     filters = filters or {}
 
-    qs = CreationToken.objects.all().order_by('created_at')
-    token = CreationTokenFilter(filters, qs).qs.last()
+    qs = CreationToken.objects.all()
+    token = CreationTokenFilter(filters, qs).qs.order_by('created_at').last()
 
     if user and token and not user.has_perm('users.creationtoken_access', token):
         raise PermissionDenied
