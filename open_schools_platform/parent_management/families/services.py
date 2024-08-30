@@ -75,7 +75,8 @@ def get_all_student_invites_for_current_user_families(user: User):
             "body_ct": ContentType.objects.get(model="student"),
             "additional_ct": ContentType.objects.get(model="studentprofile"),
             "recipient_ids": form_ids_string_from_queryset(user.parent_profile.families.all())
-        }
+        },
+        empty_filters=True
     )
 
 

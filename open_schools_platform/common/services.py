@@ -7,13 +7,14 @@ from django_filters import Filter, CharFilter
 from rest_framework.exceptions import ValidationError
 
 from config.settings.email import EMAIL_TRANSPORT
+from config.settings.sms import SMS_TRANSPORT
 from open_schools_platform.common.constants import CommonConstants
 from open_schools_platform.common.filters import BaseFilterSet, or_search_filter_is_valid, get_values_from_or_search
 from open_schools_platform.common.types import DjangoModelType
 from open_schools_platform.common.utils import get_dict_including_fields, intersect_sets, \
     form_ids_string_from_queryset, convert_str_date_to_datetime
 from open_schools_platform.errors.exceptions import WrongStatusChange, QueryCorrupted, EmailServiceUnavailable, \
-    ApplicationError
+    ApplicationError, SmsServiceUnavailable
 from open_schools_platform.query_management.queries.models import Query
 from open_schools_platform.user_management.users.models import User
 
@@ -175,6 +176,13 @@ class SendEmailService:
         self.email_transport = EMAIL_TRANSPORT
 
 
+class SendSmsService:
+    def __init__(self):
+        if SMS_TRANSPORT is None:
+            raise SmsServiceUnavailable()
+        self.sms_transport = SMS_TRANSPORT
+
+
 class email_service:
     def __enter__(self):
         if CommonConstants.REGISTRATION_MESSAGES_TRANSPORT == "email" and \
@@ -318,7 +326,10 @@ class ComplexMultipleFilter(ComplexFilter):
             BaseFilterSet.OR_SEARCH_FIELD in crossed_filters and \
             len(crossed_filters.keys()) == 1
 
-    def get_objects(self, filters, empty_filters=False):
+    def get_objects(self, filters, empty_filters=False, empty_filter=False):
+        if empty_filters and any(arg in filters.values() for arg in ("", None)) or empty_filter and filters == {}:
+            return self.selector(filters={}).none()
+
         if self.is_has_or_search_field and \
                 BaseFilterSet.OR_SEARCH_FIELD in filters and \
                 not or_search_filter_is_valid(filters[BaseFilterSet.OR_SEARCH_FIELD]):

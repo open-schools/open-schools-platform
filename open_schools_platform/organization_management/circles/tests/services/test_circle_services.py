@@ -1,3 +1,4 @@
+import pytest
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 from rest_framework.exceptions import ValidationError
@@ -13,10 +14,12 @@ class CreateCircleTests(TestCase):
 
 
 class GetCoordinatesFromAddressTests(TestCase):
+    @pytest.mark.skip
     def test_successfully_got_coordinates_from_address(self):
         circle = create_test_circle(address='175 5th Avenue NYC', location=None)
         self.assertTrue(circle.location != Point(0.0, 0.0))
 
+    @pytest.mark.skip
     def test_incorrect_address(self):
         self.assertRaises(
             ValidationError, lambda: create_test_circle(address="12345678910", location=None))

@@ -74,7 +74,8 @@ class StudentJoinCircleQueriesListApi(ApiAuthMixin, APIView):
             filters={"parent_profiles": str(request.user.parent_profile.id)},
         )
         student_profiles = get_student_profiles_by_families(families)
-        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)})
+        queries = get_queries(filters={"sender_ids": form_ids_string_from_queryset(student_profiles)},
+                              empty_filters=True)
         return Response(
             {"results": GetStudentJoinCircleSerializer(queries, many=True, context={'request': request}).data},
             status=200)
@@ -96,7 +97,7 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
 
         filters.update({"sender_ids": form_ids_string_from_queryset(request.user.parent_profile.families.all())})
 
-        tickets = self.complex_filter.get_objects(filters)
+        tickets = self.complex_filter.get_objects(filters, empty_filters=True)
 
         response = get_paginated_response(
             pagination_class=ApiTicketListPagination,
@@ -120,7 +121,8 @@ class FamilyOrganizationTicketCommentsListApi(ApiAuthMixin, ListAPIView):
     def get(self, request, organization_id):
         tickets = get_tickets(
             filters={'recipient_id': organization_id,
-                     'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all())}
+                     'sender_ids': form_ids_string_from_queryset(request.user.parent_profile.families.all())},
+            empty_filters=True
         )
 
         ticket_comments = get_comments(
