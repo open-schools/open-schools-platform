@@ -12,7 +12,11 @@ from open_schools_platform.user_management.users.services import create_user, ge
 from django.utils.translation import gettext_lazy as _
 
 
-def create_employee(name: str, position: str = "", user: User = None, organization: Organization = None) -> Employee:
+def create_employee(name: str,
+                    position: str = "",
+                    user: User = None,
+                    organization: Organization = None,
+                    role=None) -> Employee:
     employee_profile = None
     if user:
         employee_profile = user.employee_profile
@@ -22,6 +26,7 @@ def create_employee(name: str, position: str = "", user: User = None, organizati
         employee_profile=employee_profile,
         organization=organization,
         position=position,
+        role=role
     )
     return employee
 

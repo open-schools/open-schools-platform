@@ -7,6 +7,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 from open_schools_platform.common.models import BaseModel, BaseManager
+from open_schools_platform.organization_management.employees.roles import EmployeeRole
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.user_management.users.models import User
 
@@ -58,6 +59,8 @@ class Employee(BaseModel):
                                      null=True, default=None, blank=True, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     position = models.CharField(max_length=255, blank=True, default="")
+    role = models.CharField(choices=EmployeeRole.choices, default=EmployeeRole.employee,
+                            max_length=50, null=True, blank=True)
     history = HistoricalRecords()
 
     objects = EmployeeManager()  # type: ignore[assignment]

@@ -1,6 +1,7 @@
 from typing import Any, Dict, List
 
 from open_schools_platform.common.filters import SoftCondition
+from open_schools_platform.organization_management.employees.roles import EmployeeRole
 from open_schools_platform.organization_management.employees.selectors import get_employees
 from open_schools_platform.organization_management.employees.services import create_employee
 
@@ -79,12 +80,13 @@ def create_test_organizations():
     return organizations
 
 
-def create_test_employee(user: User, organization: Organization = None):
+def create_test_employee(user: User, organization: Organization = None, role=None):
     employee_data = {
         "name": "Andrey",
         "position": "Chief director",
         "user": user,
-        "organization": organization
+        "organization": organization,
+        "role": role or EmployeeRole.employee
     }  # type: Dict[Any, Any]
     return create_employee(**employee_data)
 
