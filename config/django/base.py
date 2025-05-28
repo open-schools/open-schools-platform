@@ -51,7 +51,8 @@ LOCAL_APPS = [
     'open_schools_platform.ticket_management.tickets.apps.TicketsConfig',
     'open_schools_platform.organization_management.teachers.apps.TeachersConfig',
     'open_schools_platform.testing.apps.TestingConfig',
-    'open_schools_platform.sms.apps.SmsConfig'
+    'open_schools_platform.sms.apps.SmsConfig',
+    'open_schools_platform.receipt_management.receipts.apps.ReceiptsConfig'
 ]
 
 THIRD_PARTY_APPS = [
