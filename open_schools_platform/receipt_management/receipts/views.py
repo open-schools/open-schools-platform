@@ -25,7 +25,7 @@ from open_schools_platform.receipt_management.receipts.serializers import (
     GetReceiptNotificationSerializer
 )
 from open_schools_platform.receipt_management.receipts.services import create_receipt, process_pdf_receipt, \
-    PDFDownloadService, update_receipt, bulk_send_receipt_notifications, process_bulk_pdf_receipt
+    PDFDownloadService, update_receipt, bulk_send_receipt_notifications, process_pdf_receipts_bulk
 from open_schools_platform.student_management.students.selectors import get_student_profile
 
 logger = logging.getLogger(__name__)  # Added
@@ -73,7 +73,11 @@ class BulkReceiptPDFUploadApi(ApiAuthMixin, APIView):
         }
     )
     def post(self, request):
-        pdf_file = request.FILES.get('pdf_file')  # Assuming the file is sent under 'pdf_file' key
+        serializer = UploadReceiptPDFSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        pdf_file = request.FILES.get('pdf_file')
+        student_profile_id = serializer.validated_data['student_profile_id']
 
         if not pdf_file:
             return Response({"detail": "No PDF file provided."}, status=status.HTTP_400_BAD_REQUEST)
@@ -81,14 +85,22 @@ class BulkReceiptPDFUploadApi(ApiAuthMixin, APIView):
         if not pdf_file.name.endswith('.pdf'):
             return Response({"detail": "File must be a PDF."}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Consider adding file size validation here as well
-
         try:
-            results = process_bulk_pdf_receipt(pdf_file)
-            return Response(results, status=status.HTTP_200_OK)
-        except ValueError as e:  # Catch specific errors from service if defined
+            result = process_pdf_receipts_bulk(pdf_file, student_profile_id)
+
+            serialized_receipts = GetReceiptDetailedSerializer(result["created_receipts"], many=True).data
+
+            response_data = {
+                "created_count": result["created_count"],
+                "failed_count": result["failed_count"],
+                "created_receipts": serialized_receipts,
+                "failed_details": result["failed_details"]
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:  # Generic error handler
+        except Exception as e:
             logger.error(f"Error processing bulk PDF upload: {str(e)}")
             return Response({"detail": "An error occurred while processing the PDF."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

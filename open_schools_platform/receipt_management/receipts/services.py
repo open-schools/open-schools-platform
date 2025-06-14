@@ -11,24 +11,22 @@ from django.core.files.base import ContentFile
 from django.http import HttpResponse, Http404
 from pypdf import PdfWriter, PdfReader
 
-from open_schools_platform.receipt_management.receipts.models import Receipt, ReceiptService
 from open_schools_platform.receipt_management.receipts.selectors import get_receipts_for_family
+from open_schools_platform.receipt_management.receipts.models import Receipt, ReceiptService
 from open_schools_platform.student_management.students.models import StudentProfile
-from open_schools_platform.student_management.students.selectors import get_student_profile # Added
-from open_schools_platform.receipt_management.receipts.serializers import GetReceiptDetailedSerializer # Added
 
 logger = logging.getLogger(__name__)
 
 PATTERNS = {
-            'internal_receipt_number': r'(?:Лицевой счет)[\s:]*(\d+)',
-            'payer_full_name': r'(?:Плательщик)[\s:]*([А-Яа-я\s]+?)(?:\s+Группа)',
-            'recipient_full_name': r'(?:За кого)[\s:]*([А-Яа-я\s]+)(?=\s*Счет от)',
-            'institution_name': r'(Департамент[^)]*[)])',
-            'service_category': r'(?:Группа)[\\s:]*([А-ЯА-я\\s\\d]+?)(?=\\s*Наименование платежа)',
-            'payment_due_date': r'(?:Оплатить до)[\\s:]*(\\d{1,2}\\.\\d{1,2}\\.\\d{4})',
-            'payment_purpose': r'(?:Наименование платежа)[\\s:]*([^З]+?)(?=\\s*За кого)',
-            'receipt_date': r'(?:Счет от)[\\s:]*(\\d{1,2}\\.\\d{1,2}\\.\\d{4})',
-        }
+    'internal_receipt_number': r'(?:Лицевой счет)[\s:]*(\d+)',
+    'payer_full_name': r'(?:Плательщик)[\s:]*([А-Яа-яЁё\s]+?)(?:\s+Группа)',
+    'recipient_full_name': r'(?:За кого)[\s:]*([А-Яа-яЁё\s]+)(?=\s*Счет от)',
+    'institution_name': r'(Департамент[^)]*[)])',
+    'service_category': r'(?:Группа)[\s:]*([А-ЯА-я\s\d]+?)(?=\s*Наименование платежа)',
+    'payment_due_date': r'(?:Оплатить до)[\s:]*(\d{1,2}\.\d{1,2}\.\d{4})',
+    'payment_purpose': r'(?:Наименование платежа)[\s:]*([^З]+?)(?=\s*За кого)',
+    'receipt_date': r'(?:Счет от)[\s:]*(\d{1,2}\.\d{1,2}\.\d{4})',
+}
 
 MONTHS_RU = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
              'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь']
@@ -72,7 +70,11 @@ def create_formatted_headers(text: str) -> List[str]:
     ]
 
 
-def extract_text_and_tables_from_pdf(pdf_file) -> Tuple[str, List]:
+def extract_logical_receipts_from_pdf(pdf_file) -> List[Dict]:
+    """
+    Extract logical receipts from PDF, handling both single and multi-receipt pages.
+    Returns a list of dictionaries, each representing a logical receipt.
+    """
     table_settings = {
         "vertical_strategy": "lines",
         "horizontal_strategy": "lines",
@@ -80,30 +82,79 @@ def extract_text_and_tables_from_pdf(pdf_file) -> Tuple[str, List]:
     }
 
     pdf_file.seek(0)
-    text = ''
-    clean_table = []
+    logical_receipts = []
 
     with pdfplumber.open(pdf_file) as pdf:
-        for page in pdf.pages:
-
-            page_text = page.extract_text()
-            if page_text:
-                text += page_text + "\n"
+        for page_num, page in enumerate(pdf.pages):
 
             tables = page.extract_tables(table_settings=table_settings)
-            if tables and not clean_table:
-                for row in tables[0]:
-                    if (sum(1 for cell in row if cell is not None) >= 3 and
-                            not any('Учреждение' in str(cell or '') for cell in row)):
-                        clean_table.append(clean_row(row))
+            logger.debug(f"Page {page_num + 1}: Found {len(tables)} tables")
 
-    if clean_table:
-        headers = create_formatted_headers(text)
-        if headers:
-            clean_table.insert(0, headers)
+            needs_horizontal_split = len(tables) >= 4
+            if needs_horizontal_split:
+                page_width = page.width
+                page_height = page.height
+                mid_y = page_height / 2
 
-    return text, clean_table
+                regions_definitions = [
+                    {"name": "Upper Half", "bbox": (0, 0, page_width, mid_y)},
+                    {"name": "Lower Half", "bbox": (0, mid_y, page_width, page_height)}
+                ]
 
+                for region_def in regions_definitions:
+                    cropped_page = page.crop(region_def["bbox"])
+                    region_text = cropped_page.extract_text() or ""
+                    region_raw_tables = cropped_page.extract_tables(table_settings)
+
+                    processed_region_table = []
+                    if region_raw_tables and region_raw_tables[0]:
+                        first_raw_table = region_raw_tables[0]
+                        temp_clean_table = []
+                        for row in first_raw_table:
+                            if (sum(1 for cell in row if cell is not None) >= 3 and
+                                    not any('Учреждение' in str(cell or '') for cell in row)):
+                                temp_clean_table.append(clean_row(row))
+
+                        if temp_clean_table:
+                            table_headers = create_formatted_headers(region_text)
+                            if table_headers:
+                                processed_region_table.append(table_headers)
+                            processed_region_table.extend(temp_clean_table)
+
+                    logical_receipts.append({
+                        'text': region_text,
+                        'processed_table': processed_region_table,
+                        'source_page_number': page_num + 1,
+                        'source_region_name': region_def["name"]
+                    })
+
+            else:
+                page_text = page.extract_text() or ""
+                clean_table = []
+
+                if tables:
+                    first_table = tables[0]
+                    temp_clean_table = []
+                    for row in first_table:
+                        if (sum(1 for cell in row if cell is not None) >= 3 and
+                                not any('Учреждение' in str(cell or '') for cell in row)):
+                            temp_clean_table.append(clean_row(row))
+
+                    if temp_clean_table:
+                        headers = create_formatted_headers(page_text)
+                        if headers:
+                            clean_table.append(headers)
+                        clean_table.extend(temp_clean_table)
+
+                logical_receipts.append({
+                    'text': page_text,
+                    'processed_table': clean_table,
+                    'source_page_number': page_num + 1,
+                    'source_region_name': "Full Page"
+                })
+
+    logger.info(f"Total logical receipts found: {len(logical_receipts)}")
+    return logical_receipts
 
 def parse_amount(amount_str: str) -> Decimal:
     if not amount_str or amount_str == '0.00':
@@ -120,13 +171,13 @@ class PDFReceiptParser:
     def __init__(self):
         self.patterns = {
             'internal_receipt_number': r'(?:Лицевой счет)[\s:]*(\d+)',
-            'payer_full_name': r'(?:Плательщик)[\s:]*([А-Яа-я\s]+?)(?:\s+Группа)',
-            'recipient_full_name': r'(?:За кого)[\s:]*([А-Яа-я\s]+)(?=\s*Счет от)',
+            'payer_full_name': r'(?:Плательщик)[\s:]*([А-Яа-яЁё\s]+?)(?:\s+Группа)',
+            'recipient_full_name': r'(?:За кого)[\s:]*([А-Яа-яЁё\s]+)(?=\s*Счет от)',
             'institution_name': r'(Департамент[^)]*[)])',
-            'service_category': r'(?:Группа)[\\s:]*([А-ЯА-я\\s\\d]+?)(?=\\s*Наименование платежа)',
-            'payment_due_date': r'(?:Оплатить до)[\\s:]*(\\d{1,2}\\.\\d{1,2}\\.\\d{4})',
-            'payment_purpose': r'(?:Наименование платежа)[\\s:]*([^З]+?)(?=\\s*За кого)',
-            'receipt_date': r'(?:Счет от)[\\s:]*(\\d{1,2}\\.\\d{1,2}\\.\\d{4})',
+            'service_category': r'(?:Группа)[\s:]*([А-ЯА-я\s\d]+?)(?=\s*Наименование платежа)',
+            'payment_due_date': r'(?:Оплатить до)[\s:]*(\d{1,2}\.\d{1,2}\.\d{4})',
+            'payment_purpose': r'(?:Наименование платежа)[\s:]*([^З]+?)(?=\s*За кого)',
+            'receipt_date': r'(?:Счет от)[\s:]*(\d{1,2}\.\d{1,2}\.\d{4})',
         }
 
     def extract_financial_data_from_table(self, tables: List) -> Dict:
@@ -159,6 +210,7 @@ class PDFReceiptParser:
                 'prepayment': parse_amount(row[7]),
                 'service_amount': parse_amount(row[8])
             }
+
 
             financial_data['services'].append(service_info)
 
@@ -202,36 +254,46 @@ class PDFReceiptParser:
 
         return extracted_data
 
-    def parse_pdf_receipt(self, pdf_file, student_profile: StudentProfile = None) -> Dict: # Made student_profile optional
+    def parse_pdf_receipt(self, pdf_file, student_profile: StudentProfile = None) -> List[Dict]:
         """
-        Main method to parse PDF receipt and return structured data
+        Main method to parse PDF receipt and return structured data for all logical receipts.
+        Returns a list of receipt data dictionaries.
         """
         try:
-            pdf_text, tables = extract_text_and_tables_from_pdf(pdf_file)
+            logical_receipts = extract_logical_receipts_from_pdf(pdf_file)
 
-            logger.info(f"Extracted text length: {len(pdf_text)}")
-            logger.info(f"Found {len(tables)} tables")
+            logger.info(f"Found {len(logical_receipts)} logical receipts")
 
-            receipt_data = self.extract_receipt_data(pdf_text, tables)
+            parsed_receipts = []
 
-            logger.info(f"Extracted receipt data: {receipt_data}")
+            for logical_receipt in logical_receipts:
+                receipt_data = self.extract_receipt_data(
+                    logical_receipt['text'],
+                    logical_receipt['processed_table']
+                )
+                receipt_data['source_page_number'] = logical_receipt['source_page_number']
+                receipt_data['source_region_name'] = logical_receipt['source_region_name']
 
-            if student_profile:
-                receipt_data.setdefault('student_profile', student_profile)
-                receipt_data.setdefault('recipient_full_name', student_profile.name)
+                logger.info(
+                    f"Extracted receipt data for {logical_receipt['source_region_name']} on page {logical_receipt['source_page_number']}: {receipt_data}")
 
+                if student_profile and isinstance(student_profile, StudentProfile):
+                    receipt_data.setdefault('student_profile', student_profile)
+                    receipt_data.setdefault('recipient_full_name', student_profile.name)
 
-            receipt_data.setdefault('internal_receipt_number', f"REC-{datetime.now().strftime('%Y%m%d%H%M%S%f')}") # Added %f for more uniqueness
-            receipt_data.setdefault('institution_name', "МБОУ гимназия №5") # This might need to be dynamic
-            receipt_data.setdefault('service_name', "Образовательные услуги")
-            receipt_data.setdefault('service_amount', Decimal('0.00'))
-            receipt_data.setdefault('total_amount', Decimal('0.00'))
-            receipt_data.setdefault('receipt_date', date.today())
-            receipt_data.setdefault('payment_due_date', date.today())
-            receipt_data.setdefault('payment_purpose', "Оплата образовательных услуг")
-            receipt_data.setdefault('service_category', "ПЛАТНЫЕ УСЛУГИ")
+                receipt_data.setdefault('internal_receipt_number', f"REC-{datetime.now().strftime('%Y%m%d%H%M%S%f')}")
+                receipt_data.setdefault('institution_name', "N/A")
+                receipt_data.setdefault('service_name', "N/A")
+                receipt_data.setdefault('service_amount', Decimal('0.00'))
+                receipt_data.setdefault('total_amount', Decimal('0.00'))
+                receipt_data.setdefault('receipt_date', date.today())
+                receipt_data.setdefault('payment_due_date', date.today())
+                receipt_data.setdefault('payment_purpose', "N/A")
+                receipt_data.setdefault('service_category', "N/A")
 
-            return receipt_data
+                parsed_receipts.append(receipt_data)
+
+            return parsed_receipts
 
         except Exception as e:
             logger.error(f"Error parsing PDF receipt: {str(e)}")
@@ -240,182 +302,112 @@ class PDFReceiptParser:
 
 def process_pdf_receipt(pdf_file, student_profile: StudentProfile) -> Receipt:
     """
-    Process uploaded PDF file and create receipt
+    Process uploaded PDF file and create receipt, processes only first recipe.
+    Used for legacy compatibility - expects StudentProfile instance
+    """
+    result = process_pdf_receipts_bulk(pdf_file, student_profile.id if student_profile else None)
+    return result["created_receipts"][0] if result["created_receipts"] else None
+
+
+def process_pdf_receipts_bulk(pdf_file, student_profile_id=None) -> Dict:
+    """
+    Process uploaded PDF file and create receipts for all logical receipts found
+    Args:
+        pdf_file: The PDF file to process
+        student_profile_id: StudentProfile ID (UUID string) or None
+    Returns:
+        Dict with:
+        - created_receipts: List[Receipt] - Successfully created receipts
+        - failed_details: List[Dict] - Details about failed receipt creations
+        - created_count: int - Number of successfully created receipts  
+        - failed_count: int - Number of failed receipt creations
     """
     parser = PDFReceiptParser()
 
-    receipt_data = parser.parse_pdf_receipt(pdf_file, student_profile)
+    actual_student_profile = None
+    if student_profile_id is not None:
+        try:
+            actual_student_profile = StudentProfile.objects.get(id=student_profile_id)
+            logger.info(f"Found StudentProfile {actual_student_profile.id}")
+        except StudentProfile.DoesNotExist:
+            logger.warning(f"No StudentProfile found for ID {student_profile_id}")
+            actual_student_profile = None
+        except Exception as e:
+            logger.error(f"Error getting StudentProfile for ID {student_profile_id}: {str(e)}")
+            actual_student_profile = None
 
-    pdf_file.seek(0)
-    pdf_content = ContentFile(pdf_file.read())
-    receipt_data['pdf_file'] = pdf_content
+    receipt_data_list = parser.parse_pdf_receipt(pdf_file, actual_student_profile)
 
-    receipt = create_receipt(**receipt_data)
+    created_receipts = []
+    failed_details = []
 
-    receipt.pdf_file.save(
-        f"receipt_{receipt.id}.pdf",
-        pdf_content,
-        save=True
-    )
+    for i, receipt_data in enumerate(receipt_data_list):
+        source_page_number = receipt_data.get('source_page_number', 1)
+        source_region_name = receipt_data.get('source_region_name', 'Unknown')
+        
+        try:
+            pdf_file.seek(0)
+            pdf_reader = PdfReader(pdf_file)
+            pdf_writer = PdfWriter()
 
-    logger.info(f"Processed PDF receipt {receipt.id} for student {student_profile.name}")
-    return receipt
+            page_index = source_page_number - 1
+            if page_index < len(pdf_reader.pages):
+                pdf_writer.add_page(pdf_reader.pages[page_index])
 
+                page_pdf_buffer = io.BytesIO()
+                pdf_writer.write(page_pdf_buffer)
+                page_pdf_buffer.seek(0)
 
-# def extract_individual_receipts_from_pdf(pdf_file) -> List[Dict]:
-#     """
-#     Extracts individual receipt data from a multi-page PDF, where each page is one receipt.
-#     Returns a list of dictionaries, each containing parsed data and 'pdf_page_content' (BytesIO).
-#     """
-#     logger.info("Starting extraction of individual receipts from multi-page PDF.")
-#     parser = PDFReceiptParser()
-#     receipts_data_list = []
-#
-#     pdf_file.seek(0)
-#     pdf_content_bytes = pdf_file.read()  # Read the entire PDF content once
-#     pdf_file_main_stream = io.BytesIO(pdf_content_bytes) # Use this stream for PdfReader
-#
-#     try:
-#         # Use a separate BytesIO stream for pdfplumber if needed for initial page count or other ops
-#         # Or, if pdfplumber is only used for text/table extraction within parse_pdf_receipt,
-#         # it will receive single-page streams.
-#
-#         # Get page count using PdfReader first
-#         temp_reader_for_page_count = PdfReader(io.BytesIO(pdf_content_bytes))
-#         num_pages = len(temp_reader_for_page_count.pages)
-#
-#         if num_pages == 0:
-#             logger.warning("Uploaded PDF has no pages.")
-#             return []
-#
-#         logger.info(f"PDF has {num_pages} pages. Iterating through each page.")
-#
-#         for i in range(num_pages):
-#             page_num_for_logging = i + 1
-#             logger.info(f"Processing page {page_num_for_logging} of {num_pages}")
-#
-#             single_page_pdf_stream = io.BytesIO()
-#             writer = PdfWriter()
-#
-#             # Use the main BytesIO stream for PdfReader, re-create reader or seek for each page
-#             # Creating a new reader instance for each page from the same main stream is safer
-#             current_page_reader = PdfReader(io.BytesIO(pdf_content_bytes))
-#
-#             if i < len(current_page_reader.pages):
-#                 writer.add_page(current_page_reader.pages[i])
-#                 writer.write(single_page_pdf_stream)
-#                 single_page_pdf_stream.seek(0) # Reset stream for parsing
-#
-#                 # Pass the single-page stream to the parser
-#                 parsed_data = parser.parse_pdf_receipt(single_page_pdf_stream, student_profile=None)
-#                 print(parsed_data)
-#
-#                 if parsed_data.get('recipient_full_name'):
-#                     parsed_data['source_page_number'] = page_num_for_logging
-#                     single_page_pdf_stream.seek(0)
-#                     # Store the stream itself, it will be read later in process_bulk_pdf_receipt
-#                     parsed_data['pdf_page_content'] = single_page_pdf_stream
-#                     receipts_data_list.append(parsed_data)
-#                     logger.info(f"Successfully parsed receipt from page {page_num_for_logging}. Recipient: {parsed_data.get('recipient_full_name')}")
-#                 else:
-#                     logger.warning(f"Could not extract recipient_full_name from page {page_num_for_logging}. Skipping this page.")
-#                     single_page_pdf_stream.close() # Close stream if not used
-#             else:
-#                 # This case should ideally not be reached if num_pages is accurate
-#                 logger.warning(f"Page index {i} out of bounds for PdfReader with {len(current_page_reader.pages)} pages.")
-#                 single_page_pdf_stream.close() # Close stream if error
-#
-#     except Exception as e:
-#         logger.error(f"Error processing multi-page PDF for individual receipts: {str(e)}", exc_info=True)
-#         # Clean up any streams in receipts_data_list if an error occurs mid-processing
-#         for data_item in receipts_data_list:
-#             if 'pdf_page_content' in data_item and hasattr(data_item['pdf_page_content'], 'close'):
-#                 data_item['pdf_page_content'].close()
-#         return []
-#     finally:
-#         pdf_file_main_stream.close() # Close the main BytesIO stream
-#
-#     logger.info(f"Extracted {len(receipts_data_list)} potential receipts from the PDF.")
-#     return receipts_data_list
-#
-#
-# def process_bulk_pdf_receipt(pdf_file) -> Dict[str, any]:
-#     """
-#     Process uploaded PDF file that contains multiple receipts (one per page).
-#     Tries to identify students by recipient_full_name and create receipts.
-#     """
-#     individual_receipt_data_list = extract_individual_receipts_from_pdf(pdf_file)
-#
-#     created_receipts_api_data = []
-#     failed_receipts_info = []
-#
-#     for receipt_data_item in individual_receipt_data_list:
-#         student_name = receipt_data_item.get('recipient_full_name')
-#         pdf_page_content_stream = receipt_data_item.pop('pdf_page_content', None)
-#         source_page_number = receipt_data_item.get('source_page_number', 'unknown')
-#
-#         if not student_name:
-#             logger.warning(f"Skipping receipt item from page {source_page_number} due to missing recipient_full_name.")
-#             failed_receipts_info.append({'reason': 'Missing recipient_full_name', 'source_page': source_page_number, 'data': receipt_data_item})
-#             if pdf_page_content_stream:
-#                 pdf_page_content_stream.close()
-#             continue
-#
-#         if not pdf_page_content_stream:
-#             logger.warning(f"Skipping receipt for {student_name} from page {source_page_number} due to missing PDF page content.")
-#             failed_receipts_info.append({'student_name': student_name, 'source_page': source_page_number, 'reason': 'Missing PDF page content', 'data': receipt_data_item})
-#             continue
-#
-#         try:
-#             student_profile = get_student_profile(filters={'name__icontains': student_name}, empty_exception=False)
-#             if not student_profile:
-#                 name_parts = student_name.split()
-#                 if len(name_parts) >= 2:
-#                     student_profile = get_student_profile(
-#                         filters={'user__last_name__icontains': name_parts[0], 'user__first_name__icontains': name_parts[1]},
-#                         empty_exception=False
-#                     )
-#                 if not student_profile and len(name_parts) >= 3:
-#                      student_profile = get_student_profile(
-#                         filters={'user__last_name__icontains': name_parts[0], 'user__first_name__icontains': name_parts[1], 'user__patronymic__icontains': name_parts[2]},
-#                         empty_exception=False
-#                     )
-#
-#             if student_profile:
-#                 current_receipt_data = receipt_data_item.copy()
-#                 current_receipt_data['student_profile'] = student_profile
-#
-#                 current_receipt_data.pop('source_page_number', None)
-#
-#                 pdf_page_content_stream.seek(0) # Ensure stream is at the beginning before reading
-#                 file_content = pdf_page_content_stream.read()
-#                 # Create a new ContentFile for each receipt
-#                 pdf_for_receipt_model = ContentFile(file_content, name=f"receipt_p{source_page_number}_for_{student_name.replace(' ', '_')}.pdf")
-#                 current_receipt_data['pdf_file'] = pdf_for_receipt_model
-#
-#                 new_receipt = create_receipt(**current_receipt_data)
-#
-#                 # The FileField in `create_receipt` should handle saving.
-#                 # For explicit filename control with receipt ID, we can re-save.
-#                 pdf_for_receipt_model.seek(0) # Rewind ContentFile's internal pointer
-#                 new_receipt.pdf_file.save(
-#                     f"receipt_{new_receipt.id}_p{source_page_number}.pdf",
-#                     pdf_for_receipt_model, # Pass the ContentFile
-#                     save=True
-#                 )
-#                 created_receipts_api_data.append(GetReceiptDetailedSerializer(new_receipt).data)
-#                 logger.info(f"Created receipt {new_receipt.id} for student: {student_name} from page {source_page_number}")
-#             else:
-#                 logger.warning(f"Student profile not found for: {student_name} (page {source_page_number}). Skipping receipt creation.")
-#                 failed_receipts_info.append({'student_name': student_name, 'source_page': source_page_number, 'reason': 'Student not found'})
-#         except Exception as e:
-#             logger.error(f"Failed to create receipt for {student_name} (page {source_page_number}): {str(e)}", exc_info=True)
-#             failed_receipts_info.append({'student_name': student_name, 'source_page': source_page_number,'reason': str(e)})
-#         finally:
-#             if pdf_page_content_stream:
-#                 pdf_page_content_stream.close()
-#
-#     return {"created_count": len(created_receipts_api_data), "failed_count": len(failed_receipts_info), "created_receipts": created_receipts_api_data, "failed_details": failed_receipts_info}
+                pdf_content = ContentFile(
+                    page_pdf_buffer.read(),
+                    name=f"receipt_p{source_page_number}_{source_region_name.replace(' ', '_').lower()}.pdf"
+                )
+                receipt_data['pdf_file'] = pdf_content
+                
+            else:
+                logger.warning(f"Page {source_page_number} not found in PDF, using entire PDF as fallback")
+                pdf_file.seek(0)
+                pdf_content = ContentFile(pdf_file.read())
+                receipt_data['pdf_file'] = pdf_content
+                
+        except Exception as pdf_error:
+            logger.warning(f"Error extracting page {source_page_number}: {str(pdf_error)}, using entire PDF as fallback")
+            pdf_file.seek(0)
+            pdf_content = ContentFile(pdf_file.read())
+            receipt_data['pdf_file'] = pdf_content
+
+        receipt_data.pop('source_page_number', None)
+        receipt_data.pop('source_region_name', None)
+
+        if actual_student_profile:
+            receipt_data['student_profile'] = actual_student_profile
+        elif 'student_profile' in receipt_data:
+            receipt_data.pop('student_profile', None)
+
+        try:
+            receipt = create_receipt(**receipt_data)
+            created_receipts.append(receipt)
+            logger.info(
+                f"Processed PDF receipt {receipt.id} for student {receipt_data.get('recipient_full_name', 'Unknown')} from page {source_page_number} ({source_region_name})")
+
+        except Exception as e:
+            error_detail = {
+                "index": i,
+                "page": source_page_number,
+                "region": source_region_name,
+                "recipient_name": receipt_data.get('recipient_full_name', 'Unknown'),
+                "error": str(e)
+            }
+            failed_details.append(error_detail)
+            logger.error(f"Failed to create receipt from page {source_page_number} ({source_region_name}): {str(e)}")
+            continue
+
+    return {
+        "created_receipts": created_receipts,
+        "failed_details": failed_details,
+        "created_count": len(created_receipts),
+        "failed_count": len(failed_details)
+    }
 
 
 def create_receipt(student_profile: StudentProfile, **receipt_data) -> Receipt:
@@ -447,9 +439,6 @@ class PDFDownloadService:
     Service for handling PDF download operations for receipts
     """
 
-    def __init__(self):
-        self.logger = logging.getLogger(__name__)
-
     def download_single_receipt_pdf(self, receipt: Receipt) -> HttpResponse:
         """
         Download PDF for a single receipt
@@ -469,63 +458,53 @@ class PDFDownloadService:
         try:
             response = HttpResponse(receipt.pdf_file.read(), content_type='application/pdf')
             response['Content-Disposition'] = f'attachment; filename="receipt_{receipt.internal_receipt_number}.pdf"'
-            self.logger.info(f"Downloaded PDF for receipt {receipt.id}")
+            logger.info(f"Downloaded PDF for receipt {receipt.id}")
             return response
         except FileNotFoundError:
-            self.logger.error(f"PDF file not found on storage for receipt {receipt.id}")
+            logger.error(f"PDF file not found on storage for receipt {receipt.id}")
             raise Http404("PDF file not found on storage.")
 
-    # def download_consolidated_family_pdf(self, family, filters=None) -> HttpResponse:
-    #     """
-    #     Download consolidated PDF for all receipts in a family
-    #
-    #     Args:
-    #         family: Family instance
-    #         filters: Optional filters for receipts
-    #
-    #     Returns:
-    #         HttpResponse with consolidated PDF content
-    #
-    #     Raises:
-    #         Http404: If no receipts or valid PDFs found
-    #     """
-    #     receipts = get_receipts_for_family(family=family, filters=filters or {})
-    #
-    #     if not receipts.exists():
-    #         raise Http404("No receipts found for this family.")
-    #
-    #     merger = PdfWriter()
-    #     processed_count = 0
-    #
-    #     for receipt in receipts:
-    #         if receipt.pdf_file:
-    #             try:
-    #                 pdf_file_buffer = io.BytesIO(receipt.pdf_file.read())
-    #                 reader = PdfReader(pdf_file_buffer)
-    #                 for page in reader.pages:
-    #                     merger.add_page(page)
-    #                 receipt.pdf_file.seek(0)
-    #                 processed_count += 1
-    #                 self.logger.debug(f"Added PDF for receipt {receipt.id} to consolidated file")
-    #             except FileNotFoundError:
-    #                 self.logger.warning(f"PDF for receipt {receipt.id} not found on storage. Skipping.")
-    #                 continue
-    #             except Exception as e:
-    #                 self.logger.warning(f"Error processing PDF for receipt {receipt.id}: {e}. Skipping.")
-    #                 continue
-    #
-    #     if not merger.pages:
-    #         raise Http404("No valid PDF files found to merge for this family's receipts.")
-    #
-    #     output_buffer = io.BytesIO()
-    #     merger.write(output_buffer)
-    #     output_buffer.seek(0)
-    #
-    #     response = HttpResponse(output_buffer.read(), content_type='application/pdf')
-    #     response['Content-Disposition'] = f'attachment; filename="family_{family.id}_receipts.pdf"'
-    #
-    #     self.logger.info(f"Generated consolidated PDF for family {family.id} with {processed_count} receipts")
-    #     return response
+    def download_consolidated_family_pdf(self, family, filters=None) -> HttpResponse:
+        """
+        Download consolidated PDF for all receipts in a family
+            Args:
+            family: Family instance
+            filters: Optional filters for receipts
+            Returns:
+            HttpResponse with consolidated PDF content
+            Raises:
+            Http404: If no receipts or valid PDFs found
+        """
+        receipts = get_receipts_for_family(family=family, filters=filters or {})
+        if not receipts.exists():
+            raise Http404("No receipts found for this family.")
+        merger = PdfWriter()
+        processed_count = 0
+        for receipt in receipts:
+            if receipt.pdf_file:
+                try:
+                    pdf_file_buffer = io.BytesIO(receipt.pdf_file.read())
+                    reader = PdfReader(pdf_file_buffer)
+                    for page in reader.pages:
+                        merger.add_page(page)
+                    receipt.pdf_file.seek(0)
+                    processed_count += 1
+                    logger.debug(f"Added PDF for receipt {receipt.id} to consolidated file")
+                except FileNotFoundError:
+                    logger.warning(f"PDF for receipt {receipt.id} not found on storage. Skipping.")
+                    continue
+                except Exception as e:
+                    logger.warning(f"Error processing PDF for receipt {receipt.id}: {e}. Skipping.")
+                    continue
+        if not merger.pages:
+            raise Http404("No valid PDF files found to merge for this family's receipts.")
+        output_buffer = io.BytesIO()
+        merger.write(output_buffer)
+        output_buffer.seek(0)
+        response = HttpResponse(output_buffer.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="family_{family.id}_receipts.pdf"'
+        logger.info(f"Generated consolidated PDF for family {family.id} with {processed_count} receipts")
+        return response
 
 
 class ReceiptUpdateService:
@@ -562,7 +541,7 @@ class ReceiptUpdateService:
             instance=receipt,
             fields=fields,
             data=receipt_data
-        )        
+        )
         self.logger.info(f"Updated receipt {receipt.id}")
         return updated_receipt
 
@@ -699,20 +678,19 @@ class ReceiptNotificationService:
 
 
 def update_receipt(receipt: Receipt, **receipt_data) -> Receipt:
-    """Convenience function for updating receipts"""
     service = ReceiptUpdateService()
     return service.update_receipt(receipt, **receipt_data)
 
 
 def send_receipt_notification(receipt: Receipt, notification_type: str = 'initial',
                               custom_message: str = '') -> bool:
-    """Convenience function for sending receipt notifications"""
+    """Sends receipt notifications"""
     service = ReceiptNotificationService()
     return service.send_receipt_notification(receipt, notification_type, custom_message)
 
 
 def bulk_send_receipt_notifications(receipt_ids: List[str], notification_type: str = 'initial',
                                     custom_message: str = '') -> Dict[str, int]:
-    """Convenience function for bulk sending receipt notifications"""
+    """Bulk sending receipt notifications"""
     service = ReceiptNotificationService()
     return service.bulk_send_receipt_notifications(receipt_ids, notification_type, custom_message)
