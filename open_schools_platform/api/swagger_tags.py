@@ -13,3 +13,4 @@ class SwaggerTags:
     PHOTO_MANAGEMENT_PHOTOS = "Photos management. Photos"
     HISTORY_MANAGEMENT = "History management"
     TICKET_MANAGEMENT_TICKET = "Ticket management. Tickets"
+    RECEIPT_MANAGEMENT_RECEIPTS = "Receipt management. Receipts"
