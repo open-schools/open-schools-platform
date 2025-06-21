@@ -4,6 +4,8 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from .models import Document
 from .serializers import DocumentSerializer, DocumentCreateSerializer, DocumentSignSerializer
+from ..parent_management.parents.models import ParentProfile
+
 
 # POST api/enrollment_agreement/documents/create
 class DocumentCreateView(generics.CreateAPIView):
@@ -48,3 +50,14 @@ class DocumentDirectorSignView(APIView):
             document.director_signed = True
             document.save()
         return Response({'director_signed': document.director_signed})
+
+class DocumentsByParentView(APIView):
+    def get(self, request, parent_id):
+        parent = get_object_or_404(ParentProfile, id=parent_id)
+        documents = Document.objects.filter(
+            parent_signed=False,
+            student__families__parent_profiles=parent
+        ).distinct()
+
+        serializer = DocumentSerializer(documents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
