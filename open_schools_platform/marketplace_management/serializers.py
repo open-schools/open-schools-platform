@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from open_schools_platform.marketplace_management.models import AppRelease, App, Category
+from open_schools_platform.marketplace_management.models import AppRelease, App, Category, Installation
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -28,3 +28,16 @@ class AppSerializer(serializers.ModelSerializer):
     class Meta:
         model = App
         fields = "__all__"
+
+
+
+
+class InstallationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installation
+        fields = "__all__"
+
+class InstallationCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installation
+        exclude = ("updated_at", "created_at", "active")
