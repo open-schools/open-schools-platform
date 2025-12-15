@@ -52,7 +52,7 @@ LOCAL_APPS = [
     'open_schools_platform.organization_management.teachers.apps.TeachersConfig',
     'open_schools_platform.testing.apps.TestingConfig',
     'open_schools_platform.sms.apps.SmsConfig',
-    'open_schools_platform.miniapp_management.apps.MiniappManagementConfig',
+    'open_schools_platform.marketplace_management.apps.MiniappManagementConfig',
 ]
 
 THIRD_PARTY_APPS = [
