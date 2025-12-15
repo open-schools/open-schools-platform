@@ -1,4 +1,6 @@
 import uuid
+from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
+from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.organizations.models import (
