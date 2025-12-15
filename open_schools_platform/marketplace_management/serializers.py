@@ -1,12 +1,18 @@
 from rest_framework import serializers
 
-from open_schools_platform.marketplace_management.models import AppRelease, App, Category, Installation
+from open_schools_platform.marketplace_management.models import (
+    AppRelease,
+    App,
+    Category,
+    Installation,
+)
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+
 
 class AppReleaseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -30,12 +36,11 @@ class AppSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-
-
 class InstallationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
         fields = "__all__"
+
 
 class InstallationCreateSerializer(serializers.ModelSerializer):
     class Meta:

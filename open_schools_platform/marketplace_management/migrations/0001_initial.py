@@ -14,126 +14,288 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('organizations', '0001_initial_squashed_0004_added_history_records'),
+        ("organizations", "0001_initial_squashed_0004_added_history_records"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='App',
+            name="App",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
-                ('description', models.TextField()),
-                ('type', models.CharField(choices=[('internal', 'Internal'), ('external', 'External')], max_length=10)),
-                ('status', models.CharField(choices=[('draft', 'Draft'), ('pending_review', 'Pending Review'), ('published', 'Published'), ('rejected', 'Rejected')], default='draft', max_length=15)),
-                ('icon_url', models.URLField(blank=True)),
-                ('screenshots', models.JSONField(blank=True, default=list)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("description", models.TextField()),
+                (
+                    "type",
+                    models.CharField(
+                        choices=[("internal", "Internal"), ("external", "External")],
+                        max_length=10,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("draft", "Draft"),
+                            ("pending_review", "Pending Review"),
+                            ("published", "Published"),
+                            ("rejected", "Rejected"),
+                        ],
+                        default="draft",
+                        max_length=15,
+                    ),
+                ),
+                ("icon_url", models.URLField(blank=True)),
+                ("screenshots", models.JSONField(blank=True, default=list)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='Category',
+            name="Category",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=255)),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='Review',
+            name="Review",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('rating', models.IntegerField()),
-                ('message', models.CharField(max_length=512)),
-                ('app', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='miniapp_management.app')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("rating", models.IntegerField()),
+                ("message", models.CharField(max_length=512)),
+                (
+                    "app",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="miniapp_management.app",
+                    ),
+                ),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='DeveloperProfile',
+            name="DeveloperProfile",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('email', models.EmailField(max_length=255)),
-                ('github', models.URLField(max_length=255)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='developer_profile', to=settings.AUTH_USER_MODEL)),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("email", models.EmailField(max_length=255)),
+                ("github", models.URLField(max_length=255)),
+                (
+                    "user",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="developer_profile",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
         migrations.CreateModel(
-            name='AppRelease',
+            name="AppRelease",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('version', models.CharField(max_length=50)),
-                ('date', models.DateField()),
-                ('description', models.TextField()),
-                ('manifest', models.JSONField(default=dict)),
-                ('app', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='versions', to='miniapp_management.app')),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("version", models.CharField(max_length=50)),
+                ("date", models.DateField()),
+                ("description", models.TextField()),
+                ("manifest", models.JSONField(default=dict)),
+                (
+                    "app",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="versions",
+                        to="miniapp_management.app",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
         migrations.AddField(
-            model_name='app',
-            name='category',
-            field=models.ManyToManyField(related_name='apps', to='miniapp_management.Category'),
+            model_name="app",
+            name="category",
+            field=models.ManyToManyField(
+                related_name="apps", to="miniapp_management.Category"
+            ),
         ),
         migrations.AddField(
-            model_name='app',
-            name='developer_profile',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='apps', to='miniapp_management.developerprofile'),
+            model_name="app",
+            name="developer_profile",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="apps",
+                to="miniapp_management.developerprofile",
+            ),
         ),
         migrations.CreateModel(
-            name='Installation',
+            name="Installation",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('installed_at', models.DateTimeField(auto_now_add=True)),
-                ('config_data', models.JSONField(default=dict)),
-                ('active', models.BooleanField(default=True)),
-                ('app', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='installations', to='miniapp_management.app')),
-                ('organization', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='installations', to='organizations.organization')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='installations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("installed_at", models.DateTimeField(auto_now_add=True)),
+                ("config_data", models.JSONField(default=dict)),
+                ("active", models.BooleanField(default=True)),
+                (
+                    "app",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="installations",
+                        to="miniapp_management.app",
+                    ),
+                ),
+                (
+                    "organization",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="installations",
+                        to="organizations.organization",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="installations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('app', 'organization')},
+                "unique_together": {("app", "organization")},
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),

@@ -1,6 +1,4 @@
-from django.shortcuts import render
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -8,11 +6,15 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.marketplace_management.filters import AppFilterset
 from open_schools_platform.marketplace_management.models import App, Installation
-from open_schools_platform.marketplace_management.serializers import AppSerializer, InstallationCreateSerializer, \
-    InstallationSerializer
+from open_schools_platform.marketplace_management.serializers import (
+    AppSerializer,
+    InstallationCreateSerializer,
+    InstallationSerializer,
+)
 
 
 # Create your views here.
+
 
 class AppApi(ApiAuthMixin, ModelViewSet):
     queryset = App.objects.all()
