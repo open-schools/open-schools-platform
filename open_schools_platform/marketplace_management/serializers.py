@@ -1,0 +1,50 @@
+from typing import Union
+
+from rest_framework import serializers
+
+from open_schools_platform.marketplace_management.models import (
+    AppRelease,
+    App,
+    Category,
+    Installation,
+)
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = "__all__"
+
+
+class AppReleaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppRelease
+        exclude = ["app"]
+
+
+class AppSerializer(serializers.ModelSerializer):
+    category = CategorySerializer()
+
+    latest_published_release = serializers.SerializerMethodField()
+
+    def get_latest_published_release(self, obj: App) -> Union[AppReleaseSerializer, None]:
+        latest_version = AppRelease.objects.filter(app=obj).order_by("-date").first()
+        if latest_version:
+            return AppReleaseSerializer(latest_version)
+        return None
+
+    class Meta:
+        model = App
+        fields = "__all__"
+
+
+class InstallationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installation
+        fields = "__all__"
+
+
+class InstallationCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Installation
+        exclude = ("updated_at", "created_at", "active")
