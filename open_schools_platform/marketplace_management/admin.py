@@ -35,4 +35,3 @@ class ReviewModelAdmin(BaseAdmin):
 class InstallationModelAdmin(BaseAdmin):
     list_display = ("id", "app", "active")
     field_to_highlight = "app"
-
