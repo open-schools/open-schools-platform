@@ -46,7 +46,7 @@ ticket_management_urls = [
 ]
 
 marketplace_management_urls = [
-    path('marketplace', include(('open_schools_platform.marketplace_management.urls', 'marketplace'))),
+    path('marketplace/', include(('open_schools_platform.marketplace_management.urls', 'marketplace'))),
 ]
 
 urlpatterns = [

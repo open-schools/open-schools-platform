@@ -1,7 +1,9 @@
 from django.db.models import Q
 from django_filters import rest_framework as filters
+from django_filters import UUIDFilter
 
 from open_schools_platform.marketplace_management.models import App
+from open_schools_platform.marketplace_management.models import Installation
 
 
 class AppFilterset(filters.FilterSet):
@@ -20,3 +22,13 @@ class AppFilterset(filters.FilterSet):
             "category_id",
             "developer_profile_id",
         ]
+
+
+class InstallationFilterset(filters.FilterSet):
+    schoolId = UUIDFilter(field_name="organization__id", lookup_expr="exact")
+    appId = UUIDFilter(field_name="app__id", lookup_expr="exact")
+    status = filters.BooleanFilter(field_name="active")
+
+    class Meta:
+        model = Installation
+        fields = ["schoolId", "appId", "status"]

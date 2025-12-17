@@ -4,12 +4,13 @@ from rest_framework.viewsets import ModelViewSet
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
-from open_schools_platform.marketplace_management.filters import AppFilterset
+from open_schools_platform.marketplace_management.filters import AppFilterset, InstallationFilterset
 from open_schools_platform.marketplace_management.models import App, Installation
 from open_schools_platform.marketplace_management.serializers import (
     AppSerializer,
     InstallationCreateSerializer,
     InstallationSerializer,
+    InstallationListSerializer,
 )
 
 
@@ -52,3 +53,21 @@ class InstallationsViewSet(ModelViewSet):
     )
     def retrieve(self, *args, **kwargs):
         return super().list(*args, **kwargs)
+
+
+class AdminInstallationViewSet(ApiAuthMixin, ModelViewSet):
+    """
+    ViewSet for the administrative settings API
+    """
+    queryset = Installation.objects.select_related('app', 'organization').all()
+    filterset_class = InstallationFilterset
+    pagination_class = DefaultListPagination
+    serializer_class = InstallationListSerializer
+
+    @swagger_auto_schema(
+        operation_description="Get a list of installations filtered by school, app, and status",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+        responses={200: InstallationListSerializer(many=True)}
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
