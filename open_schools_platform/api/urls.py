@@ -45,6 +45,10 @@ ticket_management_urls = [
     path('ticket', include(('open_schools_platform.ticket_management.tickets.urls', 'ticket'))),
 ]
 
+marketplace_management_urls = [
+    path('marketplace/', include(('open_schools_platform.marketplace_management.urls', 'marketplace'))),
+]
+
 urlpatterns = [
     path('user-management/', include((user_management_urls, 'user-management'))),
     path('organization-management/', include((organization_management_urls, 'organization-management'))),
@@ -53,7 +57,8 @@ urlpatterns = [
     path('students-management/', include((students_management_urls, 'students-management'))),
     path('photos-management/', include((photos_management_urls, 'photo-management'))),
     path('history-management/', include((history_management_urls, 'history-management'))),
-    path('ticket-management/', include((ticket_management_urls, 'ticket-management')))
+    path('ticket-management/', include((ticket_management_urls, 'ticket-management'))),
+    path('marketplace-management/', include((marketplace_management_urls, 'marketplace-management')))
 ]
 
 if settings.SWAGGER_ENABLED:
