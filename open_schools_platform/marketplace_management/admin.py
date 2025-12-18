@@ -124,7 +124,7 @@ class InstallationModelAdmin(BaseAdmin):
         return qs.select_related('organization', 'app')
 
     # Adding custom actions
-    actions = ['activate_installations', 'deactivate_installations']
+    actions = ('activate_installations', 'deactivate_installations',)
 
     def activate_installations(self, request: Any, queryset: Any) -> None:
         updated = queryset.update(active=True)
