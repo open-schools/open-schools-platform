@@ -41,18 +41,37 @@ class InstallationsViewSet(ModelViewSet):
         return self.serializer_class
 
     @swagger_auto_schema(
-        operation_description="Get apps list",
+        operation_description="Create new installation",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
-    def create(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Get apps list",
+        operation_description="Get installation details",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
-    def retrieve(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Delete installation",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+        responses={
+            204: 'Installation deleted successfully',
+            404: 'Installation not found'
+        }
+    )
+    def destroy(self, request, *args, **kwargs):
+        """Delete installation (стандартная реализация DRF)"""
+        return super().destroy(request, *args, **kwargs)
+
+    @swagger_auto_schema(
+        operation_description="Get installations list",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class AdminInstallationViewSet(ApiAuthMixin, ModelViewSet):
