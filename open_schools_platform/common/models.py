@@ -1,5 +1,5 @@
 from typing import Any, Tuple, Optional, Type, Union  # noqa: F401
-from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
+
 import safedelete
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
@@ -8,6 +8,9 @@ from rules.contrib.models import RulesModelMixin, RulesModelBase
 from safedelete.config import FIELD_NAME
 from safedelete.managers import SafeDeleteManager
 from safedelete.models import SafeDeleteModel
+from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
+
+from .audit.mixins import AuditMixin
 
 
 class BaseManager(SafeDeleteManager):
@@ -53,10 +56,24 @@ class BaseManager(SafeDeleteManager):
         return obj
 
 
-class BaseModel(RulesModelMixin, SafeDeleteModel, metaclass=RulesModelBase):
+class BaseModel(AuditMixin, RulesModelMixin, SafeDeleteModel, metaclass=RulesModelBase):
     _safedelete_policy = safedelete.config.SOFT_DELETE_CASCADE
     created_at = models.DateTimeField(db_index=True, default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         abstract = True
+
+    def __str__(self):
+        """Универсальное строковое представление"""
+        if hasattr(self, 'name'):
+            return self.name
+        elif hasattr(self, 'title'):
+            return self.title
+        elif hasattr(self, 'username'):
+            return self.username
+        elif hasattr(self, 'email'):
+            return self.email
+
+        # По умолчанию возвращаем ID и имя модели
+        return f"{self._meta.verbose_name} #{self.pk}"

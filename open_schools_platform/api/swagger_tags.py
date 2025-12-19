@@ -14,3 +14,4 @@ class SwaggerTags:
     HISTORY_MANAGEMENT = "History management"
     TICKET_MANAGEMENT_TICKET = "Ticket management. Tickets"
     MARKETPLACE_MANAGEMENT = "Marketplace management"
+    AUDIT = 'Audit'

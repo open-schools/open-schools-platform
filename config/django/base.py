@@ -34,6 +34,7 @@ ALLOWED_HOSTS = ['*']
 
 LOCAL_APPS = [
     'open_schools_platform.common.apps.CommonConfig',
+    'open_schools_platform.common.audit.apps.AuditConfig',
     'open_schools_platform.tasks.apps.TasksConfig',
     'open_schools_platform.api.apps.ApiConfig',
     'open_schools_platform.user_management.users.apps.UsersConfig',
@@ -88,6 +89,7 @@ INSTALLED_APPS = [
 
 LOCAL_MIDDLEWARES = [
     'open_schools_platform.middleware.LastLoginIP.LastLoginIPMiddleware',
+    'open_schools_platform.common.audit.middleware.AuditMiddleware',
     'open_schools_platform.middleware.RemoveTrailingSlash.RemoveTrailingSlashMiddleware',
 ]
 

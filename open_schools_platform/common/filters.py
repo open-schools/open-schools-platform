@@ -148,6 +148,82 @@ class MetaCharIContainsMixin:
         },
     }
 
+class ComplexFilter:
+    """
+    ComplexFilter для фильтрации логов аудита
+    """
+
+    def __init__(self, selector, include_list=None):
+        self.selector = selector
+        self.include_list = include_list or []
+
+    def get_objects(self, filters=None):
+        """Получение объектов с применением фильтров"""
+        filters = filters or {}
+        filtered_filters = {}
+
+        # Оставляем только разрешенные фильтры
+        for key in self.include_list:
+            if key in filters:
+                filtered_filters[key] = filters[key]
+
+        # Если есть фильтры по дате в формате timestamp
+        if 'date_from' in filters:
+            try:
+                # Преобразуем строку даты в datetime
+                from datetime import datetime
+                date_from = datetime.strptime(filters['date_from'], '%Y-%m-%d')
+                filtered_filters['date_from'] = date_from.date()
+            except (ValueError, TypeError):
+                filtered_filters['date_from'] = filters['date_from']
+
+        if 'date_to' in filters:
+            try:
+                from datetime import datetime
+                date_to = datetime.strptime(filters['date_to'], '%Y-%m-%d')
+                filtered_filters['date_to'] = date_to.date()
+            except (ValueError, TypeError):
+                filtered_filters['date_to'] = filters['date_to']
+
+        return self.selector(filters=filtered_filters)
+
+    def get_dict_filters(self):
+        """Получение словаря с описанием фильтров для документации"""
+        filter_dict = {}
+        for field in self.include_list:
+            if field == 'event_type':
+                filter_dict[field] = {
+                    'type': 'string',
+                    'description': 'Тип события аудита',
+                    'example': 'app_installation'
+                }
+            elif field.endswith('_id'):
+                filter_dict[field] = {
+                    'type': 'uuid',
+                    'description': f'ID {field.replace("_id", "")}',
+                    'example': '123e4567-e89b-12d3-a456-426614174000'
+                }
+            elif field in ['date_from', 'date_to']:
+                filter_dict[field] = {
+                    'type': 'date',
+                    'description': f'Дата {field}',
+                    'example': '2025-12-18'
+                }
+            elif field == 'search':
+                filter_dict[field] = {
+                    'type': 'string',
+                    'description': 'Поиск по описанию',
+                    'example': 'установка'
+                }
+            else:
+                filter_dict[field] = {
+                    'type': 'string',
+                    'description': f'Фильтр по {field}',
+                    'example': ''
+                }
+
+        return filter_dict
+
 
 class UUIDInFilter(BaseInFilter, UUIDFilter):
     pass

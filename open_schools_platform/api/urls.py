@@ -58,7 +58,8 @@ urlpatterns = [
     path('photos-management/', include((photos_management_urls, 'photo-management'))),
     path('history-management/', include((history_management_urls, 'history-management'))),
     path('ticket-management/', include((ticket_management_urls, 'ticket-management'))),
-    path('marketplace-management/', include((marketplace_management_urls, 'marketplace-management')))
+    path('marketplace-management/', include((marketplace_management_urls, 'marketplace-management'))),
+    path('marketplace-audit/', include(('open_schools_platform.common.audit.urls', 'audit')))
 ]
 
 if settings.SWAGGER_ENABLED:
