@@ -12,6 +12,12 @@ from open_schools_platform.marketplace_management.filters import (
     AppFilterset,
     InstallationFilterset,
 )
+from open_schools_platform.marketplace_management.internal_modules.errors import (
+    InternalModuleInitError,
+)
+from open_schools_platform.marketplace_management.internal_modules.factories import (
+    make_module_manager,
+)
 from open_schools_platform.marketplace_management.models import (
     App,
     Installation,
@@ -82,20 +88,38 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
             self.request.user.is_authenticated is False
             or user_organization_employee is None
         ):
-            raise PermissionDenied("Only organization employees can perform this action.")
+            raise PermissionDenied(
+                "Only organization employees can perform this action."
+            )
 
         latest_app_release: AppRelease = app.latest_release
         if latest_app_release is None:
             raise NotFound("No app release available")
 
-        config_schema = latest_app_release.manifest.get(ManifestFields.config_schema.value)
+        config_schema = latest_app_release.manifest.get(
+            ManifestFields.config_schema.value
+        )
         if config_schema is not None:
             try:
-                jsonschema.validate(instance=serializer.data["config_data"], schema=config_schema)
+                jsonschema.validate(
+                    instance=serializer.data["config_data"], schema=config_schema
+                )
             except jsonschema.exceptions.ValidationError:
-                raise InvalidArgument("Invalid config_schema")
+                raise InvalidArgument("Invalid config_data")
 
-        serializer.save()
+        module_manager = make_module_manager()
+        try:
+            module_manager.initialize(
+                app_id=serializer.data["app"],
+                org_id=serializer.data["organization"],
+                config_data=serializer.data["config_data"],
+            )
+        except InternalModuleInitError:
+            # TODO We should use installation lifecycle statuses
+            serializer.save(active=False)
+            return
+
+        serializer.save(active=True, user=self.request.user)
 
     @swagger_auto_schema(
         operation_description="Get installation details",
