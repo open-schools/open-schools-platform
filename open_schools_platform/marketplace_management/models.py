@@ -74,6 +74,16 @@ class Review(BaseModel):
 
 
 class Installation(BaseModel):
+    STATUS_DISABLED = "disabled"
+    STATUS_ACTIVE = "active"
+    STATUS_UNINSTALLED = "uninstalled"
+
+    STATUS_CHOICES = (
+        (STATUS_ACTIVE, "Active"),
+        (STATUS_DISABLED, "Disabled"),
+        (STATUS_UNINSTALLED, "Uninstalled"),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="installations")
     organization = models.ForeignKey(
@@ -85,8 +95,35 @@ class Installation(BaseModel):
         User, on_delete=models.CASCADE, related_name="installations"
     )
     installed_at = models.DateTimeField(auto_now_add=True)
-    config_data = models.JSONField(default=dict)
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default=STATUS_ACTIVE,
+        db_index=True,
+    )
     active = models.BooleanField(default=True)
+    disabled_at = models.DateTimeField(null=True, blank=True)
+    re_activated_at = models.DateTimeField(null=True, blank=True)
+    uninstalled_at = models.DateTimeField(null=True, blank=True)
+    config_data = models.JSONField(default=dict)
 
     class Meta:
         unique_together = ["app", "organization"]
+
+
+class InstallationStatusLog(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    installation = models.ForeignKey(
+        Installation,
+        on_delete=models.CASCADE,
+        related_name="status_logs",
+    )
+    old_status = models.CharField(max_length=20)
+    new_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    changed_at = models.DateTimeField(auto_now_add=True)

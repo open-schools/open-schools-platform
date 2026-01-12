@@ -1,5 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.viewsets import ModelViewSet
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
@@ -11,6 +13,10 @@ from open_schools_platform.marketplace_management.serializers import (
     InstallationCreateSerializer,
     InstallationSerializer,
     InstallationListSerializer,
+    InstallationStatusUpdateSerializer,
+)
+from open_schools_platform.marketplace_management.services.installation_status import (
+    InstallationStatusService,
 )
 
 
@@ -31,28 +37,72 @@ class AppApi(ApiAuthMixin, ModelViewSet):
         return super().list(request, *args, **kwargs)
 
 
-class InstallationsViewSet(ModelViewSet):
+class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
+    queryset = Installation.objects.select_related("organization", "app")
     serializer_class = InstallationSerializer
-    queryset = Installation.objects.all()
 
     def get_serializer_class(self):
         if self.action == "create":
             return InstallationCreateSerializer
-        return self.serializer_class
+        if self.action == "change_status":
+            return InstallationStatusUpdateSerializer
+        return InstallationSerializer
+
+    @staticmethod
+    def _can_manage_installation(user, installation) -> bool:
+        if not user or not user.is_authenticated:
+            return False
+
+        if getattr(user, "is_admin", False):
+            return True
+
+        organization = installation.organization
+
+        return organization.teachers.filter(
+            teacher_profile__user_id=user.id
+        ).exists()
 
     @swagger_auto_schema(
-        operation_description="Get apps list",
+        operation_description="Install app to organization",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
-    def create(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
+    def create(self, request, *args, **kwargs):
+        return super().create(request, *args, **kwargs)
 
     @swagger_auto_schema(
-        operation_description="Get apps list",
+        operation_description="Get installation by id",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
-    def retrieve(self, *args, **kwargs):
-        return super().list(*args, **kwargs)
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    # PATCH /installations/{id}/status
+    @action(detail=True, methods=["patch"], url_path="status")
+    @swagger_auto_schema(
+        operation_description="Change installation status",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+        request_body=InstallationStatusUpdateSerializer,
+        responses={200: InstallationSerializer},
+    )
+    def change_status(self, request, pk=None):
+        installation = self.get_object()
+
+        if not self._can_manage_installation(request.user, installation):
+            return Response(
+                {"detail": "No rights to manage the organization"},
+                status=403,
+            )
+
+        serializer = InstallationStatusUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        InstallationStatusService.change_status(
+            installation=installation,
+            new_status=serializer.validated_data["status"],
+            user=request.user,
+        )
+
+        return Response(InstallationSerializer(installation).data)
 
 
 class AdminInstallationViewSet(ApiAuthMixin, ModelViewSet):

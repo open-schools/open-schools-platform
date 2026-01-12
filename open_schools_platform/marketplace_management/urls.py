@@ -14,6 +14,11 @@ urlpatterns = [
         name="miniapps-installations-detail",
     ),
     path(
+        "installations/<uuid:pk>/status",
+        InstallationsViewSet.as_view({"patch": "change_status"}),
+        name="installations-change-status",
+    ),
+    path(
         "admin/installations",
         AdminInstallationViewSet.as_view({"get": "list"}),
         name="admin-installations-list",
