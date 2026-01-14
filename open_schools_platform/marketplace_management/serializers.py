@@ -70,3 +70,7 @@ class InstallationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
         fields = ["id", "school", "app", "installed_at", "status"]
+
+
+class InstallationStatusUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=Installation.STATUS_CHOICES)
