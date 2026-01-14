@@ -9,7 +9,17 @@ from open_schools_platform.organization_management.organizations.models import (
 from open_schools_platform.user_management.users.models import User
 from django.db import models
 
-# Create your models here.
+
+class AppType(models.TextChoices):
+    INTERNAL = "internal", "Internal"
+    EXTERNAL = "external", "External"
+
+
+class AppStatus(models.TextChoices):
+    DRAFT = "draft", "Draft"
+    PENDING_REVIEW = "pending_review", "Pending Review"
+    PUBLISHED = "published", "Published"
+    REJECTED = "rejected", "Rejected"
 
 
 class DeveloperProfile(BaseModel):
@@ -27,23 +37,11 @@ class Category(BaseModel):
 
 
 class App(BaseModel):
-    APP_TYPES = (
-        ("internal", "Internal"),
-        ("external", "External"),
-    )
-
-    STATUS_CHOICES = (
-        ("draft", "Draft"),
-        ("pending_review", "Pending Review"),
-        ("published", "Published"),
-        ("rejected", "Rejected"),
-    )
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     description = models.TextField()
-    type = models.CharField(max_length=10, choices=APP_TYPES)
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default="draft")
+    type = models.CharField(max_length=10, choices=AppType.choices)
+    status = models.CharField(max_length=15, choices=AppStatus.choices, default="draft")
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
     developer_profile = models.ForeignKey(
@@ -54,6 +52,10 @@ class App(BaseModel):
     category = models.ManyToManyField(Category, related_name="apps")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    @property
+    def latest_release(self) -> "AppRelease | None":
+        return self.versions.order_by("-date").first()
 
 
 class AppRelease(BaseModel):
