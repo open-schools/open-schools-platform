@@ -2,7 +2,7 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 from django_filters import UUIDFilter
 
-from open_schools_platform.marketplace_management.models import App
+from open_schools_platform.marketplace_management.models import App, AppType
 from open_schools_platform.marketplace_management.models import Installation
 
 
@@ -16,7 +16,7 @@ class AppFilterset(filters.FilterSet):
 
     sort = filters.ChoiceFilter(method="filter_sort", choices=SORT_CHOICES)
     category_id = filters.NumberFilter("category_id")
-    type = filters.ChoiceFilter(field_name="type", choices=App.APP_TYPES)
+    type = filters.ChoiceFilter(field_name="type", choices=AppType.choices)
     q = filters.CharFilter(method="filter_q")
 
     def filter_q(self, queryset, name, value):

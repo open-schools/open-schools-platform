@@ -10,8 +10,17 @@ urlpatterns = [
     path("apps", AppApi.as_view({"get": "list"}), name="miniapps-apps-list"),
     path(
         "installations/<uuid:pk>",
-        InstallationsViewSet.as_view({"get": "retrieve", "post": "create"}),
+        InstallationsViewSet.as_view(
+            {"get": "retrieve", "delete": "destroy"}
+        ),
         name="miniapps-installations-detail",
+    ),
+    path(
+        "installations",
+        InstallationsViewSet.as_view(
+            {"post": "create"}
+        ),
+        name="miniapps-installations-create",
     ),
     path(
         "admin/installations",
