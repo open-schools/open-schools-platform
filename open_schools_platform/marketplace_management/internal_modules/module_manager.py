@@ -1,3 +1,4 @@
+from typing import Optional
 from uuid import UUID
 
 from open_schools_platform.marketplace_management.internal_modules.interface import (
@@ -17,7 +18,7 @@ class ModuleManager:
         pass
 
     def initialize(
-        self, app_id: str, org_id: UUID, config_data: dict | None = None
+        self, app_id: str, org_id: UUID, config_data: Optional[dict] = None
     ) -> ModuleInitResultDTO:
         module: InternalModule = self.module_registry.get_module(
             app_id, org_id, config_data
