@@ -67,7 +67,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
     def create(self, request, *args, **kwargs):
         return super().create(request, *args, **kwargs)
 
-    def perform_create(self, serializer: InstallationCreateSerializer):
+    def perform_create(self, serializer):
         if Installation.objects.filter(
             app_id=serializer.data["app"],
             organization_id=serializer["organization"].value,
