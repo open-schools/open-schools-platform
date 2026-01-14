@@ -129,11 +129,11 @@ jobs:
           # This is a more aggresive cache.
           # The one above caches the wheel files, but still runs the installation for them
           # While the cache below caches the entire Python directory.
-      - name: Cache pip
-        uses: actions/cache@v3
-        with:
-          path: /opt/hostedtoolcache/Python/3.9/x64/ # This path is specific to Ubuntu
-          key: python-${{ hashFiles('requirements/local.txt') }}-${{ hashFiles('requirements/base.txt') }}
+#      - name: Cache pip
+#        uses: actions/cache@v3
+#        with:
+#          path: /opt/hostedtoolcache/Python/3.9/x64/ # This path is specific to Ubuntu
+#          key: python-${{ hashFiles('requirements/local.txt') }}-${{ hashFiles('requirements/base.txt') }}
       - name: Create env file
         run: |
           touch .env
