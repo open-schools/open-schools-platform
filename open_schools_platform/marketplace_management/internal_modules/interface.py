@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+
 @dataclass
 class ModuleInitResultDTO:
     status: str
+
 
 class InternalModule(ABC):
     @abstractmethod

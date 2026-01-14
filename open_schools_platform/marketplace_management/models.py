@@ -9,15 +9,18 @@ from open_schools_platform.organization_management.organizations.models import (
 from open_schools_platform.user_management.users.models import User
 from django.db import models
 
+
 class AppType(models.TextChoices):
     INTERNAL = "internal", "Internal"
     EXTERNAL = "external", "External"
+
 
 class AppStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     PENDING_REVIEW = "pending_review", "Pending Review"
     PUBLISHED = "published", "Published"
     REJECTED = "rejected", "Rejected"
+
 
 class DeveloperProfile(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)

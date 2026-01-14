@@ -1,4 +1,6 @@
-from open_schools_platform.marketplace_management.internal_modules.interface import InternalModule
+from open_schools_platform.marketplace_management.internal_modules.interface import (
+    InternalModule,
+)
 
 
 class ModuleRegistry:
