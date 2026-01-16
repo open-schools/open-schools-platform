@@ -1,5 +1,7 @@
 import uuid
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
+
+import safedelete
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 
 from open_schools_platform.common.models import BaseModel
@@ -76,6 +78,8 @@ class Review(BaseModel):
 
 
 class Installation(BaseModel):
+    _safedelete_policy = safedelete.config.HARD_DELETE_NOCASCADE
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="installations")
     organization = models.ForeignKey(
@@ -86,7 +90,7 @@ class Installation(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="installations"
     )
-    installed_at = models.DateTimeField(auto_now_add=True)
+    installed_at = models.DateTimeField(null=True, default=None)
     config_data = models.JSONField(default=dict)
     active = models.BooleanField(default=True)
 

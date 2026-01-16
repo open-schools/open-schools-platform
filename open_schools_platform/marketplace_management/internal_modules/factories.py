@@ -2,10 +2,9 @@ from open_schools_platform.marketplace_management.internal_modules.module_manage
     ModuleManager,
 )
 from open_schools_platform.marketplace_management.internal_modules.module_registry import (
-    ModuleRegistry,
+    module_registry,
 )
 
 
 def make_module_manager() -> ModuleManager:
-    module_registry = ModuleRegistry()
     return ModuleManager(module_registry)
