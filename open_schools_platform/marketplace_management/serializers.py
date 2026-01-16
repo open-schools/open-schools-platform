@@ -49,7 +49,7 @@ class InstallationSerializer(serializers.ModelSerializer):
 class InstallationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
-        exclude = ("id", "updated_at", "created_at", "active", "user")
+        exclude = ("id", "updated_at", "created_at", "active", "user", "installed_at")
 
 
 class InstallationListSerializer(serializers.ModelSerializer):
