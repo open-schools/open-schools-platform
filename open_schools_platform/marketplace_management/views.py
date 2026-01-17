@@ -72,9 +72,13 @@ class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
     def create(self, request, app_id=None):
         app = get_object_or_404(App, id=app_id)
 
+        user: User = self.request.user  # noqa
+
         if not Installation.objects.filter(
             app=app,
-            user=request.user,
+            organization_id__in=user.employee_profile.employees.values_list(
+                "organization_id"
+            ),
             active=True,
         ).exists():
             raise PermissionDenied("You must install app before reviewing")
