@@ -70,7 +70,7 @@ class AppRelease(BaseModel):
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="reviews")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
     app = models.ForeignKey(
         App,
         on_delete=models.CASCADE,
