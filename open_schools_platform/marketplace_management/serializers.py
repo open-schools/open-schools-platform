@@ -30,7 +30,7 @@ class AppSerializer(serializers.ModelSerializer):
     def get_latest_published_release(self, obj: App) -> Union[AppReleaseSerializer, None]:
         latest_version = AppRelease.objects.filter(app=obj).order_by("-date").first()
         if latest_version:
-            return AppReleaseSerializer(latest_version)
+            return AppReleaseSerializer(latest_version).data
         return None
 
     class Meta:

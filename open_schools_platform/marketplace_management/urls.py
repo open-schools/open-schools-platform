@@ -8,6 +8,7 @@ from open_schools_platform.marketplace_management.views import (
 
 urlpatterns = [
     path("apps", AppApi.as_view({"get": "list"}), name="miniapps-apps-list"),
+    path("apps/<uuid:pk>", AppApi.as_view({"get": "retrieve"}), name="miniapps-apps-detail"),
     path(
         "installations/<uuid:pk>",
         InstallationsViewSet.as_view(
