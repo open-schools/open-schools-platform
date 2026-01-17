@@ -6,8 +6,11 @@ from open_schools_platform.marketplace_management.models import (
     AppRelease,
     App,
     Category,
-    Installation, Review,
+    Installation,
+    Review,
+    InstallationStatus,
 )
+
 
 class ReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,6 +21,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
         if not 1 <= value <= 5:
             raise serializers.ValidationError("Rating must be between 1 and 5")
         return value
+
 
 class ReviewListSerializer(serializers.ModelSerializer):
     user = serializers.StringRelatedField()
@@ -92,3 +96,7 @@ class InstallationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
         fields = ["id", "school", "app", "installed_at", "status"]
+
+
+class InstallationStatusUpdateSerializer(serializers.Serializer):
+    status = serializers.ChoiceField(choices=InstallationStatus.choices)

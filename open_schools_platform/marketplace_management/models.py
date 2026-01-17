@@ -86,6 +86,11 @@ class Review(BaseModel):
             )
         ]
 
+class InstallationStatus(models.TextChoices):
+    STATUS_DISABLED = "draft", "draft"
+    STATUS_ACTIVE = "active", "active"
+    STATUS_UNINSTALLED = "uninstalled", "uninstalled"
+
 
 class Installation(BaseModel):
     _safedelete_policy = safedelete.config.HARD_DELETE_NOCASCADE
@@ -102,7 +107,34 @@ class Installation(BaseModel):
     )
     installed_at = models.DateTimeField(null=True, default=None)
     config_data = models.JSONField(default=dict)
+    status = models.CharField(
+        max_length=20,
+        choices=InstallationStatus.choices,
+        default=InstallationStatus.STATUS_ACTIVE,
+        db_index=True,
+    )
     active = models.BooleanField(default=True)
+    disabled_at = models.DateTimeField(null=True, blank=True)
+    re_activated_at = models.DateTimeField(null=True, blank=True)
+    uninstalled_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ["app", "organization"]
+
+
+class InstallationStatusLog(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    installation = models.ForeignKey(
+        Installation,
+        on_delete=models.CASCADE,
+        related_name="status_logs",
+    )
+    old_status = models.CharField(max_length=20)
+    new_status = models.CharField(max_length=20)
+    changed_by = models.ForeignKey(
+        User,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    changed_at = models.DateTimeField(auto_now_add=True)
