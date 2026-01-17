@@ -1,6 +1,9 @@
 import jsonschema
+from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
+from rest_framework import status
 from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -68,22 +71,21 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
-
-    def perform_create(self, serializer):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
         if Installation.objects.filter(
-            app_id=serializer.data["app"],
-            organization_id=serializer["organization"].value,
+            app_id=serializer.validated_data["app"].id,
+            organization_id=serializer.validated_data["organization"].id,
         ).exists():
             raise AlreadyExists("This app already installed for that organization")
 
-        app = App.objects.get(id=serializer.data["app"])
+        app = App.objects.get(id=serializer.validated_data["app"].id)
         if not (app.type == AppType.INTERNAL and app.status == AppStatus.PUBLISHED):
             raise InvalidArgument("App with such id don't available now")
 
         user_organization_employee: Employee = (
             self.request.user.employee_profile.employees.filter(
-                organization_id=serializer["organization"].value
+                organization_id=serializer.validated_data["organization"].id
             ).first()
         )
 
@@ -105,24 +107,41 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         if config_schema is not None:
             try:
                 jsonschema.validate(
-                    instance=serializer.data["config_data"], schema=config_schema
+                    instance=serializer.validated_data["config_data"],
+                    schema=config_schema,
                 )
             except jsonschema.exceptions.ValidationError:
                 raise InvalidArgument("Invalid config_data")
 
+        app_entry = latest_app_release.manifest.get(ManifestFields.entry.value)
+
         module_manager = make_module_manager()
         try:
             module_manager.initialize(
-                app_id=serializer.data["app"],
-                org_id=serializer.data["organization"],
-                config_data=serializer.data["config_data"],
+                app_id=serializer.validated_data["app"].id,
+                org_id=serializer.validated_data["organization"].id,
+                config_data=serializer.validated_data["config_data"],
             )
         except InternalModuleInitError:
-            # TODO We should use installation lifecycle statuses
-            serializer.save(active=False)
-            return
-
-        serializer.save(active=True, user=self.request.user)
+            # TODO We should use installation lifecycle statuses and log error
+            installation = serializer.save(
+                active=False, installed_at=None, user=request.user
+            )
+        else:
+            installation = serializer.save(
+                active=True, installed_at=timezone.now(), user=request.user
+            )
+        return Response(
+            {
+                "id": installation.id,
+                "app_id": installation.app_id,
+                "organization_id": installation.organization_id,
+                "status": "active" if installation.active else "disabled",
+                "config_data": installation.config_data,
+                "app_entry": app_entry,
+            },
+            status=status.HTTP_201_CREATED,
+        )
 
     @swagger_auto_schema(
         operation_description="Get installation details",

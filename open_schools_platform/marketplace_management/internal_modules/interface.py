@@ -1,15 +1,20 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
+from uuid import UUID
 
 
 @dataclass
 class ModuleInitResultDTO:
-    status: str
+    success: bool
 
 
 class InternalModule(ABC):
     @abstractmethod
-    def init(self) -> ModuleInitResultDTO:
+    def get_app_id(self) -> UUID:
+        pass
+
+    @abstractmethod
+    def init(self, **kwargs) -> ModuleInitResultDTO:
         pass
 
     @abstractmethod
