@@ -6,8 +6,31 @@ from open_schools_platform.marketplace_management.models import (
     AppRelease,
     App,
     Category,
-    Installation,
+    Installation, Review,
 )
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ("app", "rating", "message")
+
+    def validate_rating(self, value):
+        if not 1 <= value <= 5:
+            raise serializers.ValidationError("Rating must be between 1 and 5")
+        return value
+
+class ReviewListSerializer(serializers.ModelSerializer):
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Review
+        fields = (
+            "id",
+            "user",
+            "rating",
+            "message",
+            "created_at",
+        )
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -26,6 +49,9 @@ class AppSerializer(serializers.ModelSerializer):
     category = CategorySerializer()
 
     latest_published_release = serializers.SerializerMethodField()
+
+    avg_rating = serializers.FloatField(read_only=True)
+    reviews_count = serializers.IntegerField(read_only=True)
 
     def get_latest_published_release(
         self, obj: App

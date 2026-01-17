@@ -1,4 +1,6 @@
 import jsonschema
+from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import status
@@ -26,18 +28,66 @@ from open_schools_platform.marketplace_management.models import (
     Installation,
     AppType,
     AppStatus,
-    AppRelease,
+    AppRelease, Review,
 )
 from open_schools_platform.marketplace_management.serializers import (
     AppSerializer,
     InstallationCreateSerializer,
     InstallationSerializer,
-    InstallationListSerializer,
+    InstallationListSerializer, ReviewCreateSerializer, ReviewListSerializer,
 )
 from open_schools_platform.organization_management.employees.models import Employee
 
 
 # Create your views here.
+
+class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
+    serializer_class = ReviewCreateSerializer
+    queryset = Review.objects.all()
+
+    def get_queryset(self):
+        return Review.objects.filter(app_id=self.kwargs["app_id"])
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return ReviewCreateSerializer
+        return ReviewListSerializer
+
+    def create(self, request, app_id=None):
+        app = get_object_or_404(App, id=app_id)
+
+        if not Installation.objects.filter(
+            app=app,
+            user=request.user,
+            active=True,
+        ).exists():
+            raise PermissionDenied("You must install app before reviewing")
+
+        if Review.objects.filter(user=request.user, app=app).exists():
+            raise AlreadyExists("You already reviewed this app")
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        review = serializer.save(
+            user=request.user,
+            app=app,
+        )
+
+        return Response(
+            {
+                "id": review.id,
+                "rating": review.rating,
+                "message": review.message,
+            },
+            status=status.HTTP_201_CREATED,
+        )
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class AppApi(ApiAuthMixin, ModelViewSet):
@@ -45,6 +95,12 @@ class AppApi(ApiAuthMixin, ModelViewSet):
     filterset_class = AppFilterset
     pagination_class = DefaultListPagination
     serializer_class = AppSerializer
+
+    def get_queryset(self):
+        return (
+            App.objects
+            .annotate(avg_rating=Avg("reviews__rating"))
+        )
 
     @swagger_auto_schema(
         operation_description="Get apps list",

@@ -71,10 +71,20 @@ class AppRelease(BaseModel):
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    app = models.OneToOneField(App, on_delete=models.CASCADE)
-    rating = models.IntegerField()
-    message = models.CharField(max_length=512)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="reviews")
+    app = models.OneToOneField(App, on_delete=models.CASCADE, related_name="reviews",)
+    rating = models.PositiveSmallIntegerField()
+    message = models.CharField(max_length=512, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "app")
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(rating__gte=1, rating__lte=5),
+                name="rating_between_1_and_5",
+            )
+        ]
 
 
 class Installation(BaseModel):

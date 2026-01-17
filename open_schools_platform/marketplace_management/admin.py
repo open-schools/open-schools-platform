@@ -38,7 +38,7 @@ class AppReleaseModelAdmin(BaseAdmin):
 
 @admin_wrapper(Review)
 class ReviewModelAdmin(BaseAdmin):
-    list_display = ("id", "user", "app", "rating")
+    list_display = ("id", "user", "app", "rating", "created_at")
     field_to_highlight = "app"
 
 
