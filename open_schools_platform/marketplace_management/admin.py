@@ -70,6 +70,7 @@ class InstallationStatusLogInline(admin.TabularInline):
     def has_change_permission(self, request: HttpRequest, obj=None) -> bool:
         return False
 
+
 class InstallationFilter(admin.SimpleListFilter):
     """Custom filter for the status"""
 
@@ -187,11 +188,7 @@ class InstallationModelAdmin(BaseAdmin):
         )
 
     def get_queryset(self, request: HttpRequest):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("organization", "app")
-        )
+        return super().get_queryset(request).select_related("organization", "app")
 
     def save_model(
         self,
@@ -219,10 +216,4 @@ class InstallationModelAdmin(BaseAdmin):
         else:
             super().save_model(request, obj, form, change)
 
-    get_status_display.short_description = 'Статус'  # type: ignore[attr-defined]
-
-    def get_queryset(self, request: Any) -> Any:
-        qs = super().get_queryset(request)
-        return qs.select_related('organization', 'app')
-
-    field_to_highlight = "app"
+    get_status_display.short_description = "Статус"  # type: ignore[attr-defined]

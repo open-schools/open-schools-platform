@@ -41,10 +41,10 @@ class AppFilterset(filters.FilterSet):
 
 
 class InstallationFilterset(filters.FilterSet):
-    schoolId = UUIDFilter(field_name="organization__id", lookup_expr="exact")
-    appId = UUIDFilter(field_name="app__id", lookup_expr="exact")
+    organization_id = UUIDFilter(field_name="organization__id", lookup_expr="exact")
+    app_id = UUIDFilter(field_name="app__id", lookup_expr="exact")
     status = filters.BooleanFilter(field_name="active")
 
     class Meta:
         model = Installation
-        fields = ["schoolId", "appId", "status"]
+        fields = ["organization_id", "app_id", "status"]

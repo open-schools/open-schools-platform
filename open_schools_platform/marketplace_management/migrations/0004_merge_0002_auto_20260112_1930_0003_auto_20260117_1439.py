@@ -4,11 +4,9 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('marketplace_management', '0002_auto_20260112_1930'),
-        ('marketplace_management', '0003_auto_20260117_1439'),
+        ("marketplace_management", "0002_auto_20260112_1930"),
+        ("marketplace_management", "0003_auto_20260117_1439"),
     ]
 
-    operations = [
-    ]
+    operations = []

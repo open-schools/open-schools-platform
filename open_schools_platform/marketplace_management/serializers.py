@@ -24,7 +24,7 @@ class ReviewCreateSerializer(serializers.ModelSerializer):
 
 
 class ReviewListSerializer(serializers.ModelSerializer):
-    user = serializers.StringRelatedField()
+    user: serializers.StringRelatedField = serializers.StringRelatedField()
 
     class Meta:
         model = Review
@@ -57,9 +57,7 @@ class AppSerializer(serializers.ModelSerializer):
     avg_rating = serializers.FloatField(read_only=True)
     reviews_count = serializers.IntegerField(read_only=True)
 
-    def get_latest_published_release(
-        self, obj: App
-    ) -> Union[AppReleaseSerializer, None]:
+    def get_latest_published_release(self, obj: App) -> Union[dict, None]:
         latest_version = AppRelease.objects.filter(app=obj).order_by("-date").first()
         if latest_version:
             return AppReleaseSerializer(latest_version).data
@@ -79,7 +77,18 @@ class InstallationSerializer(serializers.ModelSerializer):
 class InstallationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
-        exclude = ("id", "updated_at", "created_at", "active", "user", "installed_at")
+        exclude = (
+            "id",
+            "updated_at",
+            "created_at",
+            "active",
+            "user",
+            "installed_at",
+            "disabled_at",
+            "status",
+            "re_activated_at",
+            "uninstalled_at",
+        )
 
 
 class InstallationListSerializer(serializers.ModelSerializer):

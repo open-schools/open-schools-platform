@@ -1,7 +1,6 @@
 import uuid
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
 
-import safedelete
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 
 from open_schools_platform.common.models import BaseModel
@@ -72,7 +71,11 @@ class AppRelease(BaseModel):
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="reviews")
-    app = models.OneToOneField(App, on_delete=models.CASCADE, related_name="reviews",)
+    app = models.OneToOneField(
+        App,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+    )
     rating = models.PositiveSmallIntegerField()
     message = models.CharField(max_length=512, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -86,6 +89,7 @@ class Review(BaseModel):
             )
         ]
 
+
 class InstallationStatus(models.TextChoices):
     STATUS_DISABLED = "draft", "draft"
     STATUS_ACTIVE = "active", "active"
@@ -93,8 +97,6 @@ class InstallationStatus(models.TextChoices):
 
 
 class Installation(BaseModel):
-    _safedelete_policy = safedelete.config.HARD_DELETE_NOCASCADE
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="installations")
     organization = models.ForeignKey(
@@ -117,9 +119,6 @@ class Installation(BaseModel):
     disabled_at = models.DateTimeField(null=True, blank=True)
     re_activated_at = models.DateTimeField(null=True, blank=True)
     uninstalled_at = models.DateTimeField(null=True, blank=True)
-
-    class Meta:
-        unique_together = ["app", "organization"]
 
 
 class InstallationStatusLog(BaseModel):

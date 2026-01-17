@@ -9,49 +9,88 @@ import uuid
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('marketplace_management', '0001_initial'),
+        ("marketplace_management", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='installation',
-            name='disabled_at',
+            model_name="installation",
+            name="disabled_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='installation',
-            name='re_activated_at',
+            model_name="installation",
+            name="re_activated_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.AddField(
-            model_name='installation',
-            name='status',
-            field=models.CharField(choices=[('active', 'Active'), ('disabled', 'Disabled'), ('uninstalled', 'Uninstalled')], db_index=True, default='active', max_length=20),
+            model_name="installation",
+            name="status",
+            field=models.CharField(
+                choices=[
+                    ("active", "Active"),
+                    ("disabled", "Disabled"),
+                    ("uninstalled", "Uninstalled"),
+                ],
+                db_index=True,
+                default="active",
+                max_length=20,
+            ),
         ),
         migrations.AddField(
-            model_name='installation',
-            name='uninstalled_at',
+            model_name="installation",
+            name="uninstalled_at",
             field=models.DateTimeField(blank=True, null=True),
         ),
         migrations.CreateModel(
-            name='InstallationStatusLog',
+            name="InstallationStatusLog",
             fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('old_status', models.CharField(max_length=20)),
-                ('new_status', models.CharField(max_length=20)),
-                ('changed_at', models.DateTimeField(auto_now_add=True)),
-                ('changed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
-                ('installation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='status_logs', to='marketplace_management.installation')),
+                (
+                    "deleted",
+                    models.DateTimeField(db_index=True, editable=False, null=True),
+                ),
+                (
+                    "deleted_by_cascade",
+                    models.BooleanField(default=False, editable=False),
+                ),
+                (
+                    "created_at",
+                    models.DateTimeField(
+                        db_index=True, default=django.utils.timezone.now
+                    ),
+                ),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4, primary_key=True, serialize=False
+                    ),
+                ),
+                ("old_status", models.CharField(max_length=20)),
+                ("new_status", models.CharField(max_length=20)),
+                ("changed_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "changed_by",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "installation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="status_logs",
+                        to="marketplace_management.installation",
+                    ),
+                ),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),

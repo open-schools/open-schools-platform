@@ -31,6 +31,7 @@ from open_schools_platform.marketplace_management.models import (
     AppStatus,
     AppRelease,
     Review,
+    InstallationStatus,
 )
 from open_schools_platform.marketplace_management.serializers import (
     AppSerializer,
@@ -45,6 +46,7 @@ from open_schools_platform.marketplace_management.services.installation_status i
     InstallationStatusService,
 )
 from open_schools_platform.organization_management.employees.models import Employee
+from open_schools_platform.user_management.users.models import User
 
 
 # Create your views here.
@@ -62,6 +64,10 @@ class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
             return ReviewCreateSerializer
         return ReviewListSerializer
 
+    @swagger_auto_schema(
+        operation_description="Create a new review.",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
     def create(self, request, app_id=None):
         app = get_object_or_404(App, id=app_id)
 
@@ -95,6 +101,10 @@ class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @swagger_auto_schema(
+        operation_description="Get apps reviews",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
@@ -115,6 +125,10 @@ class AppApi(ApiAuthMixin, ModelViewSet):
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)
 
+    @swagger_auto_schema(
+        operation_description="Get app",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
     def retrieve(self, request, *args, **kwargs):
         return super().retrieve(request, *args, **kwargs)
 
@@ -122,6 +136,8 @@ class AppApi(ApiAuthMixin, ModelViewSet):
 class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
     queryset = Installation.objects.select_related("organization", "app")
     serializer_class = InstallationSerializer
+    pagination_class = DefaultListPagination
+    filterset_class = InstallationFilterset
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -135,12 +151,13 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         if not user or not user.is_authenticated:
             return False
 
+        if user == installation.user:
+            return True
+
         if getattr(user, "is_admin", False):
             return True
 
-        organization = installation.organization
-
-        return organization.teachers.filter(teacher_profile__user_id=user.id).exists()
+        return False
 
         # PATCH /installations/{id}/status
 
@@ -170,6 +187,17 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         )
 
         return Response(InstallationSerializer(installation).data)
+
+    def get_queryset(self):
+        user: User = self.request.user  # noqa
+        qs = super().get_queryset()
+        if not user.is_authenticated:
+            return qs
+        return qs.filter(
+            organization_id__in=user.employee_profile.employees.values_list(
+                "organization_id"
+            )
+        )
 
     @swagger_auto_schema(
         operation_description="Create new installation",
@@ -230,11 +258,15 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         except InternalModuleInitError:
             # TODO We should use installation lifecycle statuses and log error
             installation = serializer.save(
-                active=False, installed_at=None, user=request.user
+                status=InstallationStatus.STATUS_DISABLED,
+                installed_at=None,
+                user=request.user,
             )
         else:
             installation = serializer.save(
-                active=True, installed_at=timezone.now(), user=request.user
+                status=InstallationStatus.STATUS_ACTIVE,
+                installed_at=timezone.now(),
+                user=request.user,
             )
         return Response(
             {
