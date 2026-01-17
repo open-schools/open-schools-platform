@@ -12,15 +12,21 @@ from open_schools_platform.marketplace_management.models import (
 )
 
 
-class ReviewCreateSerializer(serializers.ModelSerializer):
+class BaseReviewCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = ("app", "rating", "message")
+        fields = ("rating", "message")
 
     def validate_rating(self, value):
         if not 1 <= value <= 5:
             raise serializers.ValidationError("Rating must be between 1 and 5")
         return value
+
+
+class ReviewCreateSerializer(BaseReviewCreateSerializer):
+    class Meta:
+        model = Review
+        fields = ("app", "rating", "message")
 
 
 class ReviewListSerializer(serializers.ModelSerializer):

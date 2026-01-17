@@ -41,6 +41,7 @@ from open_schools_platform.marketplace_management.serializers import (
     ReviewCreateSerializer,
     ReviewListSerializer,
     InstallationListSerializer,
+    BaseReviewCreateSerializer,
 )
 from open_schools_platform.marketplace_management.services.installation_status import (
     InstallationStatusService,
@@ -61,7 +62,7 @@ class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
 
     def get_serializer_class(self):
         if self.action == "create":
-            return ReviewCreateSerializer
+            return BaseReviewCreateSerializer
         return ReviewListSerializer
 
     @swagger_auto_schema(
@@ -78,10 +79,9 @@ class AppReviewViewSet(ApiAuthMixin, ModelViewSet):
         ).exists():
             raise PermissionDenied("You must install app before reviewing")
 
-        if Review.objects.filter(user=request.user, app=app).exists():
-            raise AlreadyExists("You already reviewed this app")
-
-        serializer = self.get_serializer(data=request.data)
+        data = request.data
+        data["app"] = app.id
+        serializer = ReviewCreateSerializer(data=data)
         serializer.is_valid(raise_exception=True)
 
         review = serializer.save(

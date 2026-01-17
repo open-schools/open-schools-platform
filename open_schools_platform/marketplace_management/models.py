@@ -71,7 +71,7 @@ class AppRelease(BaseModel):
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="reviews")
-    app = models.OneToOneField(
+    app = models.ForeignKey(
         App,
         on_delete=models.CASCADE,
         related_name="reviews",
@@ -81,7 +81,6 @@ class Review(BaseModel):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ("user", "app")
         constraints = [
             models.CheckConstraint(
                 check=models.Q(rating__gte=1, rating__lte=5),
