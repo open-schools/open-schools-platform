@@ -257,7 +257,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
             module_manager.initialize(
                 app_id=serializer.validated_data["app"].id,
                 org_id=serializer.validated_data["organization"].id,
-                config_data=serializer.validated_data["config_data"],
+                config_data=serializer.validated_data.get("config_data"),
             )
         except InternalModuleInitError:
             # TODO We should use installation lifecycle statuses and log error
