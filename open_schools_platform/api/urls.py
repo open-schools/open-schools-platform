@@ -1,6 +1,7 @@
 from django.urls import path, include
 from django.conf import settings
 
+from open_schools_platform.marketplace_management.views import AppReviewViewSet
 
 query_management_urls = [
     path('queries', include(('open_schools_platform.query_management.queries.urls', 'queries'))),
@@ -50,15 +51,31 @@ marketplace_management_urls = [
 ]
 
 urlpatterns = [
-    path('user-management/', include((user_management_urls, 'user-management'))),
-    path('organization-management/', include((organization_management_urls, 'organization-management'))),
-    path('query-management/', include((query_management_urls, 'query-management'))),
-    path('parent-management/', include((parent_management_urls, 'parent-management'))),
-    path('students-management/', include((students_management_urls, 'students-management'))),
-    path('photos-management/', include((photos_management_urls, 'photo-management'))),
-    path('history-management/', include((history_management_urls, 'history-management'))),
-    path('ticket-management/', include((ticket_management_urls, 'ticket-management'))),
-    path('marketplace-management/', include((marketplace_management_urls, 'marketplace-management')))
+    path("user-management/", include((user_management_urls, "user-management"))),
+    path(
+        "organization-management/",
+        include((organization_management_urls, "organization-management")),
+    ),
+    path("query-management/", include((query_management_urls, "query-management"))),
+    path("parent-management/", include((parent_management_urls, "parent-management"))),
+    path(
+        "students-management/",
+        include((students_management_urls, "students-management")),
+    ),
+    path("photos-management/", include((photos_management_urls, "photo-management"))),
+    path(
+        "history-management/", include((history_management_urls, "history-management"))
+    ),
+    path("ticket-management/", include((ticket_management_urls, "ticket-management"))),
+    path(
+        "marketplace-management/",
+        include((marketplace_management_urls, "marketplace-management")),
+    ),
+    path(
+        "apps/<uuid:app_id>/reviews",
+        AppReviewViewSet.as_view({"post": "create", "get": "list"}),
+        name="miniapps-apps-add-review",
+    ),
 ]
 
 if settings.SWAGGER_ENABLED:
