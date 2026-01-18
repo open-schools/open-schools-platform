@@ -241,7 +241,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         config_schema = latest_app_release.manifest.get(
             ManifestFields.config_schema.value
         )
-        if config_schema is not None:
+        if config_schema is not None and serializer.validated_data.get("config_data") is not None:
             try:
                 jsonschema.validate(
                     instance=serializer.validated_data["config_data"],
