@@ -33,9 +33,9 @@ urlpatterns = [
         InstallationsViewSet.as_view({"post": "create", "get": "list"}),
         name="miniapps-installations-create",
     ),
-    # path(
-    #     "admin/installations",
-    #     AdminInstallationViewSet.as_view({"get": "list"}),
-    #     name="admin-installations-list",
-    # ),
+    path(
+        "admin/installations",
+        AdminInstallationViewSet.as_view({"get": "list"}),
+        name="admin-installations-list",
+    ),
 ]
