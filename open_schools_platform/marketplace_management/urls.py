@@ -4,6 +4,7 @@ from open_schools_platform.marketplace_management.views import (
     AppApi,
     InstallationsViewSet,
     AppReviewViewSet,
+    AdminInstallationViewSet,
 )
 
 urlpatterns = [
