@@ -321,6 +321,17 @@ class AdminInstallationViewSet(ApiAuthMixin, ModelViewSet):
     pagination_class = DefaultListPagination
     serializer_class = InstallationListSerializer
 
+    def get_queryset(self):
+        user: User = self.request.user  # noqa
+        qs = super().get_queryset()
+        if not user.is_authenticated:
+            return qs
+        return qs.filter(
+            organization_id__in=user.employee_profile.employees.values_list(
+                "organization_id"
+            )
+        )
+
     @swagger_auto_schema(
         operation_description="Get a list of installations filtered by school, app, and status",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
