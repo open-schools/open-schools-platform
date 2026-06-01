@@ -7,16 +7,9 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
 from open_schools_platform.errors.exceptions import AlreadyExists, InvalidArgument
-from open_schools_platform.marketplace_management.enums import ManifestFields
 from open_schools_platform.marketplace_management.filters import (
     AppFilterset,
     InstallationFilterset,
-)
-from open_schools_platform.marketplace_management.internal_modules.errors import (
-    InternalModuleInitError,
-)
-from open_schools_platform.marketplace_management.internal_modules.factories import (
-    make_module_manager,
 )
 from open_schools_platform.marketplace_management.models import (
     App,
@@ -75,7 +68,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
             raise AlreadyExists("This app already installed for that organization")
 
         app = App.objects.get(id=serializer.data["app"])
-        if not (app.type == AppType.INTERNAL and app.status == AppStatus.PUBLISHED):
+        if app.status != AppStatus.PUBLISHED:
             raise InvalidArgument("App with such id don't available now")
 
         user_organization_employee: Employee = (
@@ -92,32 +85,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
                 "Only organization employees can perform this action."
             )
 
-        latest_app_release: AppRelease = app.latest_release
-        if latest_app_release is None:
-            raise NotFound("No app release available")
 
-        config_schema = latest_app_release.manifest.get(
-            ManifestFields.config_schema.value
-        )
-        if config_schema is not None:
-            try:
-                jsonschema.validate(
-                    instance=serializer.data["config_data"], schema=config_schema
-                )
-            except jsonschema.exceptions.ValidationError:
-                raise InvalidArgument("Invalid config_data")
-
-        module_manager = make_module_manager()
-        try:
-            module_manager.initialize(
-                app_id=serializer.data["app"],
-                org_id=serializer.data["organization"],
-                config_data=serializer.data["config_data"],
-            )
-        except InternalModuleInitError:
-            # TODO We should use installation lifecycle statuses
-            serializer.save(active=False)
-            return
 
         serializer.save(active=True, user=self.request.user)
 
