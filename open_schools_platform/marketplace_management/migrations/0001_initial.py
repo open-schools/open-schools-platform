@@ -71,51 +71,10 @@ class Migration(migrations.Migration):
             },
             bases=(rules.contrib.models.RulesModelMixin, models.Model),
         ),
-        migrations.CreateModel(
-            name='DeveloperProfile',
-            fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('email', models.EmailField(max_length=255)),
-                ('github', models.URLField(max_length=255)),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='developer_profile', to=settings.AUTH_USER_MODEL)),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(rules.contrib.models.RulesModelMixin, models.Model),
-        ),
-        migrations.CreateModel(
-            name='AppRelease',
-            fields=[
-                ('deleted', models.DateTimeField(db_index=True, editable=False, null=True)),
-                ('deleted_by_cascade', models.BooleanField(default=False, editable=False)),
-                ('created_at', models.DateTimeField(db_index=True, default=django.utils.timezone.now)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False)),
-                ('version', models.CharField(max_length=50)),
-                ('date', models.DateField()),
-                ('description', models.TextField()),
-                ('manifest', models.JSONField(default=dict)),
-                ('app', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='versions', to='marketplace_management.app')),
-            ],
-            options={
-                'abstract': False,
-            },
-            bases=(rules.contrib.models.RulesModelMixin, models.Model),
-        ),
         migrations.AddField(
             model_name='app',
             name='category',
             field=models.ManyToManyField(related_name='apps', to='marketplace_management.Category'),
-        ),
-        migrations.AddField(
-            model_name='app',
-            name='developer_profile',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='apps', to='marketplace_management.developerprofile'),
         ),
         migrations.CreateModel(
             name='Installation',

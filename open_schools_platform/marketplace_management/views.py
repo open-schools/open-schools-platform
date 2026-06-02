@@ -1,6 +1,6 @@
 import jsonschema
 from drf_yasg.utils import swagger_auto_schema
-from rest_framework.exceptions import PermissionDenied, NotFound
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.viewsets import ModelViewSet
 
 from open_schools_platform.api.mixins import ApiAuthMixin
@@ -14,9 +14,7 @@ from open_schools_platform.marketplace_management.filters import (
 from open_schools_platform.marketplace_management.models import (
     App,
     Installation,
-    AppType,
     AppStatus,
-    AppRelease,
 )
 from open_schools_platform.marketplace_management.serializers import (
     AppSerializer,
@@ -25,9 +23,6 @@ from open_schools_platform.marketplace_management.serializers import (
     InstallationListSerializer,
 )
 from open_schools_platform.organization_management.employees.models import Employee
-
-
-# Create your views here.
 
 
 class AppApi(ApiAuthMixin, ModelViewSet):
@@ -85,7 +80,27 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
                 "Only organization employees can perform this action."
             )
 
+        config_schema = getattr(app, "manifest", {}).get("config_schema") if hasattr(app, "manifest") else None
 
+        if config_schema is not None:
+            try:
+                jsonschema.validate(
+                    instance=serializer.data["config_data"], schema=config_schema
+                )
+            except jsonschema.exceptions.ValidationError:
+                raise InvalidArgument("Invalid config_data")
+
+        module_manager = make_module_manager()
+        try:
+            module_manager.initialize(
+                app_id=serializer.data["app"],
+                org_id=serializer.data["organization"],
+                config_data=serializer.data["config_data"],
+            )
+        except InternalModuleInitError:
+            # TODO We should use installation lifecycle statuses
+            serializer.save(active=False)
+            return
 
         serializer.save(active=True, user=self.request.user)
 

@@ -2,21 +2,18 @@ from django.db.models import Q
 from django_filters import rest_framework as filters
 from django_filters import UUIDFilter
 
-from open_schools_platform.marketplace_management.models import App, AppType
+from open_schools_platform.marketplace_management.models import App
 from open_schools_platform.marketplace_management.models import Installation
 
 
 class AppFilterset(filters.FilterSet):
     SORT_CHOICES = (
         ("newest", "Newest"),
-        # ("rating", "Rating"),
-        # ("popular", "Popular"),
         ("relevance", "Relevance"),
     )
 
     sort = filters.ChoiceFilter(method="filter_sort", choices=SORT_CHOICES)
     category_id = filters.NumberFilter("category_id")
-    type = filters.ChoiceFilter(field_name="type", choices=AppType.choices)
     q = filters.CharFilter(method="filter_q")
 
     def filter_q(self, queryset, name, value):
@@ -25,18 +22,14 @@ class AppFilterset(filters.FilterSet):
         )
 
     def filter_sort(self, queryset, name, value):
-        if value == "newest":
+        if value in ("newest", "relevance"):
             return queryset.order_by("-updated_at")
-        elif value == "relevance":
-            return queryset.order_by("-updated_at")
-        else:
-            return queryset
+        return queryset
 
     class Meta:
         model = App
         fields = [
             "category_id",
-            "developer_profile_id",
         ]
 
 

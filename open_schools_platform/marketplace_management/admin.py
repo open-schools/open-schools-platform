@@ -4,36 +4,47 @@ from django.utils import timezone
 from typing import Any, List, Tuple
 
 from open_schools_platform.common.admin import admin_wrapper, BaseAdmin
-from open_schools_platform.marketplace_management.models import Installation, DeveloperProfile, Category, App, \
-    AppRelease, Review
-
-
-@admin_wrapper(DeveloperProfile)
-class DeveloperProfileModelAdmin(BaseAdmin):
-    list_display = ("id", "user", "email", "github")
-    field_to_highlight = "id"
+from open_schools_platform.marketplace_management.models import (
+    Installation,
+    Category,
+    App,
+    Review,
+    OAuth2AuthorizationCode,
+    OAuth2Token,
+)
 
 
 @admin_wrapper(Category)
 class CategoryModelAdmin(BaseAdmin):
     list_display = ("id", "name")
+    search_fields = ("name",)
 
 
 @admin_wrapper(App)
 class AppModelAdmin(BaseAdmin):
-    list_display = ("id", "name", "status", "developer_profile")
+    # Добавил новые поля в список и фильтры
+    list_display = ("id", "name", "status", "created_at", "updated_at")
+    list_filter = ("status", "category")
+    search_fields = ("name", "description")
 
-
-@admin_wrapper(AppRelease)
-class AppReleaseModelAdmin(BaseAdmin):
-    list_display = ("id", "app", "version")
-    field_to_highlight = "id"
+    # Сгруппировал новые JSON-поля и OAuth-секреты в отдельный скрываемый блок fieldsets
+    fieldsets = (
+        (None, {
+            "fields": ("name", "description", "status", "category", "icon_url", "screenshots", "manifest")
+        }),
+        ("OAuth2 Настройки", {
+            "fields": ("client_secret", "redirect_uris", "grant_types", "response_types"),
+            "classes": ("collapse",),  # Блок по дефолту будет свернут в админке
+        }),
+    )
 
 
 @admin_wrapper(Review)
 class ReviewModelAdmin(BaseAdmin):
     list_display = ("id", "user", "app", "rating")
     field_to_highlight = "app"
+    list_filter = ("rating",)
+    search_fields = ("user__username", "app__name", "message")
 
 
 class InstallationFilter(admin.SimpleListFilter):
@@ -66,10 +77,8 @@ class InstallationModelAdmin(BaseAdmin):
         'id'
     )
 
-    # Default sorting (new installations first)
     ordering = ('-installed_at',)
 
-    # Filters in the right panel
     list_filter = (
         'organization',
         'app',
@@ -82,8 +91,6 @@ class InstallationModelAdmin(BaseAdmin):
     )
 
     list_per_page = 20
-
-    # Fields for quick editing
     list_editable = ('active',)
 
     def get_organization_name(self, obj: Installation) -> str:
@@ -123,7 +130,6 @@ class InstallationModelAdmin(BaseAdmin):
         qs = super().get_queryset(request)
         return qs.select_related('organization', 'app')
 
-    # Adding custom actions
     actions = ('activate_installations', 'deactivate_installations',)
 
     def activate_installations(self, request: Any, queryset: Any) -> None:
@@ -136,6 +142,8 @@ class InstallationModelAdmin(BaseAdmin):
         updated = queryset.update(active=False)
         self.message_user(request, f'{updated} установок деактивировано')
 
-    deactivate_installations.short_description = "Деактивировать выбранные установки"  # type: ignore[attr-defined]
+    deactivate_installations.short_description = "Деактивировать выбранные установки"  
 
     field_to_highlight = "app"
+
+
