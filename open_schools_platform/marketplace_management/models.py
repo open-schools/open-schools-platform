@@ -17,11 +17,6 @@ class AppStatus(models.TextChoices):
     REJECTED = "rejected", "Rejected"
 
 
-class Category(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    name = models.CharField(max_length=255)
-
-
 class App(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
@@ -29,24 +24,34 @@ class App(BaseModel):
     status = models.CharField(max_length=15, choices=AppStatus.choices, default=AppStatus.DRAFT)
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
-    category = models.ManyToManyField(Category, related_name="apps")
-    manifest = models.JSONField(default=dict, blank=True)
+    
+    # На схеме это просто колонка category_name в таблице Apps, а не ManyToMany
+    category_name = models.CharField(max_length=255, blank=True, default="")
+    
+    # OAuth Fields
+    client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     client_secret = models.CharField(max_length=255, blank=True, default="")
     redirect_uris = models.JSONField(default=list, blank=True)
     grant_types = models.JSONField(default=list, blank=True)
     response_types = models.JSONField(default=list, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
-    client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    # ИСПРАВЛЕНО: Изменено с OneToOneField на ForeignKey (связь 1-to-N на схеме)
+    # На схеме стоит 'N' со стороны Reviews, значит связи ForeignKey, а не OneToOne
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="reviews")
     rating = models.IntegerField()
-    message = models.CharField(max_length=512)
+    message = models.TextField(max_length=512)  # Используем TextField или CharField на 512
+
+    def __str__(self):
+        return f"Review by {self.user} for {self.app}"
 
 
 class Installation(BaseModel):
@@ -61,11 +66,16 @@ class Installation(BaseModel):
         User, on_delete=models.CASCADE, related_name="installations"
     )
     installed_at = models.DateTimeField(auto_now_add=True)
-    config_data = models.JSONField(default=dict)
+    
+    # Поля из вашей старой модели (на схеме их явно нет, но они полезны для логики)
+    config_data = models.JSONField(default=dict, blank=True)
     active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ["app", "organization"]
+
+    def __str__(self):
+        return f"{self.app.name} installed in {self.organization.name}"
 
 
 class OAuth2AuthorizationCode(BaseModel):
@@ -74,15 +84,14 @@ class OAuth2AuthorizationCode(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="auth_codes"
     )
-    # ДОБАВЛЕНО: Связь с таблицей Apps (client_id на схеме)
-    client = models.ForeignKey(
-        App, on_delete=models.CASCADE, related_name="auth_codes"
+    # Связь с App (client_id на схеме указывает сюда)
+    app = models.ForeignKey(
+        App, to_field="client_id", on_delete=models.CASCADE, related_name="auth_codes"
     )
     redirect_uri = models.URLField()
-    auth_time = models.DateTimeField(auto_now_add=True)
     response_type = models.CharField(max_length=255)
-    # ДОБАВЛЕНО: Поля из схемы, которых не было в коде
-    scope = models.CharField(max_length=255, blank=True, default="")
+    scope = models.CharField(max_length=255, blank=True, default="")  # Есть на схеме
+    auth_time = models.DateTimeField(auto_now_add=True)
 
     @property
     def name(self) -> str:
@@ -94,17 +103,16 @@ class OAuth2Token(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="oauth_tokens"
     )
-    # ДОБАВЛЕНО: Связь с таблицей Apps (client_id на схеме)
-    client = models.ForeignKey(
-        App, on_delete=models.CASCADE, related_name="oauth_tokens"
+    # Связь с App (client_id на схеме указывает сюда)
+    app = models.ForeignKey(
+        App, to_field="client_id", on_delete=models.CASCADE, related_name="oauth_tokens"
     )
-    token_type = models.CharField(max_length=255)
     access_token = models.CharField(max_length=255, unique=True)
     refresh_token = models.CharField(max_length=255, unique=True)
+    token_type = models.CharField(max_length=255)
     expires_in = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)  # Есть на схеме
     revoked = models.BooleanField(default=False)
-    # ДОБАВЛЕНО: Поле из схемы
-    created_at = models.DateTimeField(auto_now_add=True)
 
     @property
     def name(self) -> str:

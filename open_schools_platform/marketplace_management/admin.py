@@ -4,47 +4,39 @@ from django.utils import timezone
 from typing import Any, List, Tuple
 
 from open_schools_platform.common.admin import admin_wrapper, BaseAdmin
-from open_schools_platform.marketplace_management.models import (
-    Installation,
-    Category,
-    App,
-    Review,
-    OAuth2AuthorizationCode,
-    OAuth2Token,
-)
-
-
-@admin_wrapper(Category)
-class CategoryModelAdmin(BaseAdmin):
-    list_display = ("id", "name")
-    search_fields = ("name",)
+from .models import Installation, App, Review, OAuth2AuthorizationCode, OAuth2Token
 
 
 @admin_wrapper(App)
 class AppModelAdmin(BaseAdmin):
-    # Добавил новые поля в список и фильтры
-    list_display = ("id", "name", "status", "created_at", "updated_at")
-    list_filter = ("status", "category")
-    search_fields = ("name", "description")
-
-    # Сгруппировал новые JSON-поля и OAuth-секреты в отдельный скрываемый блок fieldsets
-    fieldsets = (
-        (None, {
-            "fields": ("name", "description", "status", "category", "icon_url", "screenshots", "manifest")
-        }),
-        ("OAuth2 Настройки", {
-            "fields": ("client_secret", "redirect_uris", "grant_types", "response_types"),
-            "classes": ("collapse",),  # Блок по дефолту будет свернут в админке
-        }),
-    )
+    list_display = ("id", "name", "category_name", "status", "client_id")
+    list_filter = ("status", "category_name")
+    search_fields = ("name", "category_name", "client_id")
+    field_to_highlight = "id"
 
 
 @admin_wrapper(Review)
 class ReviewModelAdmin(BaseAdmin):
     list_display = ("id", "user", "app", "rating")
-    field_to_highlight = "app"
     list_filter = ("rating",)
     search_fields = ("user__username", "app__name", "message")
+    field_to_highlight = "app"
+
+
+@admin_wrapper(OAuth2AuthorizationCode)
+class OAuth2AuthorizationCodeModelAdmin(BaseAdmin):
+    list_display = ("id", "code", "user", "app", "auth_time")
+    list_filter = ("auth_time",)
+    search_fields = ("code", "user__username", "app__name")
+    field_to_highlight = "id"
+
+
+@admin_wrapper(OAuth2Token)
+class OAuth2TokenModelAdmin(BaseAdmin):
+    list_display = ("id", "user", "app", "token_type", "revoked", "created_at")
+    list_filter = ("token_type", "revoked", "created_at")
+    search_fields = ("access_token", "refresh_token", "user__username", "app__name")
+    field_to_highlight = "id"
 
 
 class InstallationFilter(admin.SimpleListFilter):
@@ -142,8 +134,6 @@ class InstallationModelAdmin(BaseAdmin):
         updated = queryset.update(active=False)
         self.message_user(request, f'{updated} установок деактивировано')
 
-    deactivate_installations.short_description = "Деактивировать выбранные установки"  
+    deactivate_installations.short_description = "Деактивировать выбранные установки"  # type: ignore[attr-defined]
 
     field_to_highlight = "app"
-
-

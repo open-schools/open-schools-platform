@@ -2,19 +2,11 @@ from rest_framework import serializers
 
 from open_schools_platform.marketplace_management.models import (
     App,
-    Category,
     Installation,
 )
 
 
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = "__all__"
-
-
 class AppSerializer(serializers.ModelSerializer):
-    category = CategorySerializer(many=True, read_only=True)
 
     class Meta:
         model = App
