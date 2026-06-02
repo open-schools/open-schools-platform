@@ -36,13 +36,15 @@ class App(BaseModel):
     grant_types = models.JSONField(default=list, blank=True)
     response_types = models.JSONField(default=list, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     updated_at = models.DateTimeField(auto_now=True)
 
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    app = models.OneToOneField(App, on_delete=models.CASCADE)
+    # ИСПРАВЛЕНО: Изменено с OneToOneField на ForeignKey (связь 1-to-N на схеме)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="reviews")
     rating = models.IntegerField()
     message = models.CharField(max_length=512)
 
@@ -72,11 +74,16 @@ class OAuth2AuthorizationCode(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="auth_codes"
     )
+    # ДОБАВЛЕНО: Связь с таблицей Apps (client_id на схеме)
+    client = models.ForeignKey(
+        App, on_delete=models.CASCADE, related_name="auth_codes"
+    )
     redirect_uri = models.URLField()
     auth_time = models.DateTimeField(auto_now_add=True)
     response_type = models.CharField(max_length=255)
+    # ДОБАВЛЕНО: Поля из схемы, которых не было в коде
+    scope = models.CharField(max_length=255, blank=True, default="")
 
-    # Заглушка для BaseAdmin, чтобы не падало FieldError
     @property
     def name(self) -> str:
         return f"Code {self.code[:8]}... ({self.user.username if self.user else 'No User'})"
@@ -87,13 +94,18 @@ class OAuth2Token(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="oauth_tokens"
     )
+    # ДОБАВЛЕНО: Связь с таблицей Apps (client_id на схеме)
+    client = models.ForeignKey(
+        App, on_delete=models.CASCADE, related_name="oauth_tokens"
+    )
     token_type = models.CharField(max_length=255)
     access_token = models.CharField(max_length=255, unique=True)
     refresh_token = models.CharField(max_length=255, unique=True)
     expires_in = models.IntegerField()
     revoked = models.BooleanField(default=False)
+    # ДОБАВЛЕНО: Поле из схемы
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    # Заглушка для BaseAdmin, чтобы не падало FieldError
     @property
     def name(self) -> str:
         return f"Token {self.access_token[:8]}... ({self.user.username if self.user else 'No User'})"
