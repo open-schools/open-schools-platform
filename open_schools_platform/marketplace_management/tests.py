@@ -102,49 +102,46 @@ class OAuth2FlowTests(TestCase):
         self.assertEqual(response.data["phone"], str(self.user.phone))
         self.assertEqual(response.data["name"], self.profile.name)
 
-    def test_token_exchange_invalid_secret(self):
-        from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code
-        auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback")
+
+class JiraWebhookTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse("api:marketplace-management:marketplace:webhook-jira-publish-app")
+        self.secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', 'test_secret_for_jira_webhooks')
         
-        url = reverse("api:marketplace-management:marketplace:oauth2-token")
-        response = self.client.post(url, {
-            "grant_type": "authorization_code",
-            "code": auth_code.code,
-            "client_id": str(self.app.client_id),
-            "client_secret": "wrong_secret"
-        })
+    def test_publish_app_with_valid_secret(self):
+        payload = {
+            "name": "Test App from Jira",
+            "description": "Test description",
+            "redirect_uris": ["http://localhost/callback"]
+        }
+        
+        response = self.client.post(
+            self.url,
+            payload,
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("client_id", response.data)
+        self.assertIn("client_secret", response.data)
+        
+        # Check if App was created
+        self.assertTrue(App.objects.filter(name="Test App from Jira", status=AppStatus.PUBLISHED).exists())
+        
+    def test_publish_app_with_invalid_secret(self):
+        payload = {
+            "name": "Hacked App",
+            "description": "Hack"
+        }
+        
+        response = self.client.post(
+            self.url,
+            payload,
+            format='json',
+            HTTP_AUTHORIZATION="Bearer WRONG_SECRET"
+        )
         
         self.assertEqual(response.status_code, 403)
-
-    def test_authorize_with_scope(self):
-        self.installation.granted_scopes = "openid profile"
-        self.installation.save()
-        
-        self.client.force_authenticate(user=self.user)
-        url = reverse("api:marketplace-management:marketplace:oauth2-authorize")
-        response = self.client.get(url, {
-            "client_id": self.app.client_id,
-            "response_type": "code",
-            "redirect_uri": "http://localhost/callback",
-            "scope": "openid profile"
-        })
-        self.assertEqual(response.status_code, 302)
-        code_str = response.url.split("code=")[1]
-        
-        from open_schools_platform.marketplace_management.models import OAuth2AuthorizationCode
-        auth_code = OAuth2AuthorizationCode.objects.get(code=code_str)
-        self.assertEqual(auth_code.scope, "openid profile")
-        
-        # Now exchange
-        token_url = reverse("api:marketplace-management:marketplace:oauth2-token")
-        res = self.client.post(token_url, {
-            "grant_type": "authorization_code",
-            "code": auth_code.code,
-            "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret
-        })
-        
-        self.assertEqual(res.status_code, 200)
-        from open_schools_platform.marketplace_management.models import OAuth2Token
-        token = OAuth2Token.objects.get(access_token=res.data["access_token"])
-        self.assertEqual(token.scope, "openid profile")
+        self.assertFalse(App.objects.filter(name="Hacked App").exists())

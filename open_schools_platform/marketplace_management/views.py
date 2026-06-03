@@ -26,7 +26,7 @@ from open_schools_platform.organization_management.employees.models import Emplo
 
 
 class AppApi(ApiAuthMixin, ModelViewSet):
-    queryset = App.objects.all()
+    queryset = App.objects.filter(status=AppStatus.PUBLISHED)
     filterset_class = AppFilterset
     pagination_class = DefaultListPagination
     serializer_class = AppSerializer
