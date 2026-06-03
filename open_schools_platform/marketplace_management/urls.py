@@ -38,5 +38,5 @@ urlpatterns = [
     path("oauth2/authorize", AuthorizeView.as_view(), name="oauth2-authorize"),
     path("oauth2/token", TokenView.as_view(), name="oauth2-token"),
     path("oauth2/userinfo", UserInfoView.as_view(), name="oauth2-userinfo"),
-    path("webhooks/jira/publish-app/", JiraApproveWebhookView.as_view(), name="webhook-jira-publish-app"),
+    path("webhooks/jira/publish-app", JiraApproveWebhookView.as_view(), name="webhook-jira-publish-app"),
 ]
