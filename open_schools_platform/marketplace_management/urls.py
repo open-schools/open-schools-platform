@@ -5,6 +5,11 @@ from open_schools_platform.marketplace_management.views import (
     InstallationsViewSet,
     AdminInstallationViewSet,
 )
+from open_schools_platform.marketplace_management.oauth2_views import (
+    AuthorizeView,
+    TokenView,
+    UserInfoView,
+)
 
 urlpatterns = [
     path("apps", AppApi.as_view({"get": "list"}), name="miniapps-apps-list"),
@@ -27,4 +32,7 @@ urlpatterns = [
         AdminInstallationViewSet.as_view({"get": "list"}),
         name="admin-installations-list",
     ),
+    path("oauth2/authorize", AuthorizeView.as_view(), name="oauth2-authorize"),
+    path("oauth2/token", TokenView.as_view(), name="oauth2-token"),
+    path("oauth2/userinfo", UserInfoView.as_view(), name="oauth2-userinfo"),
 ]

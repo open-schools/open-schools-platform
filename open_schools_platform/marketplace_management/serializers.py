@@ -45,3 +45,19 @@ class InstallationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
         fields = ["id", "school", "app", "installed_at", "status"]
+
+
+class AuthorizeRequestSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+    response_type = serializers.CharField()
+    redirect_uri = serializers.URLField()
+    scope = serializers.CharField(required=False, allow_blank=True, default="")
+    state = serializers.CharField(required=False, allow_blank=True, default="")
+
+
+class TokenRequestSerializer(serializers.Serializer):
+    grant_type = serializers.CharField()
+    code = serializers.CharField()
+    client_id = serializers.UUIDField()
+    client_secret = serializers.CharField(required=False, allow_blank=True, default="")
+    redirect_uri = serializers.URLField(required=False)
