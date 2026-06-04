@@ -10,8 +10,14 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.errors.exceptions import InvalidArgument
 from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.marketplace_management.models import App, OAuth2Token, Installation
-from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer
-from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code, exchange_code_for_token, check_installation_exists
+from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer, RevokeTokenSerializer
+from open_schools_platform.marketplace_management.oauth2_services import (
+    create_authorization_code, 
+    exchange_code_for_token, 
+    exchange_refresh_token,
+    revoke_token,
+    check_installation_exists
+)
 from open_schools_platform.marketplace_management.scopes import AVAILABLE_SCOPES
 
 
@@ -82,11 +88,27 @@ class TokenView(APIView):
         serializer.is_valid(raise_exception=True)
         data = serializer.validated_data
         
-        if data["grant_type"] != "authorization_code":
-            raise InvalidArgument("Unsupported grant_type. Only 'authorization_code' is supported.")
+        if data["grant_type"] == "authorization_code":
+            token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"])
+        elif data["grant_type"] == "refresh_token":
+            token_data = exchange_refresh_token(data["refresh_token"], str(data["client_id"]), data["client_secret"])
+        else:
+            raise InvalidArgument("Unsupported grant_type.")
             
-        token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"])
         return Response(token_data, status=status.HTTP_200_OK)
+
+
+class RevokeTokenView(APIView):
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(request_body=RevokeTokenSerializer, tags=[SwaggerTags.MARKETPLACE_MANAGEMENT])
+    def post(self, request, *args, **kwargs):
+        serializer = RevokeTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        revoke_token(data["token"], str(data["client_id"]), data["client_secret"])
+        return Response({}, status=status.HTTP_200_OK)
 
 
 class UserInfoView(APIView):
@@ -105,11 +127,17 @@ class UserInfoView(APIView):
             raise PermissionDenied("Invalid or expired token")
             
         user = token.user
-        
         profile = getattr(user, 'employee_profile', None)
-        return Response({
-            "sub": str(user.id),
-            "phone": str(user.phone) if hasattr(user, 'phone') else "",
-            "name": profile.name if profile else "",
-            "email": profile.email if profile and hasattr(profile, 'email') else "",
-        }, status=status.HTTP_200_OK)
+        granted_scopes = set(token.scope.split())
+        
+        data = {}
+        if "openid" in granted_scopes:
+            data["sub"] = str(user.id)
+        if "phone" in granted_scopes:
+            data["phone"] = str(user.phone) if hasattr(user, 'phone') else ""
+        if "profile" in granted_scopes:
+            data["name"] = profile.name if profile else ""
+        if "email" in granted_scopes:
+            data["email"] = profile.email if profile and hasattr(profile, 'email') else ""
+            
+        return Response(data, status=status.HTTP_200_OK)

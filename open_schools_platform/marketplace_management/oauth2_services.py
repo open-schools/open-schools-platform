@@ -68,3 +68,66 @@ def check_installation_exists(user: User, app: App) -> bool:
         return True
 
     return False
+
+
+def exchange_refresh_token(refresh_token_str: str, client_id: str, client_secret: str) -> dict:
+    try:
+        old_token = OAuth2Token.objects.get(
+            refresh_token=refresh_token_str, 
+            app__client_id=client_id, 
+            revoked=False
+        )
+    except OAuth2Token.DoesNotExist:
+        raise InvalidArgument("Invalid or revoked refresh token")
+
+    if old_token.app.client_secret != client_secret:
+        raise PermissionDenied("Invalid client_secret")
+
+    # Revoke old token
+    old_token.revoked = True
+    old_token.save(update_fields=['revoked'])
+
+    # Generate new tokens
+    access_token = secrets.token_urlsafe(64)
+    refresh_token = secrets.token_urlsafe(64)
+    expires_in = 3600  # 1 hour
+
+    new_token = OAuth2Token.objects.create(
+        user=old_token.user,
+        app=old_token.app,
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="Bearer",
+        expires_in=expires_in,
+        scope=old_token.scope
+    )
+
+    return {
+        "access_token": new_token.access_token,
+        "token_type": "Bearer",
+        "expires_in": new_token.expires_in,
+        "refresh_token": new_token.refresh_token
+    }
+
+
+def revoke_token(token_str: str, client_id: str, client_secret: str):
+    try:
+        app = App.objects.get(client_id=client_id)
+        if app.client_secret != client_secret:
+            raise PermissionDenied("Invalid client_secret")
+            
+        # Revoke the token by matching access or refresh token
+        updated = OAuth2Token.objects.filter(
+            app=app,
+            access_token=token_str
+        ).update(revoked=True)
+        
+        if not updated:
+            OAuth2Token.objects.filter(
+                app=app,
+                refresh_token=token_str
+            ).update(revoked=True)
+            
+    except App.DoesNotExist:
+        pass
+

@@ -3,4 +3,6 @@ AVAILABLE_SCOPES = [
     "profile",
     "email",
     "phone",
+    "read:students",
+    "read:classes",
 ]

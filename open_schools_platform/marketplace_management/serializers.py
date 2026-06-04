@@ -100,7 +100,26 @@ class AuthorizeRequestSerializer(serializers.Serializer):
 
 class TokenRequestSerializer(serializers.Serializer):
     grant_type = serializers.CharField()
-    code = serializers.CharField()
+    code = serializers.CharField(required=False)
+    refresh_token = serializers.CharField(required=False)
     client_id = serializers.UUIDField()
     client_secret = serializers.CharField()
-    redirect_uri = serializers.URLField(required=False)
+    redirect_uri = serializers.URLField(required=False)
+
+    def validate(self, attrs):
+        grant_type = attrs.get('grant_type')
+        if grant_type == 'authorization_code':
+            if not attrs.get('code'):
+                raise serializers.ValidationError("code is required for authorization_code grant type")
+        elif grant_type == 'refresh_token':
+            if not attrs.get('refresh_token'):
+                raise serializers.ValidationError("refresh_token is required for refresh_token grant type")
+        else:
+            raise serializers.ValidationError("Unsupported grant_type")
+        return attrs
+
+
+class RevokeTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    client_id = serializers.UUIDField()
+    client_secret = serializers.CharField()
