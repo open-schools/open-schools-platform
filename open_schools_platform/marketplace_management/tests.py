@@ -25,7 +25,8 @@ class OAuth2FlowTests(TestCase):
             app=self.app,
             organization=self.org,
             user=self.user,
-            active=True
+            active=True,
+            granted_scopes="openid profile email phone"
         )
 
     def test_authorize_redirects_with_code_when_installed(self):
@@ -110,17 +111,11 @@ class OAuth2FlowTests(TestCase):
             "client_secret": "wrong_secret"
         }, format='json')
         
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 403)
 
     def test_authorize_with_scope(self):
-
-        Installation.objects.create(
-            app=self.app,
-            organization=self.org,
-            user=self.user,
-            active=True,
-            granted_scopes="openid profile"
-        )
+        self.installation.granted_scopes = "openid profile"
+        self.installation.save()
         
         self.client.force_authenticate(user=self.user)
         url = reverse("api:marketplace-management:marketplace:oauth2-authorize")
