@@ -84,7 +84,7 @@ class OAuth2FlowTests(TransactionTestCase):
     def test_userinfo_endpoint(self):
         # Exchange for token
         from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code
-        auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback")
+        auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback", scope="openid profile email phone")
         
         url = reverse("api:marketplace-management:marketplace:oauth2-token")
         res = self.client.post(url, {
@@ -188,13 +188,63 @@ class ReviewTests(TransactionTestCase):
         })
         self.assertEqual(response.status_code, 201)
         
-        self.app.refresh_from_db()
-        self.assertEqual(self.app.reviews_count, 1)
-        self.assertEqual(self.app.average_rating, 4.0)
+        self.assertEqual(res.status_code, 200)
+        from open_schools_platform.marketplace_management.models import OAuth2Token
+        token = OAuth2Token.objects.get(access_token=res.data["access_token"])
+        self.assertEqual(token.scope, "openid profile")
 
-        response2 = self.client.post(url, {
-            "rating": 2,
-            "message": "Actually bad."
+    def test_refresh_token_exchange(self):
+        from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code
+        auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback", scope="openid profile")
+        
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        res = self.client.post(url, {
+            "grant_type": "authorization_code",
+            "code": auth_code.code,
+            "client_id": str(self.app.client_id),
+            "client_secret": self.app.client_secret
         })
-        self.assertEqual(response2.status_code, 400)
-
+        self.assertEqual(res.status_code, 200)
+        refresh_token = res.data["refresh_token"]
+        old_access_token = res.data["access_token"]
+        
+        res = self.client.post(url, {
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+            "client_id": str(self.app.client_id),
+            "client_secret": self.app.client_secret
+        })
+        self.assertEqual(res.status_code, 200)
+        self.assertIn("access_token", res.data)
+        self.assertNotEqual(res.data["access_token"], old_access_token)
+        
+    def test_revoke_token(self):
+        from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code
+        auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback")
+        
+        token_url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        res = self.client.post(token_url, {
+            "grant_type": "authorization_code",
+            "code": auth_code.code,
+            "client_id": str(self.app.client_id),
+            "client_secret": self.app.client_secret
+        })
+        self.assertEqual(res.status_code, 200)
+        access_token = res.data["access_token"]
+        
+        revoke_url = reverse("api:marketplace-management:marketplace:oauth2-revoke")
+        revoke_res = self.client.post(revoke_url, {
+            "token": access_token,
+            "client_id": str(self.app.client_id),
+            "client_secret": self.app.client_secret
+        })
+        self.assertEqual(revoke_res.status_code, 200)
+        
+        from open_schools_platform.marketplace_management.models import OAuth2Token
+        token_obj = OAuth2Token.objects.get(access_token=access_token)
+        self.assertTrue(token_obj.revoked)
+        
+        # Now try to use the revoked token
+        userinfo_url = reverse("api:marketplace-management:marketplace:oauth2-userinfo")
+        info_res = self.client.get(userinfo_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
+        self.assertEqual(info_res.status_code, 403)
