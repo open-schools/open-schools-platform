@@ -145,3 +145,55 @@ class JiraWebhookTests(TestCase):
         
         self.assertEqual(response.status_code, 403)
         self.assertFalse(App.objects.filter(name="Hacked App").exists())
+
+
+class ReviewTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(phone="+79009998877", password="testpassword")
+        self.profile = EmployeeProfile.objects.create(user=self.user, name="Review User")
+        self.org = Organization.objects.create(name="Review Org")
+        self.employee = Employee.objects.create(employee_profile=self.profile, organization=self.org, name="Review User")
+        
+        from open_schools_platform.marketplace_management.models import AppStatus
+        self.app = App.objects.create(
+            name="Review App", 
+            status=AppStatus.PUBLISHED
+        )
+
+    def test_create_review_without_installation(self):
+        self.client.force_authenticate(user=self.user)
+        # Using reverse with namespace according to current setup
+        url = reverse("api:marketplace-management:marketplace:miniapps-reviews", kwargs={"app_id": self.app.id})
+        response = self.client.post(url, {
+            "rating": 5,
+            "message": "Great app!"
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_review_with_installation(self):
+        Installation.objects.create(
+            app=self.app,
+            organization=self.org,
+            user=self.user,
+            active=True
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse("api:marketplace-management:marketplace:miniapps-reviews", kwargs={"app_id": self.app.id})
+        
+        response = self.client.post(url, {
+            "rating": 4,
+            "message": "Good app!"
+        })
+        self.assertEqual(response.status_code, 201)
+        
+        self.app.refresh_from_db()
+        self.assertEqual(self.app.reviews_count, 1)
+        self.assertEqual(self.app.average_rating, 4.0)
+
+        response2 = self.client.post(url, {
+            "rating": 2,
+            "message": "Actually bad."
+        })
+        self.assertEqual(response2.status_code, 400)
+

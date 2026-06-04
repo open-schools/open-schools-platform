@@ -28,6 +28,9 @@ class App(BaseModel):
     # На схеме это просто колонка category_name в таблице Apps, а не ManyToMany
     category_name = models.CharField(max_length=255, blank=True, default="")
     
+    reviews_count = models.IntegerField(default=0)
+    average_rating = models.FloatField(default=0.0)
+    
     # OAuth Fields
     client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     client_secret = models.CharField(max_length=255, blank=True, default="")

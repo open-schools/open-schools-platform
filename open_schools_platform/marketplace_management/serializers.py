@@ -3,6 +3,7 @@ from rest_framework import serializers
 from open_schools_platform.marketplace_management.models import (
     App,
     Installation,
+    Review,
 )
 
 
@@ -11,6 +12,24 @@ class AppSerializer(serializers.ModelSerializer):
     class Meta:
         model = App
         fields = "__all__"
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        return str(obj.user.name if hasattr(obj.user, 'name') and obj.user.name else obj.user.phone)
+
+    class Meta:
+        model = Review
+        fields = ["id", "user", "rating", "message", "created_at"]
+
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ["rating", "message"]
+
 
 
 class InstallationSerializer(serializers.ModelSerializer):
