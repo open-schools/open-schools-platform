@@ -18,7 +18,8 @@ class OAuth2FlowTests(TestCase):
         
         self.app = App.objects.create(
             name="Test App", 
-            redirect_uris=["http://localhost/callback"]
+            redirect_uris=["http://localhost/callback"],
+            client_secret="test_super_secret"
         )
         
         self.installation = Installation.objects.create(
@@ -64,10 +65,12 @@ class OAuth2FlowTests(TestCase):
         response = self.client.post(url, {
             "grant_type": "authorization_code",
             "code": auth_code.code,
-            "client_id": self.app.client_id,
+            "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret
-        }, format='json')
+        })
         
+        if response.status_code != 200:
+            print(f"DEBUG: {response.data}")
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", response.data)
         
@@ -86,9 +89,9 @@ class OAuth2FlowTests(TestCase):
         res = self.client.post(url, {
             "grant_type": "authorization_code",
             "code": auth_code.code,
-            "client_id": self.app.client_id,
+            "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret
-        }, format='json')
+        })
         
         access_token = res.data["access_token"]
         
@@ -107,9 +110,9 @@ class OAuth2FlowTests(TestCase):
         response = self.client.post(url, {
             "grant_type": "authorization_code",
             "code": auth_code.code,
-            "client_id": self.app.client_id,
+            "client_id": str(self.app.client_id),
             "client_secret": "wrong_secret"
-        }, format='json')
+        })
         
         self.assertEqual(response.status_code, 403)
 
@@ -137,9 +140,9 @@ class OAuth2FlowTests(TestCase):
         res = self.client.post(token_url, {
             "grant_type": "authorization_code",
             "code": auth_code.code,
-            "client_id": self.app.client_id,
+            "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret
-        }, format='json')
+        })
         
         self.assertEqual(res.status_code, 200)
         from open_schools_platform.marketplace_management.models import OAuth2Token
