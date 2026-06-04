@@ -9,9 +9,10 @@ from open_schools_platform.api.mixins import ApiAuthMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.errors.exceptions import InvalidArgument
 from rest_framework.exceptions import PermissionDenied
-from open_schools_platform.marketplace_management.models import App, OAuth2Token
+from open_schools_platform.marketplace_management.models import App, OAuth2Token, Installation
 from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer
 from open_schools_platform.marketplace_management.oauth2_services import create_authorization_code, exchange_code_for_token, check_installation_exists
+from open_schools_platform.marketplace_management.scopes import AVAILABLE_SCOPES
 
 
 class AuthorizeView(ApiAuthMixin, APIView):
@@ -32,8 +33,29 @@ class AuthorizeView(ApiAuthMixin, APIView):
         if app.redirect_uris and data["redirect_uri"] not in app.redirect_uris:
             raise InvalidArgument("Invalid redirect_uri")
             
-        if not check_installation_exists(request.user, app):
-            raise PermissionDenied("App is not installed for this user or their organization.")
+        # Fetch Installation to check scopes
+        try:
+            # We already know installation exists from check_installation_exists,
+            # but we need the exact instance to get granted_scopes.
+            # Usually the user installing it is in the organization, so we check both cases.
+            installation = Installation.objects.filter(app=app, user=request.user, active=True).first()
+            if not installation:
+                installation = Installation.objects.filter(
+                    app=app, organization__employees__employee_profile__user=request.user, active=True
+                ).first()
+            if not installation:
+                raise PermissionDenied("App is not installed for this user or their organization.")
+        except Exception:
+            raise PermissionDenied("App is not installed.")
+            
+        requested_scope = data.get("scope", "")
+        granted_scopes = set(installation.granted_scopes.split())
+        
+        for s in requested_scope.split():
+            if s and s not in AVAILABLE_SCOPES:
+                raise InvalidArgument(f"Invalid scope requested: {s}")
+            if s and s not in granted_scopes:
+                raise PermissionDenied(f"App is not allowed to request scope: {s}")
             
         # Generate code
         auth_code = create_authorization_code(
@@ -63,7 +85,7 @@ class TokenView(APIView):
         if data["grant_type"] != "authorization_code":
             raise InvalidArgument("Unsupported grant_type. Only 'authorization_code' is supported.")
             
-        token_data = exchange_code_for_token(data["code"], str(data["client_id"]))
+        token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"])
         return Response(token_data, status=status.HTTP_200_OK)
 
 

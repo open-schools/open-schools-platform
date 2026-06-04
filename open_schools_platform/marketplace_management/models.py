@@ -35,6 +35,9 @@ class App(BaseModel):
     grant_types = models.JSONField(default=list, blank=True)
     response_types = models.JSONField(default=list, blank=True)
     
+    required_scopes = models.JSONField(default=list, blank=True)
+    optional_scopes = models.JSONField(default=list, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -70,6 +73,7 @@ class Installation(BaseModel):
     # Поля из вашей старой модели (на схеме их явно нет, но они полезны для логики)
     config_data = models.JSONField(default=dict, blank=True)
     active = models.BooleanField(default=True)
+    granted_scopes = models.CharField(max_length=255, default="", blank=True)
 
     class Meta:
         unique_together = ["app", "organization"]
@@ -111,6 +115,7 @@ class OAuth2Token(BaseModel):
     refresh_token = models.CharField(max_length=255, unique=True)
     token_type = models.CharField(max_length=255)
     expires_in = models.IntegerField()
+    scope = models.CharField(max_length=255, blank=True, default="")
     created_at = models.DateTimeField(auto_now_add=True)  # Есть на схеме
     revoked = models.BooleanField(default=False)
 

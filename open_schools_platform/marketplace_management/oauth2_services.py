@@ -3,6 +3,7 @@ from django.utils import timezone
 from open_schools_platform.marketplace_management.models import OAuth2AuthorizationCode, OAuth2Token, App, Installation
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.errors.exceptions import InvalidArgument
+from rest_framework.exceptions import PermissionDenied
 
 
 def create_authorization_code(app: App, user: User, redirect_uri: str, scope: str = "") -> OAuth2AuthorizationCode:
@@ -18,11 +19,14 @@ def create_authorization_code(app: App, user: User, redirect_uri: str, scope: st
     return auth_code
 
 
-def exchange_code_for_token(code_str: str, client_id: str) -> dict:
+def exchange_code_for_token(code_str: str, client_id: str, client_secret: str) -> dict:
     try:
         auth_code = OAuth2AuthorizationCode.objects.get(code=code_str, app__client_id=client_id)
     except OAuth2AuthorizationCode.DoesNotExist:
         raise InvalidArgument("Invalid or expired authorization code")
+
+    if auth_code.app.client_secret != client_secret:
+        raise PermissionDenied("Invalid client_secret")
 
     # Generate tokens
     access_token = secrets.token_urlsafe(64)
@@ -35,7 +39,8 @@ def exchange_code_for_token(code_str: str, client_id: str) -> dict:
         access_token=access_token,
         refresh_token=refresh_token,
         token_type="Bearer",
-        expires_in=expires_in
+        expires_in=expires_in,
+        scope=auth_code.scope
     )
 
     # Invalidate code
