@@ -1,4 +1,5 @@
 import uuid
+from django.contrib.auth.hashers import make_password
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
 from django.db import models
@@ -43,6 +44,11 @@ class App(BaseModel):
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if self.client_secret and not self.client_secret.startswith('pbkdf2_') and not self.client_secret.startswith('bcrypt_'):
+            self.client_secret = make_password(self.client_secret)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -98,6 +104,8 @@ class OAuth2AuthorizationCode(BaseModel):
     redirect_uri = models.URLField()
     response_type = models.CharField(max_length=255)
     scope = models.CharField(max_length=255, blank=True, default="")  # Есть на схеме
+    code_challenge = models.CharField(max_length=128, blank=True, default="")
+    code_challenge_method = models.CharField(max_length=10, blank=True, default="S256")
     auth_time = models.DateTimeField(auto_now_add=True)
 
     @property

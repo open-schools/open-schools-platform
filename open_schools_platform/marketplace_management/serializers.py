@@ -96,6 +96,8 @@ class AuthorizeRequestSerializer(serializers.Serializer):
     redirect_uri = serializers.URLField()
     scope = serializers.CharField(required=False, allow_blank=True, default="")
     state = serializers.CharField(required=False, allow_blank=True, default="")
+    code_challenge = serializers.CharField(required=True)
+    code_challenge_method = serializers.CharField(required=False, default="S256")
 
 
 class TokenRequestSerializer(serializers.Serializer):
@@ -105,6 +107,7 @@ class TokenRequestSerializer(serializers.Serializer):
     client_id = serializers.UUIDField()
     client_secret = serializers.CharField()
     redirect_uri = serializers.URLField(required=False)
+    code_verifier = serializers.CharField(required=False, allow_blank=True, default="")
 
     def validate(self, attrs):
         grant_type = attrs.get('grant_type')

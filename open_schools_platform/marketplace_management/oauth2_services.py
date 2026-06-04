@@ -1,12 +1,16 @@
 import secrets
+import base64
+import hashlib
+from datetime import timedelta
 from django.utils import timezone
+from django.contrib.auth.hashers import check_password
 from open_schools_platform.marketplace_management.models import OAuth2AuthorizationCode, OAuth2Token, App, Installation
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.errors.exceptions import InvalidArgument
 from rest_framework.exceptions import PermissionDenied
 
 
-def create_authorization_code(app: App, user: User, redirect_uri: str, scope: str = "") -> OAuth2AuthorizationCode:
+def create_authorization_code(app: App, user: User, redirect_uri: str, scope: str = "", code_challenge: str = "", code_challenge_method: str = "S256") -> OAuth2AuthorizationCode:
     code_str = secrets.token_urlsafe(32)
     auth_code = OAuth2AuthorizationCode.objects.create(
         code=code_str,
@@ -14,19 +18,48 @@ def create_authorization_code(app: App, user: User, redirect_uri: str, scope: st
         app=app,
         redirect_uri=redirect_uri,
         response_type="code",
-        scope=scope
+        scope=scope,
+        code_challenge=code_challenge,
+        code_challenge_method=code_challenge_method
     )
     return auth_code
 
 
-def exchange_code_for_token(code_str: str, client_id: str, client_secret: str) -> dict:
+def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, code_verifier: str = "") -> dict:
     try:
         auth_code = OAuth2AuthorizationCode.objects.get(code=code_str, app__client_id=client_id)
     except OAuth2AuthorizationCode.DoesNotExist:
         raise InvalidArgument("Invalid or expired authorization code")
 
-    if auth_code.app.client_secret != client_secret:
-        raise PermissionDenied("Invalid client_secret")
+    if auth_code.auth_time + timedelta(minutes=5) < timezone.now():
+        auth_code.delete()
+        raise InvalidArgument("Authorization code expired")
+
+    if auth_code.code_challenge:
+        if not code_verifier:
+            raise InvalidArgument("code_verifier is required")
+            
+        if auth_code.code_challenge_method == "S256":
+            # Hash code_verifier with SHA256 and base64url encode it
+            digest = hashlib.sha256(code_verifier.encode('ascii')).digest()
+            calculated_challenge = base64.urlsafe_b64encode(digest).rstrip(b'=').decode('ascii')
+            if calculated_challenge != auth_code.code_challenge:
+                raise PermissionDenied("Invalid code_verifier")
+        elif auth_code.code_challenge_method == "plain":
+            if code_verifier != auth_code.code_challenge:
+                raise PermissionDenied("Invalid code_verifier")
+        else:
+            raise PermissionDenied("Unsupported code_challenge_method")
+
+    # If client_secret in DB is hashed, we use check_password. If it's plain text (not yet hashed), we fall back to simple equality
+    # This ensures backwards compatibility with unhashed secrets temporarily.
+    db_secret = auth_code.app.client_secret
+    if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+        if not check_password(client_secret, db_secret):
+            raise PermissionDenied("Invalid client_secret")
+    else:
+        if db_secret != client_secret:
+            raise PermissionDenied("Invalid client_secret")
 
     # Generate tokens
     access_token = secrets.token_urlsafe(64)
@@ -80,8 +113,13 @@ def exchange_refresh_token(refresh_token_str: str, client_id: str, client_secret
     except OAuth2Token.DoesNotExist:
         raise InvalidArgument("Invalid or revoked refresh token")
 
-    if old_token.app.client_secret != client_secret:
-        raise PermissionDenied("Invalid client_secret")
+    db_secret = old_token.app.client_secret
+    if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+        if not check_password(client_secret, db_secret):
+            raise PermissionDenied("Invalid client_secret")
+    else:
+        if db_secret != client_secret:
+            raise PermissionDenied("Invalid client_secret")
 
     # Revoke old token
     old_token.revoked = True
@@ -113,8 +151,13 @@ def exchange_refresh_token(refresh_token_str: str, client_id: str, client_secret
 def revoke_token(token_str: str, client_id: str, client_secret: str):
     try:
         app = App.objects.get(client_id=client_id)
-        if app.client_secret != client_secret:
-            raise PermissionDenied("Invalid client_secret")
+        db_secret = app.client_secret
+        if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+            if not check_password(client_secret, db_secret):
+                raise PermissionDenied("Invalid client_secret")
+        else:
+            if db_secret != client_secret:
+                raise PermissionDenied("Invalid client_secret")
             
         # Revoke the token by matching access or refresh token
         updated = OAuth2Token.objects.filter(

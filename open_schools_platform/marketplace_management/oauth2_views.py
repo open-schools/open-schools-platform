@@ -11,6 +11,8 @@ from open_schools_platform.errors.exceptions import InvalidArgument
 from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.marketplace_management.models import App, OAuth2Token, Installation
 from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer, RevokeTokenSerializer
+from datetime import timedelta
+from django.utils import timezone
 from open_schools_platform.marketplace_management.oauth2_services import (
     create_authorization_code, 
     exchange_code_for_token, 
@@ -68,7 +70,9 @@ class AuthorizeView(ApiAuthMixin, APIView):
             app=app,
             user=request.user,
             redirect_uri=data["redirect_uri"],
-            scope=data.get("scope", "")
+            scope=data.get("scope", ""),
+            code_challenge=data.get("code_challenge", ""),
+            code_challenge_method=data.get("code_challenge_method", "S256")
         )
         
         # Redirect
@@ -89,7 +93,7 @@ class TokenView(APIView):
         data = serializer.validated_data
         
         if data["grant_type"] == "authorization_code":
-            token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"])
+            token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"], data.get("code_verifier", ""))
         elif data["grant_type"] == "refresh_token":
             token_data = exchange_refresh_token(data["refresh_token"], str(data["client_id"]), data["client_secret"])
         else:
@@ -125,6 +129,9 @@ class UserInfoView(APIView):
             token = OAuth2Token.objects.select_related('user', 'user__employee_profile').get(access_token=token_str, revoked=False)
         except OAuth2Token.DoesNotExist:
             raise PermissionDenied("Invalid or expired token")
+            
+        if token.created_at + timedelta(seconds=token.expires_in) < timezone.now():
+            raise PermissionDenied("Token is expired")
             
         user = token.user
         profile = getattr(user, 'employee_profile', None)

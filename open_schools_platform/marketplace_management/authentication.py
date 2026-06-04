@@ -1,3 +1,5 @@
+from datetime import timedelta
+from django.utils import timezone
 from rest_framework.authentication import BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from open_schools_platform.marketplace_management.models import OAuth2Token
@@ -20,7 +22,8 @@ class OAuth2TokenAuthentication(BaseAuthentication):
         except OAuth2Token.DoesNotExist:
             return None
 
-        # You can also add token expiration check here if expires_in is implemented
-        # Currently, logic assumes revoked=False is enough, but consider time check if needed.
+        # Token expiration check
+        if token.created_at + timedelta(seconds=token.expires_in) < timezone.now():
+            return None
 
         return (token.user, token)
