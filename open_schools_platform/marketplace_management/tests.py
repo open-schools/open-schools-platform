@@ -70,7 +70,8 @@ class OAuth2FlowTests(TransactionTestCase):
             "code_challenge": challenge,
             "code_challenge_method": "S256"
         })
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 302)
+        self.assertIn("error=access_denied", response.url)
 
     def test_token_exchange(self):
         verifier, challenge = generate_pkce()
@@ -83,7 +84,8 @@ class OAuth2FlowTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         
         if response.status_code != 200:
@@ -108,7 +110,8 @@ class OAuth2FlowTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         
         access_token = res.data["access_token"]
@@ -131,7 +134,8 @@ class OAuth2FlowTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": "wrong_secret",
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         
         self.assertEqual(response.status_code, 403)
@@ -187,7 +191,8 @@ class ReviewTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         self.assertEqual(response.status_code, 201)
         
@@ -207,7 +212,8 @@ class ReviewTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         self.assertEqual(res.status_code, 200)
         refresh_token = res.data["refresh_token"]
@@ -234,7 +240,8 @@ class ReviewTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         self.assertEqual(res.status_code, 200)
         access_token = res.data["access_token"]
@@ -274,7 +281,8 @@ class ReviewTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         
         # Should fail with 400 because code is expired
@@ -294,7 +302,8 @@ class ReviewTests(TransactionTestCase):
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
             "client_secret": self.app.client_secret,
-            "code_verifier": verifier
+            "code_verifier": verifier,
+            "redirect_uri": "http://localhost/callback"
         })
         self.assertEqual(res.status_code, 200)
         access_token = res.data["access_token"]

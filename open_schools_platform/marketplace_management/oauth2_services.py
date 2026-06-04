@@ -25,7 +25,7 @@ def create_authorization_code(app: App, user: User, redirect_uri: str, scope: st
     return auth_code
 
 
-def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, code_verifier: str = "") -> dict:
+def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, code_verifier: str = "", redirect_uri: str = "") -> dict:
     try:
         auth_code = OAuth2AuthorizationCode.objects.get(code=code_str, app__client_id=client_id)
     except OAuth2AuthorizationCode.DoesNotExist:
@@ -34,6 +34,9 @@ def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, c
     if auth_code.auth_time + timedelta(minutes=5) < timezone.now():
         auth_code.delete()
         raise InvalidArgument("Authorization code expired")
+
+    if auth_code.redirect_uri != redirect_uri:
+        raise PermissionDenied("Invalid redirect_uri")
 
     if auth_code.code_challenge:
         if not code_verifier:

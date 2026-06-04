@@ -52,18 +52,18 @@ class AuthorizeView(ApiAuthMixin, APIView):
                     app=app, organization__employees__employee_profile__user=request.user, active=True
                 ).first()
             if not installation:
-                raise PermissionDenied("App is not installed for this user or their organization.")
+                return HttpResponseRedirect(f"{data['redirect_uri']}?error=access_denied&error_description=App is not installed")
         except Exception:
-            raise PermissionDenied("App is not installed.")
+            return HttpResponseRedirect(f"{data['redirect_uri']}?error=server_error")
             
         requested_scope = data.get("scope", "")
         granted_scopes = set(installation.granted_scopes.split())
         
         for s in requested_scope.split():
             if s and s not in AVAILABLE_SCOPES:
-                raise InvalidArgument(f"Invalid scope requested: {s}")
+                return HttpResponseRedirect(f"{data['redirect_uri']}?error=invalid_scope")
             if s and s not in granted_scopes:
-                raise PermissionDenied(f"App is not allowed to request scope: {s}")
+                return HttpResponseRedirect(f"{data['redirect_uri']}?error=access_denied&error_description=Missing scope {s}")
             
         # Generate code
         auth_code = create_authorization_code(
@@ -93,7 +93,15 @@ class TokenView(APIView):
         data = serializer.validated_data
         
         if data["grant_type"] == "authorization_code":
-            token_data = exchange_code_for_token(data["code"], str(data["client_id"]), data["client_secret"], data.get("code_verifier", ""))
+            if not data.get("redirect_uri"):
+                raise InvalidArgument("redirect_uri is required for authorization_code grant type")
+            token_data = exchange_code_for_token(
+                data["code"], 
+                str(data["client_id"]), 
+                data["client_secret"], 
+                data.get("code_verifier", ""),
+                data.get("redirect_uri", "")
+            )
         elif data["grant_type"] == "refresh_token":
             token_data = exchange_refresh_token(data["refresh_token"], str(data["client_id"]), data["client_secret"])
         else:
