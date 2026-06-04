@@ -35,6 +35,12 @@ class AppApi(ApiAuthMixin, ModelViewSet):
     pagination_class = DefaultListPagination
     serializer_class = AppSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.is_admin:
+            return App.objects.all()
+        return App.objects.filter(status=AppStatus.PUBLISHED)
+
     @swagger_auto_schema(
         operation_description="Get apps list",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
@@ -100,7 +106,14 @@ class ReviewApi(ApiAuthMixin, ModelViewSet):
 
 class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
     serializer_class = InstallationSerializer
-    queryset = Installation.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated and user.is_admin:
+            return Installation.objects.all()
+        if not user.is_authenticated:
+            return Installation.objects.none()
+        return Installation.objects.filter(organization__employees__employee_profile__user=user)
 
     def get_serializer_class(self):
         if self.action == "create":
@@ -115,51 +128,23 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         return super().create(request, *args, **kwargs)
 
     def perform_create(self, serializer):
+        from open_schools_platform.organization_management.organizations.selectors import get_organization
+        
+        org_id = serializer.validated_data["organization"].id
+        app_id = serializer.validated_data["app"].id
+        
+        # Проверка прав: выбросит PermissionDenied, если у пользователя нет organization_access
+        get_organization(filters={"id": org_id}, user=self.request.user)
+
         if Installation.objects.filter(
-            app_id=serializer.data["app"],
-            organization_id=serializer["organization"].value,
+            app_id=app_id,
+            organization_id=org_id,
         ).exists():
             raise AlreadyExists("This app already installed for that organization")
 
-        app = App.objects.get(id=serializer.data["app"])
+        app = App.objects.get(id=app_id)
         if app.status != AppStatus.PUBLISHED:
             raise InvalidArgument("App with such id don't available now")
-
-        user_organization_employee: Employee = (
-            self.request.user.employee_profile.employees.filter(
-                organization_id=serializer["organization"].value
-            ).first()
-        )
-
-        if (
-            self.request.user.is_authenticated is False
-            or user_organization_employee is None
-        ):
-            raise PermissionDenied(
-                "Only organization employees can perform this action."
-            )
-
-        config_schema = getattr(app, "manifest", {}).get("config_schema") if hasattr(app, "manifest") else None
-
-        if config_schema is not None:
-            try:
-                jsonschema.validate(
-                    instance=serializer.data["config_data"], schema=config_schema
-                )
-            except jsonschema.exceptions.ValidationError:
-                raise InvalidArgument("Invalid config_data")
-
-        module_manager = make_module_manager()
-        try:
-            module_manager.initialize(
-                app_id=serializer.data["app"],
-                org_id=serializer.data["organization"],
-                config_data=serializer.data["config_data"],
-            )
-        except InternalModuleInitError:
-            # TODO We should use installation lifecycle statuses
-            serializer.save(active=False)
-            return
 
         serializer.save(active=True, user=self.request.user)
 
@@ -195,10 +180,18 @@ class AdminInstallationViewSet(ApiAuthMixin, ModelViewSet):
     ViewSet for the administrative settings API
     """
 
-    queryset = Installation.objects.select_related("app", "organization").all()
     filterset_class = InstallationFilterset
     pagination_class = DefaultListPagination
     serializer_class = InstallationListSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        qs = Installation.objects.select_related("app", "organization").all()
+        if user.is_authenticated and user.is_admin:
+            return qs
+        if not user.is_authenticated:
+            return qs.none()
+        return qs.filter(organization__employees__employee_profile__user=user)
 
     @swagger_auto_schema(
         operation_description="Get a list of installations filtered by school, app, and status",
