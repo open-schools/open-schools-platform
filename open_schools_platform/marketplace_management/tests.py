@@ -1,12 +1,13 @@
-from django.test import TestCase
+from django.test import TransactionTestCase
+from django.conf import settings
 from django.urls import reverse
 from rest_framework.test import APIClient
-from open_schools_platform.marketplace_management.models import App, Installation, OAuth2AuthorizationCode, OAuth2Token
+from open_schools_platform.marketplace_management.models import App, Installation, OAuth2AuthorizationCode, OAuth2Token, AppStatus
 from open_schools_platform.user_management.users.models import User
 from open_schools_platform.organization_management.organizations.models import Organization
 from open_schools_platform.organization_management.employees.models import EmployeeProfile, Employee
 
-class OAuth2FlowTests(TestCase):
+class OAuth2FlowTests(TransactionTestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(phone="+79001234567", password="testpassword")
@@ -103,7 +104,7 @@ class OAuth2FlowTests(TestCase):
         self.assertEqual(response.data["name"], self.profile.name)
 
 
-class JiraWebhookTests(TestCase):
+class JiraWebhookTests(TransactionTestCase):
     def setUp(self):
         self.client = APIClient()
         self.url = reverse("api:marketplace-management:marketplace:webhook-jira-publish-app")
@@ -147,7 +148,7 @@ class JiraWebhookTests(TestCase):
         self.assertFalse(App.objects.filter(name="Hacked App").exists())
 
 
-class ReviewTests(TestCase):
+class ReviewTests(TransactionTestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = User.objects.create_user(phone="+79009998877", password="testpassword")
