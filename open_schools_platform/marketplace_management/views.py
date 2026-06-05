@@ -133,14 +133,23 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
         org_id = serializer.validated_data["organization"].id
         app_id = serializer.validated_data["app"].id
         
-        # Проверка прав: выбросит PermissionDenied, если у пользователя нет organization_access
         get_organization(filters={"id": org_id}, user=self.request.user)
 
-        if Installation.objects.filter(
+        existing_installation = Installation.all_objects.filter(
             app_id=app_id,
             organization_id=org_id,
-        ).exists():
-            raise AlreadyExists("This app already installed for that organization")
+        ).first()
+
+        if existing_installation:
+            if not existing_installation.deleted:
+                raise AlreadyExists("This app already installed for that organization")
+            
+            existing_installation.deleted = None
+            existing_installation.active = True
+            existing_installation.granted_scopes = serializer.validated_data.get("granted_scopes", "")
+            existing_installation.user = self.request.user
+            existing_installation.save()
+            return
 
         app = App.objects.get(id=app_id)
         if app.status != AppStatus.PUBLISHED:

@@ -25,14 +25,10 @@ class App(BaseModel):
     status = models.CharField(max_length=15, choices=AppStatus.choices, default=AppStatus.DRAFT)
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
-    
-    # На схеме это просто колонка category_name в таблице Apps, а не ManyToMany
     category_name = models.CharField(max_length=255, blank=True, default="")
-    
     reviews_count = models.IntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
     
-    # OAuth Fields
     client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
     client_secret = models.CharField(max_length=255, blank=True, default="")
     redirect_uris = models.JSONField(default=list, blank=True)
@@ -56,11 +52,10 @@ class App(BaseModel):
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    # На схеме стоит 'N' со стороны Reviews, значит связи ForeignKey, а не OneToOne
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
     app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="reviews")
     rating = models.IntegerField()
-    message = models.TextField(max_length=512)  # Используем TextField или CharField на 512
+    message = models.TextField(max_length=512)
 
     def __str__(self):
         return f"Review by {self.user} for {self.app}"
@@ -78,14 +73,18 @@ class Installation(BaseModel):
         User, on_delete=models.CASCADE, related_name="installations"
     )
     installed_at = models.DateTimeField(auto_now_add=True)
-    
-    # Поля из вашей старой модели (на схеме их явно нет, но они полезны для логики)
     config_data = models.JSONField(default=dict, blank=True)
     active = models.BooleanField(default=True)
     granted_scopes = models.CharField(max_length=255, default="", blank=True)
 
     class Meta:
-        unique_together = ["app", "organization"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['app', 'organization'],
+                condition=models.Q(deleted__isnull=True),
+                name='marketplace_management_i_app_id_organization_id_uniq'
+            )
+        ]
 
     def __str__(self):
         return f"{self.app.name} installed in {self.organization.name}"
@@ -97,13 +96,12 @@ class OAuth2AuthorizationCode(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="auth_codes"
     )
-    # Связь с App (client_id на схеме указывает сюда)
     app = models.ForeignKey(
         App, to_field="client_id", on_delete=models.CASCADE, related_name="auth_codes"
     )
     redirect_uri = models.URLField()
     response_type = models.CharField(max_length=255)
-    scope = models.CharField(max_length=255, blank=True, default="")  # Есть на схеме
+    scope = models.CharField(max_length=255, blank=True, default="")
     code_challenge = models.CharField(max_length=128, blank=True, default="")
     code_challenge_method = models.CharField(max_length=10, blank=True, default="S256")
     auth_time = models.DateTimeField(auto_now_add=True)
@@ -118,7 +116,6 @@ class OAuth2Token(BaseModel):
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="oauth_tokens"
     )
-    # Связь с App (client_id на схеме указывает сюда)
     app = models.ForeignKey(
         App, to_field="client_id", on_delete=models.CASCADE, related_name="oauth_tokens"
     )
@@ -127,7 +124,7 @@ class OAuth2Token(BaseModel):
     token_type = models.CharField(max_length=255)
     expires_in = models.IntegerField()
     scope = models.CharField(max_length=255, blank=True, default="")
-    created_at = models.DateTimeField(auto_now_add=True)  # Есть на схеме
+    created_at = models.DateTimeField(auto_now_add=True)
     revoked = models.BooleanField(default=False)
 
     @property
