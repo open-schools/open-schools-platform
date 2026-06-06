@@ -24,9 +24,12 @@ from open_schools_platform.organization_management.organizations.selectors impor
 
 from open_schools_platform.query_management.queries.selectors import get_queries
 from open_schools_platform.query_management.queries.serializers import GetOrganizationInviteEmployeeSerializer
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 
 
 class EmployeeListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
     queryset = Employee.objects.all()
     pagination_class = EmployeeApiListPagination
     serializer_class = GetListEmployeeSerializer
@@ -65,6 +68,8 @@ class EmployeeListApi(ApiAuthMixin, ListAPIView):
 
 
 class EmployeeQueriesListApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Get all queries for the provided employee profile",
@@ -85,6 +90,8 @@ class EmployeeQueriesListApi(ApiAuthMixin, APIView):
 
 
 class EmployeeProfileUpdateApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         request_body=UpdateEmployeeProfileSerializer,
@@ -106,6 +113,8 @@ class EmployeeProfileUpdateApi(ApiAuthMixin, APIView):
 
 
 class EmployeeUpdateApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         request_body=UpdateEmployeeSerializer,
@@ -125,6 +134,8 @@ class EmployeeUpdateApi(ApiAuthMixin, APIView):
 
 
 class EmployeeDeleteApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
         operation_description="Delete employee.",
@@ -137,6 +148,8 @@ class EmployeeDeleteApi(ApiAuthMixin, APIView):
 
 
 class EmployeeGetApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
     @swagger_auto_schema(
         operation_description="Get employee with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_EMPLOYEES],
