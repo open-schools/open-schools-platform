@@ -10,7 +10,7 @@ from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.errors.exceptions import InvalidArgument
 from rest_framework.exceptions import PermissionDenied
 from open_schools_platform.marketplace_management.models import App, OAuth2Token, Installation
-from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer, RevokeTokenSerializer
+from open_schools_platform.marketplace_management.serializers import AuthorizeRequestSerializer, TokenRequestSerializer, RevokeTokenSerializer, GenerateAuthCodeSerializer
 from datetime import timedelta
 from django.utils import timezone
 from open_schools_platform.marketplace_management.oauth2_services import (
@@ -156,3 +156,39 @@ class UserInfoView(APIView):
             data["email"] = profile.email if profile and hasattr(profile, 'email') else ""
             
         return Response(data, status=status.HTTP_200_OK)
+
+
+class GenerateAuthCodeView(ApiAuthMixin, APIView):
+    @swagger_auto_schema(request_body=GenerateAuthCodeSerializer, tags=[SwaggerTags.MARKETPLACE_MANAGEMENT])
+    def post(self, request, *args, **kwargs):
+        serializer = GenerateAuthCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        try:
+            app = App.objects.get(client_id=data["client_id"])
+        except App.DoesNotExist:
+            raise InvalidArgument("Invalid client_id")
+            
+        # Check if installed
+        installation = Installation.objects.filter(app=app, user=request.user, active=True).first()
+        if not installation:
+            installation = Installation.objects.filter(
+                app=app, organization__employees__employee_profile__user=request.user, active=True
+            ).first()
+            
+        if not installation:
+            raise PermissionDenied("App is not installed by this user or organization.")
+            
+        # Generate code (redirect_uri is empty since it's internal postMessage flow, 
+        # but exchange_code_for_token checks redirect_uri equality, so we set it to 'postmessage' or empty)
+        auth_code = create_authorization_code(
+            app=app,
+            user=request.user,
+            redirect_uri="postmessage",
+            scope=installation.granted_scopes,
+            code_challenge=data["code_challenge"],
+            code_challenge_method=data.get("code_challenge_method", "S256")
+        )
+        
+        return Response({"code": auth_code.code}, status=status.HTTP_200_OK)

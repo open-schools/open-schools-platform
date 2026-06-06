@@ -11,6 +11,7 @@ from open_schools_platform.marketplace_management.oauth2_views import (
     TokenView,
     UserInfoView,
     RevokeTokenView,
+    GenerateAuthCodeView,
 )
 from open_schools_platform.marketplace_management.webhooks import JiraApproveWebhookView
 
@@ -43,4 +44,6 @@ urlpatterns = [
     path("oauth2/token", TokenView.as_view(), name="oauth2-token"),
     path("oauth2/userinfo", UserInfoView.as_view(), name="oauth2-userinfo"),
     path("oauth2/revoke", RevokeTokenView.as_view(), name="oauth2-revoke"),
+    path("auth/generate_code", GenerateAuthCodeView.as_view(), name="oauth2-generate-code"),
+    path("webhooks/jira/publish-app", JiraApproveWebhookView.as_view(), name="webhook-jira-publish-app"),
 ]

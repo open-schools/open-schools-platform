@@ -5,4 +5,6 @@ AVAILABLE_SCOPES = [
     "phone",
     "read:students",
     "read:classes",
+    "read:organizations",
+    "read:organization_members",
 ]

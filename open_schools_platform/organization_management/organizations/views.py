@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
@@ -82,6 +83,9 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
     pagination_class = DefaultListPagination
     filterset_class = OrganizationFilter
     serializer_class = GetOrganizationSerializer
+    
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organizations")]
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],

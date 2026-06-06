@@ -34,6 +34,7 @@ class App(BaseModel):
     redirect_uris = models.JSONField(default=list, blank=True)
     grant_types = models.JSONField(default=list, blank=True)
     response_types = models.JSONField(default=list, blank=True)
+    app_url = models.URLField(blank=True, default="")
     
     required_scopes = models.JSONField(default=list, blank=True)
     optional_scopes = models.JSONField(default=list, blank=True)

@@ -93,7 +93,7 @@ class InstallationListSerializer(serializers.ModelSerializer):
 class AuthorizeRequestSerializer(serializers.Serializer):
     client_id = serializers.UUIDField()
     response_type = serializers.CharField()
-    redirect_uri = serializers.URLField()
+    redirect_uri = serializers.CharField()
     scope = serializers.CharField(required=False, allow_blank=True, default="")
     state = serializers.CharField(required=False, allow_blank=True, default="")
     code_challenge = serializers.CharField(required=True)
@@ -106,7 +106,7 @@ class TokenRequestSerializer(serializers.Serializer):
     refresh_token = serializers.CharField(required=False)
     client_id = serializers.UUIDField()
     client_secret = serializers.CharField()
-    redirect_uri = serializers.URLField(required=False)
+    redirect_uri = serializers.CharField(required=False)
     code_verifier = serializers.CharField(required=False, allow_blank=True, default="")
 
     def validate(self, attrs):
@@ -125,4 +125,10 @@ class TokenRequestSerializer(serializers.Serializer):
 class RevokeTokenSerializer(serializers.Serializer):
     token = serializers.CharField()
     client_id = serializers.UUIDField()
-    client_secret = serializers.CharField()
+    client_secret = serializers.CharField()
+
+
+class GenerateAuthCodeSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+    code_challenge = serializers.CharField(required=True)
+    code_challenge_method = serializers.CharField(required=False, default="S256")
