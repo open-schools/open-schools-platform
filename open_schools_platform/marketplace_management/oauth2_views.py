@@ -171,14 +171,22 @@ class GenerateAuthCodeView(ApiAuthMixin, APIView):
             raise InvalidArgument("Invalid client_id")
             
         # Check if installed
-        installation = Installation.objects.filter(app=app, user=request.user, active=True).first()
-        if not installation:
-            installation = Installation.objects.filter(
-                app=app, organization__employees__employee_profile__user=request.user, active=True
-            ).first()
+        installations = Installation.objects.filter(app=app, user=request.user, active=True, deleted__isnull=True)
+        if not installations.exists():
+            installations = Installation.objects.filter(
+                app=app, organization__employees__employee_profile__user=request.user, active=True, deleted__isnull=True
+            )
             
-        if not installation:
+        if "organization" in data and data["organization"]:
+            installations = installations.filter(organization_id=data["organization"])
+            
+        if not installations.exists():
             raise PermissionDenied("App is not installed by this user or organization.")
+            
+        # Combine scopes from all active installations
+        combined_scopes = set()
+        for inst in installations:
+            combined_scopes.update(inst.granted_scopes.split())
             
         # Generate code (redirect_uri is empty since it's internal postMessage flow, 
         # but exchange_code_for_token checks redirect_uri equality, so we set it to 'postmessage' or empty)
@@ -186,7 +194,7 @@ class GenerateAuthCodeView(ApiAuthMixin, APIView):
             app=app,
             user=request.user,
             redirect_uri="postmessage",
-            scope=installation.granted_scopes,
+            scope=" ".join(combined_scopes),
             code_challenge=data["code_challenge"],
             code_challenge_method=data.get("code_challenge_method", "S256")
         )

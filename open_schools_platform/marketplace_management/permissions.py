@@ -19,7 +19,28 @@ class HasOAuthScope(BasePermission):
             return True
 
         granted_scopes = request.auth.scope.split()
-        return self.required_scope in granted_scopes
+        if self.required_scope not in granted_scopes:
+            return False
+
+        # Контекстная проверка для конкретной организации
+        org_id = None
+        if hasattr(view, 'kwargs') and 'organization_id' in view.kwargs:
+            org_id = view.kwargs['organization_id']
+        elif 'organization' in request.GET:
+            org_id = request.GET['organization']
+
+        if org_id:
+            from open_schools_platform.marketplace_management.models import Installation
+            inst = Installation.objects.filter(
+                app=request.auth.app,
+                organization_id=org_id,
+                active=True,
+                deleted__isnull=True
+            ).first()
+            if not inst or self.required_scope not in inst.granted_scopes.split():
+                return False
+
+        return True
 
     def __call__(self, *args, **kwargs):
         # Allow passing arguments to the permission class

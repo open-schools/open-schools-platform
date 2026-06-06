@@ -131,4 +131,5 @@ class RevokeTokenSerializer(serializers.Serializer):
 class GenerateAuthCodeSerializer(serializers.Serializer):
     client_id = serializers.UUIDField()
     code_challenge = serializers.CharField(required=True)
-    code_challenge_method = serializers.CharField(required=False, default="S256")
+    code_challenge_method = serializers.CharField(required=False, default="S256")
+    organization = serializers.UUIDField(required=False, allow_null=True)
