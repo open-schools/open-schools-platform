@@ -15,10 +15,25 @@ from open_schools_platform.marketplace_management.models import App, AppStatus
 class JiraWebhookSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
     description = serializers.CharField()
+    ticket_id = serializers.CharField(required=False, allow_blank=True, default="")
     icon_url = serializers.URLField(required=False, allow_blank=True, default="")
     redirect_uris = serializers.ListField(child=serializers.URLField(), required=False, default=list)
     required_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     optional_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+
+    def validate_required_scopes(self, value):
+        from open_schools_platform.marketplace_management.scopes import AVAILABLE_SCOPES
+        invalid_scopes = [s for s in value if s not in AVAILABLE_SCOPES]
+        if invalid_scopes:
+            raise serializers.ValidationError(f"Invalid required scopes: {', '.join(invalid_scopes)}")
+        return value
+
+    def validate_optional_scopes(self, value):
+        from open_schools_platform.marketplace_management.scopes import AVAILABLE_SCOPES
+        invalid_scopes = [s for s in value if s not in AVAILABLE_SCOPES]
+        if invalid_scopes:
+            raise serializers.ValidationError(f"Invalid optional scopes: {', '.join(invalid_scopes)}")
+        return value
 
 
 class JiraApproveWebhookView(APIView):
