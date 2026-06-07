@@ -213,3 +213,75 @@ class JiraDeleteAppWebhookView(APIView):
         app.delete()
         
         return Response({"message": "App successfully deleted"}, status=status.HTTP_200_OK)
+
+
+class JiraRegenerateSecretSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+
+
+class JiraRegenerateSecretWebhookView(APIView):
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        request_body=JiraRegenerateSecretSerializer,
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+        operation_description="Webhook for JSM to regenerate client_secret"
+    )
+    def post(self, request, *args, **kwargs):
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
+        
+        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+            raise PermissionDenied("Invalid or missing webhook secret")
+            
+        serializer = JiraRegenerateSecretSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        try:
+            app = App.objects.get(client_id=data["client_id"])
+        except App.DoesNotExist:
+            return Response({"error": "App not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        new_client_secret = get_random_string(length=64)
+        app.client_secret = new_client_secret
+        app.save()
+        
+        return Response({
+            "client_id": str(app.client_id),
+            "client_secret": new_client_secret,
+            "message": "Client secret successfully regenerated"
+        }, status=status.HTTP_200_OK)
+
+
+class JiraRestoreAppSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+
+
+class JiraRestoreAppWebhookView(APIView):
+    permission_classes = [AllowAny]
+    
+    @swagger_auto_schema(
+        request_body=JiraRestoreAppSerializer,
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+        operation_description="Webhook for JSM to restore a soft-deleted App"
+    )
+    def post(self, request, *args, **kwargs):
+        auth_header = request.META.get('HTTP_AUTHORIZATION', '')
+        expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
+        
+        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+            raise PermissionDenied("Invalid or missing webhook secret")
+            
+        serializer = JiraRestoreAppSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = serializer.validated_data
+        
+        try:
+            app = App.objects.all_with_deleted().get(client_id=data["client_id"])
+        except App.DoesNotExist:
+            return Response({"error": "App not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+        app.undelete()
+        
+        return Response({"message": "App successfully restored"}, status=status.HTTP_200_OK)

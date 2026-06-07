@@ -475,3 +475,32 @@ class JiraUpdateDeleteWebhookTests(TransactionTestCase):
         
         self.assertFalse(App.objects.filter(client_id=self.client_id).exists())
         self.assertTrue(App.objects.all_with_deleted().filter(client_id=self.client_id).exists())
+
+    def test_regenerate_secret_success(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-regenerate-secret")
+        old_hashed_secret = self.app.client_secret
+        response = self.client.post(
+            url,
+            {"client_id": self.client_id},
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("client_secret", response.data)
+        
+        self.app.refresh_from_db()
+        self.assertNotEqual(self.app.client_secret, old_hashed_secret)
+
+    def test_restore_app_success(self):
+        self.app.delete()
+        self.assertFalse(App.objects.filter(client_id=self.client_id).exists())
+        
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-restore-app")
+        response = self.client.post(
+            url,
+            {"client_id": self.client_id},
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(App.objects.filter(client_id=self.client_id).exists())

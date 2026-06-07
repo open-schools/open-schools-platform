@@ -19,6 +19,8 @@ from open_schools_platform.marketplace_management.webhooks import (
     ValidateCredentialsWebhookView,
     JiraUpdateAppWebhookView,
     JiraDeleteAppWebhookView,
+    JiraRegenerateSecretWebhookView,
+    JiraRestoreAppWebhookView,
 )
 
 app_name = "marketplace"
@@ -57,4 +59,6 @@ urlpatterns = [
     path("webhooks/jira/validate-credentials", ValidateCredentialsWebhookView.as_view(), name="webhook-jira-validate-credentials"),
     path("webhooks/jira/update-app", JiraUpdateAppWebhookView.as_view(), name="webhook-jira-update-app"),
     path("webhooks/jira/delete-app", JiraDeleteAppWebhookView.as_view(), name="webhook-jira-delete-app"),
+    path("webhooks/jira/regenerate-secret", JiraRegenerateSecretWebhookView.as_view(), name="webhook-jira-regenerate-secret"),
+    path("webhooks/jira/restore-app", JiraRestoreAppWebhookView.as_view(), name="webhook-jira-restore-app"),
 ]
