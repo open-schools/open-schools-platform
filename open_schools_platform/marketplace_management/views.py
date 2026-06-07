@@ -17,6 +17,7 @@ from open_schools_platform.marketplace_management.models import (
     Installation,
     AppStatus,
     Review,
+    Category,
 )
 from open_schools_platform.marketplace_management.serializers import (
     AppSerializer,
@@ -25,6 +26,7 @@ from open_schools_platform.marketplace_management.serializers import (
     InstallationListSerializer,
     ReviewSerializer,
     ReviewCreateSerializer,
+    CategorySerializer,
 )
 from open_schools_platform.organization_management.employees.models import Employee
 
@@ -50,6 +52,28 @@ class AppApi(ApiAuthMixin, ModelViewSet):
 
     @swagger_auto_schema(
         operation_description="Get app details",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+
+class CategoryApi(ApiAuthMixin, ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    pagination_class = None
+
+    @swagger_auto_schema(
+        operation_description="Get categories list",
+        tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
+    )
+    def list(self, request, *args, **kwargs):
+        response = super().list(request, *args, **kwargs)
+        from rest_framework.response import Response
+        return Response({"categories": response.data})
+
+    @swagger_auto_schema(
+        operation_description="Get category details",
         tags=[SwaggerTags.MARKETPLACE_MANAGEMENT],
     )
     def retrieve(self, request, *args, **kwargs):

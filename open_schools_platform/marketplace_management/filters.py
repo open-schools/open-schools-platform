@@ -13,7 +13,7 @@ class AppFilterset(filters.FilterSet):
     )
 
     sort = filters.ChoiceFilter(method="filter_sort", choices=SORT_CHOICES)
-    category_id = filters.NumberFilter("category_id")
+    category_id = filters.UUIDFilter("category_id")
     q = filters.CharFilter(method="filter_q")
 
     def filter_q(self, queryset, name, value):
@@ -29,7 +29,7 @@ class AppFilterset(filters.FilterSet):
     class Meta:
         model = App
         fields = [
-            "category_id",
+            "category",
         ]
 
 

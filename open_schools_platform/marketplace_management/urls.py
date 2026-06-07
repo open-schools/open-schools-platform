@@ -5,6 +5,7 @@ from open_schools_platform.marketplace_management.views import (
     InstallationsViewSet,
     AdminInstallationViewSet,
     ReviewApi,
+    CategoryApi,
 )
 from open_schools_platform.marketplace_management.oauth2_views import (
     AuthorizeView,
@@ -20,6 +21,8 @@ app_name = "marketplace"
 urlpatterns = [
     path("apps", AppApi.as_view({"get": "list"}), name="miniapps-apps-list"),
     path("apps/<uuid:pk>", AppApi.as_view({"get": "retrieve"}), name="miniapps-apps-detail"),
+    path("categories", CategoryApi.as_view({"get": "list"}), name="miniapps-categories-list"),
+    path("categories/<uuid:pk>", CategoryApi.as_view({"get": "retrieve"}), name="miniapps-categories-detail"),
     path("apps/<uuid:app_id>/reviews", ReviewApi.as_view({"get": "list", "post": "create"}), name="miniapps-reviews"),
     path(
         "installations/<uuid:pk>",

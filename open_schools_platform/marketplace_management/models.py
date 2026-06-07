@@ -11,6 +11,14 @@ from open_schools_platform.organization_management.organizations.models import (
 from open_schools_platform.user_management.users.models import User
 
 
+class Category(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class AppStatus(models.TextChoices):
     DRAFT = "draft", "Draft"
     PENDING_REVIEW = "pending_review", "Pending Review"
@@ -25,7 +33,7 @@ class App(BaseModel):
     status = models.CharField(max_length=15, choices=AppStatus.choices, default=AppStatus.DRAFT)
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
-    category_name = models.CharField(max_length=255, blank=True, default="")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="apps")
     reviews_count = models.IntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
     

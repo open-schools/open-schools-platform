@@ -4,10 +4,18 @@ from open_schools_platform.marketplace_management.models import (
     App,
     Installation,
     Review,
+    Category,
 )
 
 
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ["id", "name"]
+
+
 class AppSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = App

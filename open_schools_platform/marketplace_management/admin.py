@@ -9,9 +9,9 @@ from .models import Installation, App, Review, OAuth2AuthorizationCode, OAuth2To
 
 @admin_wrapper(App)
 class AppModelAdmin(BaseAdmin):
-    list_display = ("id", "name", "category_name", "status", "client_id")
-    list_filter = ("status", "category_name")
-    search_fields = ("name", "category_name", "client_id")
+    list_display = ("id", "name", "category", "status", "client_id")
+    list_filter = ("status", "category")
+    search_fields = ("name", "category", "client_id")
     field_to_highlight = "id"
 
 

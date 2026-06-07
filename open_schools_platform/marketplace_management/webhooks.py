@@ -21,6 +21,7 @@ class JiraWebhookSerializer(serializers.Serializer):
     redirect_uris = serializers.ListField(child=serializers.URLField(), required=False, default=list)
     required_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     optional_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
+    category_name = serializers.CharField(required=False, allow_blank=True, default="")
 
     def validate_required_scopes(self, value):
         from open_schools_platform.marketplace_management.scopes import AVAILABLE_SCOPES
@@ -58,6 +59,12 @@ class JiraApproveWebhookView(APIView):
         
         client_secret = get_random_string(length=64)
         
+        category = None
+        category_name = data.get("category_name")
+        if category_name:
+            from open_schools_platform.marketplace_management.models import Category
+            category, _ = Category.objects.get_or_create(name=category_name)
+        
         app = App.objects.create(
             name=data["name"],
             description=data["description"],
@@ -67,7 +74,8 @@ class JiraApproveWebhookView(APIView):
             required_scopes=data.get("required_scopes", []),
             optional_scopes=data.get("optional_scopes", []),
             status=AppStatus.PUBLISHED,
-            client_secret=client_secret
+            client_secret=client_secret,
+            category=category
         )
         
         return Response({
