@@ -34,6 +34,8 @@ class App(BaseModel):
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="apps")
+    privacy_policy_url = models.URLField(max_length=2000, blank=True, default="")
+    eula_url = models.URLField(max_length=2000, blank=True, default="")
     reviews_count = models.IntegerField(default=0)
     average_rating = models.FloatField(default=0.0)
     
