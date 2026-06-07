@@ -17,6 +17,7 @@ class JiraWebhookSerializer(serializers.Serializer):
     description = serializers.CharField()
     ticket_id = serializers.CharField(required=False, allow_blank=True, default="")
     icon_url = serializers.URLField(required=False, allow_blank=True, default="")
+    app_url = serializers.URLField(required=False, allow_blank=True, default="")
     redirect_uris = serializers.ListField(child=serializers.URLField(), required=False, default=list)
     required_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
     optional_scopes = serializers.ListField(child=serializers.CharField(), required=False, default=list)
@@ -61,6 +62,7 @@ class JiraApproveWebhookView(APIView):
             name=data["name"],
             description=data["description"],
             icon_url=data.get("icon_url", ""),
+            app_url=data.get("app_url", ""),
             redirect_uris=data.get("redirect_uris", []),
             required_scopes=data.get("required_scopes", []),
             optional_scopes=data.get("optional_scopes", []),
