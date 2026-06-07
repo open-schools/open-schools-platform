@@ -114,7 +114,7 @@ class ValidateCredentialsWebhookView(APIView):
         data = serializer.validated_data
         
         try:
-            app = App.objects.get(client_id=data["client_id"])
+            app = App.objects.all_with_deleted().get(client_id=data["client_id"])
         except App.DoesNotExist:
             raise PermissionDenied("Invalid Client ID or Client Secret")
             

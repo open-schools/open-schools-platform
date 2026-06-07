@@ -504,3 +504,262 @@ class JiraUpdateDeleteWebhookTests(TransactionTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertTrue(App.objects.filter(client_id=self.client_id).exists())
+
+import uuid
+from django.urls import reverse
+from django.test import TransactionTestCase
+from rest_framework.test import APIClient
+from open_schools_platform.user_management.users.models import User
+from open_schools_platform.marketplace_management.models import App, Category, Installation, OAuth2Token, OAuth2AuthorizationCode
+from unittest.mock import patch
+
+import uuid
+from django.urls import reverse
+from django.test import TransactionTestCase, override_settings
+from rest_framework.test import APIClient
+from open_schools_platform.user_management.users.models import User
+from open_schools_platform.marketplace_management.models import App, Category, Installation, OAuth2Token, OAuth2AuthorizationCode
+from unittest.mock import patch
+
+class MarketplaceViewsCoverageTests(TransactionTestCase):
+    def setUp(self):
+        self.user = User.objects.create(phone="+79000000000")
+        self.category = Category.objects.create(name="Test Category")
+        self.app = App.objects.create(name="Test App", description="Desc")
+        self.app.category = self.category
+        from open_schools_platform.marketplace_management.models import AppStatus
+        self.app.status = AppStatus.PUBLISHED
+        self.app.save()
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+        
+    def test_app_api_list(self):
+        url = reverse("api:marketplace-management:marketplace:miniapps-apps-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_app_api_retrieve(self):
+        url = reverse("api:marketplace-management:marketplace:miniapps-apps-detail", kwargs={"pk": self.app.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_category_api_list(self):
+        url = reverse("api:marketplace-management:marketplace:miniapps-categories-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_category_api_retrieve(self):
+        url = reverse("api:marketplace-management:marketplace:miniapps-categories-detail", kwargs={"pk": self.category.id})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+
+    def test_installation_view_set(self):
+        from open_schools_platform.organization_management.employees.models import EmployeeProfile, Employee
+        from open_schools_platform.organization_management.organizations.models import Organization
+        profile = EmployeeProfile.objects.create(user=self.user, name="emp user")
+        org = Organization.objects.create(name="emp org")
+        Employee.objects.create(employee_profile=profile, organization=org, name="emp")
+
+        install_url = reverse("api:marketplace-management:marketplace:miniapps-installations-list")
+        
+        response = self.client.post(install_url, {
+            "app": str(self.app.id),
+            "organization": str(org.id)
+        }, format="json")
+        self.assertEqual(response.status_code, 201)
+        install_id = Installation.objects.last().id
+        
+        del_url = reverse("api:marketplace-management:marketplace:miniapps-installations-detail", kwargs={"pk": install_id})
+        res2 = self.client.delete(del_url)
+        self.assertEqual(res2.status_code, 204)
+
+        res3 = self.client.post(install_url, {
+            "app": str(self.app.id),
+            "organization": str(org.id)
+        }, format="json")
+        self.assertEqual(res3.status_code, 201)
+
+    def test_installations_view_set_unauthenticated(self):
+        unauth_client = APIClient()
+        url = reverse("api:marketplace-management:marketplace:miniapps-installations-list")
+        response = unauth_client.get(url)
+        self.assertEqual(response.status_code, 401)
+
+    def test_admin_installation_view_set_employee(self):
+        from open_schools_platform.organization_management.employees.models import EmployeeProfile, Employee
+        from open_schools_platform.organization_management.organizations.models import Organization
+        
+        profile = EmployeeProfile.objects.create(user=self.user, name="emp user")
+        org = Organization.objects.create(name="emp org")
+        Employee.objects.create(employee_profile=profile, organization=org, name="emp")
+        Installation.objects.create(app=self.app, organization=org, active=True, user=self.user)
+        
+        url = reverse("api:marketplace-management:marketplace:admin-installations-list")
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data["results"]), 1)
+
+class OAuth2FlowCoverageTests(TransactionTestCase):
+    def setUp(self):
+        self.user = User.objects.create(phone="+79000000001")
+        self.app = App.objects.create(name="Test App")
+        self.client = APIClient()
+        
+    def test_oauth2_authorization_code_not_found(self):
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        response = self.client.post(url, {
+            "grant_type": "authorization_code",
+            "code": "invalid_code_str",
+            "client_id": self.app.client_id,
+            "client_secret": "plain_secret",
+            "redirect_uri": "http://localhost/callback"
+        })
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Invalid or expired authorization code", str(response.data))
+
+    def test_oauth2_unsupported_code_challenge_method(self):
+        code = OAuth2AuthorizationCode.objects.create(
+            code="test_unsupported",
+            user=self.user,
+            app=self.app,
+            redirect_uri="http://localhost/callback",
+            response_type="code",
+            code_challenge="test",
+            code_challenge_method="test"
+        )
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        response = self.client.post(url, {
+            "grant_type": "authorization_code",
+            "code": "test_unsupported",
+            "client_id": self.app.client_id,
+            "client_secret": "plain_secret",
+            "code_verifier": "test",
+            "redirect_uri": "http://localhost/callback"
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("Unsupported code_challenge_method", str(response.data))
+
+    def test_oauth2_invalid_code_verifier_s256(self):
+        code = OAuth2AuthorizationCode.objects.create(
+            code="test_s256_invalid",
+            user=self.user,
+            app=self.app,
+            redirect_uri="http://localhost/callback",
+            response_type="code",
+            code_challenge="test",
+            code_challenge_method="S256"
+        )
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        response = self.client.post(url, {
+            "grant_type": "authorization_code",
+            "code": "test_s256_invalid",
+            "client_id": self.app.client_id,
+            "client_secret": "plain_secret",
+            "code_verifier": "invalid",
+            "redirect_uri": "http://localhost/callback"
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("Invalid code_verifier", str(response.data))
+
+    def test_oauth2_plain_secret_mismatch(self):
+        code = OAuth2AuthorizationCode.objects.create(
+            code="test_plain_secret",
+            user=self.user,
+            app=self.app,
+            redirect_uri="http://localhost/callback",
+            response_type="code"
+        )
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        response = self.client.post(url, {
+            "grant_type": "authorization_code",
+            "code": "test_plain_secret",
+            "client_id": self.app.client_id,
+            "client_secret": "invalid_plain",
+            "redirect_uri": "http://localhost/callback"
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("Invalid client_secret", str(response.data))
+
+    def test_oauth2_refresh_token_plain_secret_mismatch(self):
+        token = OAuth2Token.objects.create(
+            user=self.user,
+            app=self.app,
+            access_token="acc123",
+            refresh_token="ref123",
+            expires_in=3600
+        )
+        url = reverse("api:marketplace-management:marketplace:oauth2-token")
+        response = self.client.post(url, {
+            "grant_type": "refresh_token",
+            "refresh_token": "ref123",
+            "client_id": self.app.client_id,
+            "client_secret": "invalid_plain"
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("Invalid client_secret", str(response.data))
+
+    def test_revoke_token_plain_secret_mismatch(self):
+        token = OAuth2Token.objects.create(
+            user=self.user,
+            app=self.app,
+            access_token="acc123",
+            refresh_token="ref123",
+            expires_in=3600
+        )
+        url = reverse("api:marketplace-management:marketplace:oauth2-revoke")
+        response = self.client.post(url, {
+            "token": "acc123",
+            "client_id": self.app.client_id,
+            "client_secret": "invalid_plain"
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertIn("Invalid client_secret", str(response.data))
+
+    def test_revoke_token_app_not_found(self):
+        url = reverse("api:marketplace-management:marketplace:oauth2-revoke")
+        response = self.client.post(url, {
+            "token": "acc123",
+            "client_id": str(uuid.uuid4()),
+            "client_secret": "secret"
+        })
+        self.assertEqual(response.status_code, 200)
+
+class JiraUpdateDeleteWebhookTestsRecovered(TransactionTestCase):
+    def setUp(self):
+        self.user = User.objects.create(phone="+79000000002")
+        self.app = App.objects.create(name="Test App")
+        self.client = APIClient()
+
+    @override_settings(JIRA_WEBHOOK_SECRET='test_secret')
+    def test_webhook_jira_regenerate_secret_invalid_signature(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-regenerate-secret")
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(JIRA_WEBHOOK_SECRET='test_secret')
+    def test_webhook_jira_regenerate_secret_valid(self):
+        old_secret = self.app.client_secret
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-regenerate-secret")
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer test_secret')
+        response = self.client.post(url, {"client_id": str(self.app.client_id)}, format="json")
+        self.assertEqual(response.status_code, 200)
+        self.app.refresh_from_db()
+        self.assertNotEqual(self.app.client_secret, old_secret)
+
+    @override_settings(JIRA_WEBHOOK_SECRET='test_secret')
+    def test_webhook_jira_restore_app_invalid_signature(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-restore-app")
+        response = self.client.post(url, format="json")
+        self.assertEqual(response.status_code, 403)
+
+    @override_settings(JIRA_WEBHOOK_SECRET='test_secret')
+    def test_webhook_jira_restore_app_valid(self):
+        self.app.delete()
+        self.assertTrue(App.all_objects.get(id=self.app.id).deleted is not None)
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-restore-app")
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer test_secret')
+        response = self.client.post(url, {"client_id": str(self.app.client_id)}, format="json")
+        self.assertEqual(response.status_code, 200)
+        app = App.objects.get(id=self.app.id)
+        self.assertFalse(app.deleted)
+

@@ -41,9 +41,9 @@ urlpatterns = [
     path(
         "installations",
         InstallationsViewSet.as_view(
-            {"post": "create"}
+            {"post": "create", "get": "list"}
         ),
-        name="miniapps-installations-create",
+        name="miniapps-installations-list",
     ),
     path(
         "admin/installations",

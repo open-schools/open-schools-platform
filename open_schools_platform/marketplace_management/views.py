@@ -173,6 +173,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
             existing_installation.granted_scopes = serializer.validated_data.get("granted_scopes", "")
             existing_installation.user = self.request.user
             existing_installation.save()
+            serializer.instance = existing_installation
             return
 
         app = App.objects.get(id=app_id)
