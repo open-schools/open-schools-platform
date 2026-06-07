@@ -239,10 +239,6 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
     visible_filter_fields = complex_filter.get_dict_filters()
     serializer_class = GetStudentSerializer
 
-    def get_permissions(self):
-        from open_schools_platform.marketplace_management.permissions import HasOAuthScope
-        return super().get_permissions() + [HasOAuthScope("read:students")]
-
     @swagger_auto_schema(
         operation_description="Get students in this circle",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
@@ -271,7 +267,7 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
             )
             valid_org_ids = [
                 inst.organization_id for inst in installations 
-                if 'read:students' in inst.granted_scopes.split()
+                if 'read:organization_members' in inst.granted_scopes.split()
             ]
             students = students.filter(circle__organization__id__in=valid_org_ids)
 
