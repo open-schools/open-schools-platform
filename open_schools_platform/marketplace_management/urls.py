@@ -14,7 +14,12 @@ from open_schools_platform.marketplace_management.oauth2_views import (
     RevokeTokenView,
     GenerateAuthCodeView,
 )
-from open_schools_platform.marketplace_management.webhooks import JiraApproveWebhookView
+from open_schools_platform.marketplace_management.webhooks import (
+    JiraApproveWebhookView,
+    ValidateCredentialsWebhookView,
+    JiraUpdateAppWebhookView,
+    JiraDeleteAppWebhookView,
+)
 
 app_name = "marketplace"
 
@@ -49,4 +54,7 @@ urlpatterns = [
     path("oauth2/revoke", RevokeTokenView.as_view(), name="oauth2-revoke"),
     path("auth/generate_code", GenerateAuthCodeView.as_view(), name="oauth2-generate-code"),
     path("webhooks/jira/publish-app", JiraApproveWebhookView.as_view(), name="webhook-jira-publish-app"),
+    path("webhooks/jira/validate-credentials", ValidateCredentialsWebhookView.as_view(), name="webhook-jira-validate-credentials"),
+    path("webhooks/jira/update-app", JiraUpdateAppWebhookView.as_view(), name="webhook-jira-update-app"),
+    path("webhooks/jira/delete-app", JiraDeleteAppWebhookView.as_view(), name="webhook-jira-delete-app"),
 ]

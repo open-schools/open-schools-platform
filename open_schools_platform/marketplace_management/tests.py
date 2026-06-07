@@ -83,7 +83,7 @@ class OAuth2FlowTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -109,7 +109,7 @@ class OAuth2FlowTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -190,7 +190,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -211,7 +211,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -223,7 +223,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "refresh_token",
             "refresh_token": refresh_token,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret
+            "client_secret": "test_super_secret"
         })
         self.assertEqual(res.status_code, 200)
         self.assertIn("access_token", res.data)
@@ -239,7 +239,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -250,7 +250,7 @@ class ReviewTests(TransactionTestCase):
         revoke_res = self.client.post(revoke_url, {
             "token": access_token,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret
+            "client_secret": "test_super_secret"
         })
         self.assertEqual(revoke_res.status_code, 200)
         
@@ -280,7 +280,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -301,7 +301,7 @@ class ReviewTests(TransactionTestCase):
             "grant_type": "authorization_code",
             "code": auth_code.code,
             "client_id": str(self.app.client_id),
-            "client_secret": self.app.client_secret,
+            "client_secret": "test_super_secret",
             "code_verifier": verifier,
             "redirect_uri": "http://localhost/callback"
         })
@@ -318,3 +318,160 @@ class ReviewTests(TransactionTestCase):
         
         # Should fail with 403 because token is expired
         self.assertEqual(info_res.status_code, 403)
+
+class JiraWebhookTests(TransactionTestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.url = reverse("api:marketplace-management:marketplace:webhook-jira-publish-app")
+        self.secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', 'test_secret_for_jira_webhooks')
+        
+    def test_publish_app_with_valid_secret(self):
+        payload = {
+            "name": "Test App from Jira",
+            "description": "Test description",
+            "redirect_uris": ["http://localhost/callback"]
+        }
+        
+        response = self.client.post(
+            self.url,
+            payload,
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("client_id", response.data)
+        self.assertIn("client_secret", response.data)
+        
+        # Check if App was created
+        self.assertTrue(App.objects.filter(name="Test App from Jira", status=AppStatus.PUBLISHED).exists())
+        
+    def test_publish_app_with_invalid_secret(self):
+        payload = {
+            "name": "Hacked App",
+            "description": "Hack"
+        }
+        
+        response = self.client.post(
+            self.url,
+            payload,
+            format='json',
+            HTTP_AUTHORIZATION="Bearer WRONG_SECRET"
+        )
+        
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(App.objects.filter(name="Hacked App").exists())
+
+
+class ReviewTests(TransactionTestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.user = User.objects.create_user(phone="+79009998877", password="testpassword")
+        self.profile = EmployeeProfile.objects.create(user=self.user, name="Review User")
+        self.org = Organization.objects.create(name="Review Org")
+        self.employee = Employee.objects.create(employee_profile=self.profile, organization=self.org, name="Review User")
+        
+        from open_schools_platform.marketplace_management.models import AppStatus
+        self.app = App.objects.create(
+            name="Review App", 
+            status=AppStatus.PUBLISHED
+        )
+
+    def test_create_review_without_installation(self):
+        self.client.force_authenticate(user=self.user)
+        # Using reverse with namespace according to current setup
+        url = reverse("api:marketplace-management:marketplace:miniapps-reviews", kwargs={"app_id": self.app.id})
+        response = self.client.post(url, {
+            "rating": 5,
+            "message": "Great app!"
+        })
+        self.assertEqual(response.status_code, 403)
+
+    def test_create_review_with_installation(self):
+        Installation.objects.create(
+            app=self.app,
+            organization=self.org,
+            user=self.user,
+            active=True
+        )
+        self.client.force_authenticate(user=self.user)
+        url = reverse("api:marketplace-management:marketplace:miniapps-reviews", kwargs={"app_id": self.app.id})
+        
+        response = self.client.post(url, {
+            "rating": 4,
+            "message": "Good app!"
+        })
+        self.assertEqual(response.status_code, 201)
+        
+        self.app.refresh_from_db()
+        self.assertEqual(self.app.reviews_count, 1)
+        self.assertEqual(self.app.average_rating, 4.0)
+
+        response2 = self.client.post(url, {
+            "rating": 2,
+            "message": "Actually bad."
+        })
+        self.assertEqual(response2.status_code, 400)
+
+
+class JiraUpdateDeleteWebhookTests(TransactionTestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', 'test_secret_for_jira_webhooks')
+        
+        self.app = App.objects.create(
+            name="Original Name",
+            description="Original Description",
+            client_secret="test_secret"
+        )
+        self.client_id = str(self.app.client_id)
+        
+    def test_validate_credentials_success(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-validate-credentials")
+        response = self.client.post(
+            url,
+            {"client_id": self.client_id, "client_secret": "test_secret"},
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_validate_credentials_invalid_secret(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-validate-credentials")
+        response = self.client.post(
+            url,
+            {"client_id": self.client_id, "client_secret": "wrong_secret"},
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 403)
+
+    def test_update_app_success(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-update-app")
+        response = self.client.post(
+            url,
+            {
+                "client_id": self.client_id,
+                "name": "Updated Name",
+                "description": "Updated Description"
+            },
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.app.refresh_from_db()
+        self.assertEqual(self.app.name, "Updated Name")
+        self.assertEqual(self.app.description, "Updated Description")
+
+    def test_delete_app_success(self):
+        url = reverse("api:marketplace-management:marketplace:webhook-jira-delete-app")
+        response = self.client.post(
+            url,
+            {"client_id": self.client_id},
+            format='json',
+            HTTP_AUTHORIZATION=f"Bearer {self.secret}"
+        )
+        self.assertEqual(response.status_code, 200)
+        
+        self.assertFalse(App.objects.filter(client_id=self.client_id).exists())
+        self.assertTrue(App.objects.all_with_deleted().filter(client_id=self.client_id).exists())
