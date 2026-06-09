@@ -14,8 +14,8 @@ class HasOAuthScope(BasePermission):
         # Если запрос не авторизован через OAuth2Token, пропускаем (возможно это обычный JWT)
         # Если вы хотите, чтобы эндпоинт был доступен ТОЛЬКО для OAuth, нужно изменить логику
         if not request.auth or not isinstance(request.auth, OAuth2Token):
-            # Fallback to other permissions if token is not OAuth2
-            # Here we just allow it to pass to other permission classes
+            # Переход к другим разрешениям, если токен не OAuth2
+            # Здесь мы просто позволяем запросу перейти к другим классам разрешений
             return True
 
         granted_scopes = request.auth.scope.split()
@@ -43,5 +43,5 @@ class HasOAuthScope(BasePermission):
         return True
 
     def __call__(self, *args, **kwargs):
-        # Allow passing arguments to the permission class
+        # Позволяет передавать аргументы в класс разрешений
         return self

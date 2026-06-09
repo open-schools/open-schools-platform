@@ -22,7 +22,7 @@ class OAuth2TokenAuthentication(BaseAuthentication):
         except OAuth2Token.DoesNotExist:
             return None
 
-        # Token expiration check
+        # Проверка срока действия токена
         if token.created_at + timedelta(seconds=token.expires_in) < timezone.now():
             return None
 

@@ -41,11 +41,11 @@ class AuthorizeView(ApiAuthMixin, APIView):
         if app.redirect_uris and data["redirect_uri"] not in app.redirect_uris:
             raise InvalidArgument("Invalid redirect_uri")
             
-        # Fetch Installation to check scopes
+        # Получаем установку для проверки прав (scopes)
         try:
-            # We already know installation exists from check_installation_exists,
-            # but we need the exact instance to get granted_scopes.
-            # Usually the user installing it is in the organization, so we check both cases.
+            # Мы уже знаем, что установка существует из check_installation_exists,
+            # но нам нужен точный экземпляр, чтобы получить granted_scopes.
+            # Обычно пользователь, установивший его, находится в организации, поэтому мы проверяем оба случая.
             installation = Installation.objects.filter(app=app, user=request.user, active=True).first()
             if not installation:
                 installation = Installation.objects.filter(
@@ -65,7 +65,7 @@ class AuthorizeView(ApiAuthMixin, APIView):
             if s and s not in granted_scopes:
                 return HttpResponseRedirect(f"{data['redirect_uri']}?error=access_denied&error_description=Missing scope {s}")
             
-        # Generate code
+        # Генерация кода
         auth_code = create_authorization_code(
             app=app,
             user=request.user,
@@ -75,7 +75,7 @@ class AuthorizeView(ApiAuthMixin, APIView):
             code_challenge_method=data.get("code_challenge_method", "S256")
         )
         
-        # Redirect
+        # Перенаправление
         redirect_url = f"{data['redirect_uri']}?code={auth_code.code}"
         if data.get("state"):
             redirect_url += f"&state={data['state']}"
@@ -85,6 +85,8 @@ class AuthorizeView(ApiAuthMixin, APIView):
 
 class TokenView(APIView):
     permission_classes = [AllowAny]
+    throttle_classes = [__import__("rest_framework.throttling", fromlist=["ScopedRateThrottle"]).ScopedRateThrottle]
+    throttle_scope = 'login'
     
     @swagger_auto_schema(request_body=TokenRequestSerializer, tags=[SwaggerTags.MARKETPLACE_MANAGEMENT])
     def post(self, request, *args, **kwargs):
@@ -170,7 +172,7 @@ class GenerateAuthCodeView(ApiAuthMixin, APIView):
         except App.DoesNotExist:
             raise InvalidArgument("Invalid client_id")
             
-        # Check if installed
+        # Проверка, установлено ли приложение
         installations = Installation.objects.filter(app=app, user=request.user, active=True, deleted__isnull=True)
         if not installations.exists():
             installations = Installation.objects.filter(
@@ -181,20 +183,26 @@ class GenerateAuthCodeView(ApiAuthMixin, APIView):
             installations = installations.filter(organization_id=data["organization"])
             
         if not installations.exists():
-            raise PermissionDenied("App is not installed by this user or organization.")
+            raise PermissionDenied("Приложение не установлено данным пользователем или организацией.")
             
-        # Combine scopes from all active installations
+        # Объединяем права из всех активных установок
         combined_scopes = set()
         for inst in installations:
             combined_scopes.update(inst.granted_scopes.split())
             
-        # Generate code (redirect_uri is empty since it's internal postMessage flow, 
-        # but exchange_code_for_token checks redirect_uri equality, so we set it to 'postmessage' or empty)
+        requested_scope = data.get("scope", "")
+        if requested_scope:
+            final_scopes = set(requested_scope.split()).intersection(combined_scopes)
+        else:
+            final_scopes = combined_scopes
+            
+        # Генерация кода (redirect_uri пустой, так как используется внутренний postMessage, 
+        # но exchange_code_for_token проверяет совпадение redirect_uri, поэтому мы устанавливаем 'postmessage' или пустое значение)
         auth_code = create_authorization_code(
             app=app,
             user=request.user,
             redirect_uri="postmessage",
-            scope=" ".join(combined_scopes),
+            scope=" ".join(final_scopes),
             code_challenge=data["code_challenge"],
             code_challenge_method=data.get("code_challenge_method", "S256")
         )

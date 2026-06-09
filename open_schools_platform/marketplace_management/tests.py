@@ -19,9 +19,13 @@ def generate_pkce():
 class OAuth2FlowTests(TransactionTestCase):
     def setUp(self):
         self.client = APIClient()
+        from unittest.mock import patch
+        self.patcher = patch('rest_framework.throttling.ScopedRateThrottle.allow_request', return_value=True)
+        self.patcher.start()
+
         self.user = User.objects.create_user(phone="+79001234567", password="testpassword")
         
-        # Using objects.create instead of create_employee_profile if method signature differs
+        # Использование objects.create вместо create_employee_profile, если сигнатура метода отличается
         self.profile = EmployeeProfile.objects.create(user=self.user, name="Test User")
         self.org = Organization.objects.create(name="Test Org")
         self.employee = Employee.objects.create(employee_profile=self.profile, organization=self.org, name="Test User")
@@ -40,6 +44,9 @@ class OAuth2FlowTests(TransactionTestCase):
             granted_scopes="openid profile email phone"
         )
 
+    def tearDown(self):
+        self.patcher.stop()
+
     def test_authorize_redirects_with_code_when_installed(self):
         self.client.force_authenticate(user=self.user)
         url = reverse("api:marketplace-management:marketplace:oauth2-authorize")
@@ -54,7 +61,7 @@ class OAuth2FlowTests(TransactionTestCase):
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.url.startswith("http://localhost/callback?code="))
         
-        # Verify code was created
+        # Проверяем, что код был создан
         code_str = response.url.split("code=")[1]
         self.assertTrue(OAuth2AuthorizationCode.objects.filter(code=code_str).exists())
 
@@ -93,10 +100,10 @@ class OAuth2FlowTests(TransactionTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("access_token", response.data)
         
-        # Code should be deleted
+        # Код должен быть удален
         self.assertFalse(OAuth2AuthorizationCode.objects.filter(code=auth_code.code).exists())
         
-        # Token should be created
+        # Токен должен быть создан
         self.assertTrue(OAuth2Token.objects.filter(access_token=response.data["access_token"]).exists())
 
     def test_userinfo_endpoint(self):
@@ -184,7 +191,7 @@ class ReviewTests(TransactionTestCase):
         auth_code = OAuth2AuthorizationCode.objects.get(code=code_str)
         self.assertEqual(auth_code.scope, "openid profile")
         
-        # Now exchange
+        # Теперь обмениваем
         token_url = reverse("api:marketplace-management:marketplace:oauth2-token")
         res = self.client.post(token_url, {
             "grant_type": "authorization_code",
@@ -258,7 +265,7 @@ class ReviewTests(TransactionTestCase):
         token_obj = OAuth2Token.objects.get(access_token=access_token)
         self.assertTrue(token_obj.revoked)
         
-        # Now try to use the revoked token
+        # Теперь пытаемся использовать отозванный токен
         userinfo_url = reverse("api:marketplace-management:marketplace:oauth2-userinfo")
         info_res = self.client.get(userinfo_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
         self.assertEqual(info_res.status_code, 403)
@@ -271,7 +278,7 @@ class ReviewTests(TransactionTestCase):
         verifier, challenge = generate_pkce()
         auth_code = create_authorization_code(self.app, self.user, "http://localhost/callback", code_challenge=challenge)
         
-        # Manually set auth_time to 6 minutes ago
+        # Вручную устанавливаем auth_time на 6 минут назад
         auth_code.auth_time = timezone.now() - timedelta(minutes=6)
         auth_code.save()
         
@@ -285,7 +292,7 @@ class ReviewTests(TransactionTestCase):
             "redirect_uri": "http://localhost/callback"
         })
         
-        # Should fail with 400 because code is expired
+        # Должно завершиться с ошибкой 400, так как срок действия кода истек
         self.assertEqual(res.status_code, 400)
         
     def test_access_token_expires(self):
@@ -308,7 +315,7 @@ class ReviewTests(TransactionTestCase):
         self.assertEqual(res.status_code, 200)
         access_token = res.data["access_token"]
         
-        # Manually set created_at of token to 2 hours ago
+        # Вручную устанавливаем created_at токена на 2 часа назад
         token_obj = OAuth2Token.objects.get(access_token=access_token)
         token_obj.created_at = timezone.now() - timedelta(hours=2)
         token_obj.save()
@@ -316,7 +323,7 @@ class ReviewTests(TransactionTestCase):
         userinfo_url = reverse("api:marketplace-management:marketplace:oauth2-userinfo")
         info_res = self.client.get(userinfo_url, HTTP_AUTHORIZATION=f"Bearer {access_token}")
         
-        # Should fail with 403 because token is expired
+        # Должно завершиться с ошибкой 403, так как срок действия токена истек
         self.assertEqual(info_res.status_code, 403)
 
 class JiraWebhookTests(TransactionTestCase):
@@ -343,7 +350,7 @@ class JiraWebhookTests(TransactionTestCase):
         self.assertIn("client_id", response.data)
         self.assertIn("client_secret", response.data)
         
-        # Check if App was created
+        # Проверяем, было ли создано приложение
         self.assertTrue(App.objects.filter(name="Test App from Jira", status=AppStatus.PUBLISHED).exists())
         
     def test_publish_app_with_invalid_secret(self):
@@ -379,7 +386,7 @@ class ReviewTests(TransactionTestCase):
 
     def test_create_review_without_installation(self):
         self.client.force_authenticate(user=self.user)
-        # Using reverse with namespace according to current setup
+        # Использование reverse с namespace в соответствии с текущими настройками
         url = reverse("api:marketplace-management:marketplace:miniapps-reviews", kwargs={"app_id": self.app.id})
         response = self.client.post(url, {
             "rating": 5,
@@ -604,6 +611,12 @@ class OAuth2FlowCoverageTests(TransactionTestCase):
         self.user = User.objects.create(phone="+79000000001")
         self.app = App.objects.create(name="Test App")
         self.client = APIClient()
+        from unittest.mock import patch
+        self.patcher = patch('rest_framework.throttling.ScopedRateThrottle.allow_request', return_value=True)
+        self.patcher.start()
+
+    def tearDown(self):
+        self.patcher.stop()
         
     def test_oauth2_authorization_code_not_found(self):
         url = reverse("api:marketplace-management:marketplace:oauth2-token")

@@ -43,7 +43,7 @@ def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, c
             raise InvalidArgument("code_verifier is required")
             
         if auth_code.code_challenge_method == "S256":
-            # Hash code_verifier with SHA256 and base64url encode it
+            # Хэшируем code_verifier с помощью SHA256 и кодируем в base64url
             digest = hashlib.sha256(code_verifier.encode('ascii')).digest()
             calculated_challenge = base64.urlsafe_b64encode(digest).rstrip(b'=').decode('ascii')
             if calculated_challenge != auth_code.code_challenge:
@@ -54,20 +54,21 @@ def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, c
         else:
             raise PermissionDenied("Unsupported code_challenge_method")
 
-    # If client_secret in DB is hashed, we use check_password. If it's plain text (not yet hashed), we fall back to simple equality
-    # This ensures backwards compatibility with unhashed secrets temporarily.
+    # Если client_secret в БД захэширован, используем check_password. Если это обычный текст, используем простое равенство
+    # Это обеспечивает обратную совместимость с нехэшированными секретами на время переходного периода.
     db_secret = auth_code.app.client_secret
-    if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+    if db_secret.startswith(('pbkdf2_', 'bcrypt_', 'argon2', 'md5')):
         if not check_password(client_secret, db_secret):
             raise PermissionDenied("Invalid client_secret")
     else:
-        if db_secret != client_secret:
+        import hmac
+        if not hmac.compare_digest(str(db_secret), str(client_secret)):
             raise PermissionDenied("Invalid client_secret")
 
-    # Generate tokens
+    # Генерация токенов
     access_token = secrets.token_urlsafe(64)
     refresh_token = secrets.token_urlsafe(64)
-    expires_in = 3600  # 1 hour
+    expires_in = 3600  # 1 час
 
     token = OAuth2Token.objects.create(
         user=auth_code.user,
@@ -79,7 +80,7 @@ def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, c
         scope=auth_code.scope
     )
 
-    # Invalidate code
+    # Инвалидация кода
     auth_code.delete()
 
     return {
@@ -91,11 +92,11 @@ def exchange_code_for_token(code_str: str, client_id: str, client_secret: str, c
 
 
 def check_installation_exists(user: User, app: App) -> bool:
-    # Is the app installed specifically for this user?
+    # Установлено ли приложение специально для этого пользователя?
     if Installation.objects.filter(app=app, user=user, active=True).exists():
         return True
 
-    # Is the app installed by any organization the user belongs to?
+    # Установлено ли приложение какой-либо организацией, к которой принадлежит пользователь?
     if Installation.objects.filter(
         app=app,
         organization__employees__employee_profile__user=user,
@@ -117,21 +118,22 @@ def exchange_refresh_token(refresh_token_str: str, client_id: str, client_secret
         raise InvalidArgument("Invalid or revoked refresh token")
 
     db_secret = old_token.app.client_secret
-    if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+    if db_secret.startswith(('pbkdf2_', 'bcrypt_', 'argon2', 'md5')):
         if not check_password(client_secret, db_secret):
             raise PermissionDenied("Invalid client_secret")
     else:
-        if db_secret != client_secret:
+        import hmac
+        if not hmac.compare_digest(str(db_secret), str(client_secret)):
             raise PermissionDenied("Invalid client_secret")
 
-    # Revoke old token
+    # Отзыв старого токена
     old_token.revoked = True
     old_token.save(update_fields=['revoked'])
 
-    # Generate new tokens
+    # Генерация новых токенов
     access_token = secrets.token_urlsafe(64)
     refresh_token = secrets.token_urlsafe(64)
-    expires_in = 3600  # 1 hour
+    expires_in = 3600  # 1 час
 
     new_token = OAuth2Token.objects.create(
         user=old_token.user,
@@ -155,14 +157,15 @@ def revoke_token(token_str: str, client_id: str, client_secret: str):
     try:
         app = App.objects.get(client_id=client_id)
         db_secret = app.client_secret
-        if db_secret.startswith('pbkdf2_') or db_secret.startswith('bcrypt_'):
+        if db_secret.startswith(('pbkdf2_', 'bcrypt_', 'argon2', 'md5')):
             if not check_password(client_secret, db_secret):
                 raise PermissionDenied("Invalid client_secret")
         else:
-            if db_secret != client_secret:
+            import hmac
+            if not hmac.compare_digest(str(db_secret), str(client_secret)):
                 raise PermissionDenied("Invalid client_secret")
             
-        # Revoke the token by matching access or refresh token
+        # Отзыв токена по совпадению access_token или refresh_token
         updated = OAuth2Token.objects.filter(
             app=app,
             access_token=token_str

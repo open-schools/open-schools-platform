@@ -1,4 +1,5 @@
 import uuid
+import hmac
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import serializers, status
 from drf_yasg.utils import swagger_auto_schema
 from django.utils.crypto import get_random_string
+from django.contrib.auth.hashers import make_password
 
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.marketplace_management.models import App, AppStatus
@@ -52,7 +54,7 @@ class JiraApproveWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = JiraWebhookSerializer(data=request.data)
@@ -76,7 +78,7 @@ class JiraApproveWebhookView(APIView):
             required_scopes=data.get("required_scopes", []),
             optional_scopes=data.get("optional_scopes", []),
             status=AppStatus.PUBLISHED,
-            client_secret=client_secret,
+            client_secret=make_password(client_secret),
             category=category,
             privacy_policy_url=data.get("privacy_policy_url", ""),
             eula_url=data.get("eula_url", "")
@@ -106,7 +108,7 @@ class ValidateCredentialsWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = ValidateCredentialsSerializer(data=request.data)
@@ -122,9 +124,13 @@ class ValidateCredentialsWebhookView(APIView):
             raise PermissionDenied("Invalid Client ID or Client Secret")
 
         from django.contrib.auth.hashers import check_password
-        if not check_password(data["client_secret"], app.client_secret) and data["client_secret"] != app.client_secret:
-             raise PermissionDenied("Invalid Client ID or Client Secret")
-             
+        db_secret = app.client_secret
+        if db_secret.startswith(('pbkdf2_', 'bcrypt_', 'argon2', 'md5')):
+            if not check_password(data["client_secret"], db_secret):
+                raise PermissionDenied("Invalid Client ID or Client Secret")
+        else:
+            if not hmac.compare_digest(str(data["client_secret"]), str(db_secret)):
+                raise PermissionDenied("Invalid Client ID or Client Secret")
         return Response({"message": "Credentials are valid"}, status=status.HTTP_200_OK)
 
 
@@ -152,7 +158,7 @@ class JiraUpdateAppWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = JiraUpdateAppSerializer(data=request.data)
@@ -164,7 +170,7 @@ class JiraUpdateAppWebhookView(APIView):
         except App.DoesNotExist:
             return Response({"error": "App not found"}, status=status.HTTP_404_NOT_FOUND)
             
-        # Update fields that were provided
+        # Обновляем предоставленные поля
         for field in ["name", "description", "icon_url", "app_url", "redirect_uris", "privacy_policy_url", "eula_url"]:
             if field in data:
                 setattr(app, field, data[field])
@@ -198,7 +204,7 @@ class JiraDeleteAppWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = JiraDeleteAppSerializer(data=request.data)
@@ -231,7 +237,7 @@ class JiraRegenerateSecretWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = JiraRegenerateSecretSerializer(data=request.data)
@@ -244,7 +250,7 @@ class JiraRegenerateSecretWebhookView(APIView):
             return Response({"error": "App not found"}, status=status.HTTP_404_NOT_FOUND)
             
         new_client_secret = get_random_string(length=64)
-        app.client_secret = new_client_secret
+        app.client_secret = make_password(new_client_secret)
         app.save()
         
         return Response({
@@ -270,7 +276,7 @@ class JiraRestoreAppWebhookView(APIView):
         auth_header = request.META.get('HTTP_AUTHORIZATION', '')
         expected_secret = getattr(settings, 'JIRA_WEBHOOK_SECRET', '')
         
-        if not expected_secret or auth_header != f"Bearer {expected_secret}":
+        if not expected_secret or not hmac.compare_digest(auth_header, f"Bearer {expected_secret}"):
             raise PermissionDenied("Invalid or missing webhook secret")
             
         serializer = JiraRestoreAppSerializer(data=request.data)

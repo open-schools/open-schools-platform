@@ -62,14 +62,14 @@ class InstallationCreateSerializer(serializers.ModelSerializer):
         
         if not required.issubset(requested_scopes):
             missing = required - requested_scopes
-            # If no scopes were provided at all, maybe we just default to required?
+            # Если права вообще не были предоставлены, возможно, мы просто используем обязательные по умолчанию?
             if not requested_scopes:
                 requested_scopes = required
             else:
                 from open_schools_platform.errors.exceptions import InvalidArgument
                 raise InvalidArgument(f"Missing required scopes: {missing}")
                 
-        # Filter out anything that is neither required nor optional
+        # Отфильтровываем все, что не является ни обязательным, ни необязательным
         final_scopes = requested_scopes.intersection(required.union(optional))
         attrs['granted_scopes'] = " ".join(final_scopes)
         
@@ -140,4 +140,5 @@ class GenerateAuthCodeSerializer(serializers.Serializer):
     client_id = serializers.UUIDField()
     code_challenge = serializers.CharField(required=True)
     code_challenge_method = serializers.CharField(required=False, default="S256")
-    organization = serializers.UUIDField(required=False, allow_null=True)
+    organization = serializers.UUIDField(required=False, allow_null=True)
+    scope = serializers.CharField(required=False, allow_blank=True, default="")

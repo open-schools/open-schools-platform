@@ -112,10 +112,10 @@ class ReviewApi(ApiAuthMixin, ModelViewSet):
         
         has_installed = Installation.objects.filter(app_id=app_id, user=user).exists()
         if not has_installed:
-            raise PermissionDenied("You must install the app before leaving a review.")
+            raise PermissionDenied("Вы должны установить приложение, прежде чем оставлять отзыв.")
 
         if Review.objects.filter(app_id=app_id, user=user).exists():
-            raise AlreadyExists("You have already reviewed this app.")
+            raise AlreadyExists("Вы уже оставили отзыв к этому приложению.")
 
         serializer.save(app_id=app_id, user=user)
         
@@ -166,7 +166,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
 
         if existing_installation:
             if not existing_installation.deleted:
-                raise AlreadyExists("This app already installed for that organization")
+                raise AlreadyExists("Это приложение уже установлено для данной организации")
             
             existing_installation.deleted = None
             existing_installation.active = True
@@ -178,7 +178,7 @@ class InstallationsViewSet(ApiAuthMixin, ModelViewSet):
 
         app = App.objects.get(id=app_id)
         if app.status != AppStatus.PUBLISHED:
-            raise InvalidArgument("App with such id don't available now")
+            raise InvalidArgument("Приложение с таким ID сейчас недоступно")
 
         serializer.save(active=True, user=self.request.user)
 
