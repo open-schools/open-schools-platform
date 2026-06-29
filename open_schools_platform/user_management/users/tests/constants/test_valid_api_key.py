@@ -7,7 +7,11 @@ def is_google_api_key_valid(FIREBASE_URL_TO_GET_SESSION: str, GOOGLE_API_KEY: st
     base_url = FIREBASE_URL_TO_GET_SESSION + \
                GOOGLE_API_KEY
 
-    response = requests.post(base_url)
+    try:
+        response = requests.post(base_url, timeout=5)
+    except Exception:
+        return False
+
     try:
         status = json.loads(response.content.decode("utf-8"))['error']['status']
     except KeyError:

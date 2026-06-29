@@ -22,9 +22,12 @@ from open_schools_platform.ticket_management.tickets.serializers import GetTicke
 from open_schools_platform.ticket_management.tickets.services import create_ticket_comment, \
     create_family_organization_ticket, update_ticket_comment
 from rest_framework.response import Response
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 
 
 class TicketCommentListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:tickets")]
     queryset = TicketComment.objects.all()
     filterset_class = TicketCommentFilter
     pagination_class = ApiTicketCommentsListPagination
@@ -53,6 +56,8 @@ class TicketCommentListApi(ApiAuthMixin, ListAPIView):
 
 
 class TicketCommentCreateApi(ApiAuthMixin, CreateAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:tickets")]
     queryset = TicketComment.objects.all()
     pagination_class = ApiTicketCommentsListPagination
     serializer_class = CreateTicketCommentSerializer
@@ -82,6 +87,8 @@ class TicketCommentCreateApi(ApiAuthMixin, CreateAPIView):
 
 
 class TicketCreateApi(ApiAuthMixin, CreateAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:tickets")]
     queryset = Ticket.objects.all()
     serializer_class = CreateFamilyOrganizationTicketSerializer
 
@@ -120,7 +127,8 @@ class TicketCreateApi(ApiAuthMixin, CreateAPIView):
 
 
 class TicketCommentUpdateApi(ApiAuthMixin, APIView):
-
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:tickets")]
     @swagger_auto_schema(
         operation_description="Update ticket comment",
         tags=[SwaggerTags.TICKET_MANAGEMENT_TICKET],

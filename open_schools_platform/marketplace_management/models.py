@@ -1,18 +1,22 @@
 import uuid
+from django.contrib.auth.hashers import make_password
 from typing import Optional, Union, Tuple, Type, Any  # noqa: F401
 from safedelete.queryset import SafeDeleteQueryset  # noqa: F401
+from django.db import models
 
 from open_schools_platform.common.models import BaseModel
 from open_schools_platform.organization_management.organizations.models import (
     Organization,
 )
 from open_schools_platform.user_management.users.models import User
-from django.db import models
 
 
-class AppType(models.TextChoices):
-    INTERNAL = "internal", "Internal"
-    EXTERNAL = "external", "External"
+class Category(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    name = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class AppStatus(models.TextChoices):
@@ -22,57 +26,50 @@ class AppStatus(models.TextChoices):
     REJECTED = "rejected", "Rejected"
 
 
-class DeveloperProfile(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="developer_profile"
-    )
-    email = models.EmailField(max_length=255)
-    github = models.URLField(max_length=255)
-
-
-class Category(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    name = models.CharField(max_length=255)
-
-
 class App(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     description = models.TextField()
-    type = models.CharField(max_length=10, choices=AppType.choices)
-    status = models.CharField(max_length=15, choices=AppStatus.choices, default="draft")
+    status = models.CharField(max_length=15, choices=AppStatus.choices, default=AppStatus.DRAFT)
     icon_url = models.URLField(blank=True)
     screenshots = models.JSONField(default=list, blank=True)
-    developer_profile = models.ForeignKey(
-        DeveloperProfile,
-        on_delete=models.CASCADE,
-        related_name="apps",
-    )
-    category = models.ManyToManyField(Category, related_name="apps")
+    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name="apps")
+    privacy_policy_url = models.URLField(max_length=2000, blank=True, default="")
+    eula_url = models.URLField(max_length=2000, blank=True, default="")
+    reviews_count = models.IntegerField(default=0)
+    average_rating = models.FloatField(default=0.0)
+    
+    client_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    client_secret = models.CharField(max_length=255, blank=True, default="")
+    redirect_uris = models.JSONField(default=list, blank=True)
+    grant_types = models.JSONField(default=list, blank=True)
+    response_types = models.JSONField(default=list, blank=True)
+    app_url = models.URLField(blank=True, default="")
+    
+    required_scopes = models.JSONField(default=list, blank=True)
+    optional_scopes = models.JSONField(default=list, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    @property
-    def latest_release(self) -> "AppRelease | None":
-        return self.versions.order_by("-date").first()
+    def save(self, *args, **kwargs):
+        if self.client_secret and not self.client_secret.startswith('pbkdf2_') and not self.client_secret.startswith('bcrypt_'):
+            self.client_secret = make_password(self.client_secret)
+        super().save(*args, **kwargs)
 
-
-class AppRelease(BaseModel):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    version = models.CharField(max_length=50)
-    date = models.DateField()
-    description = models.TextField()
-    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="versions")
-    manifest = models.JSONField(default=dict)
+    def __str__(self):
+        return self.name
 
 
 class Review(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    app = models.OneToOneField(App, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviews")
+    app = models.ForeignKey(App, on_delete=models.CASCADE, related_name="reviews")
     rating = models.IntegerField()
-    message = models.CharField(max_length=512)
+    message = models.TextField(max_length=512)
+
+    def __str__(self):
+        return f"Review by {self.user} for {self.app}"
 
 
 class Installation(BaseModel):
@@ -87,8 +84,60 @@ class Installation(BaseModel):
         User, on_delete=models.CASCADE, related_name="installations"
     )
     installed_at = models.DateTimeField(auto_now_add=True)
-    config_data = models.JSONField(default=dict)
+    config_data = models.JSONField(default=dict, blank=True)
     active = models.BooleanField(default=True)
+    granted_scopes = models.CharField(max_length=255, default="", blank=True)
 
     class Meta:
-        unique_together = ["app", "organization"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=['app', 'organization'],
+                condition=models.Q(deleted__isnull=True),
+                name='marketplace_management_i_app_id_organization_id_uniq'
+            )
+        ]
+
+    def __str__(self):
+        return f"{self.app.name} installed in {self.organization.name}"
+
+
+class OAuth2AuthorizationCode(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    code = models.CharField(max_length=255, unique=True)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="auth_codes"
+    )
+    app = models.ForeignKey(
+        App, to_field="client_id", on_delete=models.CASCADE, related_name="auth_codes"
+    )
+    redirect_uri = models.URLField()
+    response_type = models.CharField(max_length=255)
+    scope = models.CharField(max_length=255, blank=True, default="")
+    code_challenge = models.CharField(max_length=128, blank=True, default="")
+    code_challenge_method = models.CharField(max_length=10, blank=True, default="S256")
+    auth_time = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def name(self) -> str:
+        return f"Code {self.code[:8]}... ({self.user.username if self.user else 'No User'})"
+
+
+class OAuth2Token(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="oauth_tokens"
+    )
+    app = models.ForeignKey(
+        App, to_field="client_id", on_delete=models.CASCADE, related_name="oauth_tokens"
+    )
+    access_token = models.CharField(max_length=255, unique=True)
+    refresh_token = models.CharField(max_length=255, unique=True)
+    token_type = models.CharField(max_length=255)
+    expires_in = models.IntegerField()
+    scope = models.CharField(max_length=255, blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+    revoked = models.BooleanField(default=False)
+
+    @property
+    def name(self) -> str:
+        return f"Token {self.access_token[:8]}... ({self.user.username if self.user else 'No User'})"

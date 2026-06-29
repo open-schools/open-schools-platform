@@ -241,3 +241,5 @@ from config.settings.swagger.settings import *  # noqa
 from config.settings.swagger.setup import SwaggerSetup  # noqa
 
 INSTALLED_APPS, MIDDLEWARE = SwaggerSetup.do_settings(INSTALLED_APPS, MIDDLEWARE)
+
+JIRA_WEBHOOK_SECRET = env('JIRA_WEBHOOK_SECRET', default='test_secret_for_jira_webhooks')

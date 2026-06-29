@@ -7,9 +7,12 @@ from open_schools_platform.common.views import convert_dict_to_serializer
 from open_schools_platform.organization_management.teachers.selectors import get_teacher_profile
 from open_schools_platform.organization_management.teachers.serializers import GetTeacherProfileSerializer
 from rest_framework.response import Response
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 
 
 class GetTeacherProfileApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
     @swagger_auto_schema(
         operation_description="Get teacher_profile with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_TEACHERS],

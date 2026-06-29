@@ -1,41 +1,43 @@
-from typing import Union
-
 from rest_framework import serializers
 
 from open_schools_platform.marketplace_management.models import (
-    AppRelease,
     App,
-    Category,
     Installation,
+    Review,
+    Category,
 )
 
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = "__all__"
-
-
-class AppReleaseSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AppRelease
-        exclude = ["app"]
+        fields = ["id", "name"]
 
 
 class AppSerializer(serializers.ModelSerializer):
-    category = CategorySerializer()
-
-    latest_published_release = serializers.SerializerMethodField()
-
-    def get_latest_published_release(self, obj: App) -> Union[AppReleaseSerializer, None]:
-        latest_version = AppRelease.objects.filter(app=obj).order_by("-date").first()
-        if latest_version:
-            return AppReleaseSerializer(latest_version)
-        return None
+    category = CategorySerializer(read_only=True)
 
     class Meta:
         model = App
         fields = "__all__"
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+
+    def get_user(self, obj):
+        return str(obj.user.name if hasattr(obj.user, 'name') and obj.user.name else obj.user.phone)
+
+    class Meta:
+        model = Review
+        fields = ["id", "user", "rating", "message", "created_at"]
+
+
+class ReviewCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ["rating", "message"]
+
 
 
 class InstallationSerializer(serializers.ModelSerializer):
@@ -45,9 +47,33 @@ class InstallationSerializer(serializers.ModelSerializer):
 
 
 class InstallationCreateSerializer(serializers.ModelSerializer):
+    scopes = serializers.ListField(child=serializers.CharField(), required=False, write_only=True)
+
     class Meta:
         model = Installation
-        exclude = ("id", "updated_at", "created_at", "active", "user")
+        exclude = ("id", "updated_at", "created_at", "active", "user", "granted_scopes")
+
+    def validate(self, attrs):
+        app = attrs.get('app')
+        requested_scopes = set(attrs.pop('scopes', []))
+        
+        required = set(app.required_scopes)
+        optional = set(app.optional_scopes)
+        
+        if not required.issubset(requested_scopes):
+            missing = required - requested_scopes
+            # Если права вообще не были предоставлены, возможно, мы просто используем обязательные по умолчанию?
+            if not requested_scopes:
+                requested_scopes = required
+            else:
+                from open_schools_platform.errors.exceptions import InvalidArgument
+                raise InvalidArgument(f"Missing required scopes: {missing}")
+                
+        # Отфильтровываем все, что не является ни обязательным, ни необязательным
+        final_scopes = requested_scopes.intersection(required.union(optional))
+        attrs['granted_scopes'] = " ".join(final_scopes)
+        
+        return attrs
 
 
 class InstallationListSerializer(serializers.ModelSerializer):
@@ -70,3 +96,49 @@ class InstallationListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Installation
         fields = ["id", "school", "app", "installed_at", "status"]
+
+
+class AuthorizeRequestSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+    response_type = serializers.CharField()
+    redirect_uri = serializers.CharField()
+    scope = serializers.CharField(required=False, allow_blank=True, default="")
+    state = serializers.CharField(required=False, allow_blank=True, default="")
+    code_challenge = serializers.CharField(required=True)
+    code_challenge_method = serializers.CharField(required=False, default="S256")
+
+
+class TokenRequestSerializer(serializers.Serializer):
+    grant_type = serializers.CharField()
+    code = serializers.CharField(required=False)
+    refresh_token = serializers.CharField(required=False)
+    client_id = serializers.UUIDField()
+    client_secret = serializers.CharField()
+    redirect_uri = serializers.CharField(required=False)
+    code_verifier = serializers.CharField(required=False, allow_blank=True, default="")
+
+    def validate(self, attrs):
+        grant_type = attrs.get('grant_type')
+        if grant_type == 'authorization_code':
+            if not attrs.get('code'):
+                raise serializers.ValidationError("code is required for authorization_code grant type")
+        elif grant_type == 'refresh_token':
+            if not attrs.get('refresh_token'):
+                raise serializers.ValidationError("refresh_token is required for refresh_token grant type")
+        else:
+            raise serializers.ValidationError("Unsupported grant_type")
+        return attrs
+
+
+class RevokeTokenSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    client_id = serializers.UUIDField()
+    client_secret = serializers.CharField()
+
+
+class GenerateAuthCodeSerializer(serializers.Serializer):
+    client_id = serializers.UUIDField()
+    code_challenge = serializers.CharField(required=True)
+    code_challenge_method = serializers.CharField(required=False, default="S256")
+    organization = serializers.UUIDField(required=False, allow_null=True)
+    scope = serializers.CharField(required=False, allow_blank=True, default="")

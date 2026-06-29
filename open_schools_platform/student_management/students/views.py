@@ -26,9 +26,12 @@ from open_schools_platform.student_management.students.serializers import GetStu
 from open_schools_platform.student_management.students.services import \
     create_student_profile, update_student_profile, update_student_join_circle_body, \
     autogenerate_family_logic, query_creation_logic, update_student
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 
 
 class StudentProfileApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     create_student_profile_serializer = CreateStudentProfileSerializer
 
     @swagger_auto_schema(
@@ -57,6 +60,8 @@ class StudentProfileApi(ApiAuthMixin, APIView):
 
 
 class StudentProfileUpdateApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         operation_description="Update student profile",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -88,6 +93,8 @@ class StudentProfileUpdateApi(ApiAuthMixin, APIView):
 
 
 class StudentProfileDeleteApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         operation_description="Delete student-profile.",
@@ -101,6 +108,8 @@ class StudentProfileDeleteApi(ApiAuthMixin, APIView):
 
 
 class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:queries")]
     @swagger_auto_schema(
         operation_description="Creates student profile, student and family.\n"
                               "Forms query for adding created student to circle",
@@ -129,6 +138,8 @@ class AutoStudentJoinCircleQueryApi(ApiAuthMixin, APIView):
 
 
 class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:queries")]
     @swagger_auto_schema(
         operation_description="Forms query for adding created student to circle",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -156,6 +167,8 @@ class StudentJoinCircleQueryApi(ApiAuthMixin, APIView):
 
 
 class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:queries")]
     @swagger_auto_schema(
         operation_description="Update body of student join circle query",
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
@@ -181,6 +194,8 @@ class StudentJoinCircleQueryUpdateApi(ApiAuthMixin, APIView):
 
 
 class StudentQueriesListApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
     @swagger_auto_schema(
         tags=[SwaggerTags.STUDENT_MANAGEMENT_STUDENTS],
         responses={200: convert_dict_to_serializer({"results": GetStudentJoinCircleSerializer(many=True)})},
@@ -205,6 +220,8 @@ class StudentQueriesListApi(ApiAuthMixin, APIView):
 
 
 class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
@@ -235,6 +252,8 @@ class StudentCirclesListApi(ApiAuthMixin, ListAPIView):
 
 
 class StudentDeleteApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     serializer_class = UpdateStudentSerializer
 
     @swagger_auto_schema(

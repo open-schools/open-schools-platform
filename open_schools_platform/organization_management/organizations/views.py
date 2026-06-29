@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 from open_schools_platform.api.pagination import get_paginated_response
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.common.paginators import DefaultListPagination
@@ -56,6 +57,9 @@ from open_schools_platform.ticket_management.tickets.services import get_family_
 
 
 class OrganizationCreateApi(ApiAuthMixin, CreateAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organizations")]
+        
     @swagger_auto_schema(
         operation_description="Create organization and related to it employee for this user.",
         request_body=CreateOrganizationSerializer,
@@ -82,16 +86,21 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
     pagination_class = DefaultListPagination
     filterset_class = OrganizationFilter
     serializer_class = GetOrganizationSerializer
+    
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organizations")]
 
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Return paginated list of organizations.",
     )
     def get(self, request, *args, **kwargs):
+        queryset = get_organizations_by_user(request.user, request.GET.dict())
+
         response = get_paginated_response(
             pagination_class=DefaultListPagination,
             serializer_class=GetOrganizationSerializer,
-            queryset=get_organizations_by_user(request.user, request.GET.dict()),
+            queryset=queryset,
             request=request,
             view=self
         )
@@ -99,6 +108,9 @@ class OrganizationListApi(ApiAuthMixin, ListAPIView):
 
 
 class InviteEmployeeApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organizations")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=CreateOrganizationInviteEmployeeSerializer,
@@ -128,6 +140,9 @@ class InviteEmployeeApi(ApiAuthMixin, APIView):
 
 
 class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organizations")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         request_body=UpdateOrganizationInviteEmployeeSerializer,
@@ -152,6 +167,9 @@ class InviteEmployeeUpdateApi(ApiAuthMixin, APIView):
 
 
 class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         responses={200: convert_dict_to_serializer({"results": GetOrganizationInviteEmployeeSerializer(many=True)})},
@@ -168,6 +186,9 @@ class OrganizationEmployeeQueriesListApi(ApiAuthMixin, APIView):
 
 
 class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
+
     complex_filter = get_organization_circle_query_filter()
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
@@ -205,6 +226,8 @@ class OrganizationCircleQueriesListApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
     pagination_class = DefaultListPagination
     complex_filter = ComplexFilter(
         filterset_type=StudentFilter,
@@ -235,6 +258,19 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
 
         students = OrganizationStudentsListApi.complex_filter.get_objects(filters=filters)
 
+        from open_schools_platform.marketplace_management.models import OAuth2Token, Installation
+        if hasattr(request, 'auth') and isinstance(request.auth, OAuth2Token):
+            installations = Installation.objects.filter(
+                app=request.auth.app, 
+                active=True,
+                deleted__isnull=True
+            )
+            valid_org_ids = [
+                inst.organization_id for inst in installations 
+                if 'read:organization_members' in inst.granted_scopes.split()
+            ]
+            students = students.filter(circle__organization__id__in=valid_org_ids)
+
         response = get_paginated_response(
             pagination_class=DefaultListPagination,
             serializer_class=GetStudentSerializer,
@@ -247,6 +283,9 @@ class OrganizationStudentsListApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationDeleteApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organizations")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Delete organization.",
@@ -259,6 +298,9 @@ class OrganizationDeleteApi(ApiAuthMixin, APIView):
 
 
 class GetStudentApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
+
     @swagger_auto_schema(
         operation_description="Get student with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
@@ -273,6 +315,9 @@ class GetStudentApi(ApiAuthMixin, APIView):
 
 
 class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:analytics")]
+
     filename = 'organization_students.xlsx'
 
     @swagger_auto_schema(
@@ -288,6 +333,9 @@ class OrganizationStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
 
 
 class GetAnalytics(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:analytics")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Get analytics for this organization",
@@ -308,6 +356,8 @@ class GetAnalytics(ApiAuthMixin, APIView):
 
 
 class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
     pagination_class = ApiCircleListPagination
     queryset = Query.objects.all()
     serializer_class = GetStudentJoinCircleSerializer
@@ -342,6 +392,9 @@ class OrganizationStudentProfileQueriesApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationTeachersListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
+
     queryset = Teacher.objects.all()
     filterset_class = TeacherFilter
     pagination_class = ApiTeachersListPagination
@@ -364,6 +417,9 @@ class OrganizationTeachersListApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationCirclesListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
+
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = DefaultListPagination
@@ -391,6 +447,9 @@ class OrganizationCirclesListApi(ApiAuthMixin, ListAPIView):
 
 
 class OrganizationCirclesApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
+
     queryset = Circle.objects.all()
     pagination_class = DefaultListPagination
     serializer_class = GetOrganizationCircleListSerializer
@@ -406,6 +465,9 @@ class OrganizationCirclesApi(ApiAuthMixin, ListAPIView):
 
 
 class GetTeacherApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
+
     @swagger_auto_schema(
         operation_description="Get teacher with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
@@ -417,6 +479,9 @@ class GetTeacherApi(ApiAuthMixin, APIView):
 
 
 class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
+
     complex_filter = get_organization_students_invitations_filter()
     queryset = Query.objects.all()
     visible_filter_fields = complex_filter.get_dict_filters()
@@ -454,6 +519,9 @@ class OrganizationInvitedStudentsApi(ApiAuthMixin, ListAPIView):
 
 
 class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:tickets")]
+
     queryset = Ticket.objects.all()
     pagination_class = OrganizationApiListPagination
     complex_filter = get_family_organization_ticket_filter()
@@ -489,6 +557,9 @@ class FamilyOrganizationTicketsListApi(ApiAuthMixin, ListAPIView):
 
 
 class GetTicketsAnalytics(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:analytics")]
+
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],
         operation_description="Get ticket analytics for this organization",
@@ -510,6 +581,9 @@ class GetTicketsAnalytics(ApiAuthMixin, APIView):
 
 
 class GetFamilyOrganizationTicketApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:tickets")]
+
     @swagger_auto_schema(
         operation_description="Get ticket comment",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_ORGANIZATIONS],

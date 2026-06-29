@@ -1,0 +1,17 @@
+AVAILABLE_SCOPES = [
+    "openid",
+    "profile",
+    "email",
+    "phone",
+    "read:organizations",
+    "write:organizations",
+    "read:organization_members",
+    "write:organization_members",
+    "read:circles",
+    "write:circles",
+    "read:queries",
+    "write:queries",
+    "read:tickets",
+    "write:tickets",
+    "read:analytics",
+]

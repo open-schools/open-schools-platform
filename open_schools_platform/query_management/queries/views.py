@@ -10,9 +10,12 @@ from open_schools_platform.query_management.queries.selectors import get_query, 
 from open_schools_platform.query_management.queries.serializers import GetQueryStatusSerializer, \
     QueryStatusChangesSerializer
 from open_schools_platform.query_management.queries.services import run_sender_handler
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
 
 
 class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:queries")]
     @swagger_auto_schema(
         operation_description="Change query status.",
         request_body=GetQueryStatusSerializer,
@@ -34,6 +37,8 @@ class QueryStatusChangeApi(ApiAuthMixin, views.APIView):
 
 
 class QueryChangesHistoryApi(ApiAuthMixin, views.APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
     @swagger_auto_schema(
         operation_description="Show changes of query status.",
         tags=[SwaggerTags.QUERY_MANAGEMENT_QUERIES],

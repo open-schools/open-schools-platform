@@ -10,6 +10,7 @@ from django.http import HttpResponse
 
 from rest_framework.permissions import IsAuthenticated, BasePermission
 from rest_framework.authentication import SessionAuthentication, BaseAuthentication
+from open_schools_platform.marketplace_management.authentication import OAuth2TokenAuthentication
 
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
 
@@ -84,7 +85,8 @@ class ApiAuthMixin:
     authentication_classes: Sequence[Type[BaseAuthentication]] = [
         CsrfExemptedSessionAuthentication,
         SessionAsHeaderAuthentication,
-        JSONWebTokenAuthentication
+        OAuth2TokenAuthentication,
+        JSONWebTokenAuthentication,
     ]
     permission_classes: PermissionClassesType = (IsAuthenticated,)
 

@@ -10,6 +10,8 @@ from rest_framework.response import Response
 from .constants import CirclesConstants
 from .models import Circle
 
+from open_schools_platform.marketplace_management.permissions import HasOAuthScope
+
 from open_schools_platform.api.mixins import ApiAuthMixin, XLSXMixin, ICalMixin
 from open_schools_platform.api.swagger_tags import SwaggerTags
 from open_schools_platform.organization_management.circles.serializers import CreateCircleSerializer, \
@@ -41,6 +43,8 @@ from ...student_management.students.services import create_student, get_student_
 
 
 class CreateCircleApi(ApiAuthMixin, CreateAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:circles")]
     @swagger_auto_schema(
         operation_description=f"Create circle via provided name and organization. "
                               f"If you provide address without location server "
@@ -67,6 +71,8 @@ class CreateCircleApi(ApiAuthMixin, CreateAPIView):
 
 
 class GetCirclesApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
     queryset = Circle.objects.all()
     filterset_class = CircleFilter
     pagination_class = ApiCircleListPagination
@@ -96,6 +102,8 @@ class GetCirclesApi(ApiAuthMixin, ListAPIView):
 
 
 class GetCircleApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
     @swagger_auto_schema(
         operation_description="Get circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
@@ -110,6 +118,8 @@ class GetCircleApi(ApiAuthMixin, APIView):
 
 
 class UpdateCircleApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:circles")]
     @swagger_auto_schema(
         operation_description="Update circle with provided UUID",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
@@ -134,6 +144,8 @@ class UpdateCircleApi(ApiAuthMixin, APIView):
 
 
 class CirclesQueriesListApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:queries")]
     @swagger_auto_schema(
         operation_description="Get all queries for provided circle.",
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
@@ -155,6 +167,8 @@ class CirclesQueriesListApi(ApiAuthMixin, APIView):
 
 
 class CirclesStudentsListApi(ApiAuthMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:organization_members")]
     queryset = Student.objects.all()
     filterset_class = StudentFilter
     pagination_class = ApiStudentsListPagination
@@ -177,6 +191,8 @@ class CirclesStudentsListApi(ApiAuthMixin, ListAPIView):
 
 
 class CircleDeleteApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:circles")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         operation_description="Delete circle.",
@@ -189,6 +205,8 @@ class CircleDeleteApi(ApiAuthMixin, APIView):
 
 
 class InviteStudentApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         request_body=CreateCircleInviteStudentSerializer,
@@ -222,6 +240,8 @@ class InviteStudentApi(ApiAuthMixin, APIView):
 
 
 class InviteTeacherApi(ApiAuthMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("write:organization_members")]
     @swagger_auto_schema(
         tags=[SwaggerTags.ORGANIZATION_MANAGEMENT_CIRCLES],
         request_body=CreateCircleInviteTeacherSerializer,
@@ -246,6 +266,8 @@ class InviteTeacherApi(ApiAuthMixin, APIView):
 
 
 class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:analytics")]
     filename = 'circle_students.xlsx'
 
     @swagger_auto_schema(
@@ -261,6 +283,8 @@ class CirclesStudentProfilesExportApi(ApiAuthMixin, XLSXMixin, APIView):
 
 
 class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
     filename = 'schedule.ics'
 
     @swagger_auto_schema(
@@ -276,6 +300,8 @@ class CircleICalExportApi(ApiAuthMixin, ICalMixin, APIView):
 
 
 class CirclesICalExportApi(ApiAuthMixin, ICalMixin, ListAPIView):
+    def get_permissions(self):
+        return super().get_permissions() + [HasOAuthScope("read:circles")]
     filename = 'schedule.ics'
     filterset_class = CircleFilter
 

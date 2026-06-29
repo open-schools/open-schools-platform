@@ -4,36 +4,39 @@ from django.utils import timezone
 from typing import Any, List, Tuple
 
 from open_schools_platform.common.admin import admin_wrapper, BaseAdmin
-from open_schools_platform.marketplace_management.models import Installation, DeveloperProfile, Category, App, \
-    AppRelease, Review
-
-
-@admin_wrapper(DeveloperProfile)
-class DeveloperProfileModelAdmin(BaseAdmin):
-    list_display = ("id", "user", "email", "github")
-    field_to_highlight = "id"
-
-
-@admin_wrapper(Category)
-class CategoryModelAdmin(BaseAdmin):
-    list_display = ("id", "name")
+from .models import Installation, App, Review, OAuth2AuthorizationCode, OAuth2Token
 
 
 @admin_wrapper(App)
 class AppModelAdmin(BaseAdmin):
-    list_display = ("id", "name", "status", "developer_profile")
-
-
-@admin_wrapper(AppRelease)
-class AppReleaseModelAdmin(BaseAdmin):
-    list_display = ("id", "app", "version")
+    list_display = ("id", "name", "category", "status", "client_id")
+    list_filter = ("status", "category")
+    search_fields = ("name", "category", "client_id")
     field_to_highlight = "id"
 
 
 @admin_wrapper(Review)
 class ReviewModelAdmin(BaseAdmin):
     list_display = ("id", "user", "app", "rating")
+    list_filter = ("rating",)
+    search_fields = ("user__username", "app__name", "message")
     field_to_highlight = "app"
+
+
+@admin_wrapper(OAuth2AuthorizationCode)
+class OAuth2AuthorizationCodeModelAdmin(BaseAdmin):
+    list_display = ("id", "code", "user", "app", "auth_time")
+    list_filter = ("auth_time",)
+    search_fields = ("code", "user__username", "app__name")
+    field_to_highlight = "id"
+
+
+@admin_wrapper(OAuth2Token)
+class OAuth2TokenModelAdmin(BaseAdmin):
+    list_display = ("id", "user", "app", "token_type", "revoked", "created_at")
+    list_filter = ("token_type", "revoked", "created_at")
+    search_fields = ("access_token", "refresh_token", "user__username", "app__name")
+    field_to_highlight = "id"
 
 
 class InstallationFilter(admin.SimpleListFilter):
@@ -66,10 +69,8 @@ class InstallationModelAdmin(BaseAdmin):
         'id'
     )
 
-    # Default sorting (new installations first)
     ordering = ('-installed_at',)
 
-    # Filters in the right panel
     list_filter = (
         'organization',
         'app',
@@ -82,8 +83,6 @@ class InstallationModelAdmin(BaseAdmin):
     )
 
     list_per_page = 20
-
-    # Fields for quick editing
     list_editable = ('active',)
 
     def get_organization_name(self, obj: Installation) -> str:
@@ -123,7 +122,6 @@ class InstallationModelAdmin(BaseAdmin):
         qs = super().get_queryset(request)
         return qs.select_related('organization', 'app')
 
-    # Adding custom actions
     actions = ('activate_installations', 'deactivate_installations',)
 
     def activate_installations(self, request: Any, queryset: Any) -> None:

@@ -24,6 +24,9 @@ services:
       retries: 3
 
   django:
+    build:
+      context: .
+      dockerfile: ./docker/local.Dockerfile
     image: django-local
     command: python manage.py runserver 0.0.0.0:8000
     environment:
@@ -39,6 +42,9 @@ services:
     restart: on-failure
 
   celery:
+    build:
+      context: .
+      dockerfile: ./docker/local.Dockerfile
     image: django-local
     #https://stackoverflow.com/questions/55249197/what-are-the-consequences-of-disabling-gossip-mingle-and-heartbeat-for-celery-w
     command: celery -A open_schools_platform.tasks worker -l info --without-mingle --without-gossip
@@ -61,7 +67,10 @@ services:
       - "5555:5555"
 
   beats:
-    image: django-local
+    build:
+      context: .
+      dockerfile: ./docker/local.Dockerfile
+
     command: celery -A open_schools_platform.tasks beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/local_db

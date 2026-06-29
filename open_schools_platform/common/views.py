@@ -23,8 +23,8 @@ def MultipleViewManager(handlers: Dict[str, Type[DjangoViewType]]) -> Type[Djang
         """
 
         def dispatch(self, request, *args, **kwargs):
-            if request.method in self.views_by_method:
-                return self.views_by_method[request.method].as_view()(request, *args, **kwargs)
+            if request.method.lower() in self.views_by_method:
+                return self.views_by_method[request.method.lower()].as_view()(request, *args, **kwargs)
             return super().dispatch(request, *args, **kwargs)
 
     return BaseManageView
